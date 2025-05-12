@@ -52,6 +52,25 @@ import { ReactComponent as ChatIcon } from "./chat.svg?react";
 import { ReactComponent as MoreDotIcon } from "./moredot.svg?react";
 import { ReactComponent as AlertHexaIcon } from "./alert-hexa.svg?react";
 import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
+import { ReactComponent as ZaposleniIcon } from "./Zaposleni.svg?react";
+import { ReactComponent as RadnaMestaIcon } from "./Radna mesta.svg?react";
+import { ReactComponent as OsposobljavanjeIcon } from "./Osposobljavanje.svg?react";
+import { ReactComponent as LokacijeIcon } from "./Lokacije.svg?react";
+import { ReactComponent as OpremaIcon } from "./Oprema.svg?react";
+import { ReactComponent as LekarskiPreglediIcon } from "./Lekarski pregledi.svg?react";
+import { ReactComponent as PreglediOpremeIcon } from "./Pregledi opreme.svg?react";
+import { ReactComponent as IspitivanjeSredineIcon } from "./Ispitivanje sredine.svg?react";
+import { ReactComponent as BezbednosnePromeneIcon } from "./Bezbednosne promene.svg?react";
+import { ReactComponent as InspekcijskiNadzorIcon } from "./Inspekcijski nadzor.svg?react";
+import { ReactComponent as ZaduzenjaLZOIcon } from "./Zaduzenja LZO.svg?react";
+import { ReactComponent as PovredeIcon } from "./Povrede.svg?react";
+import { ReactComponent as DnevniIzvestajiIcon } from "./Dnevni izvestaji.svg?react";
+import { ReactComponent as RokoviIcon } from "./Rokovi.svg?react";
+import { ReactComponent as ObrasciIcon } from "./Obrasci.svg?react";
+import { ReactComponent as NotesIcon } from "./Notes.svg?react";
+import { ReactComponent as CestaPitanjaIcon } from "./Cesta pitanja.svg?react";
+import { ReactComponent as TehnickaPodrskaIcon } from "./Tehnicka podrska.svg?react";
+import { ReactComponent as MojNalogIcon } from "./Nalog.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -108,4 +127,23 @@ export {
   HorizontaLDots,
   ChevronUpIcon,
   ChatIcon,
+  ZaposleniIcon,
+  RadnaMestaIcon,
+  OsposobljavanjeIcon,
+  LokacijeIcon,
+  OpremaIcon,
+  LekarskiPreglediIcon,
+  PreglediOpremeIcon,
+  IspitivanjeSredineIcon,
+  BezbednosnePromeneIcon,
+  InspekcijskiNadzorIcon,
+  ZaduzenjaLZOIcon,
+  PovredeIcon,
+  DnevniIzvestajiIcon,
+  RokoviIcon,
+  ObrasciIcon,
+  NotesIcon,
+  CestaPitanjaIcon,
+  TehnickaPodrskaIcon,
+  MojNalogIcon,
 };

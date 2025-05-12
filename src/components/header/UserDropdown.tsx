@@ -25,7 +25,7 @@ export default function UserDropdown() {
 
         <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
+          className={`stroke-gray-500 dark:stroke-gray-400 ${
             isOpen ? "rotate-180" : ""
           }`}
           width="18"

@@ -3,24 +3,29 @@ import { Link, useLocation } from "react-router";
 
 // Assume these icons are imported from an icon library
 import {
-  BoxCubeIcon,
-  CalenderIcon,
-  ChatIcon,
   ChevronDownIcon,
-  DocsIcon,
-  GridIcon,
   HorizontaLDots,
-  ListIcon,
-  MailIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  TaskIcon,
-  UserCircleIcon,
+  ZaposleniIcon,
+  RadnaMestaIcon,
+  OsposobljavanjeIcon,
+  LokacijeIcon,
+  OpremaIcon,
+  LekarskiPreglediIcon,
+  PreglediOpremeIcon,
+  IspitivanjeSredineIcon,
+  BezbednosnePromeneIcon,
+  InspekcijskiNadzorIcon,
+  ZaduzenjaLZOIcon,
+  PovredeIcon,
+  DnevniIzvestajiIcon,
+  RokoviIcon,
+  ObrasciIcon,
+  NotesIcon,
+  CestaPitanjaIcon,
+  TehnickaPodrskaIcon,
+  MojNalogIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -31,147 +36,199 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [
-      { name: "Ecommerce", path: "/", pro: false },
-      { name: "Analytics", path: "/analytics", pro: true },
-      { name: "Marketing", path: "/marketing", pro: true },
-      { name: "CRM", path: "/crm", pro: true },
-      { name: "Stocks", path: "/stocks", new: true, pro: true },
-      { name: "SaaS", path: "/saas", new: true, pro: true },
-    ],
+    icon: <ZaposleniIcon />,
+    name: "Zaposleni",
+    path: "/zaposleni",
   },
   {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
+    icon: <RadnaMestaIcon />,
+    name: "Radna mesta",
+    path: "/radna-mesta",
   },
   {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
+    icon: <OsposobljavanjeIcon />,
+    name: "Osposobljavanje",
+    path: "/osposobljavanje",
   },
   {
-    name: "Task",
-    icon: <TaskIcon />,
-    subItems: [
-      { name: "List", path: "/task-list", pro: true },
-      { name: "Kanban", path: "/task-kanban", pro: true },
-    ],
+    icon: <LokacijeIcon />,
+    name: "Lokacije",
+    path: "/lokacije",
   },
   {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [
-      { name: "Form Elements", path: "/form-elements", pro: false },
-      { name: "Form Layout", path: "/form-layout", pro: true },
-    ],
+    icon: <OpremaIcon />,
+    name: "Oprema",
+    path: "/oprema",
   },
   {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [
-      { name: "Basic Tables", path: "/basic-tables", pro: false },
-      { name: "Data Tables", path: "/data-tables", pro: true },
-    ],
+    icon: <LekarskiPreglediIcon />,
+    name: "Lekarski pregledi",
+    path: "/lekarski-pregledi",
   },
   {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "File Manager", path: "/file-manager", pro: true },
-      { name: "Pricing Tables", path: "/pricing-tables", pro: true },
-      { name: "Faqs", path: "/faq", pro: true },
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-      { name: "500 Error", path: "/error-500", pro: true },
-      { name: "503 Error", path: "/error-503", pro: true },
-      { name: "Coming Soon", path: "/coming-soon", pro: true },
-      { name: "Maintenance", path: "/maintenance", pro: true },
-      { name: "Success", path: "/success", pro: true },
-    ],
+    icon: <PreglediOpremeIcon />,
+    name: "Pregledi opreme",
+    path: "/pregledi-opreme",
+  },
+  {
+    icon: <IspitivanjeSredineIcon />,
+    name: "Ispitivanje sredine",
+    path: "/ispitivanje-sredine",
+  },
+  {
+    icon: <BezbednosnePromeneIcon />,
+    name: "Bezbednosne promene",
+    path: "/bezbednosne-promene",
+  },
+  {
+    icon: <InspekcijskiNadzorIcon />,
+    name: "Inspekcijski nadzor",
+    path: "/inspekcijski-nadzor",
+  },
+  {
+    icon: <ZaduzenjaLZOIcon />,
+    name: "Zaduženja LZO",
+    path: "/zaduzenja-lzo",
+  },
+  {
+    icon: <PovredeIcon />,
+    name: "Povrede",
+    path: "/povrede",
+  },
+  {
+    icon: <DnevniIzvestajiIcon />,
+    name: "Dnevni izveštaji",
+    path: "/dnevni-izvestaji",
+  },
+  {
+    icon: <RokoviIcon />,
+    name: "Rokovi",
+    path: "/rokovi",
   },
 ];
 
 const othersItems: NavItem[] = [
   {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: true },
-      { name: "Bar Chart", path: "/bar-chart", pro: true },
-      { name: "Pie Chart", path: "/pie-chart", pro: true },
-    ],
+    icon: <ObrasciIcon />,
+    name: "Obrasci",
+    path: "/obrasci",
   },
   {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Breadcrumb", path: "/breadcrumb", pro: true },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Buttons Group", path: "/buttons-group", pro: true },
-      { name: "Cards", path: "/cards", pro: true },
-      { name: "Carousel", path: "/carousel", pro: true },
-      { name: "Dropdowns", path: "/dropdowns", pro: true },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Links", path: "/links", pro: true },
-      { name: "List", path: "/list", pro: true },
-      { name: "Modals", path: "/modals", pro: true },
-      { name: "Notification", path: "/notifications", pro: true },
-      { name: "Pagination", path: "/pagination", pro: true },
-      { name: "Popovers", path: "/popovers", pro: true },
-      { name: "Progressbar", path: "/progress-bar", pro: true },
-      { name: "Ribbons", path: "/ribbons", pro: true },
-      { name: "Spinners", path: "/spinners", pro: true },
-      { name: "Tabs", path: "/tabs", pro: true },
-      { name: "Tooltips", path: "/tooltips", pro: true },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
+    icon: <NotesIcon />,
+    name: "Notes",
+    path: "/notes",
   },
   {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-      { name: "Reset Password", path: "/reset-password", pro: true },
-      {
-        name: "Two Step Verification",
-        path: "/two-step-verification",
-        pro: true,
-      },
-    ],
+    icon: <CestaPitanjaIcon />,
+    name: "Česta pitanja",
+    path: "/cesta-pitanja",
+  },
+  {
+    icon: <TehnickaPodrskaIcon />,
+    name: "Tehnička podrška",
+    path: "/tehnicka-podrska",
+  },
+  {
+    icon: <MojNalogIcon />,
+    name: "Moj nalog",
+    path: "/moj-nalog",
   },
 ];
 
 const supportItems: NavItem[] = [
   {
-    icon: <ChatIcon />,
-    name: "Chat",
-    path: "/chat",
+    icon: <ZaposleniIcon />,
+    name: "Zaposleni",
+    path: "/zaposleni",
   },
   {
-    icon: <MailIcon />,
-    name: "Email",
-    subItems: [
-      { name: "Inbox", path: "/inbox" },
-      { name: "Details", path: "/inbox-details" },
-    ],
+    icon: <RadnaMestaIcon />,
+    name: "Radna mesta",
+    path: "/radna-mesta",
   },
   {
-    icon: <DocsIcon />,
-    name: "Invoice",
-    path: "/invoice",
+    icon: <OsposobljavanjeIcon />,
+    name: "Osposobljavanje",
+    path: "/osposobljavanje",
+  },
+  {
+    icon: <LokacijeIcon />,
+    name: "Lokacije",
+    path: "/lokacije",
+  },
+  {
+    icon: <OpremaIcon />,
+    name: "Oprema",
+    path: "/oprema",
+  },
+  {
+    icon: <LekarskiPreglediIcon />,
+    name: "Lekarski pregledi",
+    path: "/lekarski-pregledi",
+  },
+  {
+    icon: <PreglediOpremeIcon />,
+    name: "Pregledi opreme",
+    path: "/pregledi-opreme",
+  },
+  {
+    icon: <IspitivanjeSredineIcon />,
+    name: "Ispitivanje sredine",
+    path: "/ispitivanje-sredine",
+  },
+  {
+    icon: <BezbednosnePromeneIcon />,
+    name: "Bezbednosne promene",
+    path: "/bezbednosne-promene",
+  },
+  {
+    icon: <InspekcijskiNadzorIcon />,
+    name: "Inspekcijski nadzor",
+    path: "/inspekcijski-nadzor",
+  },
+  {
+    icon: <ZaduzenjaLZOIcon />,
+    name: "Zaduženja LZO",
+    path: "/zaduzenja-lzo",
+  },
+  {
+    icon: <PovredeIcon />,
+    name: "Povrede",
+    path: "/povrede",
+  },
+  {
+    icon: <DnevniIzvestajiIcon />,
+    name: "Dnevni izveštaji",
+    path: "/dnevni-izvestaji",
+  },
+  {
+    icon: <RokoviIcon />,
+    name: "Rokovi",
+    path: "/rokovi",
   },
 ];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  const [isMojaFirmaCollapsed, setIsMojaFirmaCollapsed] = useState(() => {
+    const saved = localStorage.getItem('isMojaFirmaCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [isKomitentiCollapsed, setIsKomitentiCollapsed] = useState(() => {
+    const saved = localStorage.getItem('isKomitentiCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [isOstaloCollapsed, setIsOstaloCollapsed] = useState(() => {
+    const saved = localStorage.getItem('isOstaloCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const mojaFirmaRef = useRef<HTMLDivElement>(null);
+  const komitentiRef = useRef<HTMLDivElement>(null);
+  const ostaloRef = useRef<HTMLDivElement>(null);
+  const [mojaFirmaHeight, setMojaFirmaHeight] = useState<number>(0);
+  const [komitentiHeight, setKomitentiHeight] = useState<number>(0);
+  const [ostaloHeight, setOstaloHeight] = useState<number>(0);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "support" | "others";
@@ -229,6 +286,31 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
+  useEffect(() => {
+    if (mojaFirmaRef.current) {
+      setMojaFirmaHeight(mojaFirmaRef.current.scrollHeight);
+    }
+    if (komitentiRef.current) {
+      setKomitentiHeight(komitentiRef.current.scrollHeight);
+    }
+    if (ostaloRef.current) {
+      setOstaloHeight(ostaloRef.current.scrollHeight);
+    }
+  }, [isMojaFirmaCollapsed, isKomitentiCollapsed, isOstaloCollapsed, isExpanded, isHovered, isMobileOpen]);
+
+  // Save states to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('isMojaFirmaCollapsed', JSON.stringify(isMojaFirmaCollapsed));
+  }, [isMojaFirmaCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('isKomitentiCollapsed', JSON.stringify(isKomitentiCollapsed));
+  }, [isKomitentiCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('isOstaloCollapsed', JSON.stringify(isOstaloCollapsed));
+  }, [isOstaloCollapsed]);
+
   const handleSubmenuToggle = (
     index: number,
     menuType: "main" | "support" | "others"
@@ -275,7 +357,7 @@ const AppSidebar: React.FC = () => {
                 {nav.icon}
               </span>
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
+                <span className="menu-item-text text-base font-medium">{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
@@ -306,7 +388,7 @@ const AppSidebar: React.FC = () => {
                   {nav.icon}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
+                  <span className="menu-item-text text-base font-medium">{nav.name}</span>
                 )}
               </Link>
             )
@@ -373,7 +455,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -393,29 +475,9 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <span className="text-[30px] font-medium text-gray-900 dark:text-white">HSEtra</span>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <span className="text-[30px] font-medium text-gray-900 dark:text-white"></span>
           )}
         </Link>
       </div>
@@ -423,56 +485,104 @@ const AppSidebar: React.FC = () => {
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+              <button
+                onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  <div className="flex items-center gap-2">
+                    <span>MOJA FIRMA</span>
+                    <ChevronDownIcon
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        !isMojaFirmaCollapsed ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
-              </h2>
-              {renderMenuItems(navItems, "main")}
+              </button>
+              <div
+                ref={mojaFirmaRef}
+                className="overflow-hidden transition-all duration-300"
+                style={{
+                  height: isMojaFirmaCollapsed ? "0px" : `${mojaFirmaHeight}px`,
+                }}
+              >
+                {renderMenuItems(navItems, "main")}
+              </div>
             </div>
             <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+              <button
+                onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Support"
+                  <div className="flex items-center gap-2">
+                    <span>KOMITENTI</span>
+                    <ChevronDownIcon
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        !isKomitentiCollapsed ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
                 ) : (
-                  <HorizontaLDots />
+                  <HorizontaLDots className="size-6" />
                 )}
-              </h2>
-              {renderMenuItems(supportItems, "support")}
+              </button>
+              <div
+                ref={komitentiRef}
+                className="overflow-hidden transition-all duration-300"
+                style={{
+                  height: isKomitentiCollapsed ? "0px" : `${komitentiHeight}px`,
+                }}
+              >
+                {renderMenuItems(supportItems, "support")}
+              </div>
             </div>
             <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+              <button
+                onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  <div className="flex items-center gap-2">
+                    <span>OSTALO</span>
+                    <ChevronDownIcon
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        !isOstaloCollapsed ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
                 ) : (
-                  <HorizontaLDots />
+                  <HorizontaLDots className="size-6" />
                 )}
-              </h2>
-              {renderMenuItems(othersItems, "others")}
+              </button>
+              <div
+                ref={ostaloRef}
+                className="overflow-hidden transition-all duration-300"
+                style={{
+                  height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
+                }}
+              >
+                {renderMenuItems(othersItems, "others")}
+              </div>
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+
       </div>
     </aside>
   );

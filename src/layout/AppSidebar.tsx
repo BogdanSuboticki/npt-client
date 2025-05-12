@@ -311,6 +311,22 @@ const AppSidebar: React.FC = () => {
     localStorage.setItem('isOstaloCollapsed', JSON.stringify(isOstaloCollapsed));
   }, [isOstaloCollapsed]);
 
+  // Add effect to handle body scroll locking
+  useEffect(() => {
+    if (isMobileOpen) {
+      // Disable scrolling on body when sidebar is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable scrolling when sidebar is closed
+      document.body.style.overflow = 'auto';
+    }
+
+    // Cleanup function to ensure we re-enable scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMobileOpen]);
+
   const handleSubmenuToggle = (
     index: number,
     menuType: "main" | "support" | "others"
@@ -382,7 +398,7 @@ const AppSidebar: React.FC = () => {
                   className={`menu-item-icon-size ${
                     isActive(nav.path)
                       ? "menu-item-icon-active"
-                      : "menu-item-icon-inactive"
+                      : "menu-item-icon-inactive dark:text-[#d0d5dd]"
                   }`}
                 >
                   {nav.icon}
@@ -458,9 +474,9 @@ const AppSidebar: React.FC = () => {
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
-            ? "w-[290px]"
+            ? "w-[250px]"
             : isHovered
-            ? "w-[290px]"
+            ? "w-[250px]"
             : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
@@ -475,13 +491,13 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <span className="text-[30px] font-medium text-gray-900 dark:text-white">HSEtra</span>
+            <span className="text-[30px] font-medium text-gray-900 dark:text-white">HSEradar</span>
           ) : (
-            <span className="text-[30px] font-medium text-gray-900 dark:text-white"></span>
+            <span className="text-[15px] font-medium text-gray-900 dark:text-white">HSEradar</span>
           )}
         </Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pb-20 lg:pb-0">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
@@ -503,7 +519,7 @@ const AppSidebar: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <HorizontaLDots className="size-6" />
+                  <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
                 )}
               </button>
               <div
@@ -535,7 +551,7 @@ const AppSidebar: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <HorizontaLDots className="size-6" />
+                  <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
                 )}
               </button>
               <div
@@ -567,7 +583,7 @@ const AppSidebar: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <HorizontaLDots className="size-6" />
+                  <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
                 )}
               </button>
               <div

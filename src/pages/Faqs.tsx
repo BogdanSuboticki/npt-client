@@ -1,28 +1,35 @@
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import ComponentCard from "../components/common/ComponentCard";
-import FaqsOne from "../components/UiExample/FaqsExample/FaqsOne";
 import FaqsTwo from "../components/UiExample/FaqsExample/FaqsTwo";
-import FaqsThree from "../components/UiExample/FaqsExample/FaqsThree";
 import PageMeta from "../components/common/PageMeta";
+
+const faqSections = [
+  "Opšte informacije",
+  "Prijava i nalog",
+  "Podsetnici i obaveštenja",
+  "Izveštaji i praćenje",
+  "Tehnička podrška",
+  "Podešavanja naloga",
+  "Administratorske funkcije",
+  "Bezbednosna politika i zaštita podataka",
+  "Često postavljana pitanja",
+  "Kontakt i podrška",
+];
 
 export default function Faqs() {
   return (
     <>
       <PageMeta
-        title="React.js Faqs Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Faqs Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="Često postavljena pitanja | HSE Radar"
+        description="Često postavljena pitanja i odgovori o HSE Radar aplikaciji"
       />
-      <PageBreadcrumb pageTitle="Faqs" />
+      <PageBreadcrumb pageTitle="Često postavljena pitanja" />
       <div className="space-y-5 sm:space-y-6">
-        <ComponentCard title="Faq’s 1">
-          <FaqsOne />
-        </ComponentCard>
-        <ComponentCard title="Faq’s 2">
-          <FaqsTwo />
-        </ComponentCard>
-        <ComponentCard title="Faq’s 3">
-          <FaqsThree />
-        </ComponentCard>
+        {faqSections.map((title) => (
+          <ComponentCard key={title} title={title}>
+            <FaqsTwo title={title} />
+          </ComponentCard>
+        ))}
       </div>
     </>
   );

@@ -1,7 +1,115 @@
-export default function PaginationWithTextAndIcon() {
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+export default function PaginationWithTextAndIcon({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 7; // Maximum number of visible page numbers
+    let startPage = 1;
+    let endPage = totalPages;
+
+    if (totalPages > maxVisiblePages) {
+      const leftOffset = Math.floor(maxVisiblePages / 2);
+      const rightOffset = maxVisiblePages - leftOffset - 1;
+
+      if (currentPage <= leftOffset) {
+        endPage = maxVisiblePages;
+      } else if (currentPage > totalPages - rightOffset) {
+        startPage = totalPages - maxVisiblePages + 1;
+      } else {
+        startPage = currentPage - leftOffset;
+        endPage = currentPage + rightOffset;
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      if (i === startPage && startPage > 1) {
+        pages.push(
+          <li key="1">
+            <button
+              onClick={() => onPageChange(1)}
+              className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
+            >
+              1
+            </button>
+          </li>
+        );
+        if (startPage > 2) {
+          pages.push(
+            <li key="ellipsis1">
+              <span className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 dark:text-gray-400">
+                ...
+              </span>
+            </li>
+          );
+        }
+      }
+
+      pages.push(
+        <li key={i}>
+          <button
+            onClick={() => onPageChange(i)}
+            className={`flex items-center justify-center w-10 h-10 text-sm font-medium rounded-lg ${
+              currentPage === i
+                ? "bg-brand-500 text-white"
+                : "text-gray-700 hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
+            }`}
+          >
+            {i}
+          </button>
+        </li>
+      );
+
+      if (i === endPage && endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pages.push(
+            <li key="ellipsis2">
+              <span className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 dark:text-gray-400">
+                ...
+              </span>
+            </li>
+          );
+        }
+        pages.push(
+          <li key={totalPages}>
+            <button
+              onClick={() => onPageChange(totalPages)}
+              className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
+            >
+              {totalPages}
+            </button>
+          </li>
+        );
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <div className="flex items-center justify-between gap-8 px-6 py-4 sm:justify-normal">
-      <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5">
+      <button
+        onClick={handlePrevious}
+        disabled={currentPage === 1}
+        className={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5 ${
+          currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+      >
         <svg
           className="fill-current"
           width="20"
@@ -22,75 +130,20 @@ export default function PaginationWithTextAndIcon() {
       </button>
 
       <span className="block text-sm font-medium text-gray-700 dark:text-gray-400 sm:hidden">
-        Page 1 of 10
+        Page {currentPage} of {totalPages}
       </span>
 
       <ul className="hidden items-center gap-0.5 sm:flex">
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-500 hover:text-white"
-          >
-            1
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            2
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            3
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            ...
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            8
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            9
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            10
-          </a>
-        </li>
+        {renderPageNumbers()}
       </ul>
 
-      <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5">
+      <button
+        onClick={handleNext}
+        disabled={currentPage === totalPages}
+        className={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5 ${
+          currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+      >
         <span className="hidden sm:inline"> Next </span>
 
         <svg

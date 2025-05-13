@@ -59,6 +59,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import TaskList from "./pages/Task/TaskList";
 import Saas from "./pages/Dashboard/Saas";
+import RadnaMesta from "./pages/RadnaMesta";
 
 export default function App() {
   return (
@@ -131,6 +132,8 @@ export default function App() {
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
             <Route path="/pie-chart" element={<PieChart />} />
+
+            <Route path="/radna-mesta" element={<RadnaMesta />} />
           </Route>
 
           {/* Auth Layout */}

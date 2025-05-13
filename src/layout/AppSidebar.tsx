@@ -121,7 +121,7 @@ const othersItems: NavItem[] = [
   {
     icon: <CestaPitanjaIcon />,
     name: "Česta pitanja",
-    path: "/cesta-pitanja",
+    path: "/faq",
   },
   {
     icon: <TehnickaPodrskaIcon />,
@@ -483,6 +483,7 @@ const AppSidebar: React.FC = () => {
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{ "--sidebar-bg": "white" } as React.CSSProperties}
     >
       <div
         className={`py-8 flex ${

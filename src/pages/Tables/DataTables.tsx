@@ -19,7 +19,7 @@ export default function DataTables() {
           <DataTableOne />
         </ComponentCard>
         <ComponentCard title="Data Table 2">
-          <DataTableTwo />
+          <DataTableTwo data={[]} columns={[]} />
         </ComponentCard>
         <ComponentCard title="Data Table 3">
           <DataTableThree />

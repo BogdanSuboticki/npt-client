@@ -18,10 +18,18 @@ export default function PaginationExample() {
         />
       </ComponentCard>
       <ComponentCard title="Pagination with Text and Icon">
-        <PaginationWithTextAndIcon />
+        <PaginationWithTextAndIcon
+          currentPage={1}
+          totalPages={10}
+          onPageChange={handlePageChange}
+        />
       </ComponentCard>
       <ComponentCard title="Pagination with Icon">
-        <PaginationWithIcon />
+        <PaginationWithIcon
+          totalPages={10}
+          initialPage={1}
+          onPageChange={handlePageChange}
+        />
       </ComponentCard>
     </div>
   );

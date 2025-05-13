@@ -1,7 +1,31 @@
-export default function PaginationWithIcon() {
+import { useState } from 'react';
+
+interface PaginationProps {
+  totalPages: number;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
+}
+
+export default function PaginationWithIcon({
+  totalPages,
+  initialPage = 1,
+  onPageChange,
+}: PaginationProps) {
+  const [currentPage, setCurrentPage] = useState(initialPage);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    onPageChange?.(page);
+  };
+
   return (
     <div className="flex items-center justify-between gap-2 px-6 py-4 sm:justify-normal">
-      <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+      <button 
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <span>
           <svg
             className="fill-current"
@@ -22,75 +46,31 @@ export default function PaginationWithIcon() {
       </button>
 
       <span className="block text-sm font-medium text-gray-700 dark:text-gray-400 sm:hidden">
-        Page 1 of 10
+        Page {currentPage} of {totalPages}
       </span>
 
       <ul className="hidden items-center gap-0.5 sm:flex">
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-500 hover:text-white"
-          >
-            1
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            2
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            3
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            ...
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            8
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            9
-          </a>
-        </li>
-
-        <li>
-          <a
-            href="#"
-            className="flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 rounded-lg hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
-          >
-            10
-          </a>
-        </li>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <li key={page}>
+            <button
+              onClick={() => handlePageChange(page)}
+              className={`flex items-center justify-center w-10 h-10 text-sm font-medium rounded-lg ${
+                currentPage === page
+                  ? "text-white bg-brand-500"
+                  : "text-gray-700 hover:bg-brand-500 hover:text-white dark:text-gray-400 dark:hover:text-white"
+              }`}
+            >
+              {page}
+            </button>
+          </li>
+        ))}
       </ul>
 
-      <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+      <button 
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <span>
           <svg
             className="fill-current"

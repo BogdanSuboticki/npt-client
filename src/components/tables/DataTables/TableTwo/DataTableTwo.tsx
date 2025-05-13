@@ -9,112 +9,28 @@ import {
   TableRow,
 } from "../../../ui/table";
 import { PencilIcon, TrashBinIcon } from "../../../../icons";
-import PaginationWithButton from "./PaginationWithButton";
+import PaginationWithTextAndIcon from "../../../ui/pagination/PaginationWithTextAndIcon";
 
-const tableRowData = [
-  {
-    id: 1,
-    name: "Abram Schleifer",
-    position: "Sales Assistant",
-    location: "Edinburgh",
-    age: 57,
-    date: "25 Apr, 2027",
-    salary: "$89,500",
-  },
-  {
-    id: 2,
-    name: "Charlotte Anderson",
-    position: "Marketing Manager",
-    location: "London",
-    age: 42,
-    date: "12 Mar, 2025",
-    salary: "$105,000",
-  },
-  {
-    id: 3,
-    name: "Ethan Brown",
-    position: "Software Engineer",
-    location: "San Francisco",
-    age: 30,
-    date: "01 Jan, 2024",
-    salary: "$120,000",
-  },
-  {
-    id: 4,
-    name: "Sophia Martinez",
-    position: "Product Manager",
-    location: "New York",
-    age: 35,
-    date: "15 Jun, 2026",
-    salary: "$95,000",
-  },
-  {
-    id: 5,
-    name: "James Wilson",
-    position: "Data Analyst",
-    location: "Chicago",
-    age: 28,
-    date: "20 Sep, 2025",
-    salary: "$80,000",
-  },
-  {
-    id: 6,
-    name: "Olivia Johnson",
-    position: "HR Specialist",
-    location: "Los Angeles",
-    age: 40,
-    date: "08 Nov, 2026",
-    salary: "$75,000",
-  },
-  {
-    id: 7,
-    name: "William Smith",
-    position: "Financial Analyst",
-    location: "Seattle",
-    age: 38,
-    date: "03 Feb, 2026",
-    salary: "$88,000",
-  },
-  {
-    id: 8,
-    name: "Isabella Davis",
-    position: "UI/UX Designer",
-    location: "Austin",
-    age: 29,
-    date: "18 Jul, 2025",
-    salary: "$92,000",
-  },
-  {
-    id: 9,
-    name: "Liam Moore",
-    position: "DevOps Engineer",
-    location: "Boston",
-    age: 33,
-    date: "30 Oct, 2024",
-    salary: "$115,000",
-  },
-  {
-    id: 10,
-    name: "Mia Garcia",
-    position: "Content Strategist",
-    location: "Denver",
-    age: 27,
-    date: "12 Dec, 2027",
-    salary: "$70,000",
-  },
-];
-type SortKey = "name" | "position" | "location" | "age" | "date" | "salary";
-type SortOrder = "asc" | "desc";
+interface Column {
+  key: string;
+  label: string;
+  sortable: boolean;
+}
 
-export default function DataTableTwo() {
+interface DataTableTwoProps {
+  data: any[];
+  columns: Column[];
+}
+
+export default function DataTableTwo({ data: initialData, columns }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [sortKey, setSortKey] = useState<string>(columns[0].key);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredAndSortedData = useMemo(() => {
-    return tableRowData
+    return initialData
       .filter((item) =>
         Object.values(item).some(
           (value) =>
@@ -123,16 +39,14 @@ export default function DataTableTwo() {
         )
       )
       .sort((a, b) => {
-        if (sortKey === "salary") {
-          const salaryA = Number.parseInt(a[sortKey].replace(/\$|,/g, ""));
-          const salaryB = Number.parseInt(b[sortKey].replace(/\$|,/g, ""));
-          return sortOrder === "asc" ? salaryA - salaryB : salaryB - salaryA;
+        if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
+          return sortOrder === "asc" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
         }
         return sortOrder === "asc"
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, searchTerm]);
+  }, [sortKey, sortOrder, searchTerm, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -141,7 +55,7 @@ export default function DataTableTwo() {
     setCurrentPage(page);
   };
 
-  const handleSort = (key: SortKey) => {
+  const handleSort = (key: string) => {
     if (sortKey === key) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -230,63 +144,62 @@ export default function DataTableTwo() {
           <Table>
             <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
               <TableRow>
-                {[
-                  { key: "name", label: "User" },
-                  { key: "position", label: "Position" },
-                  { key: "location", label: "Office" },
-                  { key: "age", label: "Age" },
-                  { key: "date", label: "Start Date" },
-                  { key: "salary", label: "Salary" },
-                ].map(({ key, label }) => (
+                {columns.map(({ key, label, sortable }) => (
                   <TableCell
                     key={key}
                     isHeader
                     className="px-4 py-3 border border-gray-100 dark:border-white/[0.05]"
                   >
-                    <div
-                      className="flex items-center justify-between cursor-pointer"
-                      onClick={() => handleSort(key as SortKey)}
-                    >
+                    {sortable ? (
+                      <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => handleSort(key)}
+                      >
+                        <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
+                          {label}
+                        </p>
+                        <button className="flex flex-col gap-0.5">
+                          <svg
+                            className={`text-gray-300 dark:text-gray-700  ${
+                              sortKey === key && sortOrder === "asc"
+                                ? "text-brand-500"
+                                : ""
+                            }`}
+                            width="8"
+                            height="5"
+                            viewBox="0 0 8 5"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                          <svg
+                            className={`text-gray-300 dark:text-gray-700  ${
+                              sortKey === key && sortOrder === "desc"
+                                ? "text-brand-500"
+                                : ""
+                            }`}
+                            width="8"
+                            height="5"
+                            viewBox="0 0 8 5"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
                       <p className="font-medium text-gray-700 text-theme-xs dark:text-gray-400">
                         {label}
                       </p>
-                      <button className="flex flex-col gap-0.5">
-                        <svg
-                          className={`text-gray-300 dark:text-gray-700  ${
-                            sortKey === key && sortOrder === "asc"
-                              ? "text-brand-500"
-                              : ""
-                          }`}
-                          width="8"
-                          height="5"
-                          viewBox="0 0 8 5"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                        <svg
-                          className={`text-gray-300 dark:text-gray-700  ${
-                            sortKey === key && sortOrder === "desc"
-                              ? "text-brand-500"
-                              : ""
-                          }`}
-                          width="8"
-                          height="5"
-                          viewBox="0 0 8 5"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      </button>
-                    </div>
+                    )}
                   </TableCell>
                 ))}
                 <TableCell
@@ -300,27 +213,17 @@ export default function DataTableTwo() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentData.map((item, i) => (
-                <TableRow key={i + 1}>
-                  <TableCell className="px-4 py-4 font-medium text-gray-800 border border-gray-100 dark:border-white/[0.05] dark:text-white text-theme-sm whitespace-nowrap ">
-                    {item.name}
-                  </TableCell>
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ">
-                    {item.position}
-                  </TableCell>
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ">
-                    {item.location}
-                  </TableCell>
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border dark:border-white/[0.05] border-gray-100 text-theme-sm dark:text-gray-400 whitespace-nowrap ">
-                    {item.age}
-                  </TableCell>
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100  dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ">
-                    {item.date}
-                  </TableCell>
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100  dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ">
-                    {item.salary}
-                  </TableCell>
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap ">
+              {currentData.map((item) => (
+                <TableRow key={item.id}>
+                  {columns.map(({ key }) => (
+                    <TableCell
+                      key={key}
+                      className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap"
+                    >
+                      {item[key]}
+                    </TableCell>
+                  ))}
+                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap">
                     <div className="flex items-center w-full gap-2">
                       <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
                         <TrashBinIcon className="size-5" />
@@ -337,16 +240,14 @@ export default function DataTableTwo() {
         </div>
       </div>
 
-      <div className="border border-t-0 rounded-b-xl border-gray-100 py-4 pl-[18px] pr-4 dark:border-white/[0.05]">
+      <div className="border border-t-0 rounded-b-xl border-gray-100 dark:border-white/[0.05]">
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
-          {/* Left side: Showing entries */}
-
-          <PaginationWithButton
+          <PaginationWithTextAndIcon 
+            currentPage={currentPage}
             totalPages={totalPages}
-            initialPage={currentPage}
             onPageChange={handlePageChange}
           />
-          <div className="pt-3 xl:pt-0">
+          <div className="pt-3 xl:pt-0 px-6">
             <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
               Showing {startIndex + 1} to {endIndex} of {totalItems} entries
             </p>

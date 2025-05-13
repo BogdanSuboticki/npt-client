@@ -1,4 +1,14 @@
-export default function PaginationWithIcon() {
+interface PaginationProps {
+  totalPages: number;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
+}
+
+export default function PaginationWithIcon({
+  totalPages,
+  initialPage = 1,
+  onPageChange,
+}: PaginationProps) {
   return (
     <div className="flex items-center justify-between gap-2 px-6 py-4 sm:justify-normal">
       <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">

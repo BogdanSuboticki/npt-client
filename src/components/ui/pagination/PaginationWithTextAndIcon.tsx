@@ -126,7 +126,7 @@ export default function PaginationWithTextAndIcon({ currentPage, totalPages, onP
           />
         </svg>
 
-        <span className="hidden sm:inline"> Previous </span>
+        <span className="hidden sm:inline"> Prethodno </span>
       </button>
 
       <span className="block text-sm font-medium text-gray-700 dark:text-gray-400 sm:hidden">
@@ -144,7 +144,7 @@ export default function PaginationWithTextAndIcon({ currentPage, totalPages, onP
           currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        <span className="hidden sm:inline"> Next </span>
+        <span className="hidden sm:inline"> Sledeće </span>
 
         <svg
           className="fill-current"

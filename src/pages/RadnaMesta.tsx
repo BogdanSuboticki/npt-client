@@ -141,7 +141,7 @@ const radnaMestaData = [
 ];
 
 const columns = [
-  { key: "id", label: "", sortable: false },
+  { key: "id", label: "", sortable: true },
   { key: "nazivRadnogMesta", label: "Naziv radnog mesta", sortable: true },
   { key: "nazivLokacije", label: "Naziv lokacije", sortable: true },
   { key: "povecanRizik", label: "Povećan rizik", sortable: true },
@@ -154,7 +154,7 @@ const RadnaMesta: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Radna mesta
         </h1>
       </div>

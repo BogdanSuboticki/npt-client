@@ -229,9 +229,9 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
             {isRadnaMestaOpen && (
               <div className="absolute z-[100] w-[300px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                 <div className="max-h-60 overflow-y-auto">
-                  <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="sticky top-0 bg-white dark:bg-gray-800 border-b rounded-tl-xl border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div
-                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                      className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
                       onClick={handleSelectAllRadnaMesta}
                     >
                       <input
@@ -243,10 +243,12 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                       <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
                     </div>
                   </div>
-                  {uniqueRadnaMesta.map((radnoMesto) => (
+                  {uniqueRadnaMesta.map((radnoMesto, index) => (
                     <label
                       key={radnoMesto}
-                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                      className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                        index === uniqueRadnaMesta.length - 1 ? 'rounded-bl-lg' : ''
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -296,9 +298,9 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
             {isLokacijeOpen && (
               <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                 <div className="max-h-60 overflow-y-auto">
-                  <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div
-                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                      className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
                       onClick={handleSelectAllLokacije}
                     >
                       <input
@@ -310,10 +312,12 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                       <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
                     </div>
                   </div>
-                  {uniqueLokacije.map((lokacija) => (
+                  {uniqueLokacije.map((lokacija, index) => (
                     <label
                       key={lokacija}
-                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                      className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                        index === uniqueLokacije.length - 1 ? 'rounded-bl-lg' : ''
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -438,7 +442,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
         </div>
       </div>
 
-      <div className="border border-t-0 rounded-b-xl border-gray-100 dark:border-white/[0.05]">
+      <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05]">
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
           <PaginationWithTextAndIcon 
             currentPage={currentPage}

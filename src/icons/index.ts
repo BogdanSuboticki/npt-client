@@ -71,6 +71,10 @@ import { ReactComponent as NotesIcon } from "./Notes.svg?react";
 import { ReactComponent as CestaPitanjaIcon } from "./Cesta pitanja.svg?react";
 import { ReactComponent as TehnickaPodrskaIcon } from "./Tehnicka podrska.svg?react";
 import { ReactComponent as MojNalogIcon } from "./Nalog.svg?react";
+import { ReactComponent as OpremaDugmeIcon } from "./Oprema-dugme.svg?react";
+import { ReactComponent as EditButtonIcon } from "./Edit button.svg?react";
+import { ReactComponent as DeleteButtonIcon } from "./Delete-button.svg?react";
+import { ReactComponent as OpremaDugmevIcon } from "./Oprema-dugme-v2.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -146,4 +150,8 @@ export {
   CestaPitanjaIcon,
   TehnickaPodrskaIcon,
   MojNalogIcon,
+  OpremaDugmeIcon,
+  EditButtonIcon,
+  DeleteButtonIcon,
+  OpremaDugmevIcon,
 };

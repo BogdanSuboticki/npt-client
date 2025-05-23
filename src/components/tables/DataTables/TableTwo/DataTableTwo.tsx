@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { PencilIcon, TrashBinIcon, OpremaIcon } from "../../../../icons";
+import { OpremaDugmevIcon, EditButtonIcon, DeleteButtonIcon } from "../../../../icons";
 import PaginationWithTextAndIcon from "../../../ui/pagination/PaginationWithTextAndIcon";
 
 interface Column {
@@ -156,7 +156,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
       <div className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
-          <div className="relative z-20 bg-transparent">
+          <div className="relative z-20 bg-transparent w-[80px]">
             <select
               className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
               value={itemsPerPage}
@@ -194,12 +194,12 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           {/* Radna Mesta Dropdown */}
-          <div className="relative" ref={radnaMestaRef}>
+          <div className="relative w-full sm:w-auto" ref={radnaMestaRef}>
             <button
               onClick={() => setIsRadnaMestaOpen(!isRadnaMestaOpen)}
-              className="flex items-center justify-between w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90"
+              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent dark:bg-[#101828] border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg
@@ -227,8 +227,8 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
               </svg>
             </button>
             {isRadnaMestaOpen && (
-              <div className="absolute z-[100] w-[300px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                <div className="max-h-60 overflow-y-auto">
+              <div className="absolute z-[100] w-[250px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                   <div className="sticky top-0 bg-white dark:bg-gray-800 border-b rounded-tl-xl border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div
                       className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
@@ -265,10 +265,10 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           </div>
 
           {/* Lokacije Dropdown */}
-          <div className="relative" ref={lokacijeRef}>
+          <div className="relative w-full sm:w-auto" ref={lokacijeRef}>
             <button
               onClick={() => setIsLokacijeOpen(!isLokacijeOpen)}
-              className="flex items-center justify-between w-[200px] h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90"
+              className="flex items-center justify-between w-full sm:w-[200px] h-11 px-4 text-sm text-gray-800 bg-transparent dark:bg-[#101828] border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg
@@ -297,7 +297,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
             </button>
             {isLokacijeOpen && (
               <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                <div className="max-h-60 overflow-y-auto">
+                <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                   <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div
                       className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
@@ -416,7 +416,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                     <TableCell
                       key={key}
                       className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                        key === 'nazivRadnogMesta' ? 'font-bold' : 'font-normal'
+                        key === 'nazivRadnogMesta' ? 'font-medium' : 'font-normal'
                       } ${index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''}`}
                     >
                       {item[key]}
@@ -424,15 +424,15 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">
-                        <OpremaIcon className="size-5" />
+                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
+                        <OpremaDugmevIcon className="size-5" />
                       </button>
                       <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
-                        <TrashBinIcon className="size-5" />
+                        <DeleteButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90">
-                        <PencilIcon className="size-5" />
-                      </button>
+                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                        <EditButtonIcon className="size-4" />
+                      </button> 
                     </div>
                   </TableCell>
                 </TableRow>
@@ -451,7 +451,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           />
           <div className="pt-3 xl:pt-0 px-6">
             <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
-              Prikaz {startIndex + 1} do {endIndex} od {totalItems} zapisa
+              Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
             </p>
           </div>
         </div>

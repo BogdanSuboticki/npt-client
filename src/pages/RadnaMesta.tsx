@@ -152,14 +152,14 @@ const columns = [
 
 const RadnaMesta: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Radna mesta
         </h1>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
         <DataTableTwo 
           data={radnaMestaData}
           columns={columns}

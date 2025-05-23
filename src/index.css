@@ -163,6 +163,67 @@ layer(base);
   --z-index-9999: 9999;
   --z-index-99999: 99999;
   --z-index-999999: 999999;
+
+  /* Scrollbar colors */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a8a8a8;
+}
+
+.dark {
+  /* Dark mode scrollbar colors */
+  --scrollbar-track: #2E2F34;
+  --scrollbar-thumb: #3a3f4d;
+  --scrollbar-thumb-hover: #2d3140;
+}
+
+/* Global scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Hide scrollbar utility */
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Custom scrollbar utility */
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
 }
 
 /*
@@ -254,31 +315,6 @@ layer(base);
 
 @utility menu-dropdown-badge-inactive {
   @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/20;
-}
-@utility no-scrollbar {
-  /* Chrome, Safari and Opera */
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-@utility custom-scrollbar {
-  &::-webkit-scrollbar {
-    @apply size-1.5;
-  }
-
-  &::-webkit-scrollbar-track {
-    @apply rounded-full;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    @apply bg-gray-200 rounded-full dark:bg-gray-700;
-  }
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #344054;
 }
 
 @layer utilities {

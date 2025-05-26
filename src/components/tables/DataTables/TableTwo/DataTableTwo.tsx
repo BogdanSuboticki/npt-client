@@ -442,7 +442,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
         </div>
       </div>
 
-      <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05]">
+      <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05] pb-4">
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
           <PaginationWithTextAndIcon 
             currentPage={currentPage}

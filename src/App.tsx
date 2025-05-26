@@ -38,6 +38,7 @@ import FormLayout from "./pages/Forms/FormLayout";
 import Blank from "./pages/Blank";
 import EmailInbox from "./pages/Email/EmailInbox";
 import EmailDetails from "./pages/Email/EmailDetails";
+import Obrasci from "./pages/Obrasci";
 
 import TaskKanban from "./pages/Task/TaskKanban";
 import BreadCrumb from "./pages/UiElements/BreadCrumb";
@@ -60,6 +61,9 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import TaskList from "./pages/Task/TaskList";
 import Saas from "./pages/Dashboard/Saas";
 import RadnaMesta from "./pages/RadnaMesta";
+import EvidencijaRizicnaRadnaMesta from "./pages/Evidencija_rizicna_radna_mesta";
+import EvidencijaPovredaRad from "./pages/Evidencija_povreda_rad";
+import EvidencijaProfesionalneBolesti from "./pages/Evidencija_profesionalne_bolesti";
 
 export default function App() {
   return (
@@ -83,6 +87,7 @@ export default function App() {
             <Route path="/faq" element={<Faqs />} />
             <Route path="/pricing-tables" element={<PricingTables />} />
             <Route path="/blank" element={<Blank />} />
+            <Route path="/obrasci" element={<Obrasci />} />
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
@@ -134,6 +139,9 @@ export default function App() {
             <Route path="/pie-chart" element={<PieChart />} />
 
             <Route path="/radna-mesta" element={<RadnaMesta />} />
+            <Route path="/evidencija-rizicna-radna-mesta" element={<EvidencijaRizicnaRadnaMesta />} />
+            <Route path="/evidencija-povreda-rad" element={<EvidencijaPovredaRad />} />
+            <Route path="/evidencija-profesionalne-bolesti" element={<EvidencijaProfesionalneBolesti />} />
           </Route>
 
           {/* Auth Layout */}

@@ -9,20 +9,6 @@ type TableRow = {
   datumUtvrdjivanja: string;
 };
 
-const columns = [
-  {
-    header: 'Naziv radnog mesta na kom je zaposleni radio kada je utvrđena profesionalna bolest',
-    accessor: 'nazivRadnogMesta',
-  },
-  {
-    header: 'Ime i prezime obolelog od profesionalne bolesti',
-    accessor: 'imePrezime',
-  },
-  {
-    header: 'Datum utvrđivanja profesionalne bolesti',
-    accessor: 'datumUtvrdjivanja',
-  },
-];
 
 // Initial rows with empty values
 const initialRows: TableRow[] = [

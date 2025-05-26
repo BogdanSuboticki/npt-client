@@ -11,28 +11,6 @@ type TableRow = {
   ocenaTezine: string;
 };
 
-const columns = [
-  {
-    header: 'Naziv radnog mesta na kom je zaposleni radio kada se dogodila povreda',
-    accessor: 'nazivRadnogMesta',
-  },
-  {
-    header: 'Ime i prezime povređenog',
-    accessor: 'imePrezime',
-  },
-  {
-    header: 'Vreme nastanka povrede na radu (datum, dan u sedmici, čas)',
-    accessor: 'vremeNastanka',
-  },
-  {
-    header: 'Vrsta povrede (pojedinačna ili kolektivna)',
-    accessor: 'vrstaPovrede',
-  },
-  {
-    header: 'Ocena težine povrede (laka, teška, smrtna povreda na radu)',
-    accessor: 'ocenaTezine',
-  },
-];
 
 // Initial rows with empty values
 const initialRows: TableRow[] = [

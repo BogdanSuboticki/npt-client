@@ -74,7 +74,6 @@ const Obrasci: React.FC = () => {
           <CardIconTwo
             key={index}
             title={card.title}
-            description={card.description}
             link={card.link}
           />
         ))}

@@ -15,44 +15,6 @@ type TableRow = {
   preduzeteMere: string;
 };
 
-const columns = [
-  {
-    header: 'Naziv radnog mesta sa povećanim rizikom koje je utvrđeno aktom o proceni rizika',
-    accessor: 'nazivRadnogMesta',
-  },
-  {
-    header: 'Ime i prezime zaposlenog koji radi na radnom mestu sa povećanim rizikom',
-    accessor: 'imePrezime',
-  },
-  {
-    header: 'Interval vršenja periodičnih lekarskih pregleda izražen u mesecima',
-    accessor: 'intervalPregleda',
-  },
-  {
-    header: 'Datum izvršenog prethodnog i periodičnog lekarskog pregleda zaposlenog',
-    accessor: 'datumiPregleda',
-    subHeaders: [
-      { header: 'Prethodni', accessor: 'datumPregledaPrethodni' },
-      { header: 'Periodični', accessor: 'datumPregledaPeriodični' },
-    ],
-  },
-  {
-    header: 'Datum kada treba da se izvrši sledeći lekarski pregled zaposlenog',
-    accessor: 'datumSledeci',
-  },
-  {
-    header: 'Broj lekarskog izveštaja',
-    accessor: 'brojIzvestaja',
-  },
-  {
-    header: 'Ocena zdravstvene sposobnosti',
-    accessor: 'ocenaZdravstveneSposobnosti',
-  },
-  {
-    header: 'Preduzete mere (raspoređen na drugo radno mesto - poslove)',
-    accessor: 'preduzeteMere',
-  },
-];
 
 // Use TableRow type for initialRows
 const initialRows: TableRow[] = [

@@ -1,10 +1,9 @@
-import { CardDescription, CardTitle } from "../../ui/card";
+import { CardTitle } from "../../ui/card";
 import { Link } from "react-router";
 import { ReactComponent as ObrasciIcon } from "../../../icons/Obrasci.svg?react";
 
 interface CardIconTwoProps {
   title: string;
-  description: string;
   link: string;
 }
 

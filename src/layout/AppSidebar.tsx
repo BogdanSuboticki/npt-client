@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation } from "react-router";
 
 // Assume these icons are imported from an icon library
 import {
@@ -211,7 +211,6 @@ const supportItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, setIsMobileOpen } = useSidebar();
   const location = useLocation();
-  const navigate = useNavigate();
   const [isMojaFirmaCollapsed, setIsMojaFirmaCollapsed] = useState(() => {
     const saved = localStorage.getItem('isMojaFirmaCollapsed');
     return saved ? JSON.parse(saved) : false;
@@ -231,61 +230,10 @@ const AppSidebar: React.FC = () => {
   const [komitentiHeight, setKomitentiHeight] = useState<number>(0);
   const [ostaloHeight, setOstaloHeight] = useState<number>(0);
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "support" | "others";
-    index: number;
-  } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => location.pathname === path,
     [location.pathname]
   );
-
-  useEffect(() => {
-    let submenuMatched = false;
-    ["main", "support", "others"].forEach((menuType) => {
-      const items =
-        menuType === "main"
-          ? navItems
-          : menuType === "support"
-          ? supportItems
-          : othersItems;
-      items.forEach((nav, index) => {
-        if (nav.subItems) {
-          nav.subItems.forEach((subItem) => {
-            if (isActive(subItem.path)) {
-              setOpenSubmenu({
-                type: menuType as "main" | "support" | "others",
-                index,
-              });
-              submenuMatched = true;
-            }
-          });
-        }
-      });
-    });
-
-    if (!submenuMatched) {
-      setOpenSubmenu(null);
-    }
-  }, [location, isActive]);
-
-  useEffect(() => {
-    if (openSubmenu !== null) {
-      const key = `${openSubmenu.type}-${openSubmenu.index}`;
-      if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
-          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-        }));
-      }
-    }
-  }, [openSubmenu]);
 
   useEffect(() => {
     if (mojaFirmaRef.current) {
@@ -315,34 +263,15 @@ const AppSidebar: React.FC = () => {
   // Add effect to handle body scroll locking
   useEffect(() => {
     if (isMobileOpen) {
-      // Disable scrolling on body when sidebar is open
       document.body.style.overflow = 'hidden';
     } else {
-      // Re-enable scrolling when sidebar is closed
       document.body.style.overflow = 'auto';
     }
 
-    // Cleanup function to ensure we re-enable scrolling when component unmounts
     return () => {
       document.body.style.overflow = 'auto';
     };
   }, [isMobileOpen]);
-
-  const handleSubmenuToggle = (
-    index: number,
-    menuType: "main" | "support" | "others"
-  ) => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-      return { type: menuType, index };
-    });
-  };
 
   const handleMenuClick = () => {
     if (isMobileOpen) {
@@ -350,12 +279,9 @@ const AppSidebar: React.FC = () => {
     }
   };
 
-  const renderMenuItems = (
-    items: NavItem[],
-    menuType: "main" | "support" | "others"
-  ) => (
+  const renderMenuItems = (items: NavItem[]) => (
     <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
+      {items.map((nav) => (
         <li key={nav.name}>
           {nav.path && (
             <Link
@@ -445,7 +371,7 @@ const AppSidebar: React.FC = () => {
                   height: isMojaFirmaCollapsed ? "0px" : `${mojaFirmaHeight}px`,
                 }}
               >
-                {renderMenuItems(navItems, "main")}
+                {renderMenuItems(navItems)}
               </div>
             </div>
             <div className="">
@@ -477,7 +403,7 @@ const AppSidebar: React.FC = () => {
                   height: isKomitentiCollapsed ? "0px" : `${komitentiHeight}px`,
                 }}
               >
-                {renderMenuItems(supportItems, "support")}
+                {renderMenuItems(supportItems)}
               </div>
             </div>
             <div className="">
@@ -509,7 +435,7 @@ const AppSidebar: React.FC = () => {
                   height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
                 }}
               >
-                {renderMenuItems(othersItems, "others")}
+                {renderMenuItems(othersItems)}
               </div>
             </div>
           </div>

@@ -158,11 +158,11 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
           <div className="relative z-20 bg-transparent w-[80px]">
             <select
-              className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+              className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
             >
-              {[5, 8, 10].map((value) => (
+              {[10, 20, 50, 100].map((value) => (
                 <option
                   key={value}
                   value={value}
@@ -172,7 +172,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                 </option>
               ))}
             </select>
-            <span className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400">
+            <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
               <svg
                 className="stroke-current"
                 width="16"
@@ -189,7 +189,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                   strokeLinejoin="round"
                 />
               </svg>
-            </span>
+            </div>
           </div>
           <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
         </div>
@@ -227,7 +227,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
               </svg>
             </button>
             {isRadnaMestaOpen && (
-              <div className="absolute z-[100] w-[250px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+              <div className="absolute z-[100] w-full sm:w-[250px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                 <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                   <div className="sticky top-0 bg-white dark:bg-gray-800 border-b rounded-tl-xl border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div
@@ -268,7 +268,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           <div className="relative w-full sm:w-auto" ref={lokacijeRef}>
             <button
               onClick={() => setIsLokacijeOpen(!isLokacijeOpen)}
-              className="flex items-center justify-between w-full sm:w-[200px] h-11 px-4 text-sm text-gray-800 bg-transparent dark:bg-[#101828] border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent dark:bg-[#101828] border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg
@@ -296,7 +296,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
               </svg>
             </button>
             {isLokacijeOpen && (
-              <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+              <div className="absolute z-[100] w-full sm:w-[250px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                 <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                   <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div

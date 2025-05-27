@@ -90,85 +90,87 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Evidencija o radnim mestima sa povećanim rizikom, zaposlenima koji obavljaju poslove na radnim mestima sa povećanim rizikom i lekarskim pregledima zaposlenih koji obavljaju te poslove
         </h1>
-        <button
-          onClick={handlePrint}
-          className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border border-gray-200 dark:border-gray-700 md:self-start"
-        >
-          <PrintIcon className="w-5 h-5" />
-          Štampaj
-        </button>
       </div>
       <div className='rounded-xl bg-white dark:bg-white/[0.03] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
-      <div className="overflow-x-auto ">
-        <table className="min-w-full border border-gray-100 dark:border-white/[0.05]">
-          <thead>
-            <tr>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Redni broj</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Naziv radnog mesta sa povećanim rizikom koje je utvrđeno aktom o proceni rizika</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Ime i prezime zaposlenog koji radi na radnom mestu sa povećanim rizikom</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Interval vršenja periodičnih lekarskih pregleda izražen u mesecima</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" colSpan={2}>Datum izvršenog prethodnog i periodičnog lekarskog pregleda zaposlenog</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Datum kada treba da se izvrši sledeći lekarski pregled zaposlenog</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Broj lekarskog izveštaja</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Ocena zdravstvene sposobnosti</th>
-              <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400" rowSpan={2}>Preduzete mere (raspoređen na drugo radno mesto - poslove)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIdx) => (
-              <React.Fragment key={rowIdx}>
-                <tr>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1 text-center text-gray-800 dark:text-gray-400" rowSpan={5}>{rowIdx + 1}.</td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400 font-medium" value={row.nazivRadnogMesta} onChange={e => handleCellChange(rowIdx, 'nazivRadnogMesta', e.target.value)} />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.imePrezime} onChange={e => handleCellChange(rowIdx, 'imePrezime', e.target.value)} />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.intervalPregleda} onChange={e => handleCellChange(rowIdx, 'intervalPregleda', e.target.value)} />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 text-gray-800 dark:text-gray-400">Prethodni</td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1">
-                    <input
-                      type="text"
-                      className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400"
-                      value={row.datumPregledaPrethodni}
-                      onChange={e => handleCellChange(rowIdx, 'datumPregledaPrethodni', e.target.value)}
-                    />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.datumSledeci} onChange={e => handleCellChange(rowIdx, 'datumSledeci', e.target.value)} />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.brojIzvestaja} onChange={e => handleCellChange(rowIdx, 'brojIzvestaja', e.target.value)} />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.ocenaZdravstveneSposobnosti} onChange={e => handleCellChange(rowIdx, 'ocenaZdravstveneSposobnosti', e.target.value)} />
-                  </td>
-                  <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
-                    <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.preduzeteMere} onChange={e => handleCellChange(rowIdx, 'preduzeteMere', e.target.value)} />
-                  </td>
-                </tr>
-                {row.datumPregledaPeriodični.map((val, i) => (
-                  <tr key={i}>
-                    {i === 0 && (
-                      <td className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Periodični</td>
-                    )}
+        <div className="p-4 flex justify-end">
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border border-gray-200 dark:border-gray-700"
+          >
+            <PrintIcon className="w-5 h-5" />
+            Štampaj
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-100 dark:border-white/[0.05]">
+            <thead>
+              <tr>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Redni broj</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Naziv radnog mesta sa povećanim rizikom koje je utvrđeno aktom o proceni rizika</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Ime i prezime zaposlenog koji radi na radnom mestu sa povećanim rizikom</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Interval vršenja periodičnih lekarskih pregleda izražen u mesecima</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" colSpan={2}>Datum izvršenog prethodnog i periodičnog lekarskog pregleda zaposlenog</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Datum kada treba da se izvrši sledeći lekarski pregled zaposlenog</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Broj lekarskog izveštaja</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Ocena zdravstvene sposobnosti</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Preduzete mere</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIdx) => (
+                <React.Fragment key={rowIdx}>
+                  <tr>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1 text-center text-gray-800 dark:text-gray-400" rowSpan={5}>{rowIdx + 1}.</td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400 font-medium" value={row.nazivRadnogMesta} onChange={e => handleCellChange(rowIdx, 'nazivRadnogMesta', e.target.value)} />
+                    </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.imePrezime} onChange={e => handleCellChange(rowIdx, 'imePrezime', e.target.value)} />
+                    </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.intervalPregleda} onChange={e => handleCellChange(rowIdx, 'intervalPregleda', e.target.value)} />
+                    </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 text-gray-800 dark:text-gray-400">Prethodni</td>
                     <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1">
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400"
-                        value={val}
-                        onChange={e => handlePeriodicniChange(rowIdx, i, e.target.value)}
+                        value={row.datumPregledaPrethodni}
+                        onChange={e => handleCellChange(rowIdx, 'datumPregledaPrethodni', e.target.value)}
                       />
                     </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.datumSledeci} onChange={e => handleCellChange(rowIdx, 'datumSledeci', e.target.value)} />
+                    </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.brojIzvestaja} onChange={e => handleCellChange(rowIdx, 'brojIzvestaja', e.target.value)} />
+                    </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.ocenaZdravstveneSposobnosti} onChange={e => handleCellChange(rowIdx, 'ocenaZdravstveneSposobnosti', e.target.value)} />
+                    </td>
+                    <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1" rowSpan={5}>
+                      <input type="text" className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400" value={row.preduzeteMere} onChange={e => handleCellChange(rowIdx, 'preduzeteMere', e.target.value)} />
+                    </td>
                   </tr>
-                ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                  {row.datumPregledaPeriodični.map((val, i) => (
+                    <tr key={i}>
+                      {i === 0 && (
+                        <td className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Periodični</td>
+                      )}
+                      <td className="border border-gray-100 dark:border-white/[0.05] px-2 py-1">
+                        <input
+                          type="text"
+                          className="w-full outline-none bg-transparent text-gray-800 dark:text-gray-400"
+                          value={val}
+                          onChange={e => handlePeriodicniChange(rowIdx, i, e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
         <button
           className="mt-4 px-4 py-2 min-w-full bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center gap-2"

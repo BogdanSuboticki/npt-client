@@ -56,23 +56,25 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Evidencija o profesionalnim bolestima
         </h1>
-        <button
-          onClick={handlePrint}
-          className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border border-gray-200 dark:border-gray-700 md:self-start"
-        >
-          <PrintIcon className="w-5 h-5" />
-          Štampaj
-        </button>
       </div>
       <div className='rounded-xl bg-white dark:bg-white/[0.03] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+        <div className="p-4 flex justify-end">
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border border-gray-200 dark:border-gray-700"
+          >
+            <PrintIcon className="w-5 h-5" />
+            Štampaj
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-100 dark:border-white/[0.05]">
             <thead>
               <tr>
-                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400">Redni broj</th>
-                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400">Naziv radnog mesta na kom je zaposleni radio kada je utvrđena profesionalna bolest</th>
-                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400">Ime i prezime obolelog od profesionalne bolesti</th>
-                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-bold text-gray-700 dark:text-gray-400">Datum utvrđivanja profesionalne bolesti</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400">Redni broj</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400">Naziv radnog mesta na kom je zaposleni radio kada je utvrđena profesionalna bolest</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400">Ime i prezime obolelog od profesionalne bolesti</th>
+                <th className="border border-gray-100 dark:border-white/[0.05] text-[12px] px-2 py-1 font-medium text-gray-700 dark:text-gray-400">Datum utvrđivanja profesionalne bolesti</th>
               </tr>
             </thead>
             <tbody>

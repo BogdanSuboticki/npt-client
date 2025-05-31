@@ -127,13 +127,13 @@ const EvidencijaPovredaRad: React.FC = () => {
           Evidencija povreda na radu
         </h1>
       </div>
-      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-gray-800 dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>
             <div className="relative z-20 bg-transparent w-[80px]">
               <select
-                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
+                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
                 value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               >
@@ -171,14 +171,14 @@ const EvidencijaPovredaRad: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={handleDownload}
-              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2C3B4D] flex items-center gap-2 border border-gray-200 "
+              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2C3B4D] flex items-center gap-2 border border-gray-200 "
             >
               <DownloadIcon className="w-5 h-5" />
               Preuzmi
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2C3B4D] flex items-center gap-2 border border-gray-200 "
+              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2C3B4D] flex items-center gap-2 border border-gray-200 "
             >
               <PrintIcon className="w-5 h-5" />
               Štampaj
@@ -248,7 +248,7 @@ const EvidencijaPovredaRad: React.FC = () => {
         </div>
         <div className='px-6 py-4'>
         <button
-          className="px-4 py-2 min-w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+          className="px-4 py-2 min-w-full bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
           onClick={addRow}
         >
           <NoviRedIcon className="w-5 h-5" />
@@ -310,7 +310,7 @@ const EvidencijaPovredaRad: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowWarningModal(false)}
-              className="flex justify-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-theme-xs hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700 sm:w-auto"
+              className="flex justify-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-theme-xs hover:bg-gray-50 dark:bg-[#101828] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700 sm:w-auto"
             >
               Otkaži
             </button>

@@ -152,7 +152,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
   return (
-    <div className="overflow-hidden rounded-xl bg-gray-800 dark:bg-grey-900">
+    <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
       <div className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>

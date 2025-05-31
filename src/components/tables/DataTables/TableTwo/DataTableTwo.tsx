@@ -152,7 +152,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
   return (
-    <div className="overflow-hidden rounded-xl bg-white dark:bg-white/[0.03]">
+    <div className="overflow-hidden rounded-xl bg-gray-800 dark:bg-grey-900">
       <div className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
@@ -199,7 +199,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           <div className="relative w-full sm:w-auto" ref={radnaMestaRef}>
             <button
               onClick={() => setIsRadnaMestaOpen(!isRadnaMestaOpen)}
-              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent dark:bg-[#101828] border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg
@@ -268,7 +268,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           <div className="relative w-full sm:w-auto" ref={lokacijeRef}>
             <button
               onClick={() => setIsLokacijeOpen(!isLokacijeOpen)}
-              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent dark:bg-[#101828] border border-gray-300 rounded-lg dark:bg-dark-900 dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg

@@ -29,6 +29,9 @@ const mockFilledForms = [
 ];
 
 export default function CardIconTwo({ title, link }: CardIconTwoProps) {
+  // Extract the type from the link (remove the leading slash)
+  const type = link.substring(1);
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 h-full flex flex-col">
       <div className="flex-1">
@@ -54,7 +57,7 @@ export default function CardIconTwo({ title, link }: CardIconTwoProps) {
         <div className="mt-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Poslednji obrasci</h3>
-            <Link to={link} className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300">
+            <Link to={`/prethodni-obrasci?type=${type}`} className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300">
               Pogledaj sve
             </Link>
           </div>

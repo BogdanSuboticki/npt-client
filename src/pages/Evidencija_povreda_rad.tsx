@@ -127,7 +127,7 @@ const EvidencijaPovredaRad: React.FC = () => {
           Evidencija povreda na radu
         </h1>
       </div>
-      <div className='rounded-lg bg-white dark:bg-white/[0.03] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>
@@ -171,14 +171,14 @@ const EvidencijaPovredaRad: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={handleDownload}
-              className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border border-gray-200 dark:border-gray-700"
+              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2C3B4D] flex items-center gap-2 border border-gray-200 "
             >
               <DownloadIcon className="w-5 h-5" />
               Preuzmi
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 border border-gray-200 dark:border-gray-700"
+              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2C3B4D] flex items-center gap-2 border border-gray-200 "
             >
               <PrintIcon className="w-5 h-5" />
               Štampaj

@@ -15,6 +15,11 @@ const cards = [
     title: "Evidencija o profesionalnim bolestima",
     description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
     link: "/evidencija-profesionalne-bolesti"
+  },  
+  {
+    title: "Evidencija o izdatoj ličnoj zaštitnoj opremi",
+    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
+    link: "/zastitna-oprema"
   },
   {
     title: "Evidencija o zaposlenima izloženim biološkim štetnostima grupe 3/4",
@@ -57,11 +62,7 @@ const cards = [
     description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
     link: "/ispitivanja-sredine"
   },
-  {
-    title: "Evidencija o izdatoj ličnoj zaštitnoj opremi",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/zastitna-oprema"
-  },
+
 
 ];
 

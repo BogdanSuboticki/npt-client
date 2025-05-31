@@ -818,3 +818,37 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+  
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .print-only table {
+    width: 100%;
+  }
+
+  .print-only th,
+  .print-only td {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+  }
+
+  .print-only input {
+    border: none !important;
+    color: #000 !important;
+  }
+}

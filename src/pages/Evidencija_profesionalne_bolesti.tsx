@@ -119,7 +119,7 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
           Evidencija o profesionalnim bolestima
         </h1>
       </div>
-      <div className='rounded-lg bg-gray-800 dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>

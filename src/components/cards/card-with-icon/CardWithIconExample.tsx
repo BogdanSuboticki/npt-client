@@ -10,7 +10,7 @@ export default function CardWithIconExample() {
         </div>
 
         <div>
-          <CardIconTwo title="Card with Icon"link="/" />
+          <CardIconTwo title="Card with Icon" description="Card with Icon" link="/" />
         </div>
       </div>
     </ComponentCard>

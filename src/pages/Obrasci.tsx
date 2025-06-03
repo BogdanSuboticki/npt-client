@@ -4,64 +4,65 @@ import CardIconTwo from '../components/cards/card-with-icon/CardIconTwo';
 const cards = [
   
 
-
+  {
+    title: "Obrazac 1.",
+    description: "Evidencija o radnim mestima sa povećanim rizikom, zaposlenima koji obavljaju poslove na radnim mestima sa povećanim rizikom i lekarskim pregledima zaposlenih koji obavljaju te poslove",
+    link: "/evidencija-rizicna-radna-mesta"
+  },
 
   {
-    title: "Evidencija o povredama na radu",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
+    title: "Obrazac 2.",
+    description: "Evidencija o povredama na radu",
     link: "/evidencija-povreda-rad"
   },
   {
-    title: "Evidencija o profesionalnim bolestima",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
+    title: "Obrazac 3.",
+    description: "Evidencija o profesionalnim bolestima",
     link: "/evidencija-profesionalne-bolesti"
-  },  
+  },    
   {
-    title: "Evidencija o izdatoj ličnoj zaštitnoj opremi",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/zastitna-oprema"
+    title: "Obrazac 4.",
+    description: "Evidencija o zaposlenima izloženim biološkim štetnostima grupe 3/4",
+    link: "/evidencija-biloske-stetnosti"
   },
   {
-    title: "Evidencija o zaposlenima izloženim biološkim štetnostima grupe 3/4",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/bioloske-stetnosti"
+    title: "Obrazac 5.",
+    description: "Evidencija o zaposlenima koji su izloženi kancerogenima ili mutagenima, hemijskim materijama i azbestu, kao i o zdravstvenom stanju i izloženosti",
+    link: "/evidencija-kancerogeni-mutageni"
+  }, 
+  {
+    title: "Obrazac 6.",
+    description: "Evidencija o zaposlenima obučenim za bezbedan i zdrav rad i pravilno korišćenje lične zaštitne opreme",
+    link: "/evidencija-obuceni-bezbedan"
   },
   {
-    title: "Evidencija o radnim mestima sa povećanim rizikom, zaposlenima koji obavljaju poslove na radnim mestima sa povećanim rizikom i lekarskim pregledima zaposlenih koji obavljaju te poslove",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/evidencija-rizicna-radna-mesta"
+    title: "Obrazac 7.",
+    description: "Evidencija o primeni mera za bezbednost i zdravlje na radu za delatnosti iz člana 48. zakona o bezbednosti i zdravlju na radu.",
+    link: "/evidencija-primena-mera"
   },
   {
-    title: "Evidencija zaposlenima koji su izloženi karcinogenima i mutagenima, hemijskim materijama i azbestu, kao i zdravstvenom stanju i izloženosti",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/karcinogeni-mutageni"
-  },  
-  {
-    title: "Evidencija o primeni mera za bezbednost i zdravlje na radu iz člana 48. zakona o bezbednosti zdravlja na radu",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/mere-bezbednost"
+    title: "Obrazac 8.",
+    description: "Evidencija o izvršenim pregledima i proverama opreme za rad",
+    link: "/evidencija-pregledi-opreme"
   },
   {
-    title: "Evidencija o zaposlenima obučenim za bezbedan i zdrav rad i pravilno korišćenje zaštitne opreme",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/obuka-zastitna-oprema"
-  },
-
-  {
-    title: "Evidencija o izvršenim pregledima i proverama opreme za rad",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
-    link: "/pregledi-opreme"
-  },
-  {
-    title: "Evidencija o izvršenim pregledima i ispitivanjima električnih i gromobranskih instalacija",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
+    title: "Obrazac 9.",
+    description: "Evidencija o izvršenim pregledima i ispitivanjima električnih i gromobranskih instalacija",
     link: "/elektricne-instalacije"
   },
   {
-    title: "Evidencija o izvršenim ispitivanjima uslova radne sredine",
-    description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi architecto aspernatur cum et ipsum",
+    title: "Obrazac 10.",
+    description: "Evidencija o izvršenim ispitivanjima uslova radne sredine",
     link: "/ispitivanja-sredine"
   },
+  {
+    title: "Obrazac 11.",
+    description: "Evidencija o izdatoj ličnoj zaštitnoj opremi",
+    link: "/zastitna-oprema"
+  },
+
+
+
 
 
 ];
@@ -75,6 +76,7 @@ const Obrasci: React.FC = () => {
           <CardIconTwo
             key={index}
             title={card.title}
+            description={card.description}
             link={card.link}
           />
         ))}

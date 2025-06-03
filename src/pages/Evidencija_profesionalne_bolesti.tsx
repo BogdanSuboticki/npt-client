@@ -114,12 +114,15 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
 
   return (
     <div className="py-8">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+      <div className="flex-row md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Evidencija o profesionalnim bolestima
+          Obrazac 3.
         </h1>
+        <h2 className='text-lg text-gray-400 dark:text-white'>
+        EVIDENCIJA O PROFESIONALNIM BOLESTIMA
+        </h2>
       </div>
-      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>

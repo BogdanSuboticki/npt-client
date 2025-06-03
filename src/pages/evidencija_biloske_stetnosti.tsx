@@ -7,32 +7,37 @@ import { Modal } from '../components/ui/modal';
 
 // Add TableRow type with index signature
 type TableRow = {
-  nazivRadnogMesta: string;
   imePrezime: string;
-  intervalPregleda: string;
+  klasifikacijaStetnosti: string;
+  brojStrucnogNalaza: string;
+  datumIspitivanja: string;
+  datumSledecegIspitivanja: string;
   datumPregledaPrethodni: string;
   datumPregledaPeriodični: string[]; // 4 cells
+  datumPregledaCiljani: string[]; // 4 cells
   datumSledeci: string;
   brojIzvestaja: string;
   ocenaZdravstveneSposobnosti: string;
-  preduzeteMere: string;
+  napomena: string;
 };
-
 
 // Use TableRow type for initialRows
 const initialRows: TableRow[] = Array(10).fill({
-  nazivRadnogMesta: '',
   imePrezime: '',
-  intervalPregleda: '',
+  klasifikacijaStetnosti: '',
+  brojStrucnogNalaza: '',
+  datumIspitivanja: '',
+  datumSledecegIspitivanja: '',
   datumPregledaPrethodni: '',
   datumPregledaPeriodični: ['', '', '', ''],
+  datumPregledaCiljani: ['', '', '', ''],
   datumSledeci: '',
   brojIzvestaja: '',
   ocenaZdravstveneSposobnosti: '',
-  preduzeteMere: '',
+  napomena: '',
 });
 
-const EvidencijaRizicnaRadnaMesta: React.FC = () => {
+const EvidencijaBiloskeStetnosti: React.FC = () => {
   const [rows, setRows] = useState<TableRow[]>(initialRows);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -57,9 +62,18 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
     });
   };
 
+  const handleCiljaniChange = (rowIdx: number, idx: number, value: string) => {
+    setRows((prev) => {
+      const updated = [...prev];
+      const ciljani = [...updated[rowIdx].datumPregledaCiljani];
+      ciljani[idx] = value;
+      updated[rowIdx] = { ...updated[rowIdx], datumPregledaCiljani: ciljani };
+      return updated;
+    });
+  };
+
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     if (newItemsPerPage < itemsPerPage) {
-      // Check if any rows that would be removed have data
       const hasDataInRemovedRows = rows.slice(newItemsPerPage).some(row => 
         Object.values(row).some(value => 
           typeof value === 'string' ? value.trim() !== '' : 
@@ -74,20 +88,22 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
       }
     }
 
-    // If no data would be lost or user confirmed, proceed with the change
     setItemsPerPage(newItemsPerPage);
     setRows(prev => {
       if (prev.length < newItemsPerPage) {
         const newRows = Array(newItemsPerPage - prev.length).fill({
-          nazivRadnogMesta: '',
           imePrezime: '',
-          intervalPregleda: '',
+          klasifikacijaStetnosti: '',
+          brojStrucnogNalaza: '',
+          datumIspitivanja: '',
+          datumSledecegIspitivanja: '',
           datumPregledaPrethodni: '',
           datumPregledaPeriodični: ['', '', '', ''],
+          datumPregledaCiljani: ['', '', '', ''],
           datumSledeci: '',
           brojIzvestaja: '',
           ocenaZdravstveneSposobnosti: '',
-          preduzeteMere: '',
+          napomena: '',
         });
         return [...prev, ...newRows];
       } else if (prev.length > newItemsPerPage) {
@@ -107,15 +123,18 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
     setRows((prev) => [
       ...prev,
       {
-        nazivRadnogMesta: '',
         imePrezime: '',
-        intervalPregleda: '',
+        klasifikacijaStetnosti: '',
+        brojStrucnogNalaza: '',
+        datumIspitivanja: '',
+        datumSledecegIspitivanja: '',
         datumPregledaPrethodni: '',
         datumPregledaPeriodični: ['', '', '', ''],
+        datumPregledaCiljani: ['', '', '', ''],
         datumSledeci: '',
         brojIzvestaja: '',
         ocenaZdravstveneSposobnosti: '',
-        preduzeteMere: '',
+        napomena: '',
       },
     ]);
     setItemsPerPage(prev => prev + 1);
@@ -131,7 +150,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
 
     const opt = {
       margin: 1,
-      filename: 'evidencija_rizicna_radna_mesta.pdf',
+      filename: 'evidencija_biloske_stetnosti.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
         scale: 2,
@@ -153,13 +172,13 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
     <div className="py-8">
       <div className="flex-row md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-        Obrazac 1.
+          Obrazac 4.
         </h1>
         <h2 className='text-lg text-gray-400 dark:text-white'>
-        EVIDENCIJA O RADNIM MESTIMA SA POVEĆANIM RIZIKOM, ZAPOSLENIH KOJI OBAVLJAJU POSLOVE NA RADNIM MESTIMA SA POVEĆANIM RIZIKOM I LEKARSKIM PREGLEDIMA ZAPOSLENIH KOJI OBAVLJAJU TE POSLOVE          
+          EVIDENCIJA O ZAPOSLENIM KOJI SU IZLOŽENI BIOLOŠKIM ŠTETNOSTIMA GRUPE 3 I/ILI GRUPE 4
         </h2>
       </div>
-      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>
@@ -222,30 +241,24 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
             <thead>
               <tr>
                 <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Redni broj</th>
-                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Naziv radnog mesta sa povećanim rizikom koje je utvrđeno aktom o proceni rizika</th>
-                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Ime i prezime zaposlenog koji radi na radnom mestu sa povećanim rizikom</th>
-                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Interval vršenja periodičnih lekarskih pregleda izražen u mesecima</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Ime i prezime zaposlenog izloženog biološkim štetnostima grupe 3 i/ili grupe 4</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Klasifikacija bioloških štetnosti</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Broj stručnog nalaza ili izveštaja</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Datum ispitivanja</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Datum sledećeg ispitivanja</th>
                 <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" colSpan={2}>Datum izvršenog prethodnog i periodičnog lekarskog pregleda zaposlenog</th>
                 <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Datum kada treba da se izvrši sledeći lekarski pregled zaposlenog</th>
                 <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Broj lekarskog izveštaja</th>
-                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Ocena zdravstvene sposobnosti</th>
-                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Preduzete mere</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Ocena zdravstvene sposobnosti, odnosno zdravstveno stanje (jesu/nisu utvrđene promene u zdravstvenom stanju)</th>
+                <th className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-4 py-3 font-medium text-gray-700 dark:text-gray-400" rowSpan={2}>Napomena</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row, rowIdx) => (
                 <React.Fragment key={rowIdx}>
                   <tr>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 text-center text-[13px] text-gray-800 dark:text-gray-400" rowSpan={5}>{rowIdx + 1}.</td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
-                      <input
-                        type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
-                        value={row.nazivRadnogMesta}
-                        onChange={e => handleCellChange(rowIdx, 'nazivRadnogMesta', e.target.value)}
-                      />
-                    </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 text-center text-[13px] text-gray-800 dark:text-gray-400" rowSpan={9}>{rowIdx + 1}.</td>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
@@ -253,12 +266,36 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                         onChange={e => handleCellChange(rowIdx, 'imePrezime', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
-                        value={row.intervalPregleda}
-                        onChange={e => handleCellChange(rowIdx, 'intervalPregleda', e.target.value)}
+                        value={row.klasifikacijaStetnosti}
+                        onChange={e => handleCellChange(rowIdx, 'klasifikacijaStetnosti', e.target.value)}
+                      />
+                    </td>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                      <input
+                        type="text"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        value={row.brojStrucnogNalaza}
+                        onChange={e => handleCellChange(rowIdx, 'brojStrucnogNalaza', e.target.value)}
+                      />
+                    </td>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                      <input
+                        type="text"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        value={row.datumIspitivanja}
+                        onChange={e => handleCellChange(rowIdx, 'datumIspitivanja', e.target.value)}
+                      />
+                    </td>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                      <input
+                        type="text"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        value={row.datumSledecegIspitivanja}
+                        onChange={e => handleCellChange(rowIdx, 'datumSledecegIspitivanja', e.target.value)}
                       />
                     </td>
                     <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400">Prethodni</td>
@@ -270,7 +307,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                         onChange={e => handleCellChange(rowIdx, 'datumPregledaPrethodni', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
@@ -278,7 +315,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                         onChange={e => handleCellChange(rowIdx, 'datumSledeci', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
@@ -286,7 +323,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                         onChange={e => handleCellChange(rowIdx, 'brojIzvestaja', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
@@ -294,17 +331,17 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                         onChange={e => handleCellChange(rowIdx, 'ocenaZdravstveneSposobnosti', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={5}>
+                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
                       <input
                         type="text"
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
-                        value={row.preduzeteMere}
-                        onChange={e => handleCellChange(rowIdx, 'preduzeteMere', e.target.value)}
+                        value={row.napomena}
+                        onChange={e => handleCellChange(rowIdx, 'napomena', e.target.value)}
                       />
                     </td>
                   </tr>
                   {row.datumPregledaPeriodični.map((val, i) => (
-                    <tr key={i}>
+                    <tr key={`periodicni-${i}`}>
                       {i === 0 && (
                         <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Periodični</td>
                       )}
@@ -318,19 +355,34 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                       </td>
                     </tr>
                   ))}
+                  {row.datumPregledaCiljani.map((val, i) => (
+                    <tr key={`ciljani-${i}`}>
+                      {i === 0 && (
+                        <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Ciljani</td>
+                      )}
+                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
+                        <input
+                          type="text"
+                          className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                          value={val}
+                          onChange={e => handleCiljaniChange(rowIdx, i, e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
                 </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
         <div className='px-6 py-4'>
-        <button
-          className="px-4 py-2 min-w-full bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
-          onClick={addRow}
-        >
-          <NoviRedIcon className="w-5 h-5" />
-          Novi Red
-        </button>
+          <button
+            className="px-4 py-2 min-w-full bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            onClick={addRow}
+          >
+            <NoviRedIcon className="w-5 h-5" />
+            Novi Red
+          </button>
         </div>
       </div>
       
@@ -405,4 +457,4 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
   );
 };
 
-export default EvidencijaRizicnaRadnaMesta; 
+export default EvidencijaBiloskeStetnosti; 

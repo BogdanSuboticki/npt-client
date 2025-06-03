@@ -1,9 +1,10 @@
-import { CardTitle } from "../../ui/card";
+import { CardTitle, CardDescription } from "../../ui/card";
 import { Link } from "react-router";
 import { ReactComponent as ObrasciIcon } from "../../../icons/Obrasci.svg?react";
 
 interface CardIconTwoProps {
   title: string;
+  description: string;
   link: string;
 }
 
@@ -28,7 +29,7 @@ const mockFilledForms = [
   }
 ];
 
-export default function CardIconTwo({ title, link }: CardIconTwoProps) {
+export default function CardIconTwo({ title, description, link }: CardIconTwoProps) {
   // Extract the type from the link (remove the leading slash)
   const type = link.substring(1);
 
@@ -51,6 +52,7 @@ export default function CardIconTwo({ title, link }: CardIconTwoProps) {
         </div>
 
         <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </div>
 
       <div className="mt-auto">

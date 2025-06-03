@@ -65,6 +65,14 @@ import RadnaMesta from "./pages/RadnaMesta";
 import EvidencijaRizicnaRadnaMesta from "./pages/Evidencija_rizicna_radna_mesta";
 import EvidencijaPovredaRad from "./pages/Evidencija_povreda_rad";
 import EvidencijaProfesionalneBolesti from "./pages/Evidencija_profesionalne_bolesti";
+import EvidencijaBiloskeStetnosti from "./pages/evidencija_biloske_stetnosti";
+import EvidencijaKancerogeniMutageni from "./pages/evidencija_kancerogeni_mutageni";
+import EvidencijaObuceniBezbedan from "./pages/evidencija_obuceni_bezbedan";
+import EvidencijaPrimenaMera from "./pages/evidencija_primena_mera";
+import EvidencijaPreglediOpreme from "./pages/evidencija_pregledi_opreme";
+import EvidencijaElektricneInstalacije from "./pages/evidencija_elektricne_instalacije";
+import EvidencijaIspitivanjaSredine from "./pages/evidencija_ispitivanja_sredine";
+import EvidencijaZastitnaOprema from "./pages/evidencija_zastitna_oprema";
 
 export default function App() {
   return (
@@ -144,6 +152,14 @@ export default function App() {
             <Route path="/evidencija-rizicna-radna-mesta" element={<EvidencijaRizicnaRadnaMesta />} />
             <Route path="/evidencija-povreda-rad" element={<EvidencijaPovredaRad />} />
             <Route path="/evidencija-profesionalne-bolesti" element={<EvidencijaProfesionalneBolesti />} />
+            <Route path="/evidencija-biloske-stetnosti" element={<EvidencijaBiloskeStetnosti />} />
+            <Route path="/evidencija-kancerogeni-mutageni" element={<EvidencijaKancerogeniMutageni />} />
+            <Route path="/evidencija-obuceni-bezbedan" element={<EvidencijaObuceniBezbedan />} />
+            <Route path="/evidencija-primena-mera" element={<EvidencijaPrimenaMera />} />
+            <Route path="/evidencija-pregledi-opreme" element={<EvidencijaPreglediOpreme />} />
+            <Route path="/elektricne-instalacije" element={<EvidencijaElektricneInstalacije />} />
+            <Route path="/ispitivanja-sredine" element={<EvidencijaIspitivanjaSredine />} />
+            <Route path="/zastitna-oprema" element={<EvidencijaZastitnaOprema />} />
           </Route>
 
           {/* Auth Layout */}

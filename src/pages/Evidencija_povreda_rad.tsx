@@ -122,10 +122,13 @@ const EvidencijaPovredaRad: React.FC = () => {
 
   return (
     <div className="py-8">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+      <div className="flex-row md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Evidencija povreda na radu
+          Obrazac 2.
         </h1>
+        <h2 className='text-lg text-gray-400 dark:text-white'>
+        EVIDENCIJA O POVREDAMA NA RADU
+        </h2>
       </div>
       <div className='rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

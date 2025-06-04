@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router';
 import { ReactComponent as DownloadIcon } from '../icons/download.svg?react';
 import { ReactComponent as PrintIcon } from '../icons/Print.svg?react';
+import { ReactComponent as EditIcon } from '../icons/Edit button.svg?react';
 
 type ObrazacItem = {
   id: number;
@@ -116,6 +117,11 @@ const PrethodniObrasci: React.FC = () => {
     console.log('Printing obrazac:', id);
   };
 
+  const handleEdit = (id: number) => {
+    // Implement edit functionality
+    console.log('Editing obrazac:', id);
+  };
+
   return (
     <div className="py-8">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -146,6 +152,12 @@ const PrethodniObrasci: React.FC = () => {
                     Završeno
                   </span>
                   <button
+                    onClick={() => handleEdit(obrazac.id)}
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                  </button>
+                  <button
                     onClick={() => handleDownload(obrazac.id)}
                     className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                   >
@@ -157,6 +169,7 @@ const PrethodniObrasci: React.FC = () => {
                   >
                     <PrintIcon className="w-5 h-5" />
                   </button>
+  
                 </div>
               </div>
             ))}

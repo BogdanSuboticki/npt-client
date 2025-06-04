@@ -153,7 +153,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
 
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
-      <div className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 px-4 py-4">
         <div className="flex items-center gap-3">
           <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
           <div className="relative z-20 bg-transparent w-[80px]">
@@ -194,12 +194,12 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:justify-end">
           {/* Radna Mesta Dropdown */}
-          <div className="relative w-full sm:w-auto" ref={radnaMestaRef}>
+          <div className="relative w-full lg:w-auto" ref={radnaMestaRef}>
             <button
               onClick={() => setIsRadnaMestaOpen(!isRadnaMestaOpen)}
-              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg
@@ -227,7 +227,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
               </svg>
             </button>
             {isRadnaMestaOpen && (
-              <div className="absolute z-[100] w-full sm:w-[250px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+              <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                 <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                   <div className="sticky top-0 bg-white dark:bg-gray-800 border-b rounded-tl-xl border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div
@@ -265,10 +265,10 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           </div>
 
           {/* Lokacije Dropdown */}
-          <div className="relative w-full sm:w-auto" ref={lokacijeRef}>
+          <div className="relative w-full lg:w-auto" ref={lokacijeRef}>
             <button
               onClick={() => setIsLokacijeOpen(!isLokacijeOpen)}
-              className="flex items-center justify-between w-full sm:w-[250px] h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
             >
               <div className="flex items-center gap-2">
                 <svg
@@ -296,7 +296,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
               </svg>
             </button>
             {isLokacijeOpen && (
-              <div className="absolute z-[100] w-full sm:w-[250px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+              <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                 <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                   <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-tl-lg">
                     <div

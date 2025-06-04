@@ -71,7 +71,7 @@ const EvidencijaObuceniBezbedan: React.FC = () => {
         EVIDENCIJA O ZAPOSLENIMA OBUČENIM ZA BEZBEDAN I ZDRAV RAD I PRAVILNO KORIŠĆENJE LIČNE ZAŠTITNE OPREME
         </h2>
       </div>
-      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex gap-2">
             <button

@@ -346,7 +346,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                       {i === 0 && (
                         <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={3} style={{verticalAlign: 'middle'}}>Periodični</td>
                       )}
-                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
+                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 min-w-[100px]">
                         <input
                           type="text"
                           className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"

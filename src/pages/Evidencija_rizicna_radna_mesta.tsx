@@ -2,8 +2,13 @@ import React, { useState, useRef } from 'react';
 import { ReactComponent as PrintIcon } from '../icons/Print.svg?react';
 import { ReactComponent as NoviRedIcon } from '../icons/Novi_red.svg?react';
 import { ReactComponent as DownloadIcon } from '../icons/download.svg?react';
+import { ReactComponent as SaveIcon } from '../icons/Save.svg?react';
 import html2pdf from 'html2pdf.js';
 import { Modal } from '../components/ui/modal';
+import { useModal } from '../hooks/useModal';
+import Label from '../components/form/Label';
+import Input from '../components/form/input/InputField';
+import Popover from '../components/ui/popover/Popover';
 
 // Add TableRow type with index signature
 type TableRow = {
@@ -38,6 +43,8 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
+  const { isOpen, openModal, closeModal } = useModal();
+  const [nazivObrasca, setNazivObrasca] = useState('');
 
   const handleCellChange = (rowIdx: number, accessor: keyof TableRow, value: string) => {
     setRows((prev) => {
@@ -149,6 +156,19 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
     html2pdf().set(opt).from(element).save();
   };
 
+  const handleSave = () => {
+    if (!nazivObrasca.trim()) {
+      return;
+    }
+    // Handle save logic here
+    console.log("Saving form with name:", nazivObrasca);
+    closeModal();
+  };
+
+  const handleNazivChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNazivObrasca(e.target.value);
+  };
+
   return (
     <div className="py-8">
       <div className="flex-row md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -159,7 +179,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
         EVIDENCIJA O RADNIM MESTIMA SA POVEĆANIM RIZIKOM, ZAPOSLENIH KOJI OBAVLJAJU POSLOVE NA RADNIM MESTIMA SA POVEĆANIM RIZIKOM I LEKARSKIM PREGLEDIMA ZAPOSLENIH KOJI OBAVLJAJU TE POSLOVE          
         </h2>
       </div>
-      <div className='rounded-lg bg-white dark:bg-[#24303F] shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
+      <div className='rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>
@@ -308,7 +328,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
                       {i === 0 && (
                         <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Periodični</td>
                       )}
-                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
+                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 min-w-[100px]">
                         <input
                           type="text"
                           className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
@@ -323,17 +343,94 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <div className='px-6 py-4'>
-        <button
-          className="px-4 py-2 min-w-full bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
-          onClick={addRow}
-        >
-          <NoviRedIcon className="w-5 h-5" />
-          Novi Red
-        </button>
+        <div className='px-6 py-4 flex gap-2'>
+          <button
+            className="px-4 py-2 flex-1 bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            onClick={addRow}
+          >
+            <NoviRedIcon className="w-5 h-5" />
+            Novi Red
+          </button>
+          <button
+            className="px-4 py-2 flex-1 bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            onClick={openModal}
+          >
+            <SaveIcon className="w-5 h-5" />
+            Sačuvaj
+          </button>
         </div>
       </div>
       
+      {/* Save Modal */}
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        className="max-w-[584px] p-5 lg:p-10"
+      >
+        <form className="" onSubmit={(e) => e.preventDefault()}>
+          <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
+            Sačuvaj obrazac
+          </h4>
+
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5">
+            <div className="col-span-1">
+              <Label>
+                Naziv obrasca
+              </Label>
+              <Input 
+                type="text" 
+                placeholder="Unesite naziv obrasca" 
+                value={nazivObrasca}
+                onChange={handleNazivChange}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end w-full gap-3 mt-6">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="flex justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-theme-xs hover:bg-gray-50 dark:bg-[#101828] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700"
+            >
+              Odustani
+            </button>
+            <Popover
+              position="top"
+              trigger={
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="flex justify-center px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                >
+                  Sačuvaj
+                </button>
+              }
+            >
+              <div className="p-4">
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 text-error-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Molimo unesite naziv obrasca
+                  </p>
+                </div>
+              </div>
+            </Popover>
+          </div>
+        </form>
+      </Modal>
+
       {/* Warning Modal */}
       <Modal
         isOpen={showWarningModal}

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { ReactComponent as PrintIcon } from '../icons/Print.svg?react';
 import { ReactComponent as NoviRedIcon } from '../icons/Novi_red.svg?react';
 import { ReactComponent as DownloadIcon } from '../icons/download.svg?react';
-import { ReactComponent as SaveIcon } from '../icons/Save.svg?react';
+import { ReactComponent as SaveIcon } from '../icons/Save-icon.svg?react';
 import html2pdf from 'html2pdf.js';
 import { Modal } from '../components/ui/modal';
 import { useModal } from '../hooks/useModal';
@@ -175,8 +175,8 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
         Obrazac 1.
         </h1>
-        <h2 className='text-lg text-gray-400 dark:text-white'>
-        EVIDENCIJA O RADNIM MESTIMA SA POVEĆANIM RIZIKOM, ZAPOSLENIH KOJI OBAVLJAJU POSLOVE NA RADNIM MESTIMA SA POVEĆANIM RIZIKOM I LEKARSKIM PREGLEDIMA ZAPOSLENIH KOJI OBAVLJAJU TE POSLOVE          
+        <h2 className='text-lg text-gray-400 dark:text-white mt-2'>
+          Evidencija o radnim mestima sa povećanim rizikom, zaposlenih koji obavlja poslove na radnim mestima sa povećanim rizikom i lekarskim pregledima zaposlenih koji obavlja te poslove
         </h2>
       </div>
       <div className='rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]'>
@@ -185,7 +185,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>
             <div className="relative z-20 bg-transparent w-[80px]">
               <select
-                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
+                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
                 value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               >
@@ -223,14 +223,14 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={handleDownload}
-              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 border border-gray-200"
+              className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
             >
               <DownloadIcon className="w-5 h-5" />
               Preuzmi
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 border border-gray-200"
+              className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
             >
               <PrintIcon className="w-5 h-5" />
               Štampaj
@@ -345,14 +345,14 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
         </div>
         <div className='px-6 py-4 flex gap-2'>
           <button
-            className="px-4 py-2 flex-1 bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            className="px-4 py-2 flex-1 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 border border-gray-200"
             onClick={addRow}
           >
             <NoviRedIcon className="w-5 h-5" />
             Novi Red
           </button>
           <button
-            className="px-4 py-2 flex-1 bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            className="px-4 py-2 flex-1 bg-brand-500 shadow-theme-xs hover:bg-brand-600 text-white dark:text-gray-400 rounded dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
             onClick={openModal}
           >
             <SaveIcon className="w-5 h-5" />

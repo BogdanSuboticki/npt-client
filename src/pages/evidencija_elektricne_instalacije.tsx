@@ -2,8 +2,13 @@ import React, { useState, useRef } from 'react';
 import { ReactComponent as PrintIcon } from '../icons/Print.svg?react';
 import { ReactComponent as DownloadIcon } from '../icons/download.svg?react';
 import { ReactComponent as NoviRedIcon } from '../icons/Novi_red.svg?react';
+import { ReactComponent as SaveIcon } from '../icons/Save-icon.svg?react';
 import html2pdf from 'html2pdf.js';
 import { Modal } from '../components/ui/modal';
+import { useModal } from '../hooks/useModal';
+import Label from '../components/form/Label';
+import Input from '../components/form/input/InputField';
+import Popover from '../components/ui/popover/Popover';
 
 interface TableRow {
   redniBroj: number;
@@ -32,6 +37,8 @@ const EvidencijaElektricneInstalacije: React.FC = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
+  const { isOpen, openModal, closeModal } = useModal();
+  const [nazivObrasca, setNazivObrasca] = useState('');
 
   const handleCellChange = (rowIdx: number, accessor: keyof TableRow, value: string) => {
     setRows((prev) => {
@@ -112,23 +119,36 @@ const EvidencijaElektricneInstalacije: React.FC = () => {
     setItemsPerPage(prev => prev + 1);
   };
 
+  const handleSave = () => {
+    if (!nazivObrasca.trim()) {
+      return;
+    }
+    // Handle save logic here
+    console.log("Saving form with name:", nazivObrasca);
+    closeModal();
+  };
+
+  const handleNazivChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNazivObrasca(e.target.value);
+  };
+
   return (
     <div className="py-8">
       <div className="flex-row md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Obrazac 9.
         </h1>
-        <h2 className="text-lg text-gray-400 dark:text-white">
-          EVIDENCIJA O IZVRŠENIM PREGLEDIMA I ISPITIVANJIMA ELEKTRIČNIH I GROMOBRANSKIH INSTALACIJA
+        <h2 className="text-lg text-gray-400 dark:text-white mt-2">
+          Evidencija o izvršenim pregledima i ispitivanjima elekrtričnih i gromobranskih instalacija
         </h2>
       </div>
       <div className="rounded-lg bg-white dark:bg-gray-800 shadow-[0_0_5px_rgba(0,0,0,0.1)]">
         <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400">Prikaži</span>
-            <div className="relative z-20 bg-transparent w-[80px]">
+            <div className="relative z-20  w-[80px] ">
               <select
-                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
+                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-[#F9FAFB] hover:bg-gray-100 border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
                 value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               >
@@ -166,14 +186,14 @@ const EvidencijaElektricneInstalacije: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={handleDownload}
-              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 border border-gray-200"
+              className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
             >
               <DownloadIcon className="w-5 h-5" />
               Preuzmi
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-white dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2 border border-gray-200"
+              className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
             >
               <PrintIcon className="w-5 h-5" />
               Štampaj
@@ -197,24 +217,25 @@ const EvidencijaElektricneInstalacije: React.FC = () => {
                 <React.Fragment key={idx}>
                   <tr>
                     <td rowSpan={4} className="border border-gray-200 dark:border-white/[0.1] text-center text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3">{row.redniBroj}.</td>
-                    <td rowSpan={4} className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" value={row.podaciInstalacije} onChange={e => handleCellChange(idx, 'podaciInstalacije', e.target.value)} />
+                    <td rowSpan={4} className="border border-gray-200 dark:border-white/[0.1] p-0">
+                        <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.podaciInstalacije} onChange={e => handleCellChange(idx, 'podaciInstalacije', e.target.value)} />
+
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" value={row.brojStrucnogNalaza} onChange={e => handleCellChange(idx, 'brojStrucnogNalaza', e.target.value)} />
+                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
+                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.brojStrucnogNalaza} onChange={e => handleCellChange(idx, 'brojStrucnogNalaza', e.target.value)} />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" value={row.datumPregleda} onChange={e => handleCellChange(idx, 'datumPregleda', e.target.value)} />
+                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
+                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.datumPregleda} onChange={e => handleCellChange(idx, 'datumPregleda', e.target.value)} />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" value={row.datumSledecegPregleda} onChange={e => handleCellChange(idx, 'datumSledecegPregleda', e.target.value)} />
+                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
+                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.datumSledecegPregleda} onChange={e => handleCellChange(idx, 'datumSledecegPregleda', e.target.value)} />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" value={row.napomena} onChange={e => handleCellChange(idx, 'napomena', e.target.value)} />
+                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
+                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.napomena} onChange={e => handleCellChange(idx, 'napomena', e.target.value)} />
                     </td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
+                    <td className="border border-gray-200 dark:border-white/[0.1] px4 py-3">
                       <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
                     </td>
                     <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
@@ -260,13 +281,20 @@ const EvidencijaElektricneInstalacije: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <div className='px-6 py-4'>
+        <div className='px-6 py-4 flex gap-2'>
           <button
-            className="px-4 py-2 min-w-full bg-white dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            className="px-4 py-2 flex-1 bg-[#F9FAFB] dark:bg-[#101828] text-gray-700 dark:text-gray-400 rounded hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
             onClick={addRow}
           >
             <NoviRedIcon className="w-5 h-5" />
             Novi Red
+          </button>
+          <button
+            className="px-4 py-2 flex-1 bg-brand-500 shadow-theme-xs hover:bg-brand-600 text-white dark:text-gray-400 rounded dark:hover:bg-gray-700 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700"
+            onClick={openModal}
+          >
+            <SaveIcon className="w-5 h-5" />
+            Sačuvaj
           </button>
         </div>
         {/* Warning Modal */}
@@ -334,6 +362,73 @@ const EvidencijaElektricneInstalacije: React.FC = () => {
           </div>
         </Modal>
       </div>
+      {/* Save Modal */}
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        className="max-w-[584px] p-5 lg:p-10"
+      >
+        <form className="" onSubmit={(e) => e.preventDefault()}>
+          <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
+            Sačuvaj obrazac
+          </h4>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5">
+            <div className="col-span-1">
+              <Label>
+                Naziv obrasca
+              </Label>
+              <Input 
+                type="text" 
+                placeholder="Unesite naziv obrasca" 
+                value={nazivObrasca}
+                onChange={handleNazivChange}
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-end w-full gap-3 mt-6">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="flex justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-theme-xs hover:bg-gray-50 dark:bg-[#101828] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700"
+            >
+              Odustani
+            </button>
+            <Popover
+              position="top"
+              trigger={
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="flex justify-center px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                >
+                  Sačuvaj
+                </button>
+              }
+            >
+              <div className="p-4">
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 text-error-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Molimo unesite naziv obrasca
+                  </p>
+                </div>
+              </div>
+            </Popover>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

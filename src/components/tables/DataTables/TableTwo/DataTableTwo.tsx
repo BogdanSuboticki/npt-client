@@ -154,183 +154,185 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
       <div className="flex flex-col gap-4 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
-          <div className="relative z-20 bg-transparent w-[80px]">
-            <select
-              className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            >
-              {[10, 20, 50, 100].map((value) => (
-                <option
-                  key={value}
-                  value={value}
-                  className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
-                >
-                  {value}
-                </option>
-              ))}
-            </select>
-            <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
-              <svg
-                className="stroke-current"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
+            <div className="relative z-20 bg-transparent w-[80px]">
+              <select
+                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
               >
-                <path
-                  d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
-                  stroke=""
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                {[10, 20, 50, 100].map((value) => (
+                  <option
+                    key={value}
+                    value={value}
+                    className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
+                  >
+                    {value}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
+                <svg
+                  className="stroke-current"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
+                    stroke=""
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
             </div>
+            <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
           </div>
-          <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
-        </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:justify-end">
-          {/* Radna Mesta Dropdown */}
-          <div className="relative w-full lg:w-auto" ref={radnaMestaRef}>
-            <button
-              onClick={() => setIsRadnaMestaOpen(!isRadnaMestaOpen)}
-              className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-            >
-              <div className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Radna Mesta Dropdown */}
+            <div className="relative w-full lg:w-auto" ref={radnaMestaRef}>
+              <button
+                onClick={() => setIsRadnaMestaOpen(!isRadnaMestaOpen)}
+                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Prikazana radna mesta</span>
+                </div>
                 <svg
-                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  className={`w-4 h-4 transition-transform ${isRadnaMestaOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-                <span>Prikazana radna mesta</span>
-              </div>
-              <svg
-                className={`w-4 h-4 transition-transform ${isRadnaMestaOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {isRadnaMestaOpen && (
-              <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                  <div className="sticky top-0 bg-white dark:bg-gray-800 border-b rounded-tl-xl border-gray-200 dark:border-gray-700 rounded-tl-lg">
-                    <div
-                      className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
-                      onClick={handleSelectAllRadnaMesta}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedRadnaMesta.length === uniqueRadnaMesta.length}
-                        onChange={handleSelectAllRadnaMesta}
-                        className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                      />
-                      <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
+              </button>
+              {isRadnaMestaOpen && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    <div className="sticky top-0 bg-white dark:bg-gray-800 border-b rounded-tl-xl border-gray-200 dark:border-gray-700 rounded-tl-lg">
+                      <div
+                        className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                        onClick={handleSelectAllRadnaMesta}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRadnaMesta.length === uniqueRadnaMesta.length}
+                          onChange={handleSelectAllRadnaMesta}
+                          className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
+                      </div>
                     </div>
+                    {uniqueRadnaMesta.map((radnoMesto, index) => (
+                      <label
+                        key={radnoMesto}
+                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                          index === uniqueRadnaMesta.length - 1 ? 'rounded-bl-lg' : ''
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRadnaMesta.includes(radnoMesto)}
+                          onChange={() => handleRadnaMestaChange(radnoMesto)}
+                          className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                        />
+                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{radnoMesto}</span>
+                      </label>
+                    ))}
                   </div>
-                  {uniqueRadnaMesta.map((radnoMesto, index) => (
-                    <label
-                      key={radnoMesto}
-                      className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                        index === uniqueRadnaMesta.length - 1 ? 'rounded-bl-lg' : ''
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedRadnaMesta.includes(radnoMesto)}
-                        onChange={() => handleRadnaMestaChange(radnoMesto)}
-                        className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{radnoMesto}</span>
-                    </label>
-                  ))}
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Lokacije Dropdown */}
-          <div className="relative w-full lg:w-auto" ref={lokacijeRef}>
-            <button
-              onClick={() => setIsLokacijeOpen(!isLokacijeOpen)}
-              className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-            >
-              <div className="flex items-center gap-2">
+            {/* Lokacije Dropdown */}
+            <div className="relative w-full lg:w-auto" ref={lokacijeRef}>
+              <button
+                onClick={() => setIsLokacijeOpen(!isLokacijeOpen)}
+                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Prikazane lokacije</span>
+                </div>
                 <svg
-                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  className={`w-4 h-4 transition-transform ${isLokacijeOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-                <span>Prikazane lokacije</span>
-              </div>
-              <svg
-                className={`w-4 h-4 transition-transform ${isLokacijeOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {isLokacijeOpen && (
-              <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                  <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-tl-lg">
-                    <div
-                      className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
-                      onClick={handleSelectAllLokacije}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedLokacije.length === uniqueLokacije.length}
-                        onChange={handleSelectAllLokacije}
-                        className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                      />
-                      <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
+              </button>
+              {isLokacijeOpen && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-tl-lg">
+                      <div
+                        className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                        onClick={handleSelectAllLokacije}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedLokacije.length === uniqueLokacije.length}
+                          onChange={handleSelectAllLokacije}
+                          className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
+                      </div>
                     </div>
+                    {uniqueLokacije.map((lokacija, index) => (
+                      <label
+                        key={lokacija}
+                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                          index === uniqueLokacije.length - 1 ? 'rounded-bl-lg' : ''
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedLokacije.includes(lokacija)}
+                          onChange={() => handleLokacijeChange(lokacija)}
+                          className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                        />
+                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{lokacija}</span>
+                      </label>
+                    ))}
                   </div>
-                  {uniqueLokacije.map((lokacija, index) => (
-                    <label
-                      key={lokacija}
-                      className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                        index === uniqueLokacije.length - 1 ? 'rounded-bl-lg' : ''
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedLokacije.includes(lokacija)}
-                        onChange={() => handleLokacijeChange(lokacija)}
-                        className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{lokacija}</span>
-                    </label>
-                  ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

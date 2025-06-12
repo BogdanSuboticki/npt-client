@@ -40,6 +40,7 @@ import EmailInbox from "./pages/Email/EmailInbox";
 import EmailDetails from "./pages/Email/EmailDetails";
 import Obrasci from "./pages/Obrasci";
 import PrethodniObrasci from "./pages/Prethodni_obrasci";
+import Osposobljavanje from "./pages/osposobljavanje/Osposobljavanje";
 
 import TaskKanban from "./pages/Task/TaskKanban";
 import BreadCrumb from "./pages/UiElements/BreadCrumb";
@@ -98,6 +99,7 @@ export default function App() {
             <Route path="/blank" element={<Blank />} />
             <Route path="/obrasci" element={<Obrasci />} />
             <Route path="/prethodni-obrasci" element={<PrethodniObrasci />} />
+            <Route path="/osposobljavanje" element={<Osposobljavanje />} />
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />

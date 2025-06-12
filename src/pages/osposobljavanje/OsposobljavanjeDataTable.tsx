@@ -268,7 +268,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
               {isZaposleniOpen && (
                 <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                   <div className="max-h-60 overflow-y-auto">
-                    <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="sticky top-0 bg-white rounded-t-lg dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                       <div
                         className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={handleSelectAllZaposleni}
@@ -302,13 +302,14 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
             </div>
 
             {/* Date Range */}
-            <div className="flex items-center gap-2">
-              <div className="relative">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
+              <div className="relative w-full">
                 <DatePicker
                   selected={dateFrom}
                   onChange={(date) => setDateFrom(date)}
                   placeholderText="Datum od"
-                  className="w-32 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                  className="w-full h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                  wrapperClassName="w-full"
                 />
                 <svg
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none"
@@ -324,12 +325,13 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                   />
                 </svg>
               </div>
-              <div className="relative">
+              <div className="relative w-full">
                 <DatePicker
                   selected={dateTo}
                   onChange={(date) => setDateTo(date)}
                   placeholderText="Datum do"
-                  className="w-32 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                  className="w-full h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                  wrapperClassName="w-full"
                 />
                 <svg
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none"

@@ -45,7 +45,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
     >
       <form onSubmit={handleSubmit}>
         <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
-          Novi Unos Osposobljavanja
+          Novo Osposobljavanje
         </h4>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">

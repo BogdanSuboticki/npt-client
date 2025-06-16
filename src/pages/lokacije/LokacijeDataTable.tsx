@@ -7,10 +7,11 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../../../ui/table";
-import { OpremaDugmevIcon, EditButtonIcon, DeleteButtonIcon } from "../../../../icons";
-import PaginationWithTextAndIcon from "../../../ui/pagination/PaginationWithTextAndIcon";
-import FilterDropdown from "../../../ui/dropdown/FilterDropdown";
+} from "../../components/ui/table";
+import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
+import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
+import Checkbox from "../../components/form/input/Checkbox";
+import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 
 interface Column {
   key: string;
@@ -18,50 +19,82 @@ interface Column {
   sortable: boolean;
 }
 
+interface LokacijeData {
+  id: number;
+  redniBroj: number;
+  nazivLokacije: string;
+  brojMernihMesta: number;
+  organizacionaJedinica: string;
+  [key: string]: any;
+}
+
 interface DataTableTwoProps {
-  data: any[];
+  data: LokacijeData[];
   columns: Column[];
 }
 
-export default function DataTableTwo({ data: initialData, columns }: DataTableTwoProps) {
+export default function LokacijeDataTable({ data: initialData, columns }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
+  const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [data, setData] = useState<LokacijeData[]>(initialData);
   
-  // Get unique values for dropdowns
-  const uniqueRadnaMesta = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.nazivRadnogMesta)));
-  }, [initialData]);
+  // Filter states
+  const [nazivLokacije, setNazivLokacije] = useState("");
+  const [brojMernihMesta, setBrojMernihMesta] = useState("");
+  const [selectedOrganizacionaJedinica, setSelectedOrganizacionaJedinica] = useState<string[]>([]);
 
-  const uniqueLokacije = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.nazivLokacije)));
-  }, [initialData]);
+  // Get unique organizational units for dropdown
+  const uniqueOrganizacioneJedinice = useMemo(() => {
+    try {
+      return Array.from(new Set(data?.map(item => item.organizacionaJedinica) || []));
+    } catch (error) {
+      console.error('Error getting unique organizational units:', error);
+      return [];
+    }
+  }, [data]);
 
-  // Initialize with all items selected
-  const [selectedRadnaMesta, setSelectedRadnaMesta] = useState<string[]>(uniqueRadnaMesta);
-  const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
-
+  // Safe data processing
   const filteredAndSortedData = useMemo(() => {
-    return initialData
-      .filter((item) => {
-        // If no items are selected in either filter, show no results
-        if (selectedRadnaMesta.length === 0 || selectedLokacije.length === 0) {
-          return false;
-        }
-        const matchesRadnaMesta = selectedRadnaMesta.includes(item.nazivRadnogMesta);
-        const matchesLokacije = selectedLokacije.includes(item.nazivLokacije);
-        return matchesRadnaMesta && matchesLokacije;
-      })
-      .sort((a, b) => {
-        if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
-          return sortOrder === "asc" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
-        }
-        return sortOrder === "asc"
-          ? String(a[sortKey]).localeCompare(String(b[sortKey]))
-          : String(b[sortKey]).localeCompare(String(a[sortKey]));
-      });
-  }, [sortKey, sortOrder, selectedRadnaMesta, selectedLokacije, initialData]);
+    try {
+      if (!data) return [];
+
+      return data
+        .filter((item) => {
+          try {
+            const matchesNaziv = item.nazivLokacije.toLowerCase().includes(nazivLokacije.toLowerCase());
+            const matchesBroj = !brojMernihMesta || item.brojMernihMesta.toString().includes(brojMernihMesta);
+            const matchesJedinica = selectedOrganizacionaJedinica.length === 0 || selectedOrganizacionaJedinica.includes(item.organizacionaJedinica);
+
+            return matchesNaziv && matchesBroj && matchesJedinica;
+          } catch (error) {
+            console.error('Error filtering item:', error);
+            return false;
+          }
+        })
+        .sort((a, b) => {
+          try {
+            const aValue = a[sortKey];
+            const bValue = b[sortKey];
+            
+            if (typeof aValue === "number" && typeof bValue === "number") {
+              return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+            }
+            
+            return sortOrder === "asc"
+              ? String(aValue).localeCompare(String(bValue))
+              : String(bValue).localeCompare(String(aValue));
+          } catch (error) {
+            console.error('Error sorting items:', error);
+            return 0;
+          }
+        });
+    } catch (error) {
+      console.error('Error processing data:', error);
+      return [];
+    }
+  }, [data, sortKey, sortOrder, nazivLokacije, brojMernihMesta, selectedOrganizacionaJedinica]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -83,6 +116,16 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
+  const handleCheckboxChange = (id: number) => {
+    setData(prevData => 
+      prevData.map(item => 
+        item.id === id 
+          ? { ...item, iskljucenaIzPracenja: !item.iskljucenaIzPracenja }
+          : item
+      )
+    );
+  };
+
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
       <div className="flex flex-col gap-4 px-4 py-4">
@@ -99,27 +142,24 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                   <option
                     key={value}
                     value={value}
-                    className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
+                    className="text-gray-500 dark:bg-[#101828] dark:text-gray-400"
                   >
                     {value}
                   </option>
                 ))}
               </select>
-              <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                 <svg
-                  className="stroke-current"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
+                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
-                    stroke=""
-                    strokeWidth="1.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
                   />
                 </svg>
               </div>
@@ -128,18 +168,29 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <FilterDropdown
-              label="Prikazana radna mesta"
-              options={uniqueRadnaMesta}
-              selectedOptions={selectedRadnaMesta}
-              onSelectionChange={setSelectedRadnaMesta}
-            />
-            <FilterDropdown
-              label="Prikazane lokacije"
-              options={uniqueLokacije}
-              selectedOptions={selectedLokacije}
-              onSelectionChange={setSelectedLokacije}
-            />
+            {/* Filters */}
+            <div className="flex flex-col lg:flex-row gap-2">
+              <input
+                type="text"
+                placeholder="Naziv lokacije"
+                value={nazivLokacije}
+                onChange={(e) => setNazivLokacije(e.target.value)}
+                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+              />
+              <input
+                type="number"
+                placeholder="Broj mernih mesta"
+                value={brojMernihMesta}
+                onChange={(e) => setBrojMernihMesta(e.target.value)}
+                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+              />
+              <FilterDropdown
+                label="Organizaciona jedinica"
+                options={uniqueOrganizacioneJedinice}
+                selectedOptions={selectedOrganizacionaJedinica}
+                onSelectionChange={setSelectedOrganizacionaJedinica}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -157,7 +208,11 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                       index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                     }`}
                   >
-                    {sortable ? (
+                    {key === 'redniBroj' ? (
+                      <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                        &nbsp;
+                      </p>
+                    ) : sortable ? (
                       <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => handleSort(key)}
@@ -221,23 +276,28 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                     <TableCell
                       key={key}
                       className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                        key === 'nazivRadnogMesta' ? 'font-medium' : 'font-normal'
-                      } ${index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''}`}
+                        index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
+                      }`}
                     >
-                      {item[key]}
+                      {key === 'iskljucenaIzPracenja' ? (
+                        <Checkbox
+                          checked={item[key]}
+                          onChange={() => handleCheckboxChange(item.id)}
+                          className="w-4 h-4"
+                        />
+                      ) : (
+                        item[key]
+                      )}
                     </TableCell>
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                        <OpremaDugmevIcon className="size-5" />
+                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                        <EditButtonIcon className="size-4" />
                       </button>
                       <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
                         <DeleteButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button> 
                     </div>
                   </TableCell>
                 </TableRow>
@@ -263,4 +323,4 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
       </div>
     </div>
   );
-}
+} 

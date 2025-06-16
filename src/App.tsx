@@ -1,4 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { srLatn } from "date-fns/locale";
 import Ecommerce from "./pages/Dashboard/Ecommerce";
 import Stocks from "./pages/Dashboard/Stocks";
 import Crm from "./pages/Dashboard/Crm";
@@ -41,6 +44,8 @@ import EmailDetails from "./pages/Email/EmailDetails";
 import Obrasci from "./pages/Obrasci";
 import PrethodniObrasci from "./pages/Prethodni_obrasci";
 import Osposobljavanje from "./pages/osposobljavanje/Osposobljavanje";
+import Oprema from "./pages/oprema/Oprema";
+import Lokacije from "./pages/lokacije/Lokacije";
 
 import TaskKanban from "./pages/Task/TaskKanban";
 import BreadCrumb from "./pages/UiElements/BreadCrumb";
@@ -77,7 +82,7 @@ import EvidencijaZastitnaOprema from "./pages/evidencija_zastitna_oprema";
 
 export default function App() {
   return (
-    <>
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={srLatn}>
       <Router>
         <ScrollToTop />
         <Routes>
@@ -100,6 +105,8 @@ export default function App() {
             <Route path="/obrasci" element={<Obrasci />} />
             <Route path="/prethodni-obrasci" element={<PrethodniObrasci />} />
             <Route path="/osposobljavanje" element={<Osposobljavanje />} />
+            <Route path="/oprema" element={<Oprema />} />
+            <Route path="/lokacije" element={<Lokacije />} />
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
@@ -182,6 +189,6 @@ export default function App() {
           <Route path="/coming-soon" element={<ComingSoon />} />
         </Routes>
       </Router>
-    </>
+    </LocalizationProvider>
   );
 }

@@ -46,6 +46,8 @@ import PrethodniObrasci from "./pages/Prethodni_obrasci";
 import Osposobljavanje from "./pages/osposobljavanje/Osposobljavanje";
 import Oprema from "./pages/oprema/Oprema";
 import Lokacije from "./pages/lokacije/Lokacije";
+import LekarskiPreglediPage from "./pages/lekarski-pregledi/page";
+import IspitivanjeRadneSredine from "./pages/ispitivanje-radne-sredine/page";
 
 import TaskKanban from "./pages/Task/TaskKanban";
 import BreadCrumb from "./pages/UiElements/BreadCrumb";
@@ -94,6 +96,8 @@ export default function App() {
             <Route path="/crm" element={<Crm />} />
             <Route path="/stocks" element={<Stocks />} />
             <Route path="/saas" element={<Saas />} />
+            <Route path="/lekarski-pregledi" element={<LekarskiPreglediPage />} />
+            <Route path="/ispitivanje-radne-sredine" element={<IspitivanjeRadneSredine />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo} from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -45,13 +45,16 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [data, setData] = useState<OpremaData[]>(initialData);
   
-  // Filter states
-  const [nazivOpreme, setNazivOpreme] = useState("");
-  const [fabrickBroj, setFabrickBroj] = useState("");
-  const [inventarniBroj, setInventarniBroj] = useState("");
-  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  // Get unique values for dropdowns
+  const uniqueNaziviOpreme = useMemo(() => {
+    try {
+      return Array.from(new Set(data?.map(item => item.nazivOpreme) || []));
+    } catch (error) {
+      console.error('Error getting unique equipment names:', error);
+      return [];
+    }
+  }, [data]);
 
-  // Get unique years for dropdown
   const uniqueYears = useMemo(() => {
     try {
       return Array.from(new Set(data?.map(item => item.godinaProizvodnje) || [])).map(String);
@@ -61,6 +64,18 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
     }
   }, [data]);
 
+  // Set all as selected by default
+  const [selectedNazivOpreme, setSelectedNazivOpreme] = useState<string[]>(uniqueNaziviOpreme);
+  const [selectedYears, setSelectedYears] = useState<string[]>(uniqueYears);
+
+  // Update selected options if unique values change
+  useEffect(() => {
+    setSelectedNazivOpreme(uniqueNaziviOpreme);
+  }, [uniqueNaziviOpreme]);
+  useEffect(() => {
+    setSelectedYears(uniqueYears);
+  }, [uniqueYears]);
+
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
     try {
@@ -69,12 +84,10 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
       return data
         .filter((item) => {
           try {
-            const matchesNaziv = item.nazivOpreme.toLowerCase().includes(nazivOpreme.toLowerCase());
-            const matchesFabrick = item.fabrickBroj.toLowerCase().includes(fabrickBroj.toLowerCase());
-            const matchesInventarni = item.inventarniBroj.toLowerCase().includes(inventarniBroj.toLowerCase());
+            const matchesNaziv = selectedNazivOpreme.length === 0 || selectedNazivOpreme.includes(item.nazivOpreme);
             const matchesGodina = selectedYears.length === 0 || selectedYears.includes(String(item.godinaProizvodnje));
 
-            return matchesNaziv && matchesFabrick && matchesInventarni && matchesGodina;
+            return matchesNaziv && matchesGodina;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -101,7 +114,7 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, nazivOpreme, fabrickBroj, inventarniBroj, selectedYears]);
+  }, [data, sortKey, sortOrder, selectedNazivOpreme, selectedYears]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -177,26 +190,11 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Filters */}
             <div className="flex flex-col lg:flex-row gap-2">
-              <input
-                type="text"
-                placeholder="Naziv opreme"
-                value={nazivOpreme}
-                onChange={(e) => setNazivOpreme(e.target.value)}
-                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-              />
-              <input
-                type="text"
-                placeholder="Fabrički broj"
-                value={fabrickBroj}
-                onChange={(e) => setFabrickBroj(e.target.value)}
-                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-              />
-              <input
-                type="text"
-                placeholder="Inventarni broj"
-                value={inventarniBroj}
-                onChange={(e) => setInventarniBroj(e.target.value)}
-                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+              <FilterDropdown
+                label="Naziv opreme"
+                options={uniqueNaziviOpreme}
+                selectedOptions={selectedNazivOpreme}
+                onSelectionChange={setSelectedNazivOpreme}
               />
               <FilterDropdown
                 label="Godina proizvodnje"
@@ -222,17 +220,13 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
                       index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                     }`}
                   >
-                    {key === 'redniBroj' ? (
-                      <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                        &nbsp;
-                      </p>
-                    ) : sortable ? (
+                    {sortable ? (
                       <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => handleSort(key)}
                       >
                         <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                          {label}
+                          {index === 0 ? '' : label}
                         </p>
                         <button className="flex flex-col gap-0.5">
                           <svg
@@ -269,7 +263,7 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
                       </div>
                     ) : (
                       <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                        {label}
+                        {index === 0 ? '' : label}
                       </p>
                     )}
                   </TableCell>

@@ -73,7 +73,7 @@ const navItems: NavItem[] = [
   {
     icon: <IspitivanjeSredineIcon />,
     name: "Ispitivanje sredine",
-    path: "/ispitivanje-sredine",
+    path: "/ispitivanje-radne-sredine",
   },
   {
     icon: <BezbednosnePromeneIcon />,
@@ -174,7 +174,7 @@ const supportItems: NavItem[] = [
   {
     icon: <IspitivanjeSredineIcon />,
     name: "Ispitivanje sredine",
-    path: "/ispitivanje-sredine",
+    path: "/ispitivanje-radne-sredine",
   },
   {
     icon: <BezbednosnePromeneIcon />,

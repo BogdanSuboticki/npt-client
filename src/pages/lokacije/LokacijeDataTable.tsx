@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -40,12 +40,16 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [data, setData] = useState<LokacijeData[]>(initialData);
   
-  // Filter states
-  const [nazivLokacije, setNazivLokacije] = useState("");
-  const [brojMernihMesta, setBrojMernihMesta] = useState("");
-  const [selectedOrganizacionaJedinica, setSelectedOrganizacionaJedinica] = useState<string[]>([]);
+  // Get unique values for dropdowns
+  const uniqueNaziviLokacija = useMemo(() => {
+    try {
+      return Array.from(new Set(data?.map(item => item.nazivLokacije) || []));
+    } catch (error) {
+      console.error('Error getting unique location names:', error);
+      return [];
+    }
+  }, [data]);
 
-  // Get unique organizational units for dropdown
   const uniqueOrganizacioneJedinice = useMemo(() => {
     try {
       return Array.from(new Set(data?.map(item => item.organizacionaJedinica) || []));
@@ -55,6 +59,18 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
     }
   }, [data]);
 
+  // Set all as selected by default
+  const [selectedNazivLokacije, setSelectedNazivLokacije] = useState<string[]>(uniqueNaziviLokacija);
+  const [selectedOrganizacionaJedinica, setSelectedOrganizacionaJedinica] = useState<string[]>(uniqueOrganizacioneJedinice);
+
+  // Update selected options if unique values change
+  useEffect(() => {
+    setSelectedNazivLokacije(uniqueNaziviLokacija);
+  }, [uniqueNaziviLokacija]);
+  useEffect(() => {
+    setSelectedOrganizacionaJedinica(uniqueOrganizacioneJedinice);
+  }, [uniqueOrganizacioneJedinice]);
+
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
     try {
@@ -63,11 +79,10 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
       return data
         .filter((item) => {
           try {
-            const matchesNaziv = item.nazivLokacije.toLowerCase().includes(nazivLokacije.toLowerCase());
-            const matchesBroj = !brojMernihMesta || item.brojMernihMesta.toString().includes(brojMernihMesta);
+            const matchesNaziv = selectedNazivLokacije.length === 0 || selectedNazivLokacije.includes(item.nazivLokacije);
             const matchesJedinica = selectedOrganizacionaJedinica.length === 0 || selectedOrganizacionaJedinica.includes(item.organizacionaJedinica);
 
-            return matchesNaziv && matchesBroj && matchesJedinica;
+            return matchesNaziv && matchesJedinica;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -94,7 +109,7 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, nazivLokacije, brojMernihMesta, selectedOrganizacionaJedinica]);
+  }, [data, sortKey, sortOrder, selectedNazivLokacije, selectedOrganizacionaJedinica]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -170,19 +185,11 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Filters */}
             <div className="flex flex-col lg:flex-row gap-2">
-              <input
-                type="text"
-                placeholder="Naziv lokacije"
-                value={nazivLokacije}
-                onChange={(e) => setNazivLokacije(e.target.value)}
-                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-              />
-              <input
-                type="number"
-                placeholder="Broj mernih mesta"
-                value={brojMernihMesta}
-                onChange={(e) => setBrojMernihMesta(e.target.value)}
-                className="w-full lg:w-48 h-11 pl-4 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+              <FilterDropdown
+                label="Naziv lokacije"
+                options={uniqueNaziviLokacija}
+                selectedOptions={selectedNazivLokacije}
+                onSelectionChange={setSelectedNazivLokacije}
               />
               <FilterDropdown
                 label="Organizaciona jedinica"
@@ -208,17 +215,13 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
                       index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                     }`}
                   >
-                    {key === 'redniBroj' ? (
-                      <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                        &nbsp;
-                      </p>
-                    ) : sortable ? (
+                    {sortable ? (
                       <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => handleSort(key)}
                       >
                         <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                          {label}
+                          {index === 0 ? '' : label}
                         </p>
                         <button className="flex flex-col gap-0.5">
                           <svg
@@ -255,7 +258,7 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
                       </div>
                     ) : (
                       <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                        {label}
+                        {index === 0 ? '' : label}
                       </p>
                     )}
                   </TableCell>

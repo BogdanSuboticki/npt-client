@@ -106,8 +106,8 @@ export default function PaginationWithTextAndIcon({ currentPage, totalPages, onP
       <button
         onClick={handlePrevious}
         disabled={currentPage === 1}
-        className={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5 ${
-          currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+        className={`flex items-center gap-2 rounded-lg border border-gray-300 px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-brand-500 hover:text-white dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5 ${
+          currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-white dark:bg-[#101828]' : 'bg-[#F9FAFB] dark:bg-[#101828]'
         }`}
       >
         <svg
@@ -140,8 +140,8 @@ export default function PaginationWithTextAndIcon({ currentPage, totalPages, onP
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages}
-        className={`flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5 ${
-          currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+        className={`flex items-center gap-2 rounded-lg border border-gray-300 px-2 py-2 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-brand-500 hover:text-white dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 sm:px-3.5 sm:py-2.5 ${
+          currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-white dark:bg-[#101828]' : 'bg-[#F9FAFB] dark:bg-[#101828]'
         }`}
       >
         <span className="hidden sm:inline"> Sledeće </span>

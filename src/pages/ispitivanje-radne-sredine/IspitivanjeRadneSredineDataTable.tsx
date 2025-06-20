@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -13,7 +13,6 @@ import PaginationWithTextAndIcon from "../../components/ui/pagination/Pagination
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { sr } from "date-fns/locale";
-import Checkbox from "../../components/form/input/Checkbox";
 import { useTheme } from "../../context/ThemeContext";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -24,23 +23,19 @@ interface Column {
   sortable: boolean;
 }
 
-interface OsposobljavanjeData {
+interface IspitivanjeData {
   id: number;
-  zaposleni: string;
-  radnoMesto: string;
-  lokacija: string;
-  povecanRizik: boolean;
-  osposobljavanjeBZR: string;
-  datumNarednogBZR: string;
-  osposobljavanjeZOP: string;
-  datumNarednogZOP: string;
-  prikaziUPodsetniku: boolean;
-  bzrOdradjeno: boolean;
+  redniBroj: number;
+  nazivLokacije: string;
+  nazivObjekta: string;
+  brojMernihMesta: number;
+  intervalIspitivanja: string;
+  napomena: string;
   [key: string]: any;
 }
 
-interface DataTableTwoProps {
-  data: OsposobljavanjeData[];
+interface DataTableProps {
+  data: IspitivanjeData[];
   columns: Column[];
 }
 
@@ -59,47 +54,17 @@ const formatDate = (dateStr: string | null | undefined): string => {
   }
 };
 
-export default function OsposobljavanjeDataTable({ data: initialData, columns }: DataTableTwoProps) {
+export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns }: DataTableProps) {
   const { theme: appTheme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [data, setData] = useState<OsposobljavanjeData[]>(initialData);
+  const [data] = useState<IspitivanjeData[]>(initialData);
   const [isFromOpen, setIsFromOpen] = useState(false);
   const [isToOpen, setIsToOpen] = useState(false);
-  
-  // Get unique values for dropdowns with safe defaults
-  const uniqueZaposleni = useMemo(() => {
-    try {
-      return Array.from(new Set(data?.map(item => item.zaposleni) || []));
-    } catch (error) {
-      console.error('Error getting unique zaposleni:', error);
-      return [];
-    }
-  }, [data]);
-
-  // Initialize filter states with safe defaults
-  const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
-  const [selectedOsposobljavanje, setSelectedOsposobljavanje] = useState<{ bzr: boolean; zop: boolean }>({ bzr: true, zop: true });
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
-
-  // Dropdown refs
-  const zaposleniRef = useRef<HTMLDivElement>(null);
-  const [isZaposleniOpen, setIsZaposleniOpen] = useState(false);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (zaposleniRef.current && !zaposleniRef.current.contains(event.target as Node)) {
-        setIsZaposleniOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
@@ -109,15 +74,10 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
       return data
         .filter((item) => {
           try {
-            const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
-            const matchesOsposobljavanje = 
-              (selectedOsposobljavanje.bzr && item.osposobljavanjeBZR) ||
-              (selectedOsposobljavanje.zop && item.osposobljavanjeZOP);
-            
-            const matchesDateRange = (!dateFrom || new Date(item.osposobljavanjeBZR) >= dateFrom) &&
-                                   (!dateTo || new Date(item.osposobljavanjeBZR) <= dateTo);
+            const matchesDateRange = (!dateFrom || new Date(item.datumIspitivanja) >= dateFrom) &&
+                                   (!dateTo || new Date(item.datumIspitivanja) <= dateTo);
 
-            return matchesZaposleni && matchesOsposobljavanje && matchesDateRange;
+            return matchesDateRange;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -128,7 +88,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
             const aValue = a[sortKey];
             const bValue = b[sortKey];
             
-            if (sortKey.includes('datum') || sortKey.includes('osposobljavanje')) {
+            if (sortKey.includes('datum')) {
               const aDate = new Date(aValue);
               const bDate = new Date(bValue);
               return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
@@ -150,7 +110,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, selectedZaposleni, selectedOsposobljavanje, dateFrom, dateTo]);
+  }, [data, sortKey, sortOrder, dateFrom, dateTo]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -168,36 +128,9 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
     }
   };
 
-  const handleSelectAllZaposleni = () => {
-    if (selectedZaposleni.length === uniqueZaposleni.length) {
-      setSelectedZaposleni([]);
-    } else {
-      setSelectedZaposleni([...uniqueZaposleni]);
-    }
-  };
-
-  const handleZaposleniChange = (value: string) => {
-    setSelectedZaposleni(prev => {
-      const newSelection = prev.includes(value)
-        ? prev.filter(item => item !== value)
-        : [...prev, value];
-      return newSelection.length === 0 ? [] : newSelection;
-    });
-  };
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const handleCheckboxChange = (id: number, field: 'prikaziUPodsetniku' | 'bzrOdradjeno') => {
-    setData(prevData => 
-      prevData.map(item => 
-        item.id === id 
-          ? { ...item, [field]: !item[field] }
-          : item
-      )
-    );
-  };
 
   // Create theme based on app theme
   const muiTheme = createTheme({
@@ -250,73 +183,6 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
               </div>
 
               <div className="flex flex-col lg:flex-row gap-4">
-                {/* Zaposleni Dropdown */}
-                <div className="relative w-full lg:w-48" ref={zaposleniRef}>
-                  <button
-                    onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
-                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                  >
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                      <span>Zaposleni</span>
-                    </div>
-                    <svg
-                      className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''} ml-1`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isZaposleniOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                      <div className="max-h-60 overflow-y-auto">
-                        <div className="sticky top-0 bg-white rounded-t-lg dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                          <div
-                            className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                            onClick={handleSelectAllZaposleni}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedZaposleni.length === uniqueZaposleni.length}
-                              onChange={handleSelectAllZaposleni}
-                              className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                            />
-                            <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
-                          </div>
-                        </div>
-                        {uniqueZaposleni.map((zaposleni) => (
-                          <label
-                            key={zaposleni}
-                            className="flex items-start px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedZaposleni.includes(zaposleni)}
-                              onChange={() => handleZaposleniChange(zaposleni)}
-                              className="w-4 h-4 mt-0.5 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 flex-shrink-0"
-                            />
-                            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 break-words">{zaposleni}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 {/* Date Range */}
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
                   <div className="relative w-full lg:w-42">
@@ -352,7 +218,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                               backgroundColor: '#F9FAFB',
                             },
                             endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                              <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             ),
                           },
                         },
@@ -393,7 +259,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                               backgroundColor: '#F9FAFB',
                             },
                             endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                              <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             ),
                           },
                         },
@@ -402,31 +268,9 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                     />
                   </div>
                 </div>
-                {/* Osposobljavanje Checkboxes */}
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center">
-                    <Checkbox
-                      checked={selectedOsposobljavanje.bzr}
-                      onChange={(checked) => setSelectedOsposobljavanje(prev => ({ ...prev, bzr: checked }))}
-                      className="w-4 h-4"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">BZR</span>
-                  </label>
-                  <label className="flex items-center">
-                    <Checkbox
-                      checked={selectedOsposobljavanje.zop}
-                      onChange={(checked) => setSelectedOsposobljavanje(prev => ({ ...prev, zop: checked }))}
-                      className="w-4 h-4"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">ZOP</span>
-                  </label>
-                </div>
               </div>
-              
             </div>
-            
           </div>
-          
 
           <div className="max-w-full overflow-x-auto custom-scrollbar">
             <div className="min-h-[200px]">
@@ -494,7 +338,6 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                       className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0"
                     >
                       <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-
                       </p>
                     </TableCell>
                   </TableRow>
@@ -509,42 +352,19 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                             index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                           }`}
                         >
-                          {key === 'povecanRizik' ? (
-                            item[key] ? 'DA' : 'NE'
-                          ) : key === 'bzrOdradjeno' ? (
-                            <Checkbox
-                              checked={item[key]}
-                              onChange={() => handleCheckboxChange(item.id, 'bzrOdradjeno')}
-                              className="w-4 h-4"
-                            />
-                          ) : key === 'datumNarednogBZR' || key === 'osposobljavanjeBZR' || key === 'osposobljavanjeZOP' || key === 'datumNarednogZOP' ? (
-                            <div className="flex items-center">
-                              <span className="flex-1">{formatDate(item[key])}</span>
-                              {key === 'datumNarednogBZR' && (
-                                <div className="w-[40px] flex justify-center">
-                                  <Checkbox
-                                    checked={item.prikaziUPodsetniku}
-                                    onChange={() => handleCheckboxChange(item.id, 'prikaziUPodsetniku')}
-                                    className="w-4 h-4"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            item[key]
-                          )}
+                          {key.includes('datum') ? formatDate(item[key]) : item[key]}
                         </TableCell>
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
                           <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                            <LightbulbIcon className="size-5" />
+                            <LightbulbIcon className="w-5 h-5" />
                           </button>
                           <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                            <EditButtonIcon className="size-4" />
+                            <EditButtonIcon className="w-4 h-4" />
                           </button>
                           <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
-                            <DeleteButtonIcon className="size-4" />
+                            <DeleteButtonIcon className="w-4 h-4" />
                           </button>
                         </div>
                       </TableCell>

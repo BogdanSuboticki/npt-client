@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -8,12 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon, CalenderIcon } from "../../icons";
+import { CalenderIcon, EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
+import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
+import { useModal } from "../../hooks/useModal";
+import { Modal } from "../../components/ui/modal";
+import Button from "../../components/ui/button/Button";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { sr } from "date-fns/locale";
-import Checkbox from "../../components/form/input/Checkbox";
 import { useTheme } from "../../context/ThemeContext";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -24,133 +27,80 @@ interface Column {
   sortable: boolean;
 }
 
-interface OsposobljavanjeData {
+interface LekarskiPreglediData {
   id: number;
   zaposleni: string;
   radnoMesto: string;
-  lokacija: string;
   povecanRizik: boolean;
-  osposobljavanjeBZR: string;
-  datumNarednogBZR: string;
-  osposobljavanjeZOP: string;
-  datumNarednogZOP: string;
-  prikaziUPodsetniku: boolean;
-  bzrOdradjeno: boolean;
+  nocniRad: boolean;
+  vrstaLekarskog: string;
+  datumLekarskog: Date;
+  datumNarednogLekarskog: Date;
   [key: string]: any;
 }
 
-interface DataTableTwoProps {
-  data: OsposobljavanjeData[];
+interface DataTableProps {
+  data: LekarskiPreglediData[];
   columns: Column[];
 }
 
-const formatDate = (dateStr: string | null | undefined): string => {
-  if (!dateStr) return '-';
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('sr-Latn-RS', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return dateStr;
-  }
-};
-
-export default function OsposobljavanjeDataTable({ data: initialData, columns }: DataTableTwoProps) {
+export default function LekarskiPreglediDataTable({ data: initialData, columns }: DataTableProps) {
   const { theme: appTheme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
+  const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [data, setData] = useState<OsposobljavanjeData[]>(initialData);
-  const [isFromOpen, setIsFromOpen] = useState(false);
-  const [isToOpen, setIsToOpen] = useState(false);
+  const { isOpen, openModal, closeModal } = useModal();
+  const [modalDate, setModalDate] = useState<Date>(new Date());
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [showAktivni, setShowAktivni] = useState(true);
   
-  // Get unique values for dropdowns with safe defaults
+  // Get unique values for dropdowns
   const uniqueZaposleni = useMemo(() => {
-    try {
-      return Array.from(new Set(data?.map(item => item.zaposleni) || []));
-    } catch (error) {
-      console.error('Error getting unique zaposleni:', error);
-      return [];
-    }
-  }, [data]);
+    return Array.from(new Set(initialData.map(item => item.zaposleni)));
+  }, [initialData]);
 
-  // Initialize filter states with safe defaults
+  const uniqueVrsteLekarskog = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.vrstaLekarskog)));
+  }, [initialData]);
+
+  // Initialize with all items selected
   const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
-  const [selectedOsposobljavanje, setSelectedOsposobljavanje] = useState<{ bzr: boolean; zop: boolean }>({ bzr: true, zop: true });
+  const [selectedVrsteLekarskog, setSelectedVrsteLekarskog] = useState<string[]>(uniqueVrsteLekarskog);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
+  const [isFromOpen, setIsFromOpen] = useState(false);
+  const [isToOpen, setIsToOpen] = useState(false);
 
-  // Dropdown refs
-  const zaposleniRef = useRef<HTMLDivElement>(null);
-  const [isZaposleniOpen, setIsZaposleniOpen] = useState(false);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (zaposleniRef.current && !zaposleniRef.current.contains(event.target as Node)) {
-        setIsZaposleniOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Safe data processing
   const filteredAndSortedData = useMemo(() => {
-    try {
-      if (!data) return [];
-
-      return data
-        .filter((item) => {
-          try {
-            const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
-            const matchesOsposobljavanje = 
-              (selectedOsposobljavanje.bzr && item.osposobljavanjeBZR) ||
-              (selectedOsposobljavanje.zop && item.osposobljavanjeZOP);
-            
-            const matchesDateRange = (!dateFrom || new Date(item.osposobljavanjeBZR) >= dateFrom) &&
-                                   (!dateTo || new Date(item.osposobljavanjeBZR) <= dateTo);
-
-            return matchesZaposleni && matchesOsposobljavanje && matchesDateRange;
-          } catch (error) {
-            console.error('Error filtering item:', error);
-            return false;
-          }
-        })
-        .sort((a, b) => {
-          try {
-            const aValue = a[sortKey];
-            const bValue = b[sortKey];
-            
-            if (sortKey.includes('datum') || sortKey.includes('osposobljavanje')) {
-              const aDate = new Date(aValue);
-              const bDate = new Date(bValue);
-              return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
-            }
-            
-            if (typeof aValue === "number" && typeof bValue === "number") {
-              return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
-            }
-            
-            return sortOrder === "asc"
-              ? String(aValue).localeCompare(String(bValue))
-              : String(bValue).localeCompare(String(aValue));
-          } catch (error) {
-            console.error('Error sorting items:', error);
-            return 0;
-          }
-        });
-    } catch (error) {
-      console.error('Error processing data:', error);
-      return [];
-    }
-  }, [data, sortKey, sortOrder, selectedZaposleni, selectedOsposobljavanje, dateFrom, dateTo]);
+    return initialData
+      .filter((item) => {
+        if (selectedZaposleni.length === 0 || selectedVrsteLekarskog.length === 0) {
+          return false;
+        }
+        const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
+        const matchesVrsta = selectedVrsteLekarskog.includes(item.vrstaLekarskog);
+        const matchesDateRange = (!dateFrom || item.datumLekarskog >= dateFrom) &&
+                               (!dateTo || item.datumLekarskog <= dateTo);
+        const matchesAktivni = !showAktivni || item.aktivan;
+        return matchesZaposleni && matchesVrsta && matchesDateRange && matchesAktivni;
+      })
+      .sort((a, b) => {
+        if (sortKey.includes('datum')) {
+          const aDate = a[sortKey] instanceof Date ? a[sortKey] : new Date(a[sortKey]);
+          const bDate = b[sortKey] instanceof Date ? b[sortKey] : new Date(b[sortKey]);
+          return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
+        }
+        
+        if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
+          return sortOrder === "asc" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
+        }
+        
+        return sortOrder === "asc"
+          ? String(a[sortKey]).localeCompare(String(b[sortKey]))
+          : String(b[sortKey]).localeCompare(String(a[sortKey]));
+      });
+  }, [sortKey, sortOrder, selectedZaposleni, selectedVrsteLekarskog, dateFrom, dateTo, initialData, showAktivni]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -168,48 +118,78 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
     }
   };
 
-  const handleSelectAllZaposleni = () => {
-    if (selectedZaposleni.length === uniqueZaposleni.length) {
-      setSelectedZaposleni([]);
-    } else {
-      setSelectedZaposleni([...uniqueZaposleni]);
-    }
+  const handleCheckboxClick = () => {
+    setModalDate(new Date()); // Reset to today's date when opening
+    openModal();
   };
 
-  const handleZaposleniChange = (value: string) => {
-    setSelectedZaposleni(prev => {
-      const newSelection = prev.includes(value)
-        ? prev.filter(item => item !== value)
-        : [...prev, value];
-      return newSelection.length === 0 ? [] : newSelection;
-    });
+  const handleSave = () => {
+    // Handle save logic here
+    console.log("Saving lekarski pregled with date:", modalDate);
+    closeModal();
+  };
+
+  // Close date picker when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsDatePickerOpen(false);
+    }
+  }, [isOpen]);
+
+  // Add click outside handler for date picker
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.MuiPickersPopper-root') && !target.closest('.MuiInputBase-root')) {
+        setIsDatePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleDateChange = (value: Date | null) => {
+    if (value) {
+      setModalDate(value);
+      setIsDatePickerOpen(false);
+    }
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
-  const handleCheckboxChange = (id: number, field: 'prikaziUPodsetniku' | 'bzrOdradjeno') => {
-    setData(prevData => 
-      prevData.map(item => 
-        item.id === id 
-          ? { ...item, [field]: !item[field] }
-          : item
-      )
-    );
+  const formatDate = (date: Date): string => {
+    return date.toLocaleDateString('sr-Latn-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
-  // Create theme based on app theme
+  // Create theme based on app theme with high z-index for MUI Popper
   const muiTheme = createTheme({
     palette: {
       mode: appTheme,
     },
+    components: {
+      MuiPopper: {
+        styleOverrides: {
+          root: {
+            zIndex: 999999
+          }
+        }
+      }
+    }
   });
 
   return (
     <ThemeProvider theme={muiTheme}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sr}>
-        <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
+        <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
           <div className="flex flex-col gap-4 px-4 py-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -224,103 +204,59 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                       <option
                         key={value}
                         value={value}
-                        className="text-gray-500 dark:bg-[#101828] dark:text-gray-400"
+                        className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
                       >
                         {value}
                       </option>
                     ))}
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
                     <svg
-                      className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                      className="stroke-current"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
                       fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
+                        d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
+                        stroke=""
+                        strokeWidth="1.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
                       />
                     </svg>
                   </div>
                 </div>
                 <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
-              </div>
+          </div>
 
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Zaposleni Dropdown */}
-                <div className="relative w-full lg:w-48" ref={zaposleniRef}>
-                  <button
-                    onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
-                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                  >
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                      <span>Zaposleni</span>
-                    </div>
-                    <svg
-                      className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''} ml-1`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isZaposleniOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                      <div className="max-h-60 overflow-y-auto">
-                        <div className="sticky top-0 bg-white rounded-t-lg dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                          <div
-                            className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                            onClick={handleSelectAllZaposleni}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedZaposleni.length === uniqueZaposleni.length}
-                              onChange={handleSelectAllZaposleni}
-                              className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                            />
-                            <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
-                          </div>
-                        </div>
-                        {uniqueZaposleni.map((zaposleni) => (
-                          <label
-                            key={zaposleni}
-                            className="flex items-start px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedZaposleni.includes(zaposleni)}
-                              onChange={() => handleZaposleniChange(zaposleni)}
-                              className="w-4 h-4 mt-0.5 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 flex-shrink-0"
-                            />
-                            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 break-words">{zaposleni}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Date Range */}
+              <div className="flex flex-col sm:flex-row gap-4">
+            <FilterDropdown
+              label="Zaposleni"
+              options={uniqueZaposleni}
+              selectedOptions={selectedZaposleni}
+              onSelectionChange={setSelectedZaposleni}
+            />
+            <FilterDropdown
+              label="Vrsta lekarskog"
+              options={uniqueVrsteLekarskog}
+                  selectedOptions={selectedVrsteLekarskog}
+                  onSelectionChange={setSelectedVrsteLekarskog}
+                />
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={showAktivni}
+                    onChange={e => setShowAktivni(e.target.checked)}
+                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                  />
+                  Aktivni zaposleni
+              </label>
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
                   <div className="relative w-full lg:w-42">
-                    <DatePicker
+              <DatePicker
                       value={dateFrom}
                       onChange={(newValue) => setDateFrom(newValue)}
                       open={isFromOpen}
@@ -358,10 +294,10 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                         },
                       }}
                       format="dd/MM/yyyy"
-                    />
-                  </div>
+              />
+            </div>
                   <div className="relative w-full lg:w-42">
-                    <DatePicker
+              <DatePicker
                       value={dateTo}
                       onChange={(newValue) => setDateTo(newValue)}
                       open={isToOpen}
@@ -399,34 +335,12 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                         },
                       }}
                       format="dd/MM/yyyy"
-                    />
+              />
                   </div>
                 </div>
-                {/* Osposobljavanje Checkboxes */}
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center">
-                    <Checkbox
-                      checked={selectedOsposobljavanje.bzr}
-                      onChange={(checked) => setSelectedOsposobljavanje(prev => ({ ...prev, bzr: checked }))}
-                      className="w-4 h-4"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">BZR</span>
-                  </label>
-                  <label className="flex items-center">
-                    <Checkbox
-                      checked={selectedOsposobljavanje.zop}
-                      onChange={(checked) => setSelectedOsposobljavanje(prev => ({ ...prev, zop: checked }))}
-                      className="w-4 h-4"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">ZOP</span>
-                  </label>
-                </div>
               </div>
-              
             </div>
-            
           </div>
-          
 
           <div className="max-w-full overflow-x-auto custom-scrollbar">
             <div className="min-h-[200px]">
@@ -447,7 +361,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                             onClick={() => handleSort(key)}
                           >
                             <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                              {index === 0 ? '' : label}
+                              {key === 'redniBroj' ? '' : label}
                             </p>
                             <button className="flex flex-col gap-0.5">
                               <svg
@@ -484,7 +398,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                           </div>
                         ) : (
                           <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                            {index === 0 ? '' : label}
+                            {key === 'redniBroj' ? '' : label}
                           </p>
                         )}
                       </TableCell>
@@ -494,42 +408,26 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                       className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0"
                     >
                       <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-
                       </p>
                     </TableCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentData.map((item) => (
+                  {currentData.map((item, index) => (
                     <TableRow key={item.id}>
-                      {columns.map(({ key }, index) => (
+                      {columns.map(({ key }, colIndex) => (
                         <TableCell
                           key={key}
                           className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                            index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
+                            colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
                           }`}
                         >
-                          {key === 'povecanRizik' ? (
+                          {key === 'redniBroj' ? (
+                            startIndex + index + 1
+                          ) : key === 'povecanRizik' || key === 'nocniRad' ? (
                             item[key] ? 'DA' : 'NE'
-                          ) : key === 'bzrOdradjeno' ? (
-                            <Checkbox
-                              checked={item[key]}
-                              onChange={() => handleCheckboxChange(item.id, 'bzrOdradjeno')}
-                              className="w-4 h-4"
-                            />
-                          ) : key === 'datumNarednogBZR' || key === 'osposobljavanjeBZR' || key === 'osposobljavanjeZOP' || key === 'datumNarednogZOP' ? (
-                            <div className="flex items-center">
-                              <span className="flex-1">{formatDate(item[key])}</span>
-                              {key === 'datumNarednogBZR' && (
-                                <div className="w-[40px] flex justify-center">
-                                  <Checkbox
-                                    checked={item.prikaziUPodsetniku}
-                                    onChange={() => handleCheckboxChange(item.id, 'prikaziUPodsetniku')}
-                                    className="w-4 h-4"
-                                  />
-                                </div>
-                              )}
-                            </div>
+                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' ? (
+                            formatDate(item[key])
                           ) : (
                             item[key]
                           )}
@@ -537,6 +435,38 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
+                          <button 
+                            className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
+                            onClick={handleCheckboxClick}
+                          >
+                            <svg
+                              className="size-4"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                            >
+                              <rect
+                                x="2"
+                                y="2"
+                                width="12"
+                                height="12"
+                                rx="2"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                fill="none"
+                              />
+                              <path
+                                d="M6 8L8 10L10 6"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                fill="none"
+                              />
+                            </svg>
+                          </button>
                           <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
                             <LightbulbIcon className="size-5" />
                           </button>
@@ -570,7 +500,73 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
             </div>
           </div>
         </div>
+
+        <Modal
+          isOpen={isOpen}
+          onClose={closeModal}
+          className="max-w-[500px] p-5 lg:p-8"
+        >
+          <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
+            Da li je izvršen novi lekarski pregled?
+          </h4>
+          <div className="mb-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Datum izvršenog pregleda:
+            </p>
+            <DatePicker
+              value={modalDate}
+              onChange={handleDateChange}
+              open={isDatePickerOpen}
+              onOpen={() => setIsDatePickerOpen(true)}
+              onClose={() => setIsDatePickerOpen(false)}
+              slots={{
+                toolbar: () => null
+              }}
+              slotProps={{
+                popper: {
+                  sx: {
+                    zIndex: 999999
+                  }
+                },
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  onClick: () => setIsDatePickerOpen(true),
+                  sx: {
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      height: '44px',
+                      backgroundColor: '#F9FAFB',
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '12px 14px',
+                    },
+                  },
+                  InputProps: {
+                    style: {
+                      borderRadius: 8,
+                      height: 44,
+                      backgroundColor: '#F9FAFB',
+                    },
+                    endAdornment: (
+                      <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                    ),
+                  },
+                },
+              }}
+              format="dd/MM/yyyy"
+            />
+          </div>
+          <div className="flex items-center justify-end w-full gap-3">
+            <Button size="sm" variant="outline" onClick={closeModal}>
+              Izadji
+            </Button>
+            <Button size="sm" onClick={handleSave}>
+              Sačuvaj
+            </Button>
+          </div>
+        </Modal>
       </LocalizationProvider>
     </ThemeProvider>
   );
-}
+} 

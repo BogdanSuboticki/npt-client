@@ -1,0 +1,166 @@
+import { useState } from 'react';
+import IspitivanjeRadneSredineDataTable from './IspitivanjeRadneSredineDataTable';
+import IspitivanjeRadneSredineForm from './IspitivanjeRadneSredineForm';
+
+// Sample data for the table
+const sampleData = [
+  {
+    id: 1,
+    redniBroj: 1,
+    nazivLokacije: 'Fabrika Novi Sad',
+    nazivObjekta: 'Proizvodni pogon A',
+    brojMernihMesta: 8,
+    intervalIspitivanja: '6 meseci',
+    napomena: 'Redovno ispitivanje - prioritet'
+  },
+  {
+    id: 2,
+    redniBroj: 2,
+    nazivLokacije: 'Skladište Beograd',
+    nazivObjekta: 'Magacin 1',
+    brojMernihMesta: 4,
+    intervalIspitivanja: '12 meseci',
+    napomena: 'Periodično ispitivanje'
+  },
+  {
+    id: 3,
+    redniBroj: 3,
+    nazivLokacije: 'Upravna zgrada Niš',
+    nazivObjekta: 'Administrativni centar',
+    brojMernihMesta: 6,
+    intervalIspitivanja: '6 meseci',
+    napomena: 'Kontrolno merenje'
+  },
+  {
+    id: 4,
+    redniBroj: 4,
+    nazivLokacije: 'Pogon Subotica',
+    nazivObjekta: 'Proizvodna hala B',
+    brojMernihMesta: 12,
+    intervalIspitivanja: '3 meseca',
+    napomena: 'Vanredno ispitivanje'
+  },
+  {
+    id: 5,
+    redniBroj: 5,
+    nazivLokacije: 'Distributivni centar Kragujevac',
+    nazivObjekta: 'Skladišna hala',
+    brojMernihMesta: 5,
+    intervalIspitivanja: '12 meseci',
+    napomena: 'Standardno ispitivanje'
+  },
+  {
+    id: 6,
+    redniBroj: 6,
+    nazivLokacije: 'Tehnički centar Zrenjanin',
+    nazivObjekta: 'Servisni objekat',
+    brojMernihMesta: 7,
+    intervalIspitivanja: '6 meseci',
+    napomena: 'Redovna kontrola'
+  },
+  {
+    id: 7,
+    redniBroj: 7,
+    nazivLokacije: 'Logistički centar Čačak',
+    nazivObjekta: 'Magacinski prostor C',
+    brojMernihMesta: 9,
+    intervalIspitivanja: '6 meseci',
+    napomena: 'Godišnje ispitivanje'
+  },
+  {
+    id: 8,
+    redniBroj: 8,
+    nazivLokacije: 'Proizvodni kompleks Pančevo',
+    nazivObjekta: 'Proizvodna linija 2',
+    brojMernihMesta: 15,
+    intervalIspitivanja: '3 meseca',
+    napomena: 'Hitno ispitivanje'
+  },
+  {
+    id: 9,
+    redniBroj: 9,
+    nazivLokacije: 'Poslovni centar Valjevo',
+    nazivObjekta: 'Kancelarijski prostor',
+    brojMernihMesta: 3,
+    intervalIspitivanja: '12 meseci',
+    napomena: 'Standardna provera'
+  },
+  {
+    id: 10,
+    redniBroj: 10,
+    nazivLokacije: 'Industrijska zona Šabac',
+    nazivObjekta: 'Montažni objekat D',
+    brojMernihMesta: 6,
+    intervalIspitivanja: '6 meseci',
+    napomena: 'Kvartalno ispitivanje'
+  }
+];
+
+// Column definitions for the table
+const columns = [
+  { key: 'redniBroj', label: '', sortable: true },
+  { key: 'nazivLokacije', label: 'Naziv lokacije', sortable: true },
+  { key: 'nazivObjekta', label: 'Naziv objekta', sortable: true },
+  { key: 'brojMernihMesta', label: 'Broj mernih mesta', sortable: true },
+  { key: 'intervalIspitivanja', label: 'Interval ispitivanja', sortable: true },
+  { key: 'napomena', label: 'Napomena', sortable: true },
+];
+
+export default function IspitivanjeRadneSredine() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [data, setData] = useState(sampleData);
+
+  const handleSave = (newData: any) => {
+    setData(prev => [
+      ...prev,
+      {
+        ...newData,
+        id: prev.length + 1,
+        redniBroj: prev.length + 1,
+      }
+    ]);
+    setIsFormOpen(false);
+  };
+
+  return (
+    <div className="container mx-auto py-8">
+      <div className="mb-6 flex items-center">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          Ispitivanje radne sredine
+        </h1>
+        <button
+          onClick={() => setIsFormOpen(true)}
+          className="px-4 py-2 ml-5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Novo ispitivanje
+        </button>
+      </div>
+      
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
+        <IspitivanjeRadneSredineDataTable
+          data={data}
+          columns={columns}
+        />
+      </div>
+
+      <IspitivanjeRadneSredineForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSave={handleSave}
+      />
+    </div>
+  );
+} 

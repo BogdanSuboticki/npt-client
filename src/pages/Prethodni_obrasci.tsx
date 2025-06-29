@@ -3,6 +3,7 @@ import { useLocation } from 'react-router';
 import { ReactComponent as DownloadIcon } from '../icons/download.svg?react';
 import { ReactComponent as PrintIcon } from '../icons/Print.svg?react';
 import { ReactComponent as EditIcon } from '../icons/Edit button.svg?react';
+import { ReactComponent as DeleteIcon } from '../icons/Delete-button.svg?react';
 
 type ObrazacItem = {
   id: number;
@@ -122,6 +123,11 @@ const PrethodniObrasci: React.FC = () => {
     console.log('Editing obrazac:', id);
   };
 
+  const handleDelete = (id: number) => {
+    // Implement delete functionality
+    console.log('Deleting obrazac:', id);
+  };
+
   return (
     <div className="py-8">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -148,9 +154,6 @@ const PrethodniObrasci: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-                    Završeno
-                  </span>
                   <button
                     onClick={() => handleEdit(obrazac.id)}
                     className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -169,7 +172,12 @@ const PrethodniObrasci: React.FC = () => {
                   >
                     <PrintIcon className="w-5 h-5" />
                   </button>
-  
+                  <button
+                    onClick={() => handleDelete(obrazac.id)}
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  >
+                    <DeleteIcon className="w-4 h-5" />
+                  </button>
                 </div>
               </div>
             ))}

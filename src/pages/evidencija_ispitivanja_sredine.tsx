@@ -354,7 +354,7 @@ const EvidencijaIspitivanjaSredine: React.FC = () => {
         className="max-w-[584px] p-5 lg:p-10"
       >
         <form className="" onSubmit={(e) => e.preventDefault()}>
-          <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
+          <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
             Sačuvaj obrazac
           </h4>
           <div className="grid grid-cols-1 gap-x-6 gap-y-5">
@@ -376,7 +376,7 @@ const EvidencijaIspitivanjaSredine: React.FC = () => {
               onClick={closeModal}
               className="flex justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-theme-xs hover:bg-gray-50 dark:bg-[#101828] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700"
             >
-              Odustani
+              Otkaži
             </button>
             <Popover
               position="top"

@@ -158,8 +158,7 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
           </div>
 
           <div className="col-span-1">
-            <Label>Isključiti iz praćenja</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2 pt-10">
               <Checkbox
                 checked={formData.iskljucenaIzPracenja}
                 onChange={(checked) =>
@@ -167,6 +166,7 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
                 }
                 className="w-4 h-4"
               />
+              <Label className="mb-0">Isključiti iz praćenja</Label>
             </div>
           </div>
         </div>

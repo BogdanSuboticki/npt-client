@@ -177,24 +177,24 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
           </div>
 
           <div className="col-span-1">
-            <Label>ZOP</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2">
               <Checkbox
                 checked={formData.zop}
                 onChange={(checked) => setFormData({...formData, zop: checked})}
                 className="w-4 h-4"
               />
+              <Label>ZOP</Label>
             </div>
           </div>
 
           <div className="col-span-1">
-            <Label>Isključiti iz praćenja</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2">
               <Checkbox
                 checked={formData.iskljucenaIzPracenja}
                 onChange={(checked) => setFormData({...formData, iskljucenaIzPracenja: checked})}
                 className="w-4 h-4"
               />
+              <Label>Isključiti iz praćenja</Label>
             </div>
           </div>
         </div>

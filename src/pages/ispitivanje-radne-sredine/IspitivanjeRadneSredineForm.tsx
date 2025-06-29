@@ -76,7 +76,7 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
           onClose={onClose}
           className="max-w-[800px] p-5 lg:p-8"
         >
-          <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
+          <h4 className="font-semibold text-gray-800 mb-4 text-xl dark:text-white/90">
             Ispitivanje radne sredine
           </h4>
           <form onSubmit={handleSubmit}>
@@ -224,7 +224,8 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
               </div>
 
               <div className="col-span-1">
-                <div className="flex items-center gap-4">
+                <Label>&nbsp;</Label>
+                <div className="flex items-center gap-4 pt-2">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={formData.prikaziUPodsetniku}
@@ -244,17 +245,19 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <Button
-                variant="outline"
+              <button
+                type="button"
                 onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
               >
-                Odustani
-              </Button>
-              <Button
-                variant="primary"
+                Otkaži
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
               >
                 Sačuvaj
-              </Button>
+              </button>
             </div>
           </form>
         </Modal>

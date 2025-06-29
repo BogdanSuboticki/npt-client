@@ -100,7 +100,6 @@ const sampleData = [
 const columns = [
   { key: 'redniBroj', label: '', sortable: true },
   { key: 'nazivLokacije', label: 'Naziv lokacije', sortable: true },
-  { key: 'nazivObjekta', label: 'Naziv objekta', sortable: true },
   { key: 'brojMernihMesta', label: 'Broj mernih mesta', sortable: true },
   { key: 'intervalIspitivanja', label: 'Interval ispitivanja', sortable: true },
   { key: 'napomena', label: 'Napomena', sortable: true },

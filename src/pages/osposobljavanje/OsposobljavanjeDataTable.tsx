@@ -318,89 +318,115 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                 </div>
 
                 {/* Date Range */}
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
-                  <div className="relative w-full lg:w-42">
-                    <DatePicker
-                      value={dateFrom}
-                      onChange={(newValue) => setDateFrom(newValue)}
-                      open={isFromOpen}
-                      onOpen={() => setIsFromOpen(true)}
-                      onClose={() => setIsFromOpen(false)}
-                      slots={{
-                        toolbar: () => null
-                      }}
-                      slotProps={{
-                        textField: {
-                          placeholder: "Datum od",
-                          size: "small",
-                          fullWidth: true,
-                          onClick: () => setIsFromOpen(true),
-                          sx: {
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '8px',
-                              height: '44px',
-                              backgroundColor: '#F9FAFB',
+                <div className="relative w-full lg:w-42">
+                  <DatePicker
+                    value={dateFrom}
+                    onChange={(newValue) => setDateFrom(newValue)}
+                    open={isFromOpen}
+                    onOpen={() => setIsFromOpen(true)}
+                    onClose={() => setIsFromOpen(false)}
+                    slots={{
+                      toolbar: () => null
+                    }}
+                    slotProps={{
+                      textField: {
+                        placeholder: "Datum od",
+                        size: "small",
+                        fullWidth: true,
+                        onClick: () => setIsFromOpen(true),
+                        sx: {
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            height: '44px',
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                            '& fieldset': {
+                              borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
                             },
-                            '& .MuiInputBase-input': {
-                              padding: '12px 14px',
+                            '&:hover fieldset': {
+                              borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
                             },
-                          },
-                          InputProps: {
-                            style: {
-                              borderRadius: 8,
-                              height: 44,
-                              backgroundColor: '#F9FAFB',
-                            },
-                            endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
-                            ),
-                          },
-                        },
-                      }}
-                      format="dd/MM/yyyy"
-                    />
-                  </div>
-                  <div className="relative w-full lg:w-42">
-                    <DatePicker
-                      value={dateTo}
-                      onChange={(newValue) => setDateTo(newValue)}
-                      open={isToOpen}
-                      onOpen={() => setIsToOpen(true)}
-                      onClose={() => setIsToOpen(false)}
-                      slots={{
-                        toolbar: () => null
-                      }}
-                      slotProps={{
-                        textField: {
-                          placeholder: "Datum do",
-                          size: "small",
-                          fullWidth: true,
-                          onClick: () => setIsToOpen(true),
-                          sx: {
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '8px',
-                              height: '44px',
-                              backgroundColor: '#F9FAFB',
-                            },
-                            '& .MuiInputBase-input': {
-                              padding: '12px 14px',
+                            '&.Mui-focused fieldset': {
+                              borderColor: appTheme === 'dark' ? '#465FFF' : '#465FFF',
                             },
                           },
-                          InputProps: {
-                            style: {
-                              borderRadius: 8,
-                              height: 44,
-                              backgroundColor: '#F9FAFB',
+                          '& .MuiInputBase-input': {
+                            padding: '12px 14px',
+                            color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                            '&::placeholder': {
+                              color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                              opacity: 1,
                             },
-                            endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
-                            ),
                           },
                         },
-                      }}
-                      format="dd/MM/yyyy"
-                    />
-                  </div>
+                        InputProps: {
+                          style: {
+                            borderRadius: 8,
+                            height: 44,
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          },
+                          endAdornment: (
+                            <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                          ),
+                        },
+                      },
+                    }}
+                    format="dd/MM/yyyy"
+                  />
+                </div>
+                <div className="relative w-full lg:w-42">
+                  <DatePicker
+                    value={dateTo}
+                    onChange={(newValue) => setDateTo(newValue)}
+                    open={isToOpen}
+                    onOpen={() => setIsToOpen(true)}
+                    onClose={() => setIsToOpen(false)}
+                    slots={{
+                      toolbar: () => null
+                    }}
+                    slotProps={{
+                      textField: {
+                        placeholder: "Datum do",
+                        size: "small",
+                        fullWidth: true,
+                        onClick: () => setIsToOpen(true),
+                        sx: {
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            height: '44px',
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                            '& fieldset': {
+                              borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: appTheme === 'dark' ? '#465FFF' : '#465FFF',
+                            },
+                          },
+                          '& .MuiInputBase-input': {
+                            padding: '12px 14px',
+                            color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                            '&::placeholder': {
+                              color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                              opacity: 1,
+                            },
+                          },
+                        },
+                        InputProps: {
+                          style: {
+                            borderRadius: 8,
+                            height: 44,
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          },
+                          endAdornment: (
+                            <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                          ),
+                        },
+                      },
+                    }}
+                    format="dd/MM/yyyy"
+                  />
                 </div>
                 {/* Osposobljavanje Checkboxes */}
                 <div className="flex items-center gap-4">

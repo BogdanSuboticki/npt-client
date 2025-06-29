@@ -190,17 +190,6 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
               </div>
 
               <div className="col-span-1">
-                <div className="flex items-center">
-                  <Checkbox
-                    checked={formData.povecanRizik}
-                    onChange={handleCheckboxChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Povećan rizik</span>
-                </div>
-              </div>
-
-              <div className="col-span-1">
                 <Label>Vrsta lekarskog</Label>
                 <div className="relative w-full" ref={vrstaLekarskogRef}>
                   <button
@@ -385,13 +374,24 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
               </div>
             </div>
 
+            <div className="col-span-1 mt-4">
+              <div className="flex items-center gap-2 h-11">
+                <Checkbox
+                  checked={formData.povecanRizik}
+                  onChange={handleCheckboxChange}
+                  className="w-4 h-4"
+                />
+                <Label className="mb-0">Povećan rizik</Label>
+              </div>
+            </div>
+
             <div className="flex justify-end gap-2 mt-6">
               <button
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
               >
-                Zatvori
+                Otkaži
               </button>
               <button
                 type="submit"

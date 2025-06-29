@@ -245,17 +245,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                   selectedOptions={selectedVrsteLekarskog}
                   onSelectionChange={setSelectedVrsteLekarskog}
                 />
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={showAktivni}
-                    onChange={e => setShowAktivni(e.target.checked)}
-                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                  />
-                  Aktivni zaposleni
-              </label>
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
-                  <div className="relative w-full lg:w-42">
+                <div className="relative w-full lg:w-42">
               <DatePicker
                       value={dateFrom}
                       onChange={(newValue) => setDateFrom(newValue)}
@@ -337,7 +327,15 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                       format="dd/MM/yyyy"
               />
                   </div>
-                </div>
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={showAktivni}
+                    onChange={e => setShowAktivni(e.target.checked)}
+                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                  />
+                  Aktivni zaposleni
+              </label>
               </div>
             </div>
           </div>

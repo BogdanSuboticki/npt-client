@@ -73,9 +73,6 @@ export default function CardIconTwo({ title, description, link }: CardIconTwoPro
                   <span className="text-sm font-medium text-gray-900 dark:text-white">{form.employee}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">{form.date}</span>
                 </div>
-                <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-                  Završeno
-                </span>
               </div>
             ))}
           </div>

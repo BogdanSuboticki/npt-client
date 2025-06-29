@@ -345,7 +345,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
         </div>
         <div className='px-6 py-4 flex gap-2'>
           <button
-            className="px-4 py-2 flex-1 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 border border-gray-200"
+            className="px-4 py-2 flex-1 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded hover:bg-gray-100 flex items-center justify-center gap-2 border border-gray-200"
             onClick={addRow}
           >
             <NoviRedIcon className="w-5 h-5" />
@@ -368,7 +368,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
         className="max-w-[584px] p-5 lg:p-10"
       >
         <form className="" onSubmit={(e) => e.preventDefault()}>
-          <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
+          <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
             Sačuvaj obrazac
           </h4>
 
@@ -392,7 +392,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
               onClick={closeModal}
               className="flex justify-center px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-theme-xs hover:bg-gray-50 dark:bg-[#101828] dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700"
             >
-              Odustani
+              Otkaži
             </button>
             <Popover
               position="top"

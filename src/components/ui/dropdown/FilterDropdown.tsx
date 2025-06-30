@@ -96,7 +96,7 @@ export default function FilterDropdown({
                   type="checkbox"
                   checked={selectedOptions.length === options.length}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                  className="w-4 h-4 min-w-[16px] min-h-[16px] text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 flex-shrink-0"
                 />
                 <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
               </div>
@@ -112,9 +112,9 @@ export default function FilterDropdown({
                   type="checkbox"
                   checked={selectedOptions.includes(option)}
                   onChange={() => handleOptionChange(option)}
-                  className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                  className="w-4 h-4 min-w-[16px] min-h-[16px] text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 flex-shrink-0"
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate">{option}</span>
               </label>
             ))}
           </div>

@@ -16,6 +16,8 @@ import { sr } from "date-fns/locale";
 import { useTheme } from "../../context/ThemeContext";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import NovoIspitivanjeForm from "./NovoIspitivanjeForm";
+import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 
 interface Column {
   key: string;
@@ -65,6 +67,16 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
   const [isToOpen, setIsToOpen] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
+  const [isNovoFormOpen, setIsNovoFormOpen] = useState(false);
+  const [selectedColumn, setSelectedColumn] = useState<string>("");
+  
+  // Get unique values for dropdowns
+  const uniqueLokacije = useMemo(() => {
+    return Array.from(new Set(data.map(item => item.nazivLokacije)));
+  }, [data]);
+
+  // Initialize with all items selected
+  const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
 
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
@@ -76,8 +88,10 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
           try {
             const matchesDateRange = (!dateFrom || new Date(item.datumIspitivanja) >= dateFrom) &&
                                    (!dateTo || new Date(item.datumIspitivanja) <= dateTo);
+            
+            const matchesLocation = selectedLokacije.includes(item.nazivLokacije);
 
-            return matchesDateRange;
+            return matchesDateRange && matchesLocation;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -110,7 +124,7 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, dateFrom, dateTo]);
+  }, [data, sortKey, sortOrder, dateFrom, dateTo, selectedLokacije]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -128,6 +142,54 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
     }
   };
 
+  // Function to render special cell content for specific columns
+  const renderCellContent = (key: string, value: any) => {
+    const specialColumns = ['mikroklimaLetnja', 'mikroklimaZimska', 'fizickeStetnosti', 'hemijskeStetnosti', 'osvetljenje'];
+    
+    if (specialColumns.includes(key)) {
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="text-xs text-gray-600 dark:text-gray-400">
+            Prethodno ispitivanje: <span className="font-medium">-</span>
+          </div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">
+            Naredno ispitivanje: <span className="font-medium">-</span>
+          </div>
+          <button 
+            className="px-3 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600 transition-colors"
+            onClick={() => handleIzvrsiIspitivanje(key)}
+          >
+            Izvrši ispitivanje
+          </button>
+        </div>
+      );
+    }
+    
+    return key.includes('datum') ? formatDate(value) : value;
+  };
+
+  const handleIzvrsiIspitivanje = (columnKey: string) => {
+    setSelectedColumn(columnKey);
+    setIsNovoFormOpen(true);
+  };
+
+  const handleNovoIspitivanjeSave = (formData: any) => {
+    console.log('Novo ispitivanje data:', formData, 'for column:', selectedColumn);
+    // Handle the form data here
+    setIsNovoFormOpen(false);
+  };
+
+  const getFormTitle = (columnKey: string) => {
+    const titles: { [key: string]: string } = {
+      'mikroklimaLetnja': 'Ispitivanje Mikroklime letnje',
+      'mikroklimaZimska': 'Ispitivanje Mikroklime zimske',
+      'fizickeStetnosti': 'Ispitivanje Fizičkih štetnosti',
+      'hemijskeStetnosti': 'Ispitivanje Hemijskih štetnosti',
+      'osvetljenje': 'Ispitivanje Osvetljenja'
+    };
+    return titles[columnKey] || 'Novo ispitivanje';
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
@@ -142,7 +204,7 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
   return (
     <ThemeProvider theme={muiTheme}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sr}>
-        <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
+        <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] max-w-full">
           <div className="flex flex-col gap-4 px-4 py-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -183,6 +245,13 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
               </div>
 
               <div className="flex flex-col lg:flex-row gap-4">
+                <FilterDropdown
+                  label="Prikazane lokacije"
+                  options={uniqueLokacije}
+                  selectedOptions={selectedLokacije}
+                  onSelectionChange={setSelectedLokacije}
+                />
+
                 {/* Date Range */}
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
                   <div className="relative w-full lg:w-42">
@@ -205,17 +274,31 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
                               height: '44px',
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
+                              '& fieldset': {
+                                borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
+                              },
                             },
                             '& .MuiInputBase-input': {
                               padding: '12px 14px',
+                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                              '&::placeholder': {
+                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                                opacity: 1,
+                              },
                             },
                           },
                           InputProps: {
                             style: {
                               borderRadius: 8,
                               height: 44,
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
                             },
                             endAdornment: (
                               <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -246,17 +329,31 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
                               height: '44px',
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
+                              '& fieldset': {
+                                borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
+                              },
                             },
                             '& .MuiInputBase-input': {
                               padding: '12px 14px',
+                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                              '&::placeholder': {
+                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                                opacity: 1,
+                              },
                             },
                           },
                           InputProps: {
                             style: {
                               borderRadius: 8,
                               height: 44,
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
                             },
                             endAdornment: (
                               <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -272,7 +369,7 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
             </div>
           </div>
 
-          <div className="max-w-full overflow-x-auto custom-scrollbar">
+          <div className="table-responsive-container w-full overflow-x-auto custom-scrollbar">
             <div className="min-h-[200px]">
               <Table>
                 <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
@@ -287,10 +384,10 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                       >
                         {sortable ? (
                           <div
-                            className="flex items-center justify-between cursor-pointer"
+                            className="flex items-center justify-center cursor-pointer"
                             onClick={() => handleSort(key)}
                           >
-                            <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                            <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400 mr-2">
                               {index === 0 ? '' : label}
                             </p>
                             <button className="flex flex-col gap-0.5">
@@ -348,11 +445,13 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                       {columns.map(({ key }, index) => (
                         <TableCell
                           key={key}
-                          className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
+                          className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 ${
+                            !['mikroklimaLetnja', 'mikroklimaZimska', 'fizickeStetnosti', 'hemijskeStetnosti', 'osvetljenje'].includes(key) ? 'whitespace-nowrap' : ''
+                          } ${
                             index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                           }`}
                         >
-                          {key.includes('datum') ? formatDate(item[key]) : item[key]}
+                          {renderCellContent(key, item[key])}
                         </TableCell>
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
@@ -391,6 +490,13 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
           </div>
         </div>
       </LocalizationProvider>
+      
+      <NovoIspitivanjeForm
+        isOpen={isNovoFormOpen}
+        onClose={() => setIsNovoFormOpen(false)}
+        onSave={handleNovoIspitivanjeSave}
+        title={getFormTitle(selectedColumn)}
+      />
     </ThemeProvider>
   );
 }

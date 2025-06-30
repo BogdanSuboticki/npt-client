@@ -276,17 +276,29 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           height: '44px',
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                          '&:hover': {
+                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                          },
+                          '&.Mui-focused': {
+                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          },
                         },
                         '& .MuiInputBase-input': {
                           padding: '12px 14px',
+                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                          '&::placeholder': {
+                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                            opacity: 1,
+                          },
                         },
                       },
                       InputProps: {
                         style: {
                           borderRadius: 8,
                           height: 44,
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                         },
                         endAdornment: (
                           <CalenderIcon 
@@ -346,17 +358,29 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           height: '44px',
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                          '&:hover': {
+                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                          },
+                          '&.Mui-focused': {
+                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          },
                         },
                         '& .MuiInputBase-input': {
                           padding: '12px 14px',
+                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                          '&::placeholder': {
+                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                            opacity: 1,
+                          },
                         },
                       },
                       InputProps: {
                         style: {
                           borderRadius: 8,
                           height: 44,
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                         },
                         endAdornment: (
                           <CalenderIcon 

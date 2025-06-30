@@ -20,7 +20,7 @@ export default function NovoIspitivanjeForm({ isOpen, onClose, onSave, title = "
   const { theme: appTheme } = useTheme();
   const [formData, setFormData] = React.useState({
     ispravno: true,
-    datumIspitivanja: null,
+    datumIspitivanja: null as Date | null,
   });
 
   const [isDateOpen, setIsDateOpen] = React.useState(false);

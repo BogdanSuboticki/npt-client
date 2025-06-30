@@ -265,17 +265,29 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
                               height: '44px',
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                              borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                              '&:hover': {
+                                borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                              },
+                              '&.Mui-focused': {
+                                borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                              },
                             },
                             '& .MuiInputBase-input': {
                               padding: '12px 14px',
+                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                              '&::placeholder': {
+                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                                opacity: 1,
+                              },
                             },
                           },
                           InputProps: {
                             style: {
                               borderRadius: 8,
                               height: 44,
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                             },
                             endAdornment: (
                               <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
@@ -306,17 +318,29 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
                               height: '44px',
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                              borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                              '&:hover': {
+                                borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                              },
+                              '&.Mui-focused': {
+                                borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                              },
                             },
                             '& .MuiInputBase-input': {
                               padding: '12px 14px',
+                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                              '&::placeholder': {
+                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                                opacity: 1,
+                              },
                             },
                           },
                           InputProps: {
                             style: {
                               borderRadius: 8,
                               height: 44,
-                              backgroundColor: '#F9FAFB',
+                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                             },
                             endAdornment: (
                               <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
@@ -355,10 +379,10 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                       >
                         {sortable ? (
                           <div
-                            className="flex items-center justify-between cursor-pointer"
+                            className="flex items-center justify-center cursor-pointer"
                             onClick={() => handleSort(key)}
                           >
-                            <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                            <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400 mr-2">
                               {key === 'redniBroj' ? '' : label}
                             </p>
                             <button className="flex flex-col gap-0.5">
@@ -534,17 +558,29 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
                       height: '44px',
-                      backgroundColor: '#F9FAFB',
+                      backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                      borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                      '&:hover': {
+                        borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                      },
+                      '&.Mui-focused': {
+                        borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                      },
                     },
                     '& .MuiInputBase-input': {
                       padding: '12px 14px',
+                      color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                      '&::placeholder': {
+                        color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                        opacity: 1,
+                      },
                     },
                   },
                   InputProps: {
                     style: {
                       borderRadius: 8,
                       height: 44,
-                      backgroundColor: '#F9FAFB',
+                      backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                     },
                     endAdornment: (
                       <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
@@ -557,7 +593,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           </div>
           <div className="flex items-center justify-end w-full gap-3">
             <Button size="sm" variant="outline" onClick={closeModal}>
-              Izadji
+              Otkaži
             </Button>
             <Button size="sm" onClick={handleSave}>
               Sačuvaj

@@ -159,13 +159,13 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                   >
                     {sortable ? (
                       <div
-                        className="flex items-center justify-between cursor-pointer"
+                        className="flex items-center justify-center cursor-pointer"
                         onClick={() => handleSort(key)}
                       >
-                        <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                        <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400 mr-2">
                           {label}
                         </p>
-                        <button className="flex flex-col gap-0.5">
+                        <button className="flex flex-col gap-0.5 mr-2">
                           <svg
                             className={`text-gray-300 dark:text-gray-700 ${
                               sortKey === key && sortOrder === "asc" ? "text-brand-500" : ""

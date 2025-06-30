@@ -11,7 +11,12 @@ const sampleData = [
     nazivObjekta: 'Proizvodni pogon A',
     brojMernihMesta: 8,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Redovno ispitivanje - prioritet'
+    napomena: 'Redovno ispitivanje - prioritet',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Ne',
+    hemijskeStetnosti: 'Da',
+    osvetljenje: 'Da'
   },
   {
     id: 2,
@@ -20,7 +25,12 @@ const sampleData = [
     nazivObjekta: 'Magacin 1',
     brojMernihMesta: 4,
     intervalIspitivanja: '12 meseci',
-    napomena: 'Periodično ispitivanje'
+    napomena: 'Periodično ispitivanje',
+    mikroklimaLetnja: 'Ne',
+    mikroklimaZimska: 'Ne',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Ne',
+    osvetljenje: 'Da'
   },
   {
     id: 3,
@@ -29,7 +39,12 @@ const sampleData = [
     nazivObjekta: 'Administrativni centar',
     brojMernihMesta: 6,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Kontrolno merenje'
+    napomena: 'Kontrolno merenje',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Ne',
+    hemijskeStetnosti: 'Ne',
+    osvetljenje: 'Da'
   },
   {
     id: 4,
@@ -38,7 +53,12 @@ const sampleData = [
     nazivObjekta: 'Proizvodna hala B',
     brojMernihMesta: 12,
     intervalIspitivanja: '3 meseca',
-    napomena: 'Vanredno ispitivanje'
+    napomena: 'Vanredno ispitivanje',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Da',
+    osvetljenje: 'Da'
   },
   {
     id: 5,
@@ -47,7 +67,12 @@ const sampleData = [
     nazivObjekta: 'Skladišna hala',
     brojMernihMesta: 5,
     intervalIspitivanja: '12 meseci',
-    napomena: 'Standardno ispitivanje'
+    napomena: 'Standardno ispitivanje',
+    mikroklimaLetnja: 'Ne',
+    mikroklimaZimska: 'Ne',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Ne',
+    osvetljenje: 'Da'
   },
   {
     id: 6,
@@ -56,7 +81,12 @@ const sampleData = [
     nazivObjekta: 'Servisni objekat',
     brojMernihMesta: 7,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Redovna kontrola'
+    napomena: 'Redovna kontrola',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Da',
+    osvetljenje: 'Da'
   },
   {
     id: 7,
@@ -65,7 +95,12 @@ const sampleData = [
     nazivObjekta: 'Magacinski prostor C',
     brojMernihMesta: 9,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Godišnje ispitivanje'
+    napomena: 'Godišnje ispitivanje',
+    mikroklimaLetnja: 'Ne',
+    mikroklimaZimska: 'Ne',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Ne',
+    osvetljenje: 'Da'
   },
   {
     id: 8,
@@ -74,7 +109,12 @@ const sampleData = [
     nazivObjekta: 'Proizvodna linija 2',
     brojMernihMesta: 15,
     intervalIspitivanja: '3 meseca',
-    napomena: 'Hitno ispitivanje'
+    napomena: 'Hitno ispitivanje',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Da',
+    osvetljenje: 'Da'
   },
   {
     id: 9,
@@ -83,7 +123,12 @@ const sampleData = [
     nazivObjekta: 'Kancelarijski prostor',
     brojMernihMesta: 3,
     intervalIspitivanja: '12 meseci',
-    napomena: 'Standardna provera'
+    napomena: 'Standardna provera',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Ne',
+    hemijskeStetnosti: 'Ne',
+    osvetljenje: 'Da'
   },
   {
     id: 10,
@@ -92,7 +137,12 @@ const sampleData = [
     nazivObjekta: 'Montažni objekat D',
     brojMernihMesta: 6,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Kvartalno ispitivanje'
+    napomena: 'Kvartalno ispitivanje',
+    mikroklimaLetnja: 'Da',
+    mikroklimaZimska: 'Da',
+    fizickeStetnosti: 'Da',
+    hemijskeStetnosti: 'Da',
+    osvetljenje: 'Da'
   }
 ];
 
@@ -103,6 +153,11 @@ const columns = [
   { key: 'brojMernihMesta', label: 'Broj mernih mesta', sortable: true },
   { key: 'intervalIspitivanja', label: 'Interval ispitivanja', sortable: true },
   { key: 'napomena', label: 'Napomena', sortable: true },
+  { key: 'mikroklimaLetnja', label: 'Mikroklima letnja', sortable: true },
+  { key: 'mikroklimaZimska', label: 'Mikroklima zimska', sortable: true },
+  { key: 'fizickeStetnosti', label: 'Fizičke štetnosti', sortable: true },
+  { key: 'hemijskeStetnosti', label: 'Hemijske štetnosti', sortable: true },
+  { key: 'osvetljenje', label: 'Osvetljenje', sortable: true },
 ];
 
 export default function IspitivanjeRadneSredine() {
@@ -148,7 +203,7 @@ export default function IspitivanjeRadneSredine() {
         </button>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] mr-6">
         <IspitivanjeRadneSredineDataTable
           data={data}
           columns={columns}

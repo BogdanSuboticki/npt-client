@@ -217,10 +217,10 @@ export default function LokacijeDataTable({ data: initialData, columns }: DataTa
                   >
                     {sortable ? (
                       <div
-                        className="flex items-center justify-between cursor-pointer"
+                        className="flex items-center justify-center cursor-pointer"
                         onClick={() => handleSort(key)}
                       >
-                        <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                        <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400 mr-2">
                           {index === 0 ? '' : label}
                         </p>
                         <button className="flex flex-col gap-0.5">

@@ -189,11 +189,23 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           height: '44px',
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                          '&:hover': {
+                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                          },
+                          '&.Mui-focused': {
+                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          },
                           cursor: 'pointer',
                         },
                         '& .MuiInputBase-input': {
                           padding: '12px 14px',
+                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                          '&::placeholder': {
+                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                            opacity: 1,
+                          },
                           cursor: 'pointer',
                         },
                       },
@@ -201,7 +213,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         style: {
                           borderRadius: 8,
                           height: 44,
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                           cursor: 'pointer',
                         },
                         endAdornment: (
@@ -245,11 +257,23 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           height: '44px',
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                          '&:hover': {
+                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                          },
+                          '&.Mui-focused': {
+                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          },
                           cursor: 'pointer',
                         },
                         '& .MuiInputBase-input': {
                           padding: '12px 14px',
+                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                          '&::placeholder': {
+                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                            opacity: 1,
+                          },
                           cursor: 'pointer',
                         },
                       },
@@ -257,7 +281,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         style: {
                           borderRadius: 8,
                           height: 44,
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                           cursor: 'pointer',
                         },
                         endAdornment: (
@@ -301,11 +325,23 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           height: '44px',
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                          '&:hover': {
+                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                          },
+                          '&.Mui-focused': {
+                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          },
                           cursor: 'pointer',
                         },
                         '& .MuiInputBase-input': {
                           padding: '12px 14px',
+                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                          '&::placeholder': {
+                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                            opacity: 1,
+                          },
                           cursor: 'pointer',
                         },
                       },
@@ -313,7 +349,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         style: {
                           borderRadius: 8,
                           height: 44,
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                           cursor: 'pointer',
                         },
                         endAdornment: (
@@ -357,11 +393,23 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           height: '44px',
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                          '&:hover': {
+                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                          },
+                          '&.Mui-focused': {
+                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          },
                           cursor: 'pointer',
                         },
                         '& .MuiInputBase-input': {
                           padding: '12px 14px',
+                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                          '&::placeholder': {
+                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                            opacity: 1,
+                          },
                           cursor: 'pointer',
                         },
                       },
@@ -369,7 +417,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                         style: {
                           borderRadius: 8,
                           height: 44,
-                          backgroundColor: '#F9FAFB',
+                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                           cursor: 'pointer',
                         },
                         endAdornment: (

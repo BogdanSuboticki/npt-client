@@ -118,6 +118,7 @@ export default function NovoIspitivanjeForm({ isOpen, onClose, onSave, title = "
                       size: "small",
                       fullWidth: true,
                       onClick: () => setIsDateOpen(true),
+                      onTouchStart: () => setIsDateOpen(true),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -155,6 +156,10 @@ export default function NovoIspitivanjeForm({ isOpen, onClose, onSave, title = "
                           <CalenderIcon 
                             className="w-5 h-5 text-gray-500 dark:text-gray-400 cursor-pointer" 
                             onClick={(e) => {
+                              e.stopPropagation();
+                              setIsDateOpen(true);
+                            }}
+                            onTouchStart={(e) => {
                               e.stopPropagation();
                               setIsDateOpen(true);
                             }}

@@ -272,6 +272,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                       size: "small",
                       fullWidth: true,
                       onClick: () => setIsLekarskiOpen(true),
+                      onTouchStart: () => setIsLekarskiOpen(true),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -304,6 +305,10 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                           <CalenderIcon 
                             className="size-5 text-gray-500 dark:text-gray-400" 
                             onClick={(e) => {
+                              e.stopPropagation();
+                              setIsLekarskiOpen(true);
+                            }}
+                            onTouchStart={(e) => {
                               e.stopPropagation();
                               setIsLekarskiOpen(true);
                             }}
@@ -354,6 +359,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                       size: "small",
                       fullWidth: true,
                       onClick: () => setIsNaredniLekarskiOpen(true),
+                      onTouchStart: () => setIsNaredniLekarskiOpen(true),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -386,6 +392,10 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                           <CalenderIcon 
                             className="size-5 text-gray-500 dark:text-gray-400" 
                             onClick={(e) => {
+                              e.stopPropagation();
+                              setIsNaredniLekarskiOpen(true);
+                            }}
+                            onTouchStart={(e) => {
                               e.stopPropagation();
                               setIsNaredniLekarskiOpen(true);
                             }}

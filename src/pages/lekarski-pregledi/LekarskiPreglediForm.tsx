@@ -12,6 +12,26 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Checkbox from "../../components/form/input/Checkbox";
 
+// Mobile detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkIsMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isTablet = /ipad|android(?=.*\b(?!.*\b(?:mobile|phone)\b))/.test(userAgent);
+      setIsMobile(isMobileDevice || isTablet);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
+};
+
 interface LekarskiPreglediFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,6 +40,7 @@ interface LekarskiPreglediFormProps {
 
 export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: LekarskiPreglediFormProps) {
   const { theme: appTheme } = useTheme();
+  const isMobile = useIsMobile();
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",
@@ -247,77 +268,90 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
 
               <div className="col-span-1">
                 <Label>Datum lekarskog pregleda *</Label>
-                <DatePicker
-                  value={formData.datumLekarskog}
-                  onChange={(newValue) => {
-                    if (newValue) {
-                      setFormData(prev => ({ ...prev, datumLekarskog: newValue }));
-                      setIsLekarskiOpen(false);
-                    }
-                  }}
-                  format="dd/MM/yyyy"
-                  open={isLekarskiOpen}
-                  onOpen={() => setIsLekarskiOpen(true)}
-                  onClose={() => setIsLekarskiOpen(false)}
-                  slots={{
-                    toolbar: () => null
-                  }}
-                  slotProps={{
-                    popper: {
-                      sx: {
-                        zIndex: 9999999
+                {isMobile ? (
+                  <input
+                    type="date"
+                    value={formData.datumLekarskog ? formData.datumLekarskog.toISOString().split('T')[0] : ''}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : new Date();
+                      setFormData(prev => ({ ...prev, datumLekarskog: date }));
+                    }}
+                    className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                    required
+                  />
+                ) : (
+                  <DatePicker
+                    value={formData.datumLekarskog}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        setFormData(prev => ({ ...prev, datumLekarskog: newValue }));
+                        setIsLekarskiOpen(false);
                       }
-                    },
-                    textField: {
-                      size: "small",
-                      fullWidth: true,
-                      onClick: () => setIsLekarskiOpen(true),
-                      onTouchStart: () => setIsLekarskiOpen(true),
-                      sx: {
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '8px',
-                          height: '44px',
-                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                          '&:hover': {
-                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                    }}
+                    format="dd/MM/yyyy"
+                    open={isLekarskiOpen}
+                    onOpen={() => setIsLekarskiOpen(true)}
+                    onClose={() => setIsLekarskiOpen(false)}
+                    slots={{
+                      toolbar: () => null
+                    }}
+                    slotProps={{
+                      popper: {
+                        sx: {
+                          zIndex: 9999999
+                        }
+                      },
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        onClick: () => setIsLekarskiOpen(true),
+                        onTouchStart: () => setIsLekarskiOpen(true),
+                        sx: {
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            height: '44px',
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                            borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                            '&:hover': {
+                              borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                            },
+                            '&.Mui-focused': {
+                              borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                            },
                           },
-                          '&.Mui-focused': {
-                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          '& .MuiInputBase-input': {
+                            padding: '12px 14px',
+                            color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                            '&::placeholder': {
+                              color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                              opacity: 1,
+                            },
                           },
                         },
-                        '& .MuiInputBase-input': {
-                          padding: '12px 14px',
-                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                          '&::placeholder': {
-                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                            opacity: 1,
+                        InputProps: {
+                          style: {
+                            borderRadius: 8,
+                            height: 44,
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                           },
+                          endAdornment: (
+                            <CalenderIcon 
+                              className="size-5 text-gray-500 dark:text-gray-400" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsLekarskiOpen(true);
+                              }}
+                              onTouchStart={(e) => {
+                                e.stopPropagation();
+                                setIsLekarskiOpen(true);
+                              }}
+                            />
+                          ),
                         },
                       },
-                      InputProps: {
-                        style: {
-                          borderRadius: 8,
-                          height: 44,
-                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                        },
-                        endAdornment: (
-                          <CalenderIcon 
-                            className="size-5 text-gray-500 dark:text-gray-400" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsLekarskiOpen(true);
-                            }}
-                            onTouchStart={(e) => {
-                              e.stopPropagation();
-                              setIsLekarskiOpen(true);
-                            }}
-                          />
-                        ),
-                      },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                )}
               </div>
 
               <div className="col-span-1">
@@ -334,77 +368,90 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
 
               <div className="col-span-1">
                 <Label>Datum narednog lekarskog pregleda *</Label>
-                <DatePicker
-                  value={formData.datumNarednogLekarskog}
-                  onChange={(newValue) => {
-                    if (newValue) {
-                      setFormData(prev => ({ ...prev, datumNarednogLekarskog: newValue }));
-                      setIsNaredniLekarskiOpen(false);
-                    }
-                  }}
-                  format="dd/MM/yyyy"
-                  open={isNaredniLekarskiOpen}
-                  onOpen={() => setIsNaredniLekarskiOpen(true)}
-                  onClose={() => setIsNaredniLekarskiOpen(false)}
-                  slots={{
-                    toolbar: () => null
-                  }}
-                  slotProps={{
-                    popper: {
-                      sx: {
-                        zIndex: 9999999
+                {isMobile ? (
+                  <input
+                    type="date"
+                    value={formData.datumNarednogLekarskog ? formData.datumNarednogLekarskog.toISOString().split('T')[0] : ''}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : new Date();
+                      setFormData(prev => ({ ...prev, datumNarednogLekarskog: date }));
+                    }}
+                    className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                    required
+                  />
+                ) : (
+                  <DatePicker
+                    value={formData.datumNarednogLekarskog}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        setFormData(prev => ({ ...prev, datumNarednogLekarskog: newValue }));
+                        setIsNaredniLekarskiOpen(false);
                       }
-                    },
-                    textField: {
-                      size: "small",
-                      fullWidth: true,
-                      onClick: () => setIsNaredniLekarskiOpen(true),
-                      onTouchStart: () => setIsNaredniLekarskiOpen(true),
-                      sx: {
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '8px',
-                          height: '44px',
-                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                          borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                          '&:hover': {
-                            borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                    }}
+                    format="dd/MM/yyyy"
+                    open={isNaredniLekarskiOpen}
+                    onOpen={() => setIsNaredniLekarskiOpen(true)}
+                    onClose={() => setIsNaredniLekarskiOpen(false)}
+                    slots={{
+                      toolbar: () => null
+                    }}
+                    slotProps={{
+                      popper: {
+                        sx: {
+                          zIndex: 9999999
+                        }
+                      },
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        onClick: () => setIsNaredniLekarskiOpen(true),
+                        onTouchStart: () => setIsNaredniLekarskiOpen(true),
+                        sx: {
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            height: '44px',
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                            borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                            '&:hover': {
+                              borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                            },
+                            '&.Mui-focused': {
+                              borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                            },
                           },
-                          '&.Mui-focused': {
-                            borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                          '& .MuiInputBase-input': {
+                            padding: '12px 14px',
+                            color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                            '&::placeholder': {
+                              color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                              opacity: 1,
+                            },
                           },
                         },
-                        '& .MuiInputBase-input': {
-                          padding: '12px 14px',
-                          color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                          '&::placeholder': {
-                            color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                            opacity: 1,
+                        InputProps: {
+                          style: {
+                            borderRadius: 8,
+                            height: 44,
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                           },
+                          endAdornment: (
+                            <CalenderIcon 
+                              className="size-5 text-gray-500 dark:text-gray-400" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsNaredniLekarskiOpen(true);
+                              }}
+                              onTouchStart={(e) => {
+                                e.stopPropagation();
+                                setIsNaredniLekarskiOpen(true);
+                              }}
+                            />
+                          ),
                         },
                       },
-                      InputProps: {
-                        style: {
-                          borderRadius: 8,
-                          height: 44,
-                          backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                        },
-                        endAdornment: (
-                          <CalenderIcon 
-                            className="size-5 text-gray-500 dark:text-gray-400" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsNaredniLekarskiOpen(true);
-                            }}
-                            onTouchStart={(e) => {
-                              e.stopPropagation();
-                              setIsNaredniLekarskiOpen(true);
-                            }}
-                          />
-                        ),
-                      },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                )}
               </div>
             </div>
 

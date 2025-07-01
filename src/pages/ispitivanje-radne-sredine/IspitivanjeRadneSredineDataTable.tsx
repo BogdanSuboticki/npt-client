@@ -315,6 +315,11 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                             ),
                           },
                         },
+                        popper: {
+                          sx: {
+                            zIndex: 9999999
+                          }
+                        },
                       }}
                       format="dd/MM/yyyy"
                     />
@@ -379,6 +384,11 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                               />
                             ),
                           },
+                        },
+                        popper: {
+                          sx: {
+                            zIndex: 9999999
+                          }
                         },
                       }}
                       format="dd/MM/yyyy"

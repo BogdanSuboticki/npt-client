@@ -379,6 +379,11 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                           ),
                         },
                       },
+                      popper: {
+                        sx: {
+                          zIndex: 9999999
+                        }
+                      },
                     }}
                     format="dd/MM/yyyy"
                   />
@@ -443,6 +448,11 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                             />
                           ),
                         },
+                      },
+                      popper: {
+                        sx: {
+                          zIndex: 9999999
+                        }
                       },
                     }}
                     format="dd/MM/yyyy"

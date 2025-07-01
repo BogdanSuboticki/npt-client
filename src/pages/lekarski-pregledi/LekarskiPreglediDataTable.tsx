@@ -261,6 +261,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                           size: "small",
                           fullWidth: true,
                           onClick: () => setIsFromOpen(true),
+                          onTouchStart: () => setIsFromOpen(true),
                           sx: {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
@@ -290,7 +291,16 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                               backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                             },
                             endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsFromOpen(true);
+                                }}
+                                onTouchStart={(e) => {
+                                  e.stopPropagation();
+                                  setIsFromOpen(true);
+                                }}
+                              />
                             ),
                           },
                         },
@@ -314,6 +324,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                           size: "small",
                           fullWidth: true,
                           onClick: () => setIsToOpen(true),
+                          onTouchStart: () => setIsToOpen(true),
                           sx: {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
@@ -343,7 +354,16 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                               backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                             },
                             endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsToOpen(true);
+                                }}
+                                onTouchStart={(e) => {
+                                  e.stopPropagation();
+                                  setIsToOpen(true);
+                                }}
+                              />
                             ),
                           },
                         },
@@ -554,6 +574,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                   size: "small",
                   fullWidth: true,
                   onClick: () => setIsDatePickerOpen(true),
+                  onTouchStart: () => setIsDatePickerOpen(true),
                   sx: {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
@@ -583,7 +604,16 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                       backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
                     },
                     endAdornment: (
-                      <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" />
+                      <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDatePickerOpen(true);
+                        }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          setIsDatePickerOpen(true);
+                        }}
+                      />
                     ),
                   },
                 },

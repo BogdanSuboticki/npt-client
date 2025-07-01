@@ -185,6 +185,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                       size: "small",
                       fullWidth: true,
                       onClick: () => toggleDatePicker('osposobljavanjeBZR'),
+                      onTouchStart: () => toggleDatePicker('osposobljavanjeBZR'),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -223,6 +224,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                               e.stopPropagation();
                               toggleDatePicker('osposobljavanjeBZR');
                             }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              toggleDatePicker('osposobljavanjeBZR');
+                            }}
                           />
                         ),
                       },
@@ -253,6 +258,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                       size: "small",
                       fullWidth: true,
                       onClick: () => toggleDatePicker('datumNarednogBZR'),
+                      onTouchStart: () => toggleDatePicker('datumNarednogBZR'),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -291,6 +297,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                               e.stopPropagation();
                               toggleDatePicker('datumNarednogBZR');
                             }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              toggleDatePicker('datumNarednogBZR');
+                            }}
                           />
                         ),
                       },
@@ -321,6 +331,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                       size: "small",
                       fullWidth: true,
                       onClick: () => toggleDatePicker('osposobljavanjeZOP'),
+                      onTouchStart: () => toggleDatePicker('osposobljavanjeZOP'),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -359,6 +370,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                               e.stopPropagation();
                               toggleDatePicker('osposobljavanjeZOP');
                             }}
+                            onTouchStart={(e) => {
+                              e.stopPropagation();
+                              toggleDatePicker('osposobljavanjeZOP');
+                            }}
                           />
                         ),
                       },
@@ -389,6 +404,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                       size: "small",
                       fullWidth: true,
                       onClick: () => toggleDatePicker('datumNarednogZOP'),
+                      onTouchStart: () => toggleDatePicker('datumNarednogZOP'),
                       sx: {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
@@ -424,6 +440,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                           <CalenderIcon 
                             className="size-5 text-gray-500 dark:text-gray-400 cursor-pointer" 
                             onClick={(e) => {
+                              e.stopPropagation();
+                              toggleDatePicker('datumNarednogZOP');
+                            }}
+                            onTouchStart={(e) => {
                               e.stopPropagation();
                               toggleDatePicker('datumNarednogZOP');
                             }}

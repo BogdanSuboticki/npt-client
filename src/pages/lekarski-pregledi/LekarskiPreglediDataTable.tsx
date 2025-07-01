@@ -567,7 +567,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
               slotProps={{
                 popper: {
                   sx: {
-                    zIndex: 999999
+                    zIndex: 9999999
                   }
                 },
                 textField: {

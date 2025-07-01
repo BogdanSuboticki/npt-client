@@ -111,7 +111,7 @@ export default function NovoIspitivanjeForm({ isOpen, onClose, onSave, title = "
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {

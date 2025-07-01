@@ -265,7 +265,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {
@@ -352,7 +352,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {

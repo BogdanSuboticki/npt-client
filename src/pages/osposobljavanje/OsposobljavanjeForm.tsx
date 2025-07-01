@@ -178,7 +178,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {
@@ -251,7 +251,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {
@@ -324,7 +324,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {
@@ -397,7 +397,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                   slotProps={{
                     popper: {
                       sx: {
-                        zIndex: 999999
+                        zIndex: 9999999
                       }
                     },
                     textField: {

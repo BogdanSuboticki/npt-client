@@ -81,6 +81,9 @@ import EvidencijaPreglediOpreme from "./pages/evidencija_pregledi_opreme";
 import EvidencijaElektricneInstalacije from "./pages/evidencija_elektricne_instalacije";
 import EvidencijaIspitivanjaSredine from "./pages/evidencija_ispitivanja_sredine";
 import EvidencijaZastitnaOprema from "./pages/evidencija_zastitna_oprema";
+import BezbednosneProverePage from "./pages/bezbednosne-provere/page";
+import PovredePage from "./pages/povrede/page";
+import PreglediOpremePage from "./pages/pregledi-opreme/page";
 
 export default function App() {
   return (
@@ -98,7 +101,9 @@ export default function App() {
             <Route path="/saas" element={<Saas />} />
             <Route path="/lekarski-pregledi" element={<LekarskiPreglediPage />} />
             <Route path="/ispitivanje-radne-sredine" element={<IspitivanjeRadneSredine />} />
-
+            <Route path="/bezbednosne-provere" element={<BezbednosneProverePage />} />
+            <Route path="/povrede" element={<PovredePage />} />
+            <Route path="/pregledi-opreme" element={<PreglediOpremePage />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />

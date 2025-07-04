@@ -14,7 +14,7 @@ import PaginationWithTextAndIcon from "../../components/ui/pagination/Pagination
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
-import Button from "../../components/ui/button/Button";
+import Label from "../../components/form/Label";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { sr } from "date-fns/locale";
@@ -48,24 +48,26 @@ interface Column {
   sortable: boolean;
 }
 
-interface LekarskiPreglediData {
+interface PreglediOpremeData {
   id: number;
-  zaposleni: string;
-  radnoMesto: string;
-  povecanRizik: boolean;
-  nocniRad: boolean;
-  vrstaLekarskog: string;
-  datumLekarskog: Date;
-  datumNarednogLekarskog: Date;
+  redniBroj: number;
+  nazivOpreme: string;
+  inventarniBroj: string;
+  lokacija: string;
+  datumPregleda: Date;
+  intervalPregleda: string;
+  status: string;
+  datumNarednogPregleda: Date;
+  napomena: string;
   [key: string]: any;
 }
 
 interface DataTableProps {
-  data: LekarskiPreglediData[];
+  data: PreglediOpremeData[];
   columns: Column[];
 }
 
-export default function LekarskiPreglediDataTable({ data: initialData, columns }: DataTableProps) {
+export default function PreglediOpremeDataTable({ data: initialData, columns }: DataTableProps) {
   const { theme: appTheme } = useTheme();
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,20 +77,19 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [showAktivni, setShowAktivni] = useState(true);
+  const [modalStatus, setModalStatus] = useState(true); // true for "Ispravno", false for "Neispravno"
+
   
   // Get unique values for dropdowns
-  const uniqueZaposleni = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.zaposleni)));
+  const uniqueOprema = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.nazivOpreme)));
   }, [initialData]);
 
-  const uniqueVrsteLekarskog = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.vrstaLekarskog)));
-  }, [initialData]);
+  const statusOptions = ["Ispravno", "Neispravno"];
 
   // Initialize with all items selected
-  const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
-  const [selectedVrsteLekarskog, setSelectedVrsteLekarskog] = useState<string[]>(uniqueVrsteLekarskog);
+  const [selectedOprema, setSelectedOprema] = useState<string[]>(uniqueOprema);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>(statusOptions);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [isFromOpen, setIsFromOpen] = useState(false);
@@ -97,15 +98,14 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
-        if (selectedZaposleni.length === 0 || selectedVrsteLekarskog.length === 0) {
+        if (selectedOprema.length === 0 || selectedStatus.length === 0) {
           return false;
         }
-        const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
-        const matchesVrsta = selectedVrsteLekarskog.includes(item.vrstaLekarskog);
-        const matchesDateRange = (!dateFrom || item.datumLekarskog >= dateFrom) &&
-                               (!dateTo || item.datumLekarskog <= dateTo);
-        const matchesAktivni = !showAktivni || item.aktivan;
-        return matchesZaposleni && matchesVrsta && matchesDateRange && matchesAktivni;
+        const matchesOprema = selectedOprema.includes(item.nazivOpreme);
+        const matchesStatus = selectedStatus.includes(item.status);
+        const matchesDateRange = (!dateFrom || item.datumPregleda >= dateFrom) &&
+                               (!dateTo || item.datumPregleda <= dateTo);
+        return matchesOprema && matchesStatus && matchesDateRange;
       })
       .sort((a, b) => {
         if (sortKey.includes('datum')) {
@@ -122,7 +122,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedZaposleni, selectedVrsteLekarskog, dateFrom, dateTo, initialData, showAktivni]);
+  }, [sortKey, sortOrder, selectedOprema, selectedStatus, dateFrom, dateTo, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -147,7 +147,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
 
   const handleSave = () => {
     // Handle save logic here
-    console.log("Saving lekarski pregled with date:", modalDate);
+    console.log("Saving pregled opreme with date:", modalDate, "status:", modalStatus ? "Ispravno" : "Neispravno");
     closeModal();
   };
 
@@ -255,18 +255,22 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           </div>
 
               <div className="flex flex-col lg:flex-row gap-4">
-                <FilterDropdown
-                  label="Zaposleni"
-                  options={uniqueZaposleni}
-                  selectedOptions={selectedZaposleni}
-                  onSelectionChange={setSelectedZaposleni}
-                />
-                <FilterDropdown
-                  label="Vrsta lekarskog"
-                  options={uniqueVrsteLekarskog}
-                  selectedOptions={selectedVrsteLekarskog}
-                  onSelectionChange={setSelectedVrsteLekarskog}
-                />
+                <div className="w-full lg:w-64">
+                  <FilterDropdown
+                    label="Oprema"
+                    options={uniqueOprema}
+                    selectedOptions={selectedOprema}
+                    onSelectionChange={setSelectedOprema}
+                  />
+                </div>
+                <div className="w-full lg:w-48">
+                  <FilterDropdown
+                    label="Status"
+                    options={statusOptions}
+                    selectedOptions={selectedStatus}
+                    onSelectionChange={setSelectedStatus}
+                  />
+                </div>
                 <div className="relative w-full lg:w-42">
                   {isMobile ? (
                     <input
@@ -427,15 +431,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                     />
                   )}
                 </div>
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={showAktivni}
-                    onChange={e => setShowAktivni(e.target.checked)}
-                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                  />
-                  Aktivni zaposleni
-                </label>
+
               </div>
             </div>
           </div>
@@ -516,22 +512,20 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                       {columns.map(({ key }, colIndex) => (
                         <TableCell
                           key={key}
-                          className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
+                          className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 break-words ${
                             colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
                           }`}
                         >
                           {key === 'redniBroj' ? (
                             startIndex + index + 1
-                          ) : key === 'povecanRizik' || key === 'nocniRad' ? (
-                            item[key] ? 'DA' : 'NE'
-                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' ? (
+                          ) : key === 'datumPregleda' || key === 'datumNarednogPregleda' ? (
                             formatDate(item[key])
                           ) : (
                             item[key]
                           )}
                         </TableCell>
                       ))}
-                      <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
+                      <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 border-r-0">
                         <div className="flex items-center w-full gap-2">
                           <button 
                             className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
@@ -604,99 +598,140 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           onClose={closeModal}
           className="max-w-[500px] p-5 lg:p-8"
         >
-          <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
-            Da li je izvršen novi lekarski pregled?
+          <h4 className="font-semibold text-gray-800 mb-4 text-xl dark:text-white/90">
+            Novi pregled opreme
           </h4>
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Datum izvršenog pregleda:
-            </p>
-            {isMobile ? (
-              <input
-                type="date"
-                value={modalDate ? modalDate.toISOString().split('T')[0] : ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : null;
-                  handleDateChange(date);
-                }}
-                className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-              />
-            ) : (
-              <DatePicker
-                value={modalDate}
-                onChange={handleDateChange}
-                open={isDatePickerOpen}
-                onOpen={() => setIsDatePickerOpen(true)}
-                onClose={() => setIsDatePickerOpen(false)}
-                slots={{
-                  toolbar: () => null
-                }}
-                slotProps={{
-                  popper: {
-                    sx: {
-                      zIndex: 9999999
-                    }
-                  },
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    onClick: () => setIsDatePickerOpen(true),
-                    onTouchStart: () => setIsDatePickerOpen(true),
-                    sx: {
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '8px',
-                        height: '44px',
-                        backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                        borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                        '&:hover': {
-                          borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+            <div className="space-y-4">
+              <div>
+                <Label>Status pregleda</Label>
+                <div className="mt-2">
+                  <div className="tabs-container">
+                    <div className="tabs-wrapper">
+                      <input 
+                        type="radio" 
+                        id="radio-ispravno" 
+                        name="status-tabs" 
+                        checked={modalStatus}
+                        onChange={() => setModalStatus(true)}
+                      />
+                      <label className="tab" htmlFor="radio-ispravno">
+                        Ispravno
+                      </label>
+                      <input 
+                        type="radio" 
+                        id="radio-neispravno" 
+                        name="status-tabs" 
+                        checked={!modalStatus}
+                        onChange={() => setModalStatus(false)}
+                      />
+                      <label className="tab" htmlFor="radio-neispravno">
+                        Neispravno
+                      </label>
+                      <span className="glider"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>Datum izvršenog pregleda *</Label>
+                {isMobile ? (
+                  <input
+                    type="date"
+                    value={modalDate ? modalDate.toISOString().split('T')[0] : ''}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : null;
+                      handleDateChange(date);
+                    }}
+                    className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                  />
+                ) : (
+                  <DatePicker
+                    value={modalDate}
+                    onChange={handleDateChange}
+                    open={isDatePickerOpen}
+                    onOpen={() => setIsDatePickerOpen(true)}
+                    onClose={() => setIsDatePickerOpen(false)}
+                    slots={{
+                      toolbar: () => null
+                    }}
+                    slotProps={{
+                      popper: {
+                        sx: {
+                          zIndex: 9999999
+                        }
+                      },
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        onClick: () => setIsDatePickerOpen(true),
+                        onTouchStart: () => setIsDatePickerOpen(true),
+                        sx: {
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '8px',
+                            height: '44px',
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                            borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
+                            '&:hover': {
+                              borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
+                            },
+                            '&.Mui-focused': {
+                              borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                            },
+                          },
+                          '& .MuiInputBase-input': {
+                            padding: '12px 14px',
+                            color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                            '&::placeholder': {
+                              color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                              opacity: 1,
+                            },
+                          },
                         },
-                        '&.Mui-focused': {
-                          borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
+                        InputProps: {
+                          style: {
+                            borderRadius: 8,
+                            height: 44,
+                            backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
+                          },
+                          endAdornment: (
+                            <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsDatePickerOpen(true);
+                              }}
+                              onTouchStart={(e) => {
+                                e.stopPropagation();
+                                setIsDatePickerOpen(true);
+                              }}
+                            />
+                          ),
                         },
                       },
-                      '& .MuiInputBase-input': {
-                        padding: '12px 14px',
-                        color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                        '&::placeholder': {
-                          color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                          opacity: 1,
-                        },
-                      },
-                    },
-                    InputProps: {
-                      style: {
-                        borderRadius: 8,
-                        height: 44,
-                        backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                      },
-                      endAdornment: (
-                        <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsDatePickerOpen(true);
-                          }}
-                          onTouchStart={(e) => {
-                            e.stopPropagation();
-                            setIsDatePickerOpen(true);
-                          }}
-                        />
-                      ),
-                    },
-                  },
-                }}
-                format="dd/MM/yyyy"
-              />
-            )}
-          </div>
-          <div className="flex items-center justify-end w-full gap-3">
-            <Button size="sm" variant="outline" onClick={closeModal}>
-              Otkaži
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Sačuvaj
-            </Button>
-          </div>
+                    }}
+                    format="dd/MM/yyyy"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+              >
+                Otkaži
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
+              >
+                Sačuvaj
+              </button>
+            </div>
+          </form>
         </Modal>
       </LocalizationProvider>
     </ThemeProvider>

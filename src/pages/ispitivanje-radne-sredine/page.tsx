@@ -203,7 +203,7 @@ export default function IspitivanjeRadneSredine() {
         </button>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] lg:mr-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
         <IspitivanjeRadneSredineDataTable
           data={data}
           columns={columns}

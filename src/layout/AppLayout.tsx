@@ -19,13 +19,14 @@ const LayoutContent: React.FC = () => {
         } ${isMobileOpen ? "ml-0" : ""}`}
       >
         <AppHeader />
-        <div className="p-4 mx-auto max-w-7xl md:p-6">
+        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 ">
           <Outlet />
         </div>
       </div>
     </div>
   );
 };
+// class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6"
 
 const AppLayout: React.FC = () => {
   return (

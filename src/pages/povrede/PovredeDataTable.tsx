@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import React from "react";
 import {
   Table,
@@ -9,12 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { CalenderIcon, EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
+import { CalenderIcon, EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
-import { useModal } from "../../hooks/useModal";
-import { Modal } from "../../components/ui/modal";
-import Button from "../../components/ui/button/Button";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { sr } from "date-fns/locale";
@@ -48,47 +45,43 @@ interface Column {
   sortable: boolean;
 }
 
-interface LekarskiPreglediData {
+interface PovredeData {
   id: number;
+  redniBroj: number;
   zaposleni: string;
-  radnoMesto: string;
-  povecanRizik: boolean;
-  nocniRad: boolean;
-  vrstaLekarskog: string;
-  datumLekarskog: Date;
-  datumNarednogLekarskog: Date;
+  datumPovrede: Date;
+  datumObaveštavanjaInspekcije: Date;
+  datumOtvaranjaListe: Date;
+  datumOvereLekara: Date;
+  datumPreuzimanjaIzFonda: Date;
+  datumPredavanjaPoslodavcu: Date;
+  tezinaPovrede: string;
+  napomena: string;
   [key: string]: any;
 }
 
 interface DataTableProps {
-  data: LekarskiPreglediData[];
+  data: PovredeData[];
   columns: Column[];
 }
 
-export default function LekarskiPreglediDataTable({ data: initialData, columns }: DataTableProps) {
+export default function PovredeDataTable({ data: initialData, columns }: DataTableProps) {
   const { theme: appTheme } = useTheme();
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const { isOpen, openModal, closeModal } = useModal();
-  const [modalDate, setModalDate] = useState<Date>(new Date());
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [showAktivni, setShowAktivni] = useState(true);
+
+
   
   // Get unique values for dropdowns
   const uniqueZaposleni = useMemo(() => {
     return Array.from(new Set(initialData.map(item => item.zaposleni)));
   }, [initialData]);
 
-  const uniqueVrsteLekarskog = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.vrstaLekarskog)));
-  }, [initialData]);
-
   // Initialize with all items selected
   const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
-  const [selectedVrsteLekarskog, setSelectedVrsteLekarskog] = useState<string[]>(uniqueVrsteLekarskog);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [isFromOpen, setIsFromOpen] = useState(false);
@@ -97,15 +90,13 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
-        if (selectedZaposleni.length === 0 || selectedVrsteLekarskog.length === 0) {
+        if (selectedZaposleni.length === 0) {
           return false;
         }
         const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
-        const matchesVrsta = selectedVrsteLekarskog.includes(item.vrstaLekarskog);
-        const matchesDateRange = (!dateFrom || item.datumLekarskog >= dateFrom) &&
-                               (!dateTo || item.datumLekarskog <= dateTo);
-        const matchesAktivni = !showAktivni || item.aktivan;
-        return matchesZaposleni && matchesVrsta && matchesDateRange && matchesAktivni;
+        const matchesDateRange = (!dateFrom || item.datumPovrede >= dateFrom) &&
+                               (!dateTo || item.datumPovrede <= dateTo);
+        return matchesZaposleni && matchesDateRange;
       })
       .sort((a, b) => {
         if (sortKey.includes('datum')) {
@@ -122,7 +113,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedZaposleni, selectedVrsteLekarskog, dateFrom, dateTo, initialData, showAktivni]);
+  }, [sortKey, sortOrder, selectedZaposleni, dateFrom, dateTo, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -140,45 +131,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
     }
   };
 
-  const handleCheckboxClick = () => {
-    setModalDate(new Date()); // Reset to today's date when opening
-    openModal();
-  };
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving lekarski pregled with date:", modalDate);
-    closeModal();
-  };
-
-  // Close date picker when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setIsDatePickerOpen(false);
-    }
-  }, [isOpen]);
-
-  // Add click outside handler for date picker
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.MuiPickersPopper-root') && !target.closest('.MuiInputBase-root')) {
-        setIsDatePickerOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleDateChange = (value: Date | null) => {
-    if (value) {
-      setModalDate(value);
-      setIsDatePickerOpen(false);
-    }
-  };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
@@ -260,12 +213,6 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                   options={uniqueZaposleni}
                   selectedOptions={selectedZaposleni}
                   onSelectionChange={setSelectedZaposleni}
-                />
-                <FilterDropdown
-                  label="Vrsta lekarskog"
-                  options={uniqueVrsteLekarskog}
-                  selectedOptions={selectedVrsteLekarskog}
-                  onSelectionChange={setSelectedVrsteLekarskog}
                 />
                 <div className="relative w-full lg:w-42">
                   {isMobile ? (
@@ -427,15 +374,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                     />
                   )}
                 </div>
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={showAktivni}
-                    onChange={e => setShowAktivni(e.target.checked)}
-                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                  />
-                  Aktivni zaposleni
-                </label>
+
               </div>
             </div>
           </div>
@@ -524,7 +463,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                             startIndex + index + 1
                           ) : key === 'povecanRizik' || key === 'nocniRad' ? (
                             item[key] ? 'DA' : 'NE'
-                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' ? (
+                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' || key === 'datumPovrede' || key === 'datumObaveštavanjaInspekcije' || key === 'datumOtvaranjaListe' || key === 'datumOvereLekara' || key === 'datumPreuzimanjaIzFonda' || key === 'datumPredavanjaPoslodavcu' ? (
                             formatDate(item[key])
                           ) : (
                             item[key]
@@ -533,41 +472,6 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
-                          <button 
-                            className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                            onClick={handleCheckboxClick}
-                          >
-                            <svg
-                              className="size-4"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <rect
-                                x="2"
-                                y="2"
-                                width="12"
-                                height="12"
-                                rx="2"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                fill="none"
-                              />
-                              <path
-                                d="M6 8L8 10L10 6"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                              />
-                            </svg>
-                          </button>
-                          <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                            <LightbulbIcon className="size-5" />
-                          </button>
                           <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                             <EditButtonIcon className="size-4" />
                           </button>
@@ -598,106 +502,6 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
             </div>
           </div>
         </div>
-
-        <Modal
-          isOpen={isOpen}
-          onClose={closeModal}
-          className="max-w-[500px] p-5 lg:p-8"
-        >
-          <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
-            Da li je izvršen novi lekarski pregled?
-          </h4>
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Datum izvršenog pregleda:
-            </p>
-            {isMobile ? (
-              <input
-                type="date"
-                value={modalDate ? modalDate.toISOString().split('T')[0] : ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : null;
-                  handleDateChange(date);
-                }}
-                className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-              />
-            ) : (
-              <DatePicker
-                value={modalDate}
-                onChange={handleDateChange}
-                open={isDatePickerOpen}
-                onOpen={() => setIsDatePickerOpen(true)}
-                onClose={() => setIsDatePickerOpen(false)}
-                slots={{
-                  toolbar: () => null
-                }}
-                slotProps={{
-                  popper: {
-                    sx: {
-                      zIndex: 9999999
-                    }
-                  },
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    onClick: () => setIsDatePickerOpen(true),
-                    onTouchStart: () => setIsDatePickerOpen(true),
-                    sx: {
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '8px',
-                        height: '44px',
-                        backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                        borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                        '&:hover': {
-                          borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        padding: '12px 14px',
-                        color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                        '&::placeholder': {
-                          color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                          opacity: 1,
-                        },
-                      },
-                    },
-                    InputProps: {
-                      style: {
-                        borderRadius: 8,
-                        height: 44,
-                        backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                      },
-                      endAdornment: (
-                        <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsDatePickerOpen(true);
-                          }}
-                          onTouchStart={(e) => {
-                            e.stopPropagation();
-                            setIsDatePickerOpen(true);
-                          }}
-                        />
-                      ),
-                    },
-                  },
-                }}
-                format="dd/MM/yyyy"
-              />
-            )}
-          </div>
-          <div className="flex items-center justify-end w-full gap-3">
-            <Button size="sm" variant="outline" onClick={closeModal}>
-              Otkaži
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Sačuvaj
-            </Button>
-          </div>
-        </Modal>
       </LocalizationProvider>
     </ThemeProvider>
   );

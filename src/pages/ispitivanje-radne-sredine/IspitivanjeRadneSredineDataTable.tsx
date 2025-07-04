@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -18,6 +18,26 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import NovoIspitivanjeForm from "./NovoIspitivanjeForm";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
+
+// Mobile detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  React.useEffect(() => {
+    const checkIsMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isTablet = /ipad|android(?=.*\b(?!.*\b(?:mobile|phone)\b))/.test(userAgent);
+      setIsMobile(isMobileDevice || isTablet);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
+};
 
 interface Column {
   key: string;
@@ -58,6 +78,7 @@ const formatDate = (dateStr: string | null | undefined): string => {
 
 export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns }: DataTableProps) {
   const { theme: appTheme } = useTheme();
+  const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
@@ -255,144 +276,168 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                 {/* Date Range */}
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
                   <div className="relative w-full lg:w-42">
-                    <DatePicker
-                      value={dateFrom}
-                      onChange={(newValue) => setDateFrom(newValue)}
-                      open={isFromOpen}
-                      onOpen={() => setIsFromOpen(true)}
-                      onClose={() => setIsFromOpen(false)}
-                      slots={{
-                        toolbar: () => null
-                      }}
-                      slotProps={{
-                        textField: {
-                          placeholder: "Datum od",
-                          size: "small",
-                          fullWidth: true,
-                          onClick: () => setIsFromOpen(true),
-                          onTouchStart: () => setIsFromOpen(true),
-                          sx: {
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '8px',
-                              height: '44px',
-                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                              '& fieldset': {
-                                borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
+                    {isMobile ? (
+                      <input
+                        type="date"
+                        value={dateFrom ? dateFrom.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const date = e.target.value ? new Date(e.target.value) : null;
+                          setDateFrom(date);
+                        }}
+                        className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                      />
+                    ) : (
+                      <DatePicker
+                        value={dateFrom}
+                        onChange={(newValue) => setDateFrom(newValue)}
+                        open={isFromOpen}
+                        onOpen={() => setIsFromOpen(true)}
+                        onClose={() => setIsFromOpen(false)}
+                        slots={{
+                          toolbar: () => null
+                        }}
+                        slotProps={{
+                          popper: {
+                            sx: {
+                              zIndex: 9999999
+                            }
+                          },
+                          textField: {
+                            placeholder: "Datum od",
+                            size: "small",
+                            fullWidth: true,
+                            onClick: () => setIsFromOpen(true),
+                            onTouchStart: () => setIsFromOpen(true),
+                            sx: {
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                height: '44px',
+                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
+                                '& fieldset': {
+                                  borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
+                                },
+                                '&:hover fieldset': {
+                                  borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
+                                },
+                                '&.Mui-focused fieldset': {
+                                  borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
+                                },
                               },
-                              '&:hover fieldset': {
-                                borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
-                              },
-                              '&.Mui-focused fieldset': {
-                                borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
+                              '& .MuiInputBase-input': {
+                                padding: '12px 14px',
+                                color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                                '&::placeholder': {
+                                  color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                                  opacity: 1,
+                                },
                               },
                             },
-                            '& .MuiInputBase-input': {
-                              padding: '12px 14px',
-                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                              '&::placeholder': {
-                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                                opacity: 1,
+                            InputProps: {
+                              style: {
+                                borderRadius: 8,
+                                height: 44,
+                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
                               },
+                              endAdornment: (
+                                <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsFromOpen(true);
+                                  }}
+                                  onTouchStart={(e) => {
+                                    e.stopPropagation();
+                                    setIsFromOpen(true);
+                                  }}
+                                />
+                              ),
                             },
                           },
-                          InputProps: {
-                            style: {
-                              borderRadius: 8,
-                              height: 44,
-                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                            },
-                            endAdornment: (
-                              <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsFromOpen(true);
-                                }}
-                                onTouchStart={(e) => {
-                                  e.stopPropagation();
-                                  setIsFromOpen(true);
-                                }}
-                              />
-                            ),
-                          },
-                        },
-                        popper: {
-                          sx: {
-                            zIndex: 9999999
-                          }
-                        },
-                      }}
-                      format="dd/MM/yyyy"
-                    />
+                        }}
+                        format="dd/MM/yyyy"
+                      />
+                    )}
                   </div>
                   <div className="relative w-full lg:w-42">
-                    <DatePicker
-                      value={dateTo}
-                      onChange={(newValue) => setDateTo(newValue)}
-                      open={isToOpen}
-                      onOpen={() => setIsToOpen(true)}
-                      onClose={() => setIsToOpen(false)}
-                      slots={{
-                        toolbar: () => null
-                      }}
-                      slotProps={{
-                        textField: {
-                          placeholder: "Datum do",
-                          size: "small",
-                          fullWidth: true,
-                          onClick: () => setIsToOpen(true),
-                          onTouchStart: () => setIsToOpen(true),
-                          sx: {
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '8px',
-                              height: '44px',
-                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                              '& fieldset': {
-                                borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
+                    {isMobile ? (
+                      <input
+                        type="date"
+                        value={dateTo ? dateTo.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const date = e.target.value ? new Date(e.target.value) : null;
+                          setDateTo(date);
+                        }}
+                        className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                      />
+                    ) : (
+                      <DatePicker
+                        value={dateTo}
+                        onChange={(newValue) => setDateTo(newValue)}
+                        open={isToOpen}
+                        onOpen={() => setIsToOpen(true)}
+                        onClose={() => setIsToOpen(false)}
+                        slots={{
+                          toolbar: () => null
+                        }}
+                        slotProps={{
+                          popper: {
+                            sx: {
+                              zIndex: 9999999
+                            }
+                          },
+                          textField: {
+                            placeholder: "Datum do",
+                            size: "small",
+                            fullWidth: true,
+                            onClick: () => setIsToOpen(true),
+                            onTouchStart: () => setIsToOpen(true),
+                            sx: {
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                height: '44px',
+                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
+                                '& fieldset': {
+                                  borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
+                                },
+                                '&:hover fieldset': {
+                                  borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
+                                },
+                                '&.Mui-focused fieldset': {
+                                  borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
+                                },
                               },
-                              '&:hover fieldset': {
-                                borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
-                              },
-                              '&.Mui-focused fieldset': {
-                                borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
+                              '& .MuiInputBase-input': {
+                                padding: '12px 14px',
+                                color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
+                                '&::placeholder': {
+                                  color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                                  opacity: 1,
+                                },
                               },
                             },
-                            '& .MuiInputBase-input': {
-                              padding: '12px 14px',
-                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                              '&::placeholder': {
-                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                                opacity: 1,
+                            InputProps: {
+                              style: {
+                                borderRadius: 8,
+                                height: 44,
+                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
                               },
+                              endAdornment: (
+                                <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsToOpen(true);
+                                  }}
+                                  onTouchStart={(e) => {
+                                    e.stopPropagation();
+                                    setIsToOpen(true);
+                                  }}
+                                />
+                              ),
                             },
                           },
-                          InputProps: {
-                            style: {
-                              borderRadius: 8,
-                              height: 44,
-                              backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                            },
-                            endAdornment: (
-                              <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsToOpen(true);
-                                }}
-                                onTouchStart={(e) => {
-                                  e.stopPropagation();
-                                  setIsToOpen(true);
-                                }}
-                              />
-                            ),
-                          },
-                        },
-                        popper: {
-                          sx: {
-                            zIndex: 9999999
-                          }
-                        },
-                      }}
-                      format="dd/MM/yyyy"
-                    />
+                        }}
+                        format="dd/MM/yyyy"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

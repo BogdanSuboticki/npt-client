@@ -48,24 +48,23 @@ interface Column {
   sortable: boolean;
 }
 
-interface LekarskiPreglediData {
+interface BezbednosneProvereData {
   id: number;
-  zaposleni: string;
-  radnoMesto: string;
-  povecanRizik: boolean;
-  nocniRad: boolean;
-  vrstaLekarskog: string;
-  datumLekarskog: Date;
-  datumNarednogLekarskog: Date;
+  redniBroj: number;
+  lokacija: string;
+  datumObilaska: Date;
+  periodObilaska: string;
+  sledeciObilazak: string;
+  napomena: string;
   [key: string]: any;
 }
 
 interface DataTableProps {
-  data: LekarskiPreglediData[];
+  data: BezbednosneProvereData[];
   columns: Column[];
 }
 
-export default function LekarskiPreglediDataTable({ data: initialData, columns }: DataTableProps) {
+export default function BezbednosneProvereDataTable({ data: initialData, columns }: DataTableProps) {
   const { theme: appTheme } = useTheme();
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,20 +74,16 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [showAktivni, setShowAktivni] = useState(true);
+  const [modalNapomena, setModalNapomena] = useState<string>('');
+
   
   // Get unique values for dropdowns
-  const uniqueZaposleni = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.zaposleni)));
-  }, [initialData]);
-
-  const uniqueVrsteLekarskog = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.vrstaLekarskog)));
+  const uniqueLokacije = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.lokacija)));
   }, [initialData]);
 
   // Initialize with all items selected
-  const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
-  const [selectedVrsteLekarskog, setSelectedVrsteLekarskog] = useState<string[]>(uniqueVrsteLekarskog);
+  const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [isFromOpen, setIsFromOpen] = useState(false);
@@ -97,15 +92,13 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
-        if (selectedZaposleni.length === 0 || selectedVrsteLekarskog.length === 0) {
+        if (selectedLokacije.length === 0) {
           return false;
         }
-        const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
-        const matchesVrsta = selectedVrsteLekarskog.includes(item.vrstaLekarskog);
-        const matchesDateRange = (!dateFrom || item.datumLekarskog >= dateFrom) &&
-                               (!dateTo || item.datumLekarskog <= dateTo);
-        const matchesAktivni = !showAktivni || item.aktivan;
-        return matchesZaposleni && matchesVrsta && matchesDateRange && matchesAktivni;
+        const matchesLokacije = selectedLokacije.includes(item.lokacija);
+        const matchesDateRange = (!dateFrom || item.datumObilaska >= dateFrom) &&
+                               (!dateTo || item.datumObilaska <= dateTo);
+        return matchesLokacije && matchesDateRange;
       })
       .sort((a, b) => {
         if (sortKey.includes('datum')) {
@@ -122,7 +115,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedZaposleni, selectedVrsteLekarskog, dateFrom, dateTo, initialData, showAktivni]);
+  }, [sortKey, sortOrder, selectedLokacije, dateFrom, dateTo, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -142,12 +135,13 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
 
   const handleCheckboxClick = () => {
     setModalDate(new Date()); // Reset to today's date when opening
+    setModalNapomena(''); // Reset napomena field
     openModal();
   };
 
   const handleSave = () => {
     // Handle save logic here
-    console.log("Saving lekarski pregled with date:", modalDate);
+    console.log("Saving bezbednosna provera with date:", modalDate, "and napomena:", modalNapomena);
     closeModal();
   };
 
@@ -256,16 +250,10 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
 
               <div className="flex flex-col lg:flex-row gap-4">
                 <FilterDropdown
-                  label="Zaposleni"
-                  options={uniqueZaposleni}
-                  selectedOptions={selectedZaposleni}
-                  onSelectionChange={setSelectedZaposleni}
-                />
-                <FilterDropdown
-                  label="Vrsta lekarskog"
-                  options={uniqueVrsteLekarskog}
-                  selectedOptions={selectedVrsteLekarskog}
-                  onSelectionChange={setSelectedVrsteLekarskog}
+                  label="Lokacija"
+                  options={uniqueLokacije}
+                  selectedOptions={selectedLokacije}
+                  onSelectionChange={setSelectedLokacije}
                 />
                 <div className="relative w-full lg:w-42">
                   {isMobile ? (
@@ -427,15 +415,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                     />
                   )}
                 </div>
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={showAktivni}
-                    onChange={e => setShowAktivni(e.target.checked)}
-                    className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
-                  />
-                  Aktivni zaposleni
-                </label>
+
               </div>
             </div>
           </div>
@@ -524,7 +504,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                             startIndex + index + 1
                           ) : key === 'povecanRizik' || key === 'nocniRad' ? (
                             item[key] ? 'DA' : 'NE'
-                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' ? (
+                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' ? (
                             formatDate(item[key])
                           ) : (
                             item[key]
@@ -605,7 +585,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
           className="max-w-[500px] p-5 lg:p-8"
         >
           <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
-            Da li je izvršen novi lekarski pregled?
+          Da li je izvršena nova bezbednosna provera? 
           </h4>
           <div className="mb-6">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -688,6 +668,18 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                 format="dd/MM/yyyy"
               />
             )}
+          </div>
+          <div className="mb-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Napomena:
+            </p>
+            <textarea
+              value={modalNapomena}
+              onChange={(e) => setModalNapomena(e.target.value)}
+              placeholder="Unesite napomenu..."
+              className="w-full px-4 py-3 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg resize-none dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10"
+              rows={3}
+            />
           </div>
           <div className="flex items-center justify-end w-full gap-3">
             <Button size="sm" variant="outline" onClick={closeModal}>

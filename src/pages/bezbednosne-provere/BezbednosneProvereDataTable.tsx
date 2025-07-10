@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import React from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -9,38 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { CalenderIcon, EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
+import { EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { sr } from "date-fns/locale";
-import { useTheme } from "../../context/ThemeContext";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
-// Mobile detection hook
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  React.useEffect(() => {
-    const checkIsMobile = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-      const isTablet = /ipad|android(?=.*\b(?!.*\b(?:mobile|phone)\b))/.test(userAgent);
-      setIsMobile(isMobileDevice || isTablet);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  return isMobile;
-};
+import CustomDatePicker from "../../components/form/input/DatePicker";
+import TextArea from "../../components/form/input/TextArea";
 
 interface Column {
   key: string;
@@ -65,15 +40,12 @@ interface DataTableProps {
 }
 
 export default function BezbednosneProvereDataTable({ data: initialData, columns }: DataTableProps) {
-  const { theme: appTheme } = useTheme();
-  const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [modalNapomena, setModalNapomena] = useState<string>('');
 
   
@@ -86,8 +58,6 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
   const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
-  const [isFromOpen, setIsFromOpen] = useState(false);
-  const [isToOpen, setIsToOpen] = useState(false);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData
@@ -145,35 +115,6 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
     closeModal();
   };
 
-  // Close date picker when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setIsDatePickerOpen(false);
-    }
-  }, [isOpen]);
-
-  // Add click outside handler for date picker
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.MuiPickersPopper-root') && !target.closest('.MuiInputBase-root')) {
-        setIsDatePickerOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleDateChange = (value: Date | null) => {
-    if (value) {
-      setModalDate(value);
-      setIsDatePickerOpen(false);
-    }
-  };
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
@@ -186,511 +127,279 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
     });
   };
 
-  // Create theme based on app theme with high z-index for MUI Popper
-  const muiTheme = createTheme({
-    palette: {
-      mode: appTheme,
-    },
-    components: {
-      MuiPopper: {
-        styleOverrides: {
-          root: {
-            zIndex: 999999
-          }
-        }
-      }
-    }
-  });
-
   return (
-    <ThemeProvider theme={muiTheme}>
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sr}>
-        <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
-          <div className="flex flex-col gap-4 px-4 py-4">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
-                <div className="relative z-20 bg-transparent w-[80px]">
-                  <select
-                    className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
-                    value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+    <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
+      <div className="flex flex-col gap-4 px-4 py-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
+            <div className="relative z-20 bg-transparent w-[80px]">
+              <select
+                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              >
+                {[10, 20, 50, 100].map((value) => (
+                  <option
+                    key={value}
+                    value={value}
+                    className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
                   >
-                    {[10, 20, 50, 100].map((value) => (
-                      <option
-                        key={value}
-                        value={value}
-                        className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
-                      >
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
-                    <svg
-                      className="stroke-current"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
-                        stroke=""
-                        strokeWidth="1.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
-          </div>
-
-              <div className="flex flex-col lg:flex-row gap-4">
-                <FilterDropdown
-                  label="Lokacija"
-                  options={uniqueLokacije}
-                  selectedOptions={selectedLokacije}
-                  onSelectionChange={setSelectedLokacije}
-                />
-                <div className="relative w-full lg:w-42">
-                  {isMobile ? (
-                    <input
-                      type="date"
-                      value={dateFrom ? dateFrom.toISOString().split('T')[0] : ''}
-                      onChange={(e) => {
-                        const date = e.target.value ? new Date(e.target.value) : null;
-                        setDateFrom(date);
-                      }}
-                      className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-                    />
-                  ) : (
-                    <DatePicker
-                      value={dateFrom}
-                      onChange={(newValue) => setDateFrom(newValue)}
-                      open={isFromOpen}
-                      onOpen={() => setIsFromOpen(true)}
-                      onClose={() => setIsFromOpen(false)}
-                      slots={{
-                        toolbar: () => null
-                      }}
-                      slotProps={{
-                        popper: {
-                          sx: {
-                            zIndex: 9999999
-                          }
-                        },
-                        textField: {
-                          placeholder: "Datum od",
-                          size: "small",
-                          fullWidth: true,
-                          onClick: () => setIsFromOpen(true),
-                          onTouchStart: () => setIsFromOpen(true),
-                          sx: {
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '8px',
-                              height: '44px',
-                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                              borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                              '&:hover': {
-                                borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
-                              },
-                              '&.Mui-focused': {
-                                borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
-                              },
-                            },
-                            '& .MuiInputBase-input': {
-                              padding: '12px 14px',
-                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                              '&::placeholder': {
-                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                                opacity: 1,
-                              },
-                            },
-                          },
-                          InputProps: {
-                            style: {
-                              borderRadius: 8,
-                              height: 44,
-                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                            },
-                            endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsFromOpen(true);
-                                }}
-                                onTouchStart={(e) => {
-                                  e.stopPropagation();
-                                  setIsFromOpen(true);
-                                }}
-                              />
-                            ),
-                          },
-                        },
-                      }}
-                      format="dd/MM/yyyy"
-                    />
-                  )}
-                </div>
-                <div className="relative w-full lg:w-42">
-                  {isMobile ? (
-                    <input
-                      type="date"
-                      value={dateTo ? dateTo.toISOString().split('T')[0] : ''}
-                      onChange={(e) => {
-                        const date = e.target.value ? new Date(e.target.value) : null;
-                        setDateTo(date);
-                      }}
-                      className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-                    />
-                  ) : (
-                    <DatePicker
-                      value={dateTo}
-                      onChange={(newValue) => setDateTo(newValue)}
-                      open={isToOpen}
-                      onOpen={() => setIsToOpen(true)}
-                      onClose={() => setIsToOpen(false)}
-                      slots={{
-                        toolbar: () => null
-                      }}
-                      slotProps={{
-                        popper: {
-                          sx: {
-                            zIndex: 9999999
-                          }
-                        },
-                        textField: {
-                          placeholder: "Datum do",
-                          size: "small",
-                          fullWidth: true,
-                          onClick: () => setIsToOpen(true),
-                          onTouchStart: () => setIsToOpen(true),
-                          sx: {
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '8px',
-                              height: '44px',
-                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                              borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                              '&:hover': {
-                                borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
-                              },
-                              '&.Mui-focused': {
-                                borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
-                              },
-                            },
-                            '& .MuiInputBase-input': {
-                              padding: '12px 14px',
-                              color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                              '&::placeholder': {
-                                color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                                opacity: 1,
-                              },
-                            },
-                          },
-                          InputProps: {
-                            style: {
-                              borderRadius: 8,
-                              height: 44,
-                              backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                            },
-                            endAdornment: (
-                              <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsToOpen(true);
-                                }}
-                                onTouchStart={(e) => {
-                                  e.stopPropagation();
-                                  setIsToOpen(true);
-                                }}
-                              />
-                            ),
-                          },
-                        },
-                      }}
-                      format="dd/MM/yyyy"
-                    />
-                  )}
-                </div>
-
+                    {value}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
+                <svg
+                  className="stroke-current"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
+                    stroke=""
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
             </div>
-          </div>
+            <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
+      </div>
 
-          <div className="max-w-full overflow-x-auto custom-scrollbar">
-            <div className="min-h-[200px]">
-              <Table>
-                <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    {columns.map(({ key, label, sortable }, index) => (
-                      <TableCell
-                        key={key}
-                        isHeader
-                        className={`px-4 py-3 border border-gray-100 dark:border-white/[0.05] ${
-                          index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
-                        }`}
-                      >
-                        {sortable ? (
-                          <div
-                            className="flex items-center justify-center cursor-pointer"
-                            onClick={() => handleSort(key)}
-                          >
-                            <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400 mr-2">
-                              {key === 'redniBroj' ? '' : label}
-                            </p>
-                            <button className="flex flex-col gap-0.5">
-                              <svg
-                                className={`text-gray-300 dark:text-gray-700 ${
-                                  sortKey === key && sortOrder === "asc" ? "text-brand-500" : ""
-                                }`}
-                                width="8"
-                                height="5"
-                                viewBox="0 0 8 5"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                              <svg
-                                className={`text-gray-300 dark:text-gray-700 ${
-                                  sortKey === key && sortOrder === "desc" ? "text-brand-500" : ""
-                                }`}
-                                width="8"
-                                height="5"
-                                viewBox="0 0 8 5"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        ) : (
-                          <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                            {key === 'redniBroj' ? '' : label}
-                          </p>
-                        )}
-                      </TableCell>
-                    ))}
-                    <TableCell
-                      isHeader
-                      className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0"
-                    >
-                      <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentData.map((item, index) => (
-                    <TableRow key={item.id}>
-                      {columns.map(({ key }, colIndex) => (
-                        <TableCell
-                          key={key}
-                          className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                            colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
-                          }`}
-                        >
-                          {key === 'redniBroj' ? (
-                            startIndex + index + 1
-                          ) : key === 'povecanRizik' || key === 'nocniRad' ? (
-                            item[key] ? 'DA' : 'NE'
-                          ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' ? (
-                            formatDate(item[key])
-                          ) : (
-                            item[key]
-                          )}
-                        </TableCell>
-                      ))}
-                      <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
-                        <div className="flex items-center w-full gap-2">
-                          <button 
-                            className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                            onClick={handleCheckboxClick}
-                          >
-                            <svg
-                              className="size-4"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <rect
-                                x="2"
-                                y="2"
-                                width="12"
-                                height="12"
-                                rx="2"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                fill="none"
-                              />
-                              <path
-                                d="M6 8L8 10L10 6"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                              />
-                            </svg>
-                          </button>
-                          <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                            <LightbulbIcon className="size-5" />
-                          </button>
-                          <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                            <EditButtonIcon className="size-4" />
-                          </button>
-                          <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
-                            <DeleteButtonIcon className="size-4" />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-
-          <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05] pb-4">
-            <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
-              <PaginationWithTextAndIcon 
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
+          <div className="flex flex-col lg:flex-row gap-4">
+            <FilterDropdown
+              label="Lokacija"
+              options={uniqueLokacije}
+              selectedOptions={selectedLokacije}
+              onSelectionChange={setSelectedLokacije}
+            />
+            <div className="relative w-full lg:w-42">
+              <CustomDatePicker
+                value={dateFrom}
+                onChange={(date) => setDateFrom(date)}
+                placeholder="Datum od"
+                className="bg-[#F9FAFB] dark:bg-[#101828]"
               />
-              <div className="pt-3 xl:pt-0 px-6">
-                <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
-                  Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
-                </p>
-              </div>
             </div>
+            <div className="relative w-full lg:w-42">
+              <CustomDatePicker
+                value={dateTo}
+                onChange={(date) => setDateTo(date)}
+                placeholder="Datum do"
+                className="bg-[#F9FAFB] dark:bg-[#101828]"
+              />
+            </div>
+
           </div>
         </div>
+      </div>
 
-        <Modal
-          isOpen={isOpen}
-          onClose={closeModal}
-          className="max-w-[500px] p-5 lg:p-8"
-        >
-          <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
-          Da li je izvršena nova bezbednosna provera? 
-          </h4>
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Datum izvršenog pregleda:
+      <div className="max-w-full overflow-x-auto custom-scrollbar">
+        <div className="min-h-[200px]">
+          <Table>
+            <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
+              <TableRow>
+                {columns.map(({ key, label, sortable }, index) => (
+                  <TableCell
+                    key={key}
+                    isHeader
+                    className={`px-4 py-3 border border-gray-100 dark:border-white/[0.05] ${
+                      index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
+                    }`}
+                  >
+                    {sortable ? (
+                      <div
+                        className="flex items-center justify-center cursor-pointer"
+                        onClick={() => handleSort(key)}
+                      >
+                        <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400 mr-2">
+                          {key === 'redniBroj' ? '' : label}
+                        </p>
+                        <button className="flex flex-col gap-0.5">
+                          <svg
+                            className={`text-gray-300 dark:text-gray-700 ${
+                              sortKey === key && sortOrder === "asc" ? "text-brand-500" : ""
+                            }`}
+                            width="8"
+                            height="5"
+                            viewBox="0 0 8 5"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                          <svg
+                            className={`text-gray-300 dark:text-gray-700 ${
+                              sortKey === key && sortOrder === "desc" ? "text-brand-500" : ""
+                            }`}
+                            width="8"
+                            height="5"
+                            viewBox="0 0 8 5"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                        {key === 'redniBroj' ? '' : label}
+                      </p>
+                    )}
+                  </TableCell>
+                ))}
+                <TableCell
+                  isHeader
+                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0"
+                >
+                  <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                  </p>
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentData.map((item, index) => (
+                <TableRow key={item.id}>
+                  {columns.map(({ key }, colIndex) => (
+                    <TableCell
+                      key={key}
+                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
+                        colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
+                      }`}
+                    >
+                      {key === 'redniBroj' ? (
+                        startIndex + index + 1
+                      ) : key === 'povecanRizik' || key === 'nocniRad' ? (
+                        item[key] ? 'DA' : 'NE'
+                      ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' ? (
+                        formatDate(item[key])
+                      ) : (
+                        item[key]
+                      )}
+                    </TableCell>
+                  ))}
+                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
+                    <div className="flex items-center w-full gap-2">
+                      <button 
+                        className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
+                        onClick={handleCheckboxClick}
+                      >
+                        <svg
+                          className="size-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                        >
+                          <rect
+                            x="2"
+                            y="2"
+                            width="12"
+                            height="12"
+                            rx="2"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            fill="none"
+                          />
+                          <path
+                            d="M6 8L8 10L10 6"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            fill="none"
+                          />
+                        </svg>
+                      </button>
+                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
+                        <LightbulbIcon className="size-5" />
+                      </button>
+                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                        <EditButtonIcon className="size-4" />
+                      </button>
+                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                        <DeleteButtonIcon className="size-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05] pb-4">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
+          <PaginationWithTextAndIcon 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+          <div className="pt-3 xl:pt-0 px-6">
+            <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
+              Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
             </p>
-            {isMobile ? (
-              <input
-                type="date"
-                value={modalDate ? modalDate.toISOString().split('T')[0] : ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : null;
-                  handleDateChange(date);
-                }}
-                className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-              />
-            ) : (
-              <DatePicker
-                value={modalDate}
-                onChange={handleDateChange}
-                open={isDatePickerOpen}
-                onOpen={() => setIsDatePickerOpen(true)}
-                onClose={() => setIsDatePickerOpen(false)}
-                slots={{
-                  toolbar: () => null
-                }}
-                slotProps={{
-                  popper: {
-                    sx: {
-                      zIndex: 9999999
-                    }
-                  },
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    onClick: () => setIsDatePickerOpen(true),
-                    onTouchStart: () => setIsDatePickerOpen(true),
-                    sx: {
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '8px',
-                        height: '44px',
-                        backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                        borderColor: appTheme === 'dark' ? '#374151' : '#D1D5DB',
-                        '&:hover': {
-                          borderColor: appTheme === 'dark' ? '#4B5563' : '#9CA3AF',
-                        },
-                        '&.Mui-focused': {
-                          borderColor: appTheme === 'dark' ? '#6366F1' : '#6366F1',
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        padding: '12px 14px',
-                        color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                        '&::placeholder': {
-                          color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                          opacity: 1,
-                        },
-                      },
-                    },
-                    InputProps: {
-                      style: {
-                        borderRadius: 8,
-                        height: 44,
-                        backgroundColor: appTheme === 'dark' ? '#101828' : '#F9FAFB',
-                      },
-                      endAdornment: (
-                        <CalenderIcon className="size-5 text-gray-500 dark:text-gray-400" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsDatePickerOpen(true);
-                          }}
-                          onTouchStart={(e) => {
-                            e.stopPropagation();
-                            setIsDatePickerOpen(true);
-                          }}
-                        />
-                      ),
-                    },
-                  },
-                }}
-                format="dd/MM/yyyy"
-              />
-            )}
           </div>
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Napomena:
-            </p>
-            <textarea
-              value={modalNapomena}
-              onChange={(e) => setModalNapomena(e.target.value)}
-              placeholder="Unesite napomenu..."
-              className="w-full px-4 py-3 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg resize-none dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10"
-              rows={3}
-            />
-          </div>
-          <div className="flex items-center justify-end w-full gap-3">
-            <Button size="sm" variant="outline" onClick={closeModal}>
-              Otkaži
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Sačuvaj
-            </Button>
-          </div>
-        </Modal>
-      </LocalizationProvider>
-    </ThemeProvider>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        className="max-w-[500px] p-5 lg:p-8"
+      >
+        <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
+        Da li je izvršena nova bezbednosna provera? 
+        </h4>
+        <div className="mb-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            Datum izvršenog pregleda:
+          </p>
+          <CustomDatePicker
+            value={modalDate}
+            onChange={(date) => {
+              if (date) {
+                setModalDate(date);
+              }
+            }}
+            className="bg-[#F9FAFB] dark:bg-[#101828]"
+          />
+        </div>
+        <div className="mb-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            Napomena:
+          </p>
+          <TextArea
+            value={modalNapomena}
+            onChange={setModalNapomena}
+            placeholder="Unesite napomenu..."
+            rows={3}
+            className="bg-[#F9FAFB] dark:bg-[#101828]"
+          />
+        </div>
+        <div className="flex items-center justify-end w-full gap-3">
+          <Button size="sm" variant="outline" onClick={closeModal}>
+            Otkaži
+          </Button>
+          <Button size="sm" onClick={handleSave}>
+            Sačuvaj
+          </Button>
+        </div>
+      </Modal>
+    </div>
   );
 } 

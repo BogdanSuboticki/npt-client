@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DataTableTwo from '../components/tables/DataTables/TableTwo/DataTableTwo';
 import RadnoMestoForm from './RadnoMestoForm';
+import Button from "../components/ui/button/Button";
 
 // Sample data for the table
 const radnaMestaData = [
@@ -173,9 +174,10 @@ const RadnaMesta: React.FC = () => {
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Radna mesta
         </h1>
-        <button
+        <Button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2 ml-5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          size="sm"
+          className="ml-5"
         >
           <svg
             className="w-5 h-5"
@@ -191,7 +193,7 @@ const RadnaMesta: React.FC = () => {
             />
           </svg>
           Novi Unos
-        </button>
+        </Button>
       </div>
       
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">

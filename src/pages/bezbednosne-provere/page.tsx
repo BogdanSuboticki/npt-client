@@ -3,6 +3,7 @@
 import React, { useState } from "react";
     import BezbednosneProvereDataTable from "./BezbednosneProvereDataTable";
     import BezbednosneProvereForm from "./BezbednosneProvereForm";
+    import Button from "../../components/ui/button/Button";
 
 // Sample data for the table
 const lekarskiPreglediData = [
@@ -38,9 +39,9 @@ const lekarskiPreglediData = [
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },
-  { key: "datumObilaska", label: "Datum obilaska", sortable: true },
-  { key: "periodObilaska", label: "Period obilaska", sortable: true },
-  { key: "sledeciObilazak", label: "Sledeći obilazak", sortable: true },
+  { key: "datumProvere", label: "Datum provere", sortable: true },
+  { key: "intervalProvere", label: "Interval provere", sortable: true },
+  { key: "sledecaProvera", label: "Sledeća provera", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
 ];
 
@@ -92,9 +93,10 @@ const LekarskiPreglediPage: React.FC = () => {
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Bezbednosne provere
           </h1>
-          <button
+          <Button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2 ml-5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            size="sm"
+            className="ml-5"
           >
             <svg
               className="w-5 h-5"
@@ -110,7 +112,7 @@ const LekarskiPreglediPage: React.FC = () => {
               />
             </svg>
             Novi Unos
-          </button>
+          </Button>
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">

@@ -46,7 +46,6 @@ interface CustomDatePickerProps {
 const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   value,
   onChange,
-  label,
   placeholder,
   required = false,
   disabled = false,

@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Checkbox from "../../components/form/input/Checkbox";
-import { useTheme } from "../../context/ThemeContext";
 
 interface OsposobljavanjeFormProps {
   isOpen: boolean;
@@ -14,7 +13,6 @@ interface OsposobljavanjeFormProps {
 }
 
 export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: OsposobljavanjeFormProps) {
-  const { theme: appTheme } = useTheme();
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",

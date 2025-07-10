@@ -84,6 +84,8 @@ import EvidencijaZastitnaOprema from "./pages/evidencija_zastitna_oprema";
 import BezbednosneProverePage from "./pages/bezbednosne-provere/page";
 import PovredePage from "./pages/povrede/page";
 import PreglediOpremePage from "./pages/pregledi-opreme/page";
+import Firme from "./pages/firme/page";
+import ZaposleniPage from "./pages/zaposleni/page";
 
 export default function App() {
   return (
@@ -104,6 +106,8 @@ export default function App() {
             <Route path="/bezbednosne-provere" element={<BezbednosneProverePage />} />
             <Route path="/povrede" element={<PovredePage />} />
             <Route path="/pregledi-opreme" element={<PreglediOpremePage />} />
+            <Route path="/firme" element={<Firme />} />
+            <Route path="/zaposleni" element={<ZaposleniPage />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />

@@ -109,10 +109,10 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
         </div>
 
         <div className="flex items-center justify-end w-full gap-3 mt-6">
-          <Button size="sm" variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Otkaži
           </Button>
-          <Button size="sm" onClick={() => handleSubmit(new Event('submit') as any)}>
+          <Button type="submit">
             Sačuvaj
           </Button>
         </div>

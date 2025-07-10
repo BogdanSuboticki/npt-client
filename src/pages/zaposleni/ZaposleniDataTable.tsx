@@ -8,14 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
+import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
-import { useModal } from "../../hooks/useModal";
-import { Modal } from "../../components/ui/modal";
-import Label from "../../components/form/Label";
-import CustomDatePicker from "../../components/form/input/DatePicker";
-import Button from "../../components/ui/button/Button";
 
 interface Column {
   key: string;
@@ -23,67 +18,43 @@ interface Column {
   sortable: boolean;
 }
 
-interface PreglediOpremeData {
+interface ZaposleniData {
   id: number;
   redniBroj: number;
-  nazivOpreme: string;
-  inventarniBroj: string;
-  lokacija: string;
-  datumPregleda: Date;
-  intervalPregleda: string;
-  status: string;
-  datumNarednogPregleda: Date;
-  napomena: string;
+  imePrezime: string;
+  prvaPomoc: string;
   [key: string]: any;
 }
 
 interface DataTableProps {
-  data: PreglediOpremeData[];
+  data: ZaposleniData[];
   columns: Column[];
 }
 
-export default function PreglediOpremeDataTable({ data: initialData, columns }: DataTableProps) {
+export default function ZaposleniDataTable({ data: initialData, columns }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const { isOpen, openModal, closeModal } = useModal();
-  const [modalDate, setModalDate] = useState<Date>(new Date());
-  const [modalStatus, setModalStatus] = useState(true); // true for "Ispravno", false for "Neispravno"
 
-  
   // Get unique values for dropdowns
-  const uniqueOprema = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.nazivOpreme)));
+  const uniqueImePrezime = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.imePrezime)));
   }, [initialData]);
 
-  const statusOptions = ["Ispravno", "Neispravno"];
-
   // Initialize with all items selected
-  const [selectedOprema, setSelectedOprema] = useState<string[]>(uniqueOprema);
-  const [selectedStatus, setSelectedStatus] = useState<string[]>(statusOptions);
-  const [dateFrom, setDateFrom] = useState<Date | null>(null);
-  const [dateTo, setDateTo] = useState<Date | null>(null);
+  const [selectedImePrezime, setSelectedImePrezime] = useState<string[]>(uniqueImePrezime);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
-        if (selectedOprema.length === 0 || selectedStatus.length === 0) {
+        if (selectedImePrezime.length === 0) {
           return false;
         }
-        const matchesOprema = selectedOprema.includes(item.nazivOpreme);
-        const matchesStatus = selectedStatus.includes(item.status);
-        const matchesDateRange = (!dateFrom || item.datumPregleda >= dateFrom) &&
-                               (!dateTo || item.datumPregleda <= dateTo);
-        return matchesOprema && matchesStatus && matchesDateRange;
+        const matchesImePrezime = selectedImePrezime.includes(item.imePrezime);
+        return matchesImePrezime;
       })
       .sort((a, b) => {
-        if (sortKey.includes('datum')) {
-          const aDate = a[sortKey] instanceof Date ? a[sortKey] : new Date(a[sortKey]);
-          const bDate = b[sortKey] instanceof Date ? b[sortKey] : new Date(b[sortKey]);
-          return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
-        }
-        
         if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
           return sortOrder === "asc" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
         }
@@ -92,7 +63,7 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedOprema, selectedStatus, dateFrom, dateTo, initialData]);
+  }, [sortKey, sortOrder, selectedImePrezime, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -110,34 +81,9 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
     }
   };
 
-  const handleCheckboxClick = () => {
-    setModalDate(new Date()); // Reset to today's date when opening
-    openModal();
-  };
-
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving pregled opreme with date:", modalDate, "status:", modalStatus ? "Ispravno" : "Neispravno");
-    closeModal();
-  };
-
-  const handleDateChange = (value: Date | null) => {
-    if (value) {
-      setModalDate(value);
-    }
-  };
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('sr-Latn-RS', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
 
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
@@ -184,37 +130,12 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
       </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="w-full lg:w-64">
-              <FilterDropdown
-                label="Oprema"
-                options={uniqueOprema}
-                selectedOptions={selectedOprema}
-                onSelectionChange={setSelectedOprema}
-              />
-            </div>
-            <div className="w-full lg:w-48">
-              <FilterDropdown
-                label="Status"
-                options={statusOptions}
-                selectedOptions={selectedStatus}
-                onSelectionChange={setSelectedStatus}
-              />
-            </div>
-            <div className="relative w-full lg:w-42">
-              <CustomDatePicker
-                value={dateFrom}
-                onChange={(date) => setDateFrom(date)}
-                placeholder="Datum od"
-              />
-            </div>
-            <div className="relative w-full lg:w-42">
-              <CustomDatePicker
-                value={dateTo}
-                onChange={(date) => setDateTo(date)}
-                placeholder="Datum do"
-              />
-            </div>
-
+            <FilterDropdown
+              label="Ime i prezime"
+              options={uniqueImePrezime}
+              selectedOptions={selectedImePrezime}
+              onSelectionChange={setSelectedImePrezime}
+            />
           </div>
         </div>
       </div>
@@ -295,56 +216,19 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
                   {columns.map(({ key }, colIndex) => (
                     <TableCell
                       key={key}
-                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 break-words ${
+                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
                         colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
                       }`}
                     >
                       {key === 'redniBroj' ? (
                         startIndex + index + 1
-                      ) : key === 'datumPregleda' || key === 'datumNarednogPregleda' ? (
-                        formatDate(item[key])
                       ) : (
                         item[key]
                       )}
                     </TableCell>
                   ))}
-                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 border-r-0">
+                  <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button 
-                        className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={handleCheckboxClick}
-                      >
-                        <svg
-                          className="size-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                        >
-                          <rect
-                            x="2"
-                            y="2"
-                            width="12"
-                            height="12"
-                            rx="2"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            fill="none"
-                          />
-                          <path
-                            d="M6 8L8 10L10 6"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                          />
-                        </svg>
-                      </button>
-                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                        <LightbulbIcon className="size-5" />
-                      </button>
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />
                       </button>
@@ -374,67 +258,6 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
           </div>
         </div>
       </div>
-
-      <Modal
-        isOpen={isOpen}
-        onClose={closeModal}
-        className="max-w-[500px] p-5 lg:p-8"
-      >
-        <h4 className="font-semibold text-gray-800 mb-4 text-xl dark:text-white/90">
-          Novi pregled opreme
-        </h4>
-        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-          <div className="space-y-4">
-            <div>
-              <Label>Status pregleda</Label>
-              <div className="mt-2">
-                <div className="tabs-container">
-                  <div className="tabs-wrapper">
-                    <input 
-                      type="radio" 
-                      id="radio-ispravno" 
-                      name="status-tabs" 
-                      checked={modalStatus}
-                      onChange={() => setModalStatus(true)}
-                    />
-                    <label className="tab" htmlFor="radio-ispravno">
-                      Ispravno
-                    </label>
-                    <input 
-                      type="radio" 
-                      id="radio-neispravno" 
-                      name="status-tabs" 
-                      checked={!modalStatus}
-                      onChange={() => setModalStatus(false)}
-                    />
-                    <label className="tab" htmlFor="radio-neispravno">
-                      Neispravno
-                    </label>
-                    <span className="glider"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <Label>Datum izvršenog pregleda *</Label>
-              <CustomDatePicker
-                value={modalDate}
-                onChange={handleDateChange}
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-end gap-3">
-            <Button size="sm" variant="outline" onClick={closeModal}>
-              Otkaži
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Sačuvaj
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 } 

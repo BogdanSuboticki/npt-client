@@ -1,45 +1,36 @@
-import React, { useState } from 'react';
-import OpremaDataTable from './OpremaDataTable';
-import OpremaForm from './OpremaForm';
-import Button from '../../components/ui/button/Button';
+"use client";
+
+import React, { useState } from "react";
+import ZaposleniDataTable from "./ZaposleniDataTable";
+import ZaposleniForm from "./ZaposleniForm";
+import Button from "../../components/ui/button/Button";
 
 // Sample data for the table
-const opremaData = [
+const zaposleniData = [
   {
     id: 1,
     redniBroj: 1,
-    nazivOpreme: "Viljuškar",
-    fabrickBroj: "FB123456",
-    inventarniBroj: "INV789",
-    godinaProizvodnje: 2020,
-    intervalPregleda: 6,
-    zop: true,
-    napomena: "Redovno održavanje",
-    iskljucenaIzPracenja: false
+    imePrezime: "Petar Petrović",
+    prvaPomoc: "Da",
   },
   {
     id: 2,
     redniBroj: 2,
-    nazivOpreme: "Kran",
-    fabrickBroj: "FB789012",
-    inventarniBroj: "INV456",
-    godinaProizvodnje: 2019,
-    intervalPregleda: 12,
-    zop: true,
-    napomena: "Potrebno zamena delova",
-    iskljucenaIzPracenja: false
-  }
+    imePrezime: "Ana Anić",
+    prvaPomoc: "Ne",
+  },
+  {
+    id: 3,
+    redniBroj: 3,
+    imePrezime: "Marko Marković",
+    prvaPomoc: "Da",
+  },
 ];
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "nazivOpreme", label: "Naziv opreme", sortable: true },
-  { key: "fabrickBroj", label: "Fabrički broj", sortable: true },
-  { key: "inventarniBroj", label: "Inventarni broj", sortable: true },
-  { key: "godinaProizvodnje", label: "Godina proizvodnje", sortable: true },
-  { key: "intervalPregleda", label: "Interval pregleda (meseci)", sortable: true },
-  { key: "zop", label: "ZOP", sortable: true },
-  { key: "napomena", label: "Napomena", sortable: true }
+  { key: "imePrezime", label: "Ime i prezime zaposlenog", sortable: true },
+  { key: "prvaPomoc", label: "Prva pomoć", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -53,7 +44,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error in Oprema component:', error);
+    console.error('Error in Zaposleni component:', error);
     console.error('Error info:', errorInfo);
   }
 
@@ -73,7 +64,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const Oprema: React.FC = () => {
+const ZaposleniPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
 
   const handleSave = (data: any) => {
@@ -88,7 +79,7 @@ const Oprema: React.FC = () => {
       <div className="container mx-auto py-8">
         <div className="mb-6 flex items-center">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Oprema
+           Zaposleni
           </h1>
           <Button
             onClick={() => setShowForm(true)}
@@ -113,13 +104,13 @@ const Oprema: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <OpremaDataTable 
-            data={opremaData}
+          <ZaposleniDataTable 
+            data={zaposleniData}
             columns={columns}
           />
         </div>
 
-        <OpremaForm 
+        <ZaposleniForm 
           isOpen={showForm}
           onClose={() => setShowForm(false)}
           onSave={handleSave}
@@ -129,4 +120,4 @@ const Oprema: React.FC = () => {
   );
 };
 
-export default Oprema; 
+export default ZaposleniPage; 

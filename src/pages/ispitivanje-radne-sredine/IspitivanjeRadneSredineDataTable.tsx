@@ -10,12 +10,7 @@ import {
 } from "../../components/ui/table";
 import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon, CalenderIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { sr } from "date-fns/locale";
-import { useTheme } from "../../context/ThemeContext";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import CustomDatePicker from "../../components/form/input/DatePicker";
 import NovoIspitivanjeForm from "./NovoIspitivanjeForm";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 
@@ -77,15 +72,12 @@ const formatDate = (dateStr: string | null | undefined): string => {
 };
 
 export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns }: DataTableProps) {
-  const { theme: appTheme } = useTheme();
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [data] = useState<IspitivanjeData[]>(initialData);
-  const [isFromOpen, setIsFromOpen] = useState(false);
-  const [isToOpen, setIsToOpen] = useState(false);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [isNovoFormOpen, setIsNovoFormOpen] = useState(false);
@@ -215,17 +207,9 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
-  // Create theme based on app theme
-  const muiTheme = createTheme({
-    palette: {
-      mode: appTheme,
-    },
-  });
-
   return (
-    <ThemeProvider theme={muiTheme}>
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sr}>
-        <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] max-w-full">
+    <>
+      <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] max-w-full">
           <div className="flex flex-col gap-4 px-4 py-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -277,165 +261,53 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
                   <div className="relative w-full lg:w-42">
                     {isMobile ? (
-                      <input
-                        type="date"
-                        value={dateFrom ? dateFrom.toISOString().split('T')[0] : ''}
-                        onChange={(e) => {
-                          const date = e.target.value ? new Date(e.target.value) : null;
-                          setDateFrom(date);
-                        }}
-                        className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-                      />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={dateFrom ? dateFrom.toISOString().split('T')[0] : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value) : null;
+                            setDateFrom(date);
+                          }}
+                          className="w-full px-4 pr-12 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
                     ) : (
-                      <DatePicker
+                      <CustomDatePicker
                         value={dateFrom}
-                        onChange={(newValue) => setDateFrom(newValue)}
-                        open={isFromOpen}
-                        onOpen={() => setIsFromOpen(true)}
-                        onClose={() => setIsFromOpen(false)}
-                        slots={{
-                          toolbar: () => null
-                        }}
-                        slotProps={{
-                          popper: {
-                            sx: {
-                              zIndex: 9999999
-                            }
-                          },
-                          textField: {
-                            placeholder: "Datum od",
-                            size: "small",
-                            fullWidth: true,
-                            onClick: () => setIsFromOpen(true),
-                            onTouchStart: () => setIsFromOpen(true),
-                            sx: {
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '8px',
-                                height: '44px',
-                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                                '& fieldset': {
-                                  borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
-                                },
-                                '&:hover fieldset': {
-                                  borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
-                                },
-                                '&.Mui-focused fieldset': {
-                                  borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
-                                },
-                              },
-                              '& .MuiInputBase-input': {
-                                padding: '12px 14px',
-                                color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                                '&::placeholder': {
-                                  color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                                  opacity: 1,
-                                },
-                              },
-                            },
-                            InputProps: {
-                              style: {
-                                borderRadius: 8,
-                                height: 44,
-                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                              },
-                              endAdornment: (
-                                <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsFromOpen(true);
-                                  }}
-                                  onTouchStart={(e) => {
-                                    e.stopPropagation();
-                                    setIsFromOpen(true);
-                                  }}
-                                />
-                              ),
-                            },
-                          },
-                        }}
-                        format="dd/MM/yyyy"
+                        onChange={(newValue: Date | null) => setDateFrom(newValue)}
+                        placeholder="Datum od"
                       />
                     )}
                   </div>
                   <div className="relative w-full lg:w-42">
                     {isMobile ? (
-                      <input
-                        type="date"
-                        value={dateTo ? dateTo.toISOString().split('T')[0] : ''}
-                        onChange={(e) => {
-                          const date = e.target.value ? new Date(e.target.value) : null;
-                          setDateTo(date);
-                        }}
-                        className="w-full px-4 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-                      />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={dateTo ? dateTo.toISOString().split('T')[0] : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value) : null;
+                            setDateTo(date);
+                          }}
+                          className="w-full px-4 pr-12 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
                     ) : (
-                      <DatePicker
+                      <CustomDatePicker
                         value={dateTo}
-                        onChange={(newValue) => setDateTo(newValue)}
-                        open={isToOpen}
-                        onOpen={() => setIsToOpen(true)}
-                        onClose={() => setIsToOpen(false)}
-                        slots={{
-                          toolbar: () => null
-                        }}
-                        slotProps={{
-                          popper: {
-                            sx: {
-                              zIndex: 9999999
-                            }
-                          },
-                          textField: {
-                            placeholder: "Datum do",
-                            size: "small",
-                            fullWidth: true,
-                            onClick: () => setIsToOpen(true),
-                            onTouchStart: () => setIsToOpen(true),
-                            sx: {
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '8px',
-                                height: '44px',
-                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                                '& fieldset': {
-                                  borderColor: appTheme === 'dark' ? '#4B5563' : '#D1D5DB',
-                                },
-                                '&:hover fieldset': {
-                                  borderColor: appTheme === 'dark' ? '#6B7280' : '#9CA3AF',
-                                },
-                                '&.Mui-focused fieldset': {
-                                  borderColor: appTheme === 'dark' ? '#60A5FA' : '#465FFF',
-                                },
-                              },
-                              '& .MuiInputBase-input': {
-                                padding: '12px 14px',
-                                color: appTheme === 'dark' ? '#F9FAFB' : '#111827',
-                                '&::placeholder': {
-                                  color: appTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                                  opacity: 1,
-                                },
-                              },
-                            },
-                            InputProps: {
-                              style: {
-                                borderRadius: 8,
-                                height: 44,
-                                backgroundColor: appTheme === 'dark' ? '#374151' : '#F9FAFB',
-                              },
-                              endAdornment: (
-                                <CalenderIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsToOpen(true);
-                                  }}
-                                  onTouchStart={(e) => {
-                                    e.stopPropagation();
-                                    setIsToOpen(true);
-                                  }}
-                                />
-                              ),
-                            },
-                          },
-                        }}
-                        format="dd/MM/yyyy"
+                        onChange={(newValue: Date | null) => setDateTo(newValue)}
+                        placeholder="Datum do"
                       />
                     )}
                   </div>
@@ -564,14 +436,13 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
             </div>
           </div>
         </div>
-      </LocalizationProvider>
-      
-      <NovoIspitivanjeForm
-        isOpen={isNovoFormOpen}
-        onClose={() => setIsNovoFormOpen(false)}
-        onSave={handleNovoIspitivanjeSave}
-        title={getFormTitle(selectedColumn)}
-      />
-    </ThemeProvider>
-  );
+        
+        <NovoIspitivanjeForm
+          isOpen={isNovoFormOpen}
+          onClose={() => setIsNovoFormOpen(false)}
+          onSave={handleNovoIspitivanjeSave}
+          title={getFormTitle(selectedColumn)}
+        />
+      </>
+    );
 }

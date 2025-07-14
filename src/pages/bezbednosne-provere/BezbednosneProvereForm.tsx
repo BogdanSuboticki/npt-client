@@ -6,6 +6,7 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import TextArea from "../../components/form/input/TextArea";
+import Button from "../../components/ui/button/Button";
 
 interface BezbednosneProvereFormProps {
   isOpen: boolean;
@@ -180,20 +181,13 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
           />
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-          >
+        <div className="flex items-center justify-end w-full gap-3 mt-6">
+          <Button variant="outline" onClick={onClose}>
             Otkaži
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
-          >
+          </Button>
+          <Button type="submit">
             Sačuvaj
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

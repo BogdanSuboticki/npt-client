@@ -24,12 +24,12 @@ interface PovredeData {
   redniBroj: number;
   zaposleni: string;
   datumPovrede: Date;
-  datumObaveštavanjaInspekcije: Date;
-  datumOtvaranjaListe: Date;
-  datumOvereLekara: Date;
-  datumPreuzimanjaIzFonda: Date;
-  datumPredavanjaPoslodavcu: Date;
   tezinaPovrede: string;
+  brojPovredneListe: string;
+  datumObavestenjaInspekcije: Date;
+  datumPredajeFondu: Date;
+  datumPreuzimanjaIzFonda: Date;
+  datumDostavjanjaUpravi: Date;
   napomena: string;
   [key: string]: any;
 }
@@ -266,7 +266,7 @@ export default function PovredeDataTable({ data: initialData, columns }: DataTab
                         startIndex + index + 1
                       ) : key === 'povecanRizik' || key === 'nocniRad' ? (
                         item[key] ? 'DA' : 'NE'
-                      ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' || key === 'datumPovrede' || key === 'datumObaveštavanjaInspekcije' || key === 'datumOtvaranjaListe' || key === 'datumOvereLekara' || key === 'datumPreuzimanjaIzFonda' || key === 'datumPredavanjaPoslodavcu' ? (
+                      ) : key === 'datumPovrede' || key === 'datumObavestenjaInspekcije' || key === 'datumPredajeFondu' || key === 'datumPreuzimanjaIzFonda' || key === 'datumDostavjanjaUpravi' ? (
                         formatDate(item[key])
                       ) : (
                         item[key]

@@ -38,7 +38,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
       className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
     >
       <form onSubmit={handleSubmit}>
-        <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
+        <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
           Novo Radno Mesto
         </h4>
 
@@ -64,46 +64,58 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
           </div>
 
           <div className="col-span-1">
-            <Label>Povećan rizik</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2 pt-4">
               <Checkbox
                 checked={formData.povecanRizik}
                 onChange={(checked) => setFormData({...formData, povecanRizik: checked})}
                 className="w-4 h-4"
+                id="povecanRizik"
               />
+              <Label className="mb-0 cursor-pointer" htmlFor="povecanRizik">
+                Povećan rizik
+              </Label>
             </div>
           </div>
 
           <div className="col-span-1">
-            <Label>Obavezna obuka</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2 pt-4">
               <Checkbox
                 checked={formData.obaveznaObuka}
                 onChange={(checked) => setFormData({...formData, obaveznaObuka: checked})}
                 className="w-4 h-4"
+                id="obaveznaObuka"
               />
+              <Label className="mb-0 cursor-pointer" htmlFor="obaveznaObuka">
+                Obavezna obuka
+              </Label>
             </div>
           </div>
 
           <div className="col-span-1">
-            <Label>Obavezan oftamološki pregled</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2 pt-4">
               <Checkbox
                 checked={formData.obavezanOftamoloskiPregled}
                 onChange={(checked) => setFormData({...formData, obavezanOftamoloskiPregled: checked})}
                 className="w-4 h-4"
+                id="obavezanOftamoloskiPregled"
               />
+              <Label className="mb-0 cursor-pointer" htmlFor="obavezanOftamoloskiPregled">
+                Obavezan oftamološki pregled
+              </Label>
             </div>
           </div>
 
           <div className="col-span-1">
-            <Label>Obavezan pregled po drugom osnovu</Label>
-            <div className="mt-2">
+            <div className="flex items-center gap-2 pt-4">
               <Checkbox
                 checked={formData.obavezanPregledPoDrugomOsnovu}
                 onChange={(checked) => setFormData({...formData, obavezanPregledPoDrugomOsnovu: checked})}
                 className="w-4 h-4"
+                id="obavezanPregledPoDrugomOsnovu"
               />
+              <Label className="mb-0 cursor-pointer" htmlFor="obavezanPregledPoDrugomOsnovu">
+                Obavezan pregled po drugom osnovu
+              </Label>
             </div>
           </div>
         </div>

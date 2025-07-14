@@ -80,22 +80,7 @@ export default function ZaposleniForm({ isOpen, onClose, onSave }: ZaposleniForm
                 onClick={() => setIsPrvaPomocOpen(!isPrvaPomocOpen)}
                 className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <span>{formData.prvaPomoc || "Izaberi opciju"}</span>
-                </div>
+                <span>{formData.prvaPomoc || "Izaberi opciju"}</span>
                 <svg
                   className={`w-4 h-4 transition-transform ${isPrvaPomocOpen ? 'rotate-180' : ''}`}
                   fill="none"

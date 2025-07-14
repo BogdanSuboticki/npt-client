@@ -326,7 +326,7 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
               </div>
             </div>
 
-          <div className="p-5 lg:p-10 pt-0 flex-shrink-0">
+          <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
             <div className="col-span-1 mb-4">
               <div className="flex items-center gap-2 h-11">
                 <Checkbox

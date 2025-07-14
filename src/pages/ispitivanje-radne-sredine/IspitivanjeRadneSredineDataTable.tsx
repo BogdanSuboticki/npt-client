@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon, CalenderIcon } from "../../icons";
+import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import NovoIspitivanjeForm from "./NovoIspitivanjeForm";

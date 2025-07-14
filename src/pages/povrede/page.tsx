@@ -6,45 +6,45 @@ import React, { useState } from "react";
     import Button from "../../components/ui/button/Button";
 
 // Sample data for the table
-const lekarskiPreglediData = [
+const povredeData = [
   {
     id: 1,
     redniBroj: 1,
     zaposleni: "Zaposleni 1",
-    datumPovrede: new Date("2024-01-01"),
-    datumObaveštavanjaInspekcije: new Date("2024-01-01"),
-    datumOtvaranjaListe: new Date("2024-01-01"),
-    datumOvereLekara: new Date("2024-01-01"),
-    datumPreuzimanjaIzFonda: new Date("2024-01-01"),
-    datumPredavanjaPoslodavcu: new Date("2024-01-01"),
-    tezinaPovrede: "Težina povrede 1",
-    napomena: "Napomena 1",
+    datumPovrede: new Date("2024-01-15"),
+    tezinaPovrede: "Laka",
+    brojPovredneListe: "PL-001/2024",
+    datumObavestenjaInspekcije: new Date("2024-01-16"),
+    datumPredajeFondu: new Date("2024-01-20"),
+    datumPreuzimanjaIzFonda: new Date("2024-02-05"),
+    datumDostavjanjaUpravi: new Date("2024-02-10"),
+    napomena: "Povreda na radu - udarac u glavu",
   },
   {
     id: 2,
     redniBroj: 2,
     zaposleni: "Zaposleni 2",
-    datumPovrede: new Date("2024-02-01"),
-    datumObaveštavanjaInspekcije: new Date("2024-02-01"),
-    datumOtvaranjaListe: new Date("2024-02-01"),
-    datumOvereLekara: new Date("2024-02-01"),
-    datumPreuzimanjaIzFonda: new Date("2024-02-01"),
-    datumPredavanjaPoslodavcu: new Date("2024-02-01"),
-    tezinaPovrede: "Težina povrede 2",
-    napomena: "Napomena 2",
+    datumPovrede: new Date("2024-02-10"),
+    tezinaPovrede: "Srednja",
+    brojPovredneListe: "PL-002/2024",
+    datumObavestenjaInspekcije: new Date("2024-02-11"),
+    datumPredajeFondu: new Date("2024-02-15"),
+    datumPreuzimanjaIzFonda: new Date("2024-03-01"),
+    datumDostavjanjaUpravi: new Date("2024-03-05"),
+    napomena: "Povreda na radu - prelom noge",
   },
   {
     id: 3,
     redniBroj: 3,
     zaposleni: "Zaposleni 3",
-    datumPovrede: new Date("2024-03-01"),
-    datumObaveštavanjaInspekcije: new Date("2024-03-01"),
-    datumOtvaranjaListe: new Date("2024-03-01"),
-    datumOvereLekara: new Date("2024-03-01"),
-    datumPreuzimanjaIzFonda: new Date("2024-03-01"),
-    datumPredavanjaPoslodavcu: new Date("2024-03-01"),
-    tezinaPovrede: "Težina povrede 3",
-    napomena: "Napomena 3",
+    datumPovrede: new Date("2024-03-05"),
+    tezinaPovrede: "Teška",
+    brojPovredneListe: "PL-003/2024",
+    datumObavestenjaInspekcije: new Date("2024-03-06"),
+    datumPredajeFondu: new Date("2024-03-10"),
+    datumPreuzimanjaIzFonda: new Date("2024-03-25"),
+    datumDostavjanjaUpravi: new Date("2024-03-30"),
+    napomena: "Povreda na radu - opekotine",
   },
 ];
 
@@ -52,12 +52,12 @@ const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "zaposleni", label: "Zaposleni", sortable: true },
   { key: "datumPovrede", label: "Datum povrede", sortable: true },
-  { key: "datumObaveštavanjaInspekcije", label: "Datum obaveštavanja inspekcije", sortable: true },
-  { key: "datumOtvaranjaListe", label: "Datum otvaranja liste", sortable: true },
-  { key: "datumOvereLekara", label: "Datum overe lekara", sortable: true },
-  { key: "datumPreuzimanjaIzFonda", label: "Datum preuzimanja iz fonda", sortable: true },
-  { key: "datumPredavanjaPoslodavcu", label: "Datum predavanja poslodavcu", sortable: true },
   { key: "tezinaPovrede", label: "Težina povrede", sortable: true },
+  { key: "brojPovredneListe", label: "Broj povredne liste", sortable: true },
+  { key: "datumObavestenjaInspekcije", label: "Datum obaveštenja inspekcije", sortable: true },
+  { key: "datumPredajeFondu", label: "Datum predaje u fondu", sortable: true },
+  { key: "datumPreuzimanjaIzFonda", label: "Datum preuzimanja iz fonda", sortable: true },
+  { key: "datumDostavjanjaUpravi", label: "Datum dostavjanja upravi za BZR", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
 ];
 
@@ -133,7 +133,7 @@ const LekarskiPreglediPage: React.FC = () => {
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <PovredeDataTable 
-            data={lekarskiPreglediData}
+            data={povredeData}
             columns={columns}
           />
         </div>

@@ -333,7 +333,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-[100dvh] lg:h-screen z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[270px]"
@@ -360,7 +360,7 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pb-20 lg:pb-0">
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pb-32 lg:pb-0">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>

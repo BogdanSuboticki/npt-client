@@ -55,7 +55,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
       className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
     >
           <form onSubmit={handleSubmit}>
-            <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">
+            <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
               Novo Osposobljavanje
             </h4>
 
@@ -113,13 +113,16 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
               </div>
 
               <div className="col-span-1">
-                <Label>Povećani Rizik</Label>
-                <div className="mt-2">
+                <div className="flex items-center gap-2 pt-4">
                   <Checkbox
                     checked={formData.povecanRizik}
                     onChange={(checked) => setFormData({...formData, povecanRizik: checked})}
                     className="w-4 h-4"
+                    id="povecanRizik"
                   />
+                  <Label className="mb-0 cursor-pointer" htmlFor="povecanRizik">
+                    Povećani Rizik
+                  </Label>
                 </div>
               </div>
             </div>

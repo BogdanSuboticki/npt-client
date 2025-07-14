@@ -68,7 +68,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
+      className="max-w-[800px] max-h-[90vh] overflow-y-auto p-5 lg:p-10 dark:bg-gray-800"
     >
       <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Povreda</h2>
       <form onSubmit={handleSubmit}>
@@ -81,22 +81,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
                 onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
                 className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <span>{formData.zaposleni || "Izaberi zaposlenog"}</span>
-                </div>
+                <span>{formData.zaposleni || "Izaberi zaposlenog"}</span>
                 <svg
                   className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''}`}
                   fill="none"
@@ -210,22 +195,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
                 onClick={() => setIsTezinaPovredeOpen(!isTezinaPovredeOpen)}
                 className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <span>{formData.tezinaPovrede || "Izaberi težinu povrede"}</span>
-                </div>
+                <span>{formData.tezinaPovrede || "Izaberi težinu povrede"}</span>
                 <svg
                   className={`w-4 h-4 transition-transform ${isTezinaPovredeOpen ? 'rotate-180' : ''}`}
                   fill="none"

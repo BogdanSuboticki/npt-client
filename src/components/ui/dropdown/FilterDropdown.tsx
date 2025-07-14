@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import Checkbox from "../../form/input/Checkbox";
 
 interface FilterDropdownProps {
   label: string;
@@ -92,30 +93,31 @@ export default function FilterDropdown({
                 className="flex items-center rounded-tl-lg px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
                 onClick={handleSelectAll}
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={selectedOptions.length === options.length}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 min-w-[16px] min-h-[16px] text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 flex-shrink-0"
+                  className="w-4 h-4 min-w-[16px] min-h-[16px] flex-shrink-0"
+                  id={`select-all-${label}`}
                 />
                 <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prikaži sve</span>
               </div>
             </div>
             {options.map((option, index) => (
-              <label
+              <div
                 key={option}
                 className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
                   index === options.length - 1 ? 'rounded-bl-lg' : ''
                 }`}
+                onClick={() => handleOptionChange(option)}
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={selectedOptions.includes(option)}
                   onChange={() => handleOptionChange(option)}
-                  className="w-4 h-4 min-w-[16px] min-h-[16px] text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 flex-shrink-0"
+                  className="w-4 h-4 min-w-[16px] min-h-[16px] flex-shrink-0"
+                  id={`${label}-${option}`}
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate">{option}</span>
-              </label>
+              </div>
             ))}
           </div>
         </div>

@@ -15,6 +15,7 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import CustomDatePicker from "../../components/form/input/DatePicker";
+import Checkbox from "../../components/form/input/Checkbox";
 
 
 
@@ -49,7 +50,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
-  const [showAktivni, setShowAktivni] = useState(true);
+  const [showAktivni, setShowAktivni] = useState(false);
   
   // Get unique values for dropdowns
   const uniqueZaposleni = useMemo(() => {
@@ -57,8 +58,8 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
   }, [initialData]);
 
   const uniqueVrsteLekarskog = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.vrstaLekarskog)));
-  }, [initialData]);
+    return ["Predhodni", "Periodični", "Vanredni"];
+  }, []);
 
   // Initialize with all items selected
   const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
@@ -212,15 +213,17 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                 placeholder="Datum do"
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-              <input
-                type="checkbox"
+            <div className="flex items-center gap-2">
+              <Checkbox
                 checked={showAktivni}
-                onChange={e => setShowAktivni(e.target.checked)}
-                className="w-4 h-4 text-brand-500 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600"
+                onChange={(checked) => setShowAktivni(checked)}
+                className="w-4 h-4"
+                id="aktivniZaposleni"
               />
-              Aktivni zaposleni
-            </label>
+              <label className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer" htmlFor="aktivniZaposleni">
+                Aktivni zaposleni
+              </label>
+            </div>
           </div>
         </div>
       </div>

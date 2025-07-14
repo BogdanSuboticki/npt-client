@@ -3,38 +3,75 @@
 import React, { useState } from "react";
 import LekarskiPreglediDataTable from "./LekarskiPreglediDataTable";
 import LekarskiPreglediForm from "./LekarskiPreglediForm";
+import Button from "../../components/ui/button/Button";
 
 // Sample data for the table
 const lekarskiPreglediData = [
   {
     id: 1,
-    zaposleni: "John Doe",
-    radnoMesto: "Developer",
+    zaposleni: "Marko Petrović",
+    radnoMesto: "Inženjer proizvodnje",
     povecanRizik: true,
     nocniRad: false,
-    vrstaLekarskog: "Redovan",
-    datumLekarskog: new Date("2024-01-01"),
-    datumNarednogLekarskog: new Date("2024-07-01"),
+    vrstaLekarskog: "Predhodni",
+    datumLekarskog: new Date("2024-01-15"),
+    datumNarednogLekarskog: new Date("2024-07-15"),
+    aktivan: true,
   },
   {
     id: 2,
-    zaposleni: "Jane Smith",
-    radnoMesto: "Designer",
+    zaposleni: "Ana Jovanović",
+    radnoMesto: "Tehničar održavanja",
     povecanRizik: false,
     nocniRad: true,
-    vrstaLekarskog: "Vanredan",
-    datumLekarskog: new Date("2024-02-15"),
-    datumNarednogLekarskog: new Date("2024-08-15"),
+    vrstaLekarskog: "Periodični",
+    datumLekarskog: new Date("2024-02-20"),
+    datumNarednogLekarskog: new Date("2024-08-20"),
+    aktivan: true,
   },
   {
     id: 3,
-    zaposleni: "Bob Johnson",
-    radnoMesto: "Manager",
+    zaposleni: "Stefan Nikolić",
+    radnoMesto: "Električar",
     povecanRizik: true,
     nocniRad: false,
-    vrstaLekarskog: "Redovan",
+    vrstaLekarskog: "Vanredni",
     datumLekarskog: new Date("2024-03-10"),
     datumNarednogLekarskog: new Date("2024-09-10"),
+    aktivan: true,
+  },
+  {
+    id: 4,
+    zaposleni: "Marija Đorđević",
+    radnoMesto: "Hemijski tehničar",
+    povecanRizik: true,
+    nocniRad: false,
+    vrstaLekarskog: "Periodični",
+    datumLekarskog: new Date("2024-01-05"),
+    datumNarednogLekarskog: new Date("2024-07-05"),
+    aktivan: false,
+  },
+  {
+    id: 5,
+    zaposleni: "Dragan Simić",
+    radnoMesto: "Mehaničar",
+    povecanRizik: false,
+    nocniRad: true,
+    vrstaLekarskog: "Predhodni",
+    datumLekarskog: new Date("2024-02-28"),
+    datumNarednogLekarskog: new Date("2024-08-28"),
+    aktivan: true,
+  },
+  {
+    id: 6,
+    zaposleni: "Jelena Popović",
+    radnoMesto: "Laborant",
+    povecanRizik: true,
+    nocniRad: false,
+    vrstaLekarskog: "Vanredni",
+    datumLekarskog: new Date("2024-03-15"),
+    datumNarednogLekarskog: new Date("2024-09-15"),
+    aktivan: true,
   },
 ];
 
@@ -97,9 +134,10 @@ const LekarskiPreglediPage: React.FC = () => {
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Lekarski pregledi
           </h1>
-          <button
+          <Button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2 ml-5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            size="sm"
+            className="ml-5"
           >
             <svg
               className="w-5 h-5"
@@ -115,7 +153,7 @@ const LekarskiPreglediPage: React.FC = () => {
               />
             </svg>
             Novi Unos
-          </button>
+          </Button>
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">

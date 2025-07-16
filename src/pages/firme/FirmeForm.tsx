@@ -5,7 +5,6 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import Checkbox from "../../components/form/input/Checkbox";
 import Button from "../../components/ui/button/Button";
 
 interface FirmeFormProps {
@@ -78,13 +77,6 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
-
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      obaveznaObukaPrvePomoci: checked
     }));
   };
 
@@ -327,16 +319,6 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
             </div>
 
           <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
-            <div className="col-span-1 mb-4">
-              <div className="flex items-center gap-2 h-11">
-                <Checkbox
-                  checked={formData.obaveznaObukaPrvePomoci}
-                  onChange={handleCheckboxChange}
-                  className="w-4 h-4"
-                />
-                <Label className="mb-0">Obavezna obuka iz prve pomoći</Label>
-              </div>
-            </div>
 
             <div className="flex justify-end gap-2">
               <Button

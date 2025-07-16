@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -84,20 +85,13 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-          >
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
             Otkaži
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700"
-          >
+          </Button>
+          <Button type="submit">
             Sačuvaj
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

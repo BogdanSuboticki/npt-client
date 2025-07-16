@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -6,33 +6,6 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { sr } from "date-fns/locale";
 import { useTheme } from "../../../context/ThemeContext";
 
-// Improved mobile detection hook
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      // Check for touch capability first (more reliable than user agent)
-      const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      
-      // Check screen size
-      const isSmallScreen = window.innerWidth <= 768;
-      
-      // Check user agent as fallback
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-      
-      // Consider mobile if it has touch AND is small screen, OR if user agent indicates mobile
-      setIsMobile((hasTouchScreen && isSmallScreen) || isMobileDevice);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  return isMobile;
-};
 
 // Import the datepicker icon
 const DatePickerIcon = () => (
@@ -55,12 +28,10 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   value,
   onChange,
   placeholder,
-  required = false,
   disabled = false,
   className = ""
 }) => {
   const { theme: appTheme } = useTheme();
-  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleDateChange = (newValue: Date | null) => {

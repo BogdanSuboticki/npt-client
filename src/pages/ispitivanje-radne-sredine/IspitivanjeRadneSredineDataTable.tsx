@@ -317,8 +317,8 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
           </div>
 
           <div className="table-responsive-container w-full overflow-x-auto custom-scrollbar">
-            <div className="min-h-[200px]">
-              <Table>
+            <div className="min-h-[200px] !max-w-[100px]">
+              <Table className="">
                 <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
                   <TableRow>
                     {columns.map(({ key, label, sortable }, index) => (

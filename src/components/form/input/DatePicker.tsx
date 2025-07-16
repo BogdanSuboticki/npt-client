@@ -107,11 +107,6 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               toolbar: () => null
             }}
             slotProps={{
-              popper: {
-                sx: {
-                  zIndex: 9999999
-                }
-              },
               textField: {
                 style: { 
                   position: 'absolute',

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import CustomDatePicker from "../../components/form/input/DatePicker";
+import DatePicker from "../../components/form/date-picker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -93,7 +93,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+      className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 "
     >
       <div className="flex flex-col h-full">
         <div className="p-5 lg:p-10 pb-0">
@@ -199,14 +199,14 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
 
               <div className="col-span-1">
                 <Label>Datum pregleda opreme *</Label>
-                <CustomDatePicker
-                  value={formData.datumPregleda}
-                  onChange={(date) => {
-                    if (date) {
-                      setFormData(prev => ({ ...prev, datumPregleda: date }));
+                <DatePicker
+                  id="datum-pregleda"
+                  defaultDate={formData.datumPregleda}
+                  onChange={(selectedDates) => {
+                    if (selectedDates && selectedDates.length > 0) {
+                      setFormData(prev => ({ ...prev, datumPregleda: selectedDates[0] }));
                     }
                   }}
-                  required
                 />
               </div>
 

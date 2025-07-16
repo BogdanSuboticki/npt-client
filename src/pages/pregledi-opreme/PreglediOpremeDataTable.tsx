@@ -14,7 +14,7 @@ import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
-import CustomDatePicker from "../../components/form/input/DatePicker";
+import DatePicker from "../../components/form/date-picker";
 import Button from "../../components/ui/button/Button";
 
 interface Column {
@@ -201,16 +201,30 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
               />
             </div>
             <div className="relative w-full lg:w-42">
-              <CustomDatePicker
-                value={dateFrom}
-                onChange={(date) => setDateFrom(date)}
+              <DatePicker
+                id="date-from"
+                defaultDate={dateFrom || undefined}
+                onChange={(selectedDates) => {
+                  if (selectedDates && selectedDates.length > 0) {
+                    setDateFrom(selectedDates[0]);
+                  } else {
+                    setDateFrom(null);
+                  }
+                }}
                 placeholder="Datum od"
               />
             </div>
             <div className="relative w-full lg:w-42">
-              <CustomDatePicker
-                value={dateTo}
-                onChange={(date) => setDateTo(date)}
+              <DatePicker
+                id="date-to"
+                defaultDate={dateTo || undefined}
+                onChange={(selectedDates) => {
+                  if (selectedDates && selectedDates.length > 0) {
+                    setDateTo(selectedDates[0]);
+                  } else {
+                    setDateTo(null);
+                  }
+                }}
                 placeholder="Datum do"
               />
             </div>
@@ -418,9 +432,14 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
 
             <div>
               <Label>Datum izvršenog pregleda *</Label>
-              <CustomDatePicker
-                value={modalDate}
-                onChange={handleDateChange}
+              <DatePicker
+                id="modal-date"
+                defaultDate={modalDate}
+                onChange={(selectedDates) => {
+                  if (selectedDates && selectedDates.length > 0) {
+                    setModalDate(selectedDates[0]);
+                  }
+                }}
               />
             </div>
           </div>

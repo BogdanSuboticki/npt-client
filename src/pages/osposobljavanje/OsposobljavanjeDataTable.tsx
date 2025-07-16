@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -12,26 +12,6 @@ import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Checkbox from "../../components/form/input/Checkbox";
-
-// Mobile detection hook
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  React.useEffect(() => {
-    const checkIsMobile = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-      const isTablet = /ipad|android(?=.*\b(?!.*\b(?:mobile|phone)\b))/.test(userAgent);
-      setIsMobile(isMobileDevice || isTablet);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  return isMobile;
-};
 
 interface Column {
   key: string;
@@ -75,7 +55,6 @@ const formatDate = (dateStr: string | null | undefined): string => {
 };
 
 export default function OsposobljavanjeDataTable({ data: initialData, columns }: DataTableTwoProps) {
-  const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
@@ -324,56 +303,18 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
 
                 {/* Date Range */}
                 <div className="relative w-full lg:w-42">
-                  {isMobile ? (
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={dateFrom ? dateFrom.toISOString().split('T')[0] : ''}
-                        onChange={(e) => {
-                          const date = e.target.value ? new Date(e.target.value) : null;
-                          setDateFrom(date);
-                        }}
-                        className="w-full px-4 pr-12 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-                      />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  ) : (
-                    <CustomDatePicker
-                      value={dateFrom}
-                      onChange={(newValue) => setDateFrom(newValue)}
-                      placeholder="Datum od"
-                    />
-                  )}
+                  <CustomDatePicker
+                    value={dateFrom}
+                    onChange={(newValue) => setDateFrom(newValue)}
+                    placeholder="Datum od"
+                  />
                 </div>
                 <div className="relative w-full lg:w-42">
-                  {isMobile ? (
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={dateTo ? dateTo.toISOString().split('T')[0] : ''}
-                        onChange={(e) => {
-                          const date = e.target.value ? new Date(e.target.value) : null;
-                          setDateTo(date);
-                        }}
-                        className="w-full px-4 pr-12 h-11 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90"
-                      />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  ) : (
-                    <CustomDatePicker
-                      value={dateTo}
-                      onChange={(newValue) => setDateTo(newValue)}
-                      placeholder="Datum do"
-                    />
-                  )}
+                  <CustomDatePicker
+                    value={dateTo}
+                    onChange={(newValue) => setDateTo(newValue)}
+                    placeholder="Datum do"
+                  />
                 </div>
                 {/* Osposobljavanje Checkboxes */}
                 <div className="flex items-center gap-4">

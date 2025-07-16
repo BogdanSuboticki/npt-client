@@ -121,12 +121,6 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
     closeModal();
   };
 
-  const handleDateChange = (value: Date | null) => {
-    if (value) {
-      setModalDate(value);
-    }
-  };
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);

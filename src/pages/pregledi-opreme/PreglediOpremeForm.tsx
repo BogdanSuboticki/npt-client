@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import DatePicker from "../../components/form/date-picker";
+import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -199,14 +199,14 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
 
               <div className="col-span-1">
                 <Label>Datum pregleda opreme *</Label>
-                <DatePicker
-                  id="datum-pregleda"
-                  defaultDate={formData.datumPregleda}
-                  onChange={(selectedDates) => {
-                    if (selectedDates && selectedDates.length > 0) {
-                      setFormData(prev => ({ ...prev, datumPregleda: selectedDates[0] }));
+                <CustomDatePicker
+                  value={formData.datumPregleda}
+                  onChange={(date) => {
+                    if (date) {
+                      setFormData(prev => ({ ...prev, datumPregleda: date }));
                     }
                   }}
+                  required
                 />
               </div>
 

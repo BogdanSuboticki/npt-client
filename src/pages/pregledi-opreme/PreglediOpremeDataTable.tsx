@@ -14,7 +14,7 @@ import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
-import DatePicker from "../../components/form/date-picker";
+import CustomDatePicker from "../../components/form/input/DatePicker";
 import Button from "../../components/ui/button/Button";
 
 interface Column {
@@ -121,6 +121,12 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
     closeModal();
   };
 
+  const handleDateChange = (value: Date | null) => {
+    if (value) {
+      setModalDate(value);
+    }
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
@@ -195,30 +201,16 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
               />
             </div>
             <div className="relative w-full lg:w-42">
-              <DatePicker
-                id="date-from"
-                defaultDate={dateFrom || undefined}
-                onChange={(selectedDates) => {
-                  if (selectedDates && selectedDates.length > 0) {
-                    setDateFrom(selectedDates[0]);
-                  } else {
-                    setDateFrom(null);
-                  }
-                }}
+              <CustomDatePicker
+                value={dateFrom}
+                onChange={(date) => setDateFrom(date)}
                 placeholder="Datum od"
               />
             </div>
             <div className="relative w-full lg:w-42">
-              <DatePicker
-                id="date-to"
-                defaultDate={dateTo || undefined}
-                onChange={(selectedDates) => {
-                  if (selectedDates && selectedDates.length > 0) {
-                    setDateTo(selectedDates[0]);
-                  } else {
-                    setDateTo(null);
-                  }
-                }}
+              <CustomDatePicker
+                value={dateTo}
+                onChange={(date) => setDateTo(date)}
                 placeholder="Datum do"
               />
             </div>
@@ -426,14 +418,9 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
 
             <div>
               <Label>Datum izvršenog pregleda *</Label>
-              <DatePicker
-                id="modal-date"
-                defaultDate={modalDate}
-                onChange={(selectedDates) => {
-                  if (selectedDates && selectedDates.length > 0) {
-                    setModalDate(selectedDates[0]);
-                  }
-                }}
+              <CustomDatePicker
+                value={modalDate}
+                onChange={handleDateChange}
               />
             </div>
           </div>

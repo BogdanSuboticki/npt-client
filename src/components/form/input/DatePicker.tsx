@@ -6,16 +6,24 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { sr } from "date-fns/locale";
 import { useTheme } from "../../../context/ThemeContext";
 
-// Mobile detection hook
+// Improved mobile detection hook
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkIsMobile = () => {
+      // Check for touch capability first (more reliable than user agent)
+      const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      // Check screen size
+      const isSmallScreen = window.innerWidth <= 768;
+      
+      // Check user agent as fallback
       const userAgent = navigator.userAgent.toLowerCase();
       const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-      const isTablet = /ipad|android(?=.*\b(?!.*\b(?:mobile|phone)\b))/.test(userAgent);
-      setIsMobile(isMobileDevice || isTablet);
+      
+      // Consider mobile if it has touch AND is small screen, OR if user agent indicates mobile
+      setIsMobile((hasTouchScreen && isSmallScreen) || isMobileDevice);
     };
 
     checkIsMobile();
@@ -55,31 +63,6 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Remove click outside handler - let MUI handle it
-  // useEffect(() => {
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-  //     
-  //     // Check if click is inside any MUI date picker related element
-  //     const isInsideMuiDatePicker = target.closest('[role="dialog"]') || 
-  //                                  target.closest('.MuiPickersPopper-root') || 
-  //                                  target.closest('.MuiPaper-root') ||
-  //                                  target.closest('.MuiCalendar-root') ||
-  //                                  target.closest('.MuiPickersCalendarHeader-root') ||
-  //                                  target.closest('.MuiPickersArrowSwitcher-root') ||
-  //                                  target.closest('.custom-date-picker-input');
-  //     
-  //     if (!isInsideMuiDatePicker) {
-  //       setIsOpen(false);
-  //     }
-  //   };
-
-  //   document.addEventListener('mousedown', handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener('mousedown', handleClickOutside);
-  //   };
-  // }, []);
-
   const handleDateChange = (newValue: Date | null) => {
     onChange(newValue);
     setIsOpen(false);
@@ -110,88 +93,68 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   return (
     <ThemeProvider theme={muiTheme}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sr}>
-        {isMobile ? (
-          // Mobile: Use native date input with custom styling and icon
-          <div className="relative">
-            <input
-              type="date"
-              value={value ? value.toISOString().split('T')[0] : ''}
-              onChange={(e) => {
-                const date = e.target.value ? new Date(e.target.value) : null;
-                onChange(date);
-              }}
-              className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 pr-12 text-sm shadow-theme-xs bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
-              required={required}
-              disabled={disabled}
-            />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <DatePickerIcon />
-            </div>
-          </div>
-        ) : (
-          // Desktop: Use custom styled datepicker
-          <div className="relative custom-date-picker-input">
-            <div 
-              className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
-              onClick={toggleDatePicker}
-              onTouchStart={toggleDatePicker}
-            >
-              <div className="flex items-center justify-between h-full">
-                <span className={`${value ? 'text-gray-800 dark:text-white/90' : 'text-gray-400 dark:text-gray-500'}`}>
-                  {value ? value.toLocaleDateString('sr-RS') : placeholder || 'Izaberi datum'}
-                </span>
-                <div 
-                  className={`text-gray-500 dark:text-gray-400 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
-                  onClick={(e: React.MouseEvent) => {
-                    if (!disabled) {
-                      e.stopPropagation();
-                      toggleDatePicker();
-                    }
-                  }}
-                  onTouchStart={(e: React.TouchEvent) => {
-                    if (!disabled) {
-                      e.stopPropagation();
-                      toggleDatePicker();
-                    }
-                  }}
-                >
-                  <DatePickerIcon />
-                </div>
+        {/* Use the same custom UI for both mobile and desktop for consistency */}
+        <div className="relative custom-date-picker-input">
+          <div 
+            className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
+            onClick={toggleDatePicker}
+            onTouchStart={toggleDatePicker}
+          >
+            <div className="flex items-center justify-between h-full">
+              <span className={`${value ? 'text-gray-800 dark:text-white/90' : 'text-gray-400 dark:text-gray-500'}`}>
+                {value ? value.toLocaleDateString('sr-RS') : placeholder || 'Izaberi datum'}
+              </span>
+              <div 
+                className={`text-gray-500 dark:text-gray-400 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
+                onClick={(e: React.MouseEvent) => {
+                  if (!disabled) {
+                    e.stopPropagation();
+                    toggleDatePicker();
+                  }
+                }}
+                onTouchStart={(e: React.TouchEvent) => {
+                  if (!disabled) {
+                    e.stopPropagation();
+                    toggleDatePicker();
+                  }
+                }}
+              >
+                <DatePickerIcon />
               </div>
             </div>
-            
-            <MuiDatePicker
-              value={value}
-              onChange={handleDateChange}
-              open={isOpen}
-              onOpen={() => setIsOpen(true)}
-              onClose={() => setIsOpen(false)}
-              format="dd/MM/yyyy"
-              disabled={disabled}
-              slots={{
-                toolbar: () => null
-              }}
-              slotProps={{
-                popper: {
-                  sx: {
-                    zIndex: 9999999
-                  }
-                },
-                textField: {
-                  style: { 
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    opacity: 0,
-                    pointerEvents: 'none'
-                  }
-                },
-              }}
-            />
           </div>
-        )}
+          
+          <MuiDatePicker
+            value={value}
+            onChange={handleDateChange}
+            open={isOpen}
+            onOpen={() => setIsOpen(true)}
+            onClose={() => setIsOpen(false)}
+            format="dd/MM/yyyy"
+            disabled={disabled}
+            slots={{
+              toolbar: () => null
+            }}
+            slotProps={{
+              popper: {
+                sx: {
+                  zIndex: 9999999
+                }
+              },
+              textField: {
+                style: { 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  opacity: 0,
+                  pointerEvents: 'none'
+                }
+              },
+            }}
+          />
+        </div>
       </LocalizationProvider>
     </ThemeProvider>
   );

@@ -145,6 +145,27 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
     const specialColumns = ['mikroklimaLetnja', 'mikroklimaZimska', 'fizickeStetnosti', 'hemijskeStetnosti', 'osvetljenje'];
     
     if (specialColumns.includes(key)) {
+      // Check if value is an object with dates
+      if (value && typeof value === 'object' && value.prethodnoIspitivanje && value.narednoIspitivanje) {
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="text-xs text-gray-600 dark:text-gray-400">
+              Prethodno ispitivanje: <span className="font-medium">{value.prethodnoIspitivanje}</span>
+            </div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">
+              Naredno ispitivanje: <span className="font-medium">{value.narednoIspitivanje}</span>
+            </div>
+            <button 
+              className="px-3 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600 transition-colors"
+              onClick={() => handleIzvrsiIspitivanje(key)}
+            >
+              Izvrši ispitivanje
+            </button>
+          </div>
+        );
+      }
+      
+      // Fallback for old data structure
       return (
         <div className="flex flex-col gap-2">
           <div className="text-xs text-gray-600 dark:text-gray-400">

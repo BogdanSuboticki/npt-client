@@ -96,20 +96,20 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
-              <div className="col-span-1">
+            <div className="flex flex-col space-y-4 pb-4">
+              <div className="w-full">
                 <Label>Naziv opreme *</Label>
                 <Input
                   type="text"
                   name="nazivOpreme"
                   value={formData.nazivOpreme}
                   onChange={(e) => setFormData({...formData, nazivOpreme: e.target.value})}
-                  className="bg-[#F9FAFB] dark:bg-[#101828]"
+                  className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                   required
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Lokacija *</Label>
                 <div className="relative w-full" ref={lokacijaRef}>
                   <button
@@ -150,7 +150,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                 </div>
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Interval pregleda (meseci) *</Label>
                 <div className="relative w-full" ref={intervalRef}>
                   <button
@@ -189,10 +189,9 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                     </div>
                   )}
                 </div>
-
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Datum pregleda opreme *</Label>
                 <CustomDatePicker
                   value={formData.datumPregleda}
@@ -205,7 +204,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Status *</Label>
                 <div className="relative w-full" ref={statusRef}>
                   <button
@@ -246,7 +245,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                 </div>
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Datum narednog pregleda opreme</Label>
                 <div className="relative">
                   <input
@@ -263,18 +262,18 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                 </div>
               </div>
 
-              <div className="col-span-1 lg:col-span-2">
+              <div className="w-full">
                 <Label>Napomena</Label>
                 <TextArea
                   value={formData.napomena}
                   onChange={(value) => setFormData({...formData, napomena: value})}
                   placeholder="Unesite napomenu..."
                   rows={4}
-                  className="bg-[#F9FAFB] dark:bg-[#101828]"
+                  className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="w-full">
                 <Slider
                   label="Pratiti"
                   optionOne="Da"

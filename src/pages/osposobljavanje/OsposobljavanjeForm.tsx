@@ -52,35 +52,38 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
+      className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
-          <form onSubmit={handleSubmit}>
-            <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
-              Novo Osposobljavanje
-            </h4>
-
-            <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
-              <div className="col-span-1">
+      <div className="flex flex-col h-full">
+        <div className="p-5 lg:p-10 pb-0">
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white/90 mb-6">
+            Novo Osposobljavanje
+          </h4>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            <div className="flex flex-col space-y-4 pb-4">
+              <div className="w-full">
                 <Label>Zaposleni *</Label>
                 <Input 
                   type="text" 
                   value={formData.zaposleni}
                   onChange={(e) => setFormData({...formData, zaposleni: e.target.value})}
-                  className="bg-[#F9FAFB] dark:bg-[#101828]"
+                  className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Radno Mesto *</Label>
                 <Input 
                   type="text" 
                   value={formData.radnoMesto}
                   onChange={(e) => setFormData({...formData, radnoMesto: e.target.value})}
-                  className="bg-[#F9FAFB] dark:bg-[#101828]"
+                  className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Osposobljavanje BZR</Label>
                 <CustomDatePicker
                   value={formData.osposobljavanjeBZR}
@@ -88,7 +91,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Datum Narednog BZR</Label>
                 <CustomDatePicker
                   value={formData.datumNarednogBZR}
@@ -96,7 +99,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Osposobljavanje ZOP</Label>
                 <CustomDatePicker
                   value={formData.osposobljavanjeZOP}
@@ -104,7 +107,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
 
-              <div className="col-span-1">
+              <div className="w-full">
                 <Label>Datum Narednog ZOP</Label>
                 <CustomDatePicker
                   value={formData.datumNarednogZOP}
@@ -112,7 +115,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="w-full">
                 <Slider
                   label="Povećani Rizik"
                   optionOne="Da"
@@ -123,8 +126,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
             </div>
+          </div>
 
-            <div className="flex items-center justify-end w-full gap-3 mt-6">
+          <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+            <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={onClose}>
                 Otkaži
               </Button>
@@ -132,8 +137,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 Sačuvaj
               </Button>
             </div>
-          </form>
-        </Modal>
-      );
+          </div>
+        </form>
+      </div>
+    </Modal>
+  );
 }
 

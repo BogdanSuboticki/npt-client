@@ -13,11 +13,26 @@ const sampleData = [
     brojMernihMesta: 8,
     intervalIspitivanja: '6 meseci',
     napomena: 'Redovno ispitivanje - prioritet',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Ne',
-    hemijskeStetnosti: 'Da',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '15.06.2023',
+      narednoIspitivanje: '15.12.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '10.01.2023',
+      narednoIspitivanje: '10.07.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '22.03.2023',
+      narednoIspitivanje: '22.09.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '05.05.2023',
+      narednoIspitivanje: '05.11.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '18.04.2023',
+      narednoIspitivanje: '18.10.2023'
+    }
   },
   {
     id: 2,
@@ -27,11 +42,26 @@ const sampleData = [
     brojMernihMesta: 4,
     intervalIspitivanja: '12 meseci',
     napomena: 'Periodično ispitivanje',
-    mikroklimaLetnja: 'Ne',
-    mikroklimaZimska: 'Ne',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Ne',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '12.07.2022',
+      narednoIspitivanje: '12.07.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '08.02.2022',
+      narednoIspitivanje: '08.02.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '25.09.2022',
+      narednoIspitivanje: '25.09.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '14.11.2022',
+      narednoIspitivanje: '14.11.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '03.08.2022',
+      narednoIspitivanje: '03.08.2023'
+    }
   },
   {
     id: 3,
@@ -41,11 +71,26 @@ const sampleData = [
     brojMernihMesta: 6,
     intervalIspitivanja: '6 meseci',
     napomena: 'Kontrolno merenje',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Ne',
-    hemijskeStetnosti: 'Ne',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '20.05.2023',
+      narednoIspitivanje: '20.11.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '15.12.2022',
+      narednoIspitivanje: '15.06.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '28.02.2023',
+      narednoIspitivanje: '28.08.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '10.04.2023',
+      narednoIspitivanje: '10.10.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '07.03.2023',
+      narednoIspitivanje: '07.09.2023'
+    }
   },
   {
     id: 4,
@@ -55,11 +100,26 @@ const sampleData = [
     brojMernihMesta: 12,
     intervalIspitivanja: '3 meseca',
     napomena: 'Vanredno ispitivanje',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Da',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '30.06.2023',
+      narednoIspitivanje: '30.09.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '25.03.2023',
+      narednoIspitivanje: '25.06.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '12.05.2023',
+      narednoIspitivanje: '12.08.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '18.07.2023',
+      narednoIspitivanje: '18.10.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '05.04.2023',
+      narednoIspitivanje: '05.07.2023'
+    }
   },
   {
     id: 5,
@@ -69,11 +129,26 @@ const sampleData = [
     brojMernihMesta: 5,
     intervalIspitivanja: '12 meseci',
     napomena: 'Standardno ispitivanje',
-    mikroklimaLetnja: 'Ne',
-    mikroklimaZimska: 'Ne',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Ne',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '22.08.2022',
+      narednoIspitivanje: '22.08.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '14.01.2022',
+      narednoIspitivanje: '14.01.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '09.10.2022',
+      narednoIspitivanje: '09.10.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '17.12.2022',
+      narednoIspitivanje: '17.12.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '31.07.2022',
+      narednoIspitivanje: '31.07.2023'
+    }
   },
   {
     id: 6,
@@ -83,11 +158,26 @@ const sampleData = [
     brojMernihMesta: 7,
     intervalIspitivanja: '6 meseci',
     napomena: 'Redovna kontrola',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Da',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '11.04.2023',
+      narednoIspitivanje: '11.10.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '06.11.2022',
+      narednoIspitivanje: '06.05.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '24.01.2023',
+      narednoIspitivanje: '24.07.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '13.03.2023',
+      narednoIspitivanje: '13.09.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '29.02.2023',
+      narednoIspitivanje: '29.08.2023'
+    }
   },
   {
     id: 7,
@@ -97,11 +187,26 @@ const sampleData = [
     brojMernihMesta: 9,
     intervalIspitivanja: '6 meseci',
     napomena: 'Godišnje ispitivanje',
-    mikroklimaLetnja: 'Ne',
-    mikroklimaZimska: 'Ne',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Ne',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '16.09.2022',
+      narednoIspitivanje: '16.03.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '21.12.2022',
+      narednoIspitivanje: '21.06.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '08.05.2023',
+      narednoIspitivanje: '08.11.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '26.07.2022',
+      narednoIspitivanje: '26.01.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '19.10.2022',
+      narednoIspitivanje: '19.04.2023'
+    }
   },
   {
     id: 8,
@@ -111,11 +216,26 @@ const sampleData = [
     brojMernihMesta: 15,
     intervalIspitivanja: '3 meseca',
     napomena: 'Hitno ispitivanje',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Da',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '02.08.2023',
+      narednoIspitivanje: '02.11.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '27.05.2023',
+      narednoIspitivanje: '27.08.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '14.06.2023',
+      narednoIspitivanje: '14.09.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '01.09.2023',
+      narednoIspitivanje: '01.12.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '23.07.2023',
+      narednoIspitivanje: '23.10.2023'
+    }
   },
   {
     id: 9,
@@ -125,11 +245,26 @@ const sampleData = [
     brojMernihMesta: 3,
     intervalIspitivanja: '12 meseci',
     napomena: 'Standardna provera',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Ne',
-    hemijskeStetnosti: 'Ne',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '09.12.2022',
+      narednoIspitivanje: '09.12.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '03.03.2022',
+      narednoIspitivanje: '03.03.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '18.06.2022',
+      narednoIspitivanje: '18.06.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '30.09.2022',
+      narednoIspitivanje: '30.09.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '12.04.2022',
+      narednoIspitivanje: '12.04.2023'
+    }
   },
   {
     id: 10,
@@ -139,11 +274,26 @@ const sampleData = [
     brojMernihMesta: 6,
     intervalIspitivanja: '6 meseci',
     napomena: 'Kvartalno ispitivanje',
-    mikroklimaLetnja: 'Da',
-    mikroklimaZimska: 'Da',
-    fizickeStetnosti: 'Da',
-    hemijskeStetnosti: 'Da',
-    osvetljenje: 'Da'
+    mikroklimaLetnja: {
+      prethodnoIspitivanje: '25.03.2023',
+      narednoIspitivanje: '25.09.2023'
+    },
+    mikroklimaZimska: {
+      prethodnoIspitivanje: '17.10.2022',
+      narednoIspitivanje: '17.04.2023'
+    },
+    fizickeStetnosti: {
+      prethodnoIspitivanje: '04.01.2023',
+      narednoIspitivanje: '04.07.2023'
+    },
+    hemijskeStetnosti: {
+      prethodnoIspitivanje: '22.05.2023',
+      narednoIspitivanje: '22.11.2023'
+    },
+    osvetljenje: {
+      prethodnoIspitivanje: '11.02.2023',
+      narednoIspitivanje: '11.08.2023'
+    }
   }
 ];
 

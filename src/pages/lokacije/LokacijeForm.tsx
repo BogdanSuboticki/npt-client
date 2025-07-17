@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
-import Checkbox from "../../components/form/input/Checkbox";
 import Label from "../../components/form/Label";
 import Slider from "../../components/ui/Slider";
 

@@ -68,12 +68,16 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[800px] max-h-[90vh] overflow-y-auto p-5 lg:p-10 dark:bg-gray-800"
+      className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Povreda</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="col-span-1">
+      <div className="flex flex-col h-full">
+        <div className="p-5 lg:p-10 pb-0">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Povreda</h2>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 pb-4">
+          <div className="w-full">
             <Label>Zaposleni *</Label>
             <div className="relative w-full" ref={zaposleniRef}>
               <button
@@ -114,7 +118,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             </div>
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Datum povrede *</Label>
             <CustomDatePicker
               value={formData.datumPovrede}
@@ -127,7 +131,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             />
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Datum obaveštavanja inspekcije</Label>
             <CustomDatePicker
               value={formData.datumObaveštavanjaInspekcije}
@@ -139,7 +143,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             />
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Datum otvaranja liste</Label>
             <CustomDatePicker
               value={formData.datumOtvaranjaListe}
@@ -151,7 +155,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             />
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Datum overe lekara</Label>
             <CustomDatePicker
               value={formData.datumOvereLekara}
@@ -163,7 +167,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             />
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Datum preuzimanja iz fonda</Label>
             <CustomDatePicker
               value={formData.datumPreuzimanjaIzFonda}
@@ -175,7 +179,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             />
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Datum predavanja poslodavcu</Label>
             <CustomDatePicker
               value={formData.datumPredavanjaPoslodavcu}
@@ -187,7 +191,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             />
           </div>
 
-          <div className="col-span-1">
+          <div className="w-full">
             <Label>Težina povrede *</Label>
             <div className="relative w-full" ref={tezinaPovredeRef}>
               <button
@@ -227,33 +231,37 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
               )}
             </div>
           </div>
-        </div>
 
-        <div className="col-span-2 mt-4">
-          <Label>Napomena</Label>
-          <TextArea
-            value={formData.napomena}
-            onChange={(value) => setFormData({...formData, napomena: value})}
-            placeholder="Unesite napomenu..."
-            rows={3}
-            className="bg-[#F9FAFB] dark:bg-[#101828]"
-          />
+          <div className="w-full mt-4">
+            <Label>Napomena</Label>
+            <TextArea
+              value={formData.napomena}
+              onChange={(value) => setFormData({...formData, napomena: value})}
+              placeholder="Unesite napomenu..."
+              rows={3}
+              className="bg-[#F9FAFB] dark:bg-[#101828]"
+            />
+          </div>
         </div>
+      </div>
 
-        <div className="flex justify-end gap-2 mt-6">
-          <Button
-            variant="outline"
-            onClick={onClose}
-          >
-            Otkaži
-          </Button>
-          <Button
-            type="submit"
-          >
-            Sačuvaj
-          </Button>
-        </div>
-      </form>
+          <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={onClose}
+              >
+                Otkaži
+              </Button>
+              <Button
+                type="submit"
+              >
+                Sačuvaj
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
     </Modal>
   );
 } 

@@ -920,7 +920,7 @@ span.flatpickr-weekday,
   align-items: center;
   justify-content: center;
   height: 40px;
-  width: 200px;
+  width: 50%;
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 8px;
@@ -937,20 +937,20 @@ span.flatpickr-weekday,
   position: absolute;
   display: flex;
   height: 40px;
-  width: 200px;
+  width: calc(50% - 0.25rem);
   background-color: #ecf3ff;
   z-index: 1;
   transition: 0.25s ease-out;
 }
 
-.tabs-wrapper input[id="radio-ispravno"]:checked ~ .glider {
-  transform: translateX(0);
-  border-radius: 8px 0 0 8px;
+.tabs-wrapper input[type="radio"]:checked ~ .glider {
+  transform: translateX(calc(100% - 0.25rem));
+  border-radius: 0 8px 8px 0;
 }
 
-.tabs-wrapper input[id="radio-neispravno"]:checked ~ .glider {
-  transform: translateX(100%);
-  border-radius: 0 8px 8px 0;
+.tabs-wrapper input[type="radio"]:first-of-type:checked ~ .glider {
+  transform: translateX(0.25rem);
+  border-radius: 8px 0 0 8px;
 }
 
 /* Dark mode support for tabs */

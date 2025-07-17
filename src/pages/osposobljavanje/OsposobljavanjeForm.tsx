@@ -4,7 +4,7 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import CustomDatePicker from "../../components/form/input/DatePicker";
-import Checkbox from "../../components/form/input/Checkbox";
+import Slider from "../../components/ui/Slider";
 
 interface OsposobljavanjeFormProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
     zaposleni: "",
     radnoMesto: "",
     lokacija: "",
-    povecanRizik: false,
+    povecanRizik: false, // false = "Ne", true = "Da"
     osposobljavanjeBZR: new Date(),
     datumNarednogBZR: new Date(),
     osposobljavanjeZOP: new Date(),
@@ -112,18 +112,15 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
 
-              <div className="col-span-1">
-                <div className="flex items-center gap-2 pt-4">
-                  <Checkbox
-                    checked={formData.povecanRizik}
-                    onChange={(checked) => setFormData({...formData, povecanRizik: checked})}
-                    className="w-4 h-4"
-                    id="povecanRizik"
-                  />
-                  <Label className="mb-0 cursor-pointer" htmlFor="povecanRizik">
-                    Povećani Rizik
-                  </Label>
-                </div>
+              <div className="col-span-2">
+                <Slider
+                  label="Povećani Rizik"
+                  optionOne="Da"
+                  optionTwo="Ne"
+                  value={formData.povecanRizik}
+                  onChange={(value) => setFormData({...formData, povecanRizik: value})}
+                  size="full"
+                />
               </div>
             </div>
 

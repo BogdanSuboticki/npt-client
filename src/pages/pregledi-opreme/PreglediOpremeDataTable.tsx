@@ -16,6 +16,7 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Button from "../../components/ui/button/Button";
+import Slider from "../../components/ui/Slider";
 
 interface Column {
   key: string;
@@ -385,36 +386,13 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
         </h4>
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
           <div className="space-y-4">
-            <div>
-              <Label>Status pregleda</Label>
-              <div className="mt-2">
-                <div className="tabs-container">
-                  <div className="tabs-wrapper">
-                    <input 
-                      type="radio" 
-                      id="radio-ispravno" 
-                      name="status-tabs" 
-                      checked={modalStatus}
-                      onChange={() => setModalStatus(true)}
-                    />
-                    <label className="tab" htmlFor="radio-ispravno">
-                      Ispravno
-                    </label>
-                    <input 
-                      type="radio" 
-                      id="radio-neispravno" 
-                      name="status-tabs" 
-                      checked={!modalStatus}
-                      onChange={() => setModalStatus(false)}
-                    />
-                    <label className="tab" htmlFor="radio-neispravno">
-                      Neispravno
-                    </label>
-                    <span className="glider"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Slider
+              label="Status pregleda"
+              optionOne="Ispravno"
+              optionTwo="Neispravno"
+              value={modalStatus}
+              onChange={setModalStatus}
+            />
 
             <div>
               <Label>Datum izvršenog pregleda *</Label>

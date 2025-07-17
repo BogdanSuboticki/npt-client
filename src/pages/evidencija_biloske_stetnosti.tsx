@@ -50,6 +50,9 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
+  
+  // Create refs for each input field
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const handleCellChange = (rowIdx: number, accessor: keyof TableRow, value: string) => {
     setRows((prev) => {
@@ -148,22 +151,129 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
   };
 
   const handlePrint = () => {
+    const element = tableRef.current;
+    if (!element) return;
+
+    // Store original input elements and their values
+    const inputs = element.querySelectorAll('input');
+    const originalInputs: HTMLInputElement[] = [];
+    const inputValues: string[] = [];
+
+    // Replace inputs with text divs and store originals
+    inputs.forEach((input, index) => {
+      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
+      inputValues[index] = input.value;
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = input.value;
+      textDiv.style.cssText = `
+        width: 100%;
+        min-height: 24px;
+        padding: 2px 4px;
+        font-size: 11px;
+        line-height: 1.3;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #000000;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: Arial, sans-serif;
+        display: block;
+      `;
+      input.parentNode?.replaceChild(textDiv, input);
+    });
+
+    // Add print-specific CSS
+    const printStyle = document.createElement('style');
+    printStyle.textContent = `
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #print-table, #print-table * {
+          visibility: visible;
+        }
+        #print-table {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        @page {
+          size: A4 landscape;
+          margin: 0.3in;
+        }
+      }
+    `;
+    element.id = 'print-table';
+    element.appendChild(printStyle);
+
+    // Print
     window.print();
+
+    // Restore original input elements
+    setTimeout(() => {
+      const textDivs = element.querySelectorAll('div');
+      textDivs.forEach((div, index) => {
+        if (originalInputs[index]) {
+          const restoredInput = originalInputs[index];
+          restoredInput.value = inputValues[index];
+          div.parentNode?.replaceChild(restoredInput, div);
+        }
+      });
+      element.removeAttribute('id');
+      if (printStyle.parentNode) {
+        printStyle.parentNode.removeChild(printStyle);
+      }
+    }, 1000);
   };
 
   const handleDownload = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Store original input elements and their values
+    const inputs = element.querySelectorAll('input');
+    const originalInputs: HTMLInputElement[] = [];
+    const inputValues: string[] = [];
+
+    // Replace inputs with text divs and store originals
+    inputs.forEach((input, index) => {
+      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
+      inputValues[index] = input.value;
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = input.value;
+      textDiv.style.cssText = `
+        width: 100%;
+        min-height: 24px;
+        padding: 2px 4px;
+        font-size: 11px;
+        line-height: 1.3;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #000000;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: Arial, sans-serif;
+        display: block;
+      `;
+      input.parentNode?.replaceChild(textDiv, input);
+    });
+
     const opt = {
-      margin: 1,
+      margin: 0.3,
       filename: 'evidencija_biloske_stetnosti.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
-        scale: 2,
+        scale: 1.2,
         useCORS: true,
         letterRendering: true,
-        scrollY: 0
+        scrollY: 0,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
       },
       jsPDF: { 
         unit: 'in', 
@@ -172,7 +282,17 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
       }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Restore original input elements
+      const textDivs = element.querySelectorAll('div');
+      textDivs.forEach((div, index) => {
+        if (originalInputs[index]) {
+          const restoredInput = originalInputs[index];
+          restoredInput.value = inputValues[index];
+          div.parentNode?.replaceChild(restoredInput, div);
+        }
+      });
+    });
   };
 
   const handleSave = () => {
@@ -186,6 +306,12 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
 
   const handleNazivChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNazivObrasca(e.target.value);
+  };
+
+  const handleCellClick = (inputRef: { current: HTMLInputElement | null }) => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   return (
@@ -278,83 +404,132 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                 <React.Fragment key={rowIdx}>
                   <tr>
                     <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 text-center text-[13px] text-gray-800 dark:text-gray-400" rowSpan={9}>{rowIdx + 1}.</td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`imePrezime-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`imePrezime-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.imePrezime}
                         onChange={e => handleCellChange(rowIdx, 'imePrezime', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`klasifikacijaStetnosti-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`klasifikacijaStetnosti-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.klasifikacijaStetnosti}
                         onChange={e => handleCellChange(rowIdx, 'klasifikacijaStetnosti', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`brojStrucnogNalaza-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`brojStrucnogNalaza-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.brojStrucnogNalaza}
                         onChange={e => handleCellChange(rowIdx, 'brojStrucnogNalaza', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`datumIspitivanja-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`datumIspitivanja-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumIspitivanja}
                         onChange={e => handleCellChange(rowIdx, 'datumIspitivanja', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`datumSledecegIspitivanja-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`datumSledecegIspitivanja-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumSledecegIspitivanja}
                         onChange={e => handleCellChange(rowIdx, 'datumSledecegIspitivanja', e.target.value)}
                       />
                     </td>
                     <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400">Prethodni</td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text"
+                      onClick={() => handleCellClick({ current: inputRefs.current[`datumPregledaPrethodni-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`datumPregledaPrethodni-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumPregledaPrethodni}
                         onChange={e => handleCellChange(rowIdx, 'datumPregledaPrethodni', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`datumSledeci-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`datumSledeci-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumSledeci}
                         onChange={e => handleCellChange(rowIdx, 'datumSledeci', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`brojIzvestaja-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`brojIzvestaja-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.brojIzvestaja}
                         onChange={e => handleCellChange(rowIdx, 'brojIzvestaja', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`ocenaZdravstveneSposobnosti-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`ocenaZdravstveneSposobnosti-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.ocenaZdravstveneSposobnosti}
                         onChange={e => handleCellChange(rowIdx, 'ocenaZdravstveneSposobnosti', e.target.value)}
                       />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1" rowSpan={9}>
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text" 
+                      rowSpan={9}
+                      onClick={() => handleCellClick({ current: inputRefs.current[`napomena-${rowIdx}`] })}
+                    >
                       <input
+                        ref={(el) => { inputRefs.current[`napomena-${rowIdx}`] = el; }}
                         type="text"
-                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.napomena}
                         onChange={e => handleCellChange(rowIdx, 'napomena', e.target.value)}
                       />
@@ -365,10 +540,14 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                       {i === 0 && (
                         <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Periodični</td>
                       )}
-                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 min-w-[100px]">
+                      <td 
+                        className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 min-w-[100px] cursor-text"
+                        onClick={() => handleCellClick({ current: inputRefs.current[`periodicni-${rowIdx}-${i}`] })}
+                      >
                         <input
+                          ref={(el) => { inputRefs.current[`periodicni-${rowIdx}-${i}`] = el; }}
                           type="text"
-                          className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                          className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                           value={val}
                           onChange={e => handlePeriodicniChange(rowIdx, i, e.target.value)}
                         />
@@ -380,10 +559,14 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                       {i === 0 && (
                         <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400" rowSpan={4} style={{verticalAlign: 'middle'}}>Ciljani</td>
                       )}
-                      <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
+                      <td 
+                        className="border border-gray-200 dark:border-white/[0.1] px-2 py-1 cursor-text"
+                        onClick={() => handleCellClick({ current: inputRefs.current[`ciljani-${rowIdx}-${i}`] })}
+                      >
                         <input
+                          ref={(el) => { inputRefs.current[`ciljani-${rowIdx}-${i}`] = el; }}
                           type="text"
-                          className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
+                          className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                           value={val}
                           onChange={e => handleCiljaniChange(rowIdx, i, e.target.value)}
                         />
@@ -501,8 +684,8 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
             >
               <path
                 d="M34.364 6.85053C38.6205 -2.28351 51.3795 -2.28351 55.636 6.85053C58.0129 11.951 63.5594 14.6722 68.9556 13.3853C78.6192 11.0807 86.5743 21.2433 82.2185 30.3287C79.7862 35.402 81.1561 41.5165 85.5082 45.0122C93.3019 51.2725 90.4628 63.9451 80.7747 66.1403C75.3648 67.3661 71.5265 72.2695 71.5572 77.9156C71.6123 88.0265 60.1169 93.6664 52.3918 87.3184C48.0781 83.7737 41.9219 83.7737 37.6082 87.3184C29.8831 93.6664 18.3877 88.0266 18.4428 77.9156C18.4735 72.2695 14.6352 67.3661 9.22531 66.1403C-0.462787 63.9451 -3.30193 51.2725 4.49185 45.0122C8.84391 41.5165 10.2138 35.402 7.78151 30.3287C3.42572 21.2433 11.3808 11.0807 21.0444 13.3853C26.4406 14.6722 31.9871 11.951 34.364 6.85053Z"
-                fill=""
-                fillOpacity=""
+                fill="currentColor"
+                fillOpacity="1"
               />
             </svg>
 
@@ -519,7 +702,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                   fillRule="evenodd"
                   clipRule="evenodd"
                   d="M32.1445 19.0002C32.1445 26.2604 26.2589 32.146 18.9987 32.146C11.7385 32.146 5.85287 26.2604 5.85287 19.0002C5.85287 11.7399 11.7385 5.85433 18.9987 5.85433C26.2589 5.85433 32.1445 11.7399 32.1445 19.0002ZM18.9987 35.146C27.9158 35.146 35.1445 27.9173 35.1445 19.0002C35.1445 10.0831 27.9158 2.85433 18.9987 2.85433C10.0816 2.85433 2.85287 10.0831 2.85287 19.0002C2.85287 27.9173 10.0816 35.146 18.9987 35.146ZM21.0001 26.0855C21.0001 24.9809 20.1047 24.0855 19.0001 24.0855L18.9985 24.0855C17.894 24.0855 16.9985 24.9809 16.9985 26.0855C16.9985 27.19 17.894 28.0855 18.9985 28.0855L19.0001 28.0855C20.1047 28.0855 21.0001 27.19 21.0001 26.0855ZM18.9986 10.1829C19.827 10.1829 20.4986 10.8545 20.4986 11.6829L20.4986 20.6707C20.4986 21.4992 19.827 22.1707 18.9986 22.1707C18.1701 22.1707 17.4986 21.4992 17.4986 20.6707L17.4986 11.6829C17.4986 10.8545 18.1701 10.1829 18.9986 10.1829Z"
-                  fill=""
+                  fill="currentColor"
                 />
               </svg>
             </span>

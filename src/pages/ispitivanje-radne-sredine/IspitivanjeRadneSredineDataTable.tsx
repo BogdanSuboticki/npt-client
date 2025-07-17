@@ -67,8 +67,13 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
     return Array.from(new Set(data.map(item => item.nazivLokacije)));
   }, [data]);
 
+  const uniqueObjekti = useMemo(() => {
+    return Array.from(new Set(data.map(item => item.nazivObjekta)));
+  }, [data]);
+
   // Initialize with all items selected
   const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
+  const [selectedObjekti, setSelectedObjekti] = useState<string[]>(uniqueObjekti);
 
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
@@ -82,8 +87,9 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                                    (!dateTo || new Date(item.datumIspitivanja) <= dateTo);
             
             const matchesLocation = selectedLokacije.includes(item.nazivLokacije);
+            const matchesObject = selectedObjekti.includes(item.nazivObjekta);
 
-            return matchesDateRange && matchesLocation;
+            return matchesDateRange && matchesLocation && matchesObject;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -116,7 +122,7 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, dateFrom, dateTo, selectedLokacije]);
+  }, [data, sortKey, sortOrder, dateFrom, dateTo, selectedLokacije, selectedObjekti]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -234,6 +240,13 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                   options={uniqueLokacije}
                   selectedOptions={selectedLokacije}
                   onSelectionChange={setSelectedLokacije}
+                />
+
+                <FilterDropdown
+                  label="Prikazani objekti"
+                  options={uniqueObjekti}
+                  selectedOptions={selectedObjekti}
+                  onSelectionChange={setSelectedObjekti}
                 />
 
                 {/* Date Range */}

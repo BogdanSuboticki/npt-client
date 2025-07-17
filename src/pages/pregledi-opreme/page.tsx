@@ -135,7 +135,7 @@ const PreglediOpremePage: React.FC = () => {
             className="ml-5"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -144,7 +144,7 @@ const PreglediOpremePage: React.FC = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 4v16m8-8H4"
+                d="M12 4v16m8-8H4"  
               />
             </svg>
             Novi Unos

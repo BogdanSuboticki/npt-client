@@ -7,6 +7,7 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Checkbox from "../../components/form/input/Checkbox";
 import Button from "../../components/ui/button/Button";
+import Slider from "../../components/ui/Slider";
 
 interface LekarskiPreglediFormProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",
-    povecanRizik: false,
+    povecanRizik: false, // false = "Ne", true = "Da"
     vrstaLekarskog: "",
     datumLekarskog: new Date(),
     intervalLekarskog: "",
@@ -63,12 +64,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
   };
 
 
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      povecanRizik: checked
-    }));
-  };
+
 
   return (
     <Modal
@@ -213,17 +209,14 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
         </div>
 
         <div className="col-span-1 mt-4">
-          <div className="flex items-center gap-2 h-11">
-            <Checkbox
-              checked={formData.povecanRizik}
-              onChange={handleCheckboxChange}
-              className="w-4 h-4"
-              id="povecanRizik"
-            />
-            <Label className="mb-0 cursor-pointer" htmlFor="povecanRizik">
-              Povećan rizik
-            </Label>
-          </div>
+          <Slider
+            label="Povećan rizik"
+            optionOne="Da"
+            optionTwo="Ne"
+            value={formData.povecanRizik}
+            onChange={(value) => setFormData(prev => ({ ...prev, povecanRizik: value }))}
+            size="full"
+          />
         </div>
 
         <div className="flex justify-end gap-2 mt-6">

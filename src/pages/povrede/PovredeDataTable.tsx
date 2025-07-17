@@ -183,7 +183,7 @@ export default function PovredeDataTable({ data: initialData, columns }: DataTab
       </div>
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
-        <div className="min-h-[200px]">
+        <div className="min-h-[200px] max-w-[100px]">
           <Table>
             <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
               <TableRow>

@@ -151,6 +151,7 @@ const sampleData = [
 const columns = [
   { key: 'redniBroj', label: '', sortable: true },
   { key: 'nazivLokacije', label: 'Naziv lokacije', sortable: true },
+  { key: 'nazivObjekta', label: 'Naziv objekta', sortable: true },
   { key: 'brojMernihMesta', label: 'Broj mernih mesta', sortable: true },
   { key: 'intervalIspitivanja', label: 'Interval ispitivanja', sortable: true },
   { key: 'napomena', label: 'Napomena', sortable: true },
@@ -221,7 +222,7 @@ const IspitivanjeRadneSredine: React.FC = () => {
             className="ml-5"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

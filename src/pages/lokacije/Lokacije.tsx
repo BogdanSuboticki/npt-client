@@ -81,7 +81,7 @@ export default function Lokacije() {
             className="ml-5"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

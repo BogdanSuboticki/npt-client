@@ -40,12 +40,23 @@ const EvidencijaPreglediOpreme: React.FC = () => {
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
 
+  // Refs for input fields
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+
   const handleCellChange = (rowIdx: number, accessor: keyof TableRow, value: string) => {
     setRows((prev) => {
       const updated = [...prev];
       updated[rowIdx] = { ...updated[rowIdx], [accessor]: value };
       return updated;
     });
+  };
+
+  // Click handler for table cells
+  const handleCellClick = (inputKey: string) => {
+    const input = inputRefs.current[inputKey];
+    if (input) {
+      input.focus();
+    }
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -88,20 +99,148 @@ const EvidencijaPreglediOpreme: React.FC = () => {
   };
 
   const handlePrint = () => {
+    const element = tableRef.current;
+    if (!element) return;
+
+    // Store original input elements and their values
+    const inputs = element.querySelectorAll('input');
+    const originalInputs: HTMLInputElement[] = [];
+    const inputValues: string[] = [];
+
+    // Replace inputs with text divs and store originals
+    inputs.forEach((input, index) => {
+      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
+      inputValues[index] = input.value;
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = input.value;
+      textDiv.style.cssText = `
+        width: 100%;
+        min-height: 24px;
+        padding: 2px 4px;
+        font-size: 11px;
+        line-height: 1.3;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #000000;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: Arial, sans-serif;
+        display: block;
+      `;
+      input.parentNode?.replaceChild(textDiv, input);
+    });
+
+    // Add print-specific CSS
+    const printStyle = document.createElement('style');
+    printStyle.textContent = `
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #print-table, #print-table * {
+          visibility: visible;
+        }
+        #print-table {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        @page {
+          size: A4 landscape;
+          margin: 0.3in;
+        }
+      }
+    `;
+    element.id = 'print-table';
+    element.appendChild(printStyle);
+
+    // Print
     window.print();
+
+    // Restore original input elements
+    setTimeout(() => {
+      const textDivs = element.querySelectorAll('div');
+      textDivs.forEach((div, index) => {
+        if (originalInputs[index]) {
+          const restoredInput = originalInputs[index];
+          restoredInput.value = inputValues[index];
+          div.parentNode?.replaceChild(restoredInput, div);
+        }
+      });
+      element.removeAttribute('id');
+      if (printStyle.parentNode) {
+        printStyle.parentNode.removeChild(printStyle);
+      }
+    }, 1000);
   };
 
   const handleDownload = () => {
     const element = tableRef.current;
     if (!element) return;
+
+    // Store original input elements and their values
+    const inputs = element.querySelectorAll('input');
+    const originalInputs: HTMLInputElement[] = [];
+    const inputValues: string[] = [];
+
+    // Replace inputs with text divs and store originals
+    inputs.forEach((input, index) => {
+      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
+      inputValues[index] = input.value;
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = input.value;
+      textDiv.style.cssText = `
+        width: 100%;
+        min-height: 24px;
+        padding: 2px 4px;
+        font-size: 11px;
+        line-height: 1.3;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #000000;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: Arial, sans-serif;
+        display: block;
+      `;
+      input.parentNode?.replaceChild(textDiv, input);
+    });
+
     const opt = {
-      margin: 1,
+      margin: 0.3,
       filename: 'evidencija_pregledi_opreme.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+      html2canvas: { 
+        scale: 1.2,
+        useCORS: true,
+        letterRendering: true,
+        scrollY: 0,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'a4', 
+        orientation: 'landscape'
+      }
     };
-    html2pdf().set(opt).from(element).save();
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Restore original input elements
+      const textDivs = element.querySelectorAll('div');
+      textDivs.forEach((div, index) => {
+        if (originalInputs[index]) {
+          const restoredInput = originalInputs[index];
+          restoredInput.value = inputValues[index];
+          div.parentNode?.replaceChild(restoredInput, div);
+        }
+      });
+    });
   };
 
   const addRow = () => {
@@ -217,62 +356,192 @@ const EvidencijaPreglediOpreme: React.FC = () => {
                 <React.Fragment key={idx}>
                   <tr>
                     <td rowSpan={4} className="border border-gray-200 dark:border-white/[0.1] text-center text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3">{row.redniBroj}.</td>
-                    <td rowSpan={4} className="border border-gray-200 dark:border-white/[0.1] p-0">
-                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.podaciOpreme} onChange={e => handleCellChange(idx, 'podaciOpreme', e.target.value)} />
+                    <td 
+                      rowSpan={4} 
+                      className="border border-gray-200 dark:border-white/[0.1] p-0 cursor-text"
+                      onClick={() => handleCellClick(`podaciOpreme-${idx}`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" 
+                        value={row.podaciOpreme} 
+                        onChange={e => handleCellChange(idx, 'podaciOpreme', e.target.value)}
+                        ref={(el) => { inputRefs.current[`podaciOpreme-${idx}`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
-                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.brojStrucnogNalaza} onChange={e => handleCellChange(idx, 'brojStrucnogNalaza', e.target.value)} />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] p-0 cursor-text"
+                      onClick={() => handleCellClick(`brojStrucnogNalaza-${idx}`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" 
+                        value={row.brojStrucnogNalaza} 
+                        onChange={e => handleCellChange(idx, 'brojStrucnogNalaza', e.target.value)}
+                        ref={(el) => { inputRefs.current[`brojStrucnogNalaza-${idx}`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
-                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.datumPregleda} onChange={e => handleCellChange(idx, 'datumPregleda', e.target.value)} />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] p-0 cursor-text"
+                      onClick={() => handleCellClick(`datumPregleda-${idx}`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" 
+                        value={row.datumPregleda} 
+                        onChange={e => handleCellChange(idx, 'datumPregleda', e.target.value)}
+                        ref={(el) => { inputRefs.current[`datumPregleda-${idx}`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
-                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.datumSledecegPregleda} onChange={e => handleCellChange(idx, 'datumSledecegPregleda', e.target.value)} />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] p-0 cursor-text"
+                      onClick={() => handleCellClick(`datumSledecegPregleda-${idx}`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" 
+                        value={row.datumSledecegPregleda} 
+                        onChange={e => handleCellChange(idx, 'datumSledecegPregleda', e.target.value)}
+                        ref={(el) => { inputRefs.current[`datumSledecegPregleda-${idx}`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] p-0">
-                      <input type="text" className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" value={row.napomena} onChange={e => handleCellChange(idx, 'napomena', e.target.value)} />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] p-0 cursor-text"
+                      onClick={() => handleCellClick(`napomena-${idx}`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full h-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 px-4 py-3" 
+                        value={row.napomena} 
+                        onChange={e => handleCellChange(idx, 'napomena', e.target.value)}
+                        ref={(el) => { inputRefs.current[`napomena-${idx}`] = el; }}
+                      />
                     </td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`brojStrucnogNalaza-${idx}-1`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`brojStrucnogNalaza-${idx}-1`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`datumPregleda-${idx}-1`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`datumPregleda-${idx}-1`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`datumSledecegPregleda-${idx}-1`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`datumSledecegPregleda-${idx}-1`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`napomena-${idx}-1`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`napomena-${idx}-1`] = el; }}
+                      />
                     </td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`brojStrucnogNalaza-${idx}-2`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`brojStrucnogNalaza-${idx}-2`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`datumPregleda-${idx}-2`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`datumPregleda-${idx}-2`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`datumSledecegPregleda-${idx}-2`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`datumSledecegPregleda-${idx}-2`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`napomena-${idx}-2`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`napomena-${idx}-2`] = el; }}
+                      />
                     </td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`brojStrucnogNalaza-${idx}-3`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`brojStrucnogNalaza-${idx}-3`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`datumPregleda-${idx}-3`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`datumPregleda-${idx}-3`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`datumSledecegPregleda-${idx}-3`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`datumSledecegPregleda-${idx}-3`] = el; }}
+                      />
                     </td>
-                    <td className="border border-gray-200 dark:border-white/[0.1] px-4 py-3">
-                      <input type="text" className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400" />
+                    <td 
+                      className="border border-gray-200 dark:border-white/[0.1] px-4 py-3 cursor-text"
+                      onClick={() => handleCellClick(`napomena-${idx}-3`)}
+                    >
+                      <input 
+                        type="text" 
+                        className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400"
+                        ref={(el) => { inputRefs.current[`napomena-${idx}-3`] = el; }}
+                      />
                     </td>
                   </tr>
                 </React.Fragment>

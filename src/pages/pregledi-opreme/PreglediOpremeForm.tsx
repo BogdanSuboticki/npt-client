@@ -6,8 +6,8 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import TextArea from "../../components/form/input/TextArea";
-import Checkbox from "../../components/form/input/Checkbox";
 import Button from "../../components/ui/button/Button";
+import Slider from "../../components/ui/Slider";
 
 interface PreglediOpremeFormProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     status: "",
     datumNarednogPregleda: new Date(),
     napomena: "",
-    iskljucenoIzPracenja: false,
+    pratiSe: true, // true = "Da", false = "Ne"
   });
 
   // Add state for dropdowns
@@ -82,12 +82,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     onClose();
   };
 
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      iskljucenoIzPracenja: checked
-    }));
-  };
+
 
   return (
     <Modal
@@ -253,12 +248,19 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
 
               <div className="col-span-1">
                 <Label>Datum narednog pregleda opreme</Label>
-                <input
-                  type="text"
-                  value={formData.datumNarednogPregleda ? formData.datumNarednogPregleda.toLocaleDateString('sr-RS') : ''}
-                  readOnly
-                  className="w-full px-4 h-11 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.datumNarednogPregleda ? formData.datumNarednogPregleda.toLocaleDateString('sr-RS') : ''}
+                    readOnly
+                    className="w-full px-4 h-11 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 pr-10"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
+                      <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div className="col-span-1 lg:col-span-2">
@@ -272,18 +274,15 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                 />
               </div>
 
-              <div className="col-span-1">
-                <div className="flex items-center gap-2 h-11">
-                  <Checkbox
-                    checked={formData.iskljucenoIzPracenja}
-                    onChange={handleCheckboxChange}
-                    className="w-4 h-4"
-                    id="iskljucenoIzPracenja"
-                  />
-                  <Label className="mb-0 cursor-pointer" htmlFor="iskljucenoIzPracenja">
-                    Isključiti iz praćenja
-                  </Label>
-                </div>
+              <div className="col-span-2">
+                <Slider
+                  label="Pratiti"
+                  optionOne="Da"
+                  optionTwo="Ne"
+                  value={formData.pratiSe}
+                  onChange={(value) => setFormData(prev => ({ ...prev, pratiSe: value }))}
+                  size="full"
+                />
               </div>
             </div>
           </div>

@@ -53,20 +53,148 @@ const EvidencijaObuceniBezbedan: React.FC = () => {
   };
 
   const handlePrint = () => {
+    const element = tableRef.current;
+    if (!element) return;
+
+    // Store original input elements and their values
+    const inputs = element.querySelectorAll('input');
+    const originalInputs: HTMLInputElement[] = [];
+    const inputValues: string[] = [];
+
+    // Replace inputs with text divs and store originals
+    inputs.forEach((input, index) => {
+      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
+      inputValues[index] = input.value;
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = input.value;
+      textDiv.style.cssText = `
+        width: 100%;
+        min-height: 24px;
+        padding: 2px 4px;
+        font-size: 11px;
+        line-height: 1.3;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #000000;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: Arial, sans-serif;
+        display: block;
+      `;
+      input.parentNode?.replaceChild(textDiv, input);
+    });
+
+    // Add print-specific CSS
+    const printStyle = document.createElement('style');
+    printStyle.textContent = `
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #print-table, #print-table * {
+          visibility: visible;
+        }
+        #print-table {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        @page {
+          size: A4 landscape;
+          margin: 0.3in;
+        }
+      }
+    `;
+    element.id = 'print-table';
+    element.appendChild(printStyle);
+
+    // Print
     window.print();
+
+    // Restore original input elements
+    setTimeout(() => {
+      const textDivs = element.querySelectorAll('div');
+      textDivs.forEach((div, index) => {
+        if (originalInputs[index]) {
+          const restoredInput = originalInputs[index];
+          restoredInput.value = inputValues[index];
+          div.parentNode?.replaceChild(restoredInput, div);
+        }
+      });
+      element.removeAttribute('id');
+      if (printStyle.parentNode) {
+        printStyle.parentNode.removeChild(printStyle);
+      }
+    }, 1000);
   };
 
   const handleDownload = () => {
     const element = tableRef.current;
     if (!element) return;
+
+    // Store original input elements and their values
+    const inputs = element.querySelectorAll('input');
+    const originalInputs: HTMLInputElement[] = [];
+    const inputValues: string[] = [];
+
+    // Replace inputs with text divs and store originals
+    inputs.forEach((input, index) => {
+      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
+      inputValues[index] = input.value;
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = input.value;
+      textDiv.style.cssText = `
+        width: 100%;
+        min-height: 24px;
+        padding: 2px 4px;
+        font-size: 13px;
+        line-height: 1.4;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #1f2937;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: inherit;
+        display: block;
+      `;
+      input.parentNode?.replaceChild(textDiv, input);
+    });
+
     const opt = {
       margin: 1,
       filename: 'evidencija_obuceni_bezbedan.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        scrollY: 0,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'a4', 
+        orientation: 'landscape'
+      }
     };
-    html2pdf().set(opt).from(element).save();
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Restore original input elements
+      const textDivs = element.querySelectorAll('div');
+      textDivs.forEach((div, index) => {
+        if (originalInputs[index]) {
+          const restoredInput = originalInputs[index];
+          restoredInput.value = inputValues[index];
+          div.parentNode?.replaceChild(restoredInput, div);
+        }
+      });
+    });
   };
 
   const handleSave = () => {

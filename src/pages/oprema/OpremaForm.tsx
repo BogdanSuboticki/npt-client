@@ -4,6 +4,7 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Checkbox from "../../components/form/input/Checkbox";
+import Slider from "../../components/ui/Slider";
 
 interface OpremaFormProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
     intervalPregleda: 12,
     zop: false,
     napomena: "",
-    iskljucenaIzPracenja: false
+    pratiSe: true // true = "Da", false = "Ne"
   });
 
   // Add state for dropdown
@@ -177,17 +178,14 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
               </div>
 
               <div className="col-span-1">
-                <div className="flex items-center gap-2 h-11">
-                  <Checkbox
-                    checked={formData.iskljucenaIzPracenja}
-                    onChange={(checked) => setFormData({...formData, iskljucenaIzPracenja: checked})}
-                    className="w-4 h-4"
-                    id="iskljucenaIzPracenja"
-                  />
-                  <Label className="mb-0 cursor-pointer" htmlFor="iskljucenaIzPracenja">
-                    Isključiti iz praćenja
-                  </Label>
-                </div>
+                <Slider
+                  label="Pratiti"
+                  optionOne="Da"
+                  optionTwo="Ne"
+                  value={formData.pratiSe}
+                  onChange={(value) => setFormData({...formData, pratiSe: value})}
+                  size="full"
+                />
               </div>
             </div>
           </div>

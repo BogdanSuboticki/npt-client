@@ -172,12 +172,14 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
       </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <FilterDropdown
-              label="Lokacija"
-              options={uniqueLokacije}
-              selectedOptions={selectedLokacije}
-              onSelectionChange={setSelectedLokacije}
-            />
+            <div className="w-full lg:w-60">
+              <FilterDropdown
+                label="Lokacija"
+                options={uniqueLokacije}
+                selectedOptions={selectedLokacije}
+                onSelectionChange={setSelectedLokacije}
+              />
+            </div>
             <div className="relative w-full lg:w-42">
               <CustomDatePicker
                 value={dateFrom}

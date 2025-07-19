@@ -152,15 +152,51 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Create header elements for print
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    `;
+    
+    const title = document.createElement('h1');
+    title.textContent = 'Obrazac 5.';
+    title.style.cssText = `
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #000000;
+    `;
+    
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = 'Evidencija o zaposlenima koji su izloženi kancerogenima ili mutagenima, hemijskim materijama i azbestu, kao i o zdravstvenom stanju i izloženosti';
+    subtitle.style.cssText = `
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #000000;
+      line-height: 1.4;
+    `;
+    
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(subtitle);
+    
+    // Insert header at the beginning of the table container
+    element.insertBefore(headerDiv, element.firstChild);
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
     const inputValues: string[] = [];
+    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
 
     // Replace inputs with text divs and store originals
     inputs.forEach((input, index) => {
+      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
       originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
       inputValues[index] = input.value;
+      inputRefs[inputKey] = input;
       
       const textDiv = document.createElement('div');
       textDiv.textContent = input.value;
@@ -168,15 +204,15 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
         width: 100%;
         min-height: 24px;
         padding: 2px 4px;
-        font-size: 11px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         word-wrap: break-word;
         white-space: pre-wrap;
-        color: #000000;
+        color: #1f2937;
         background: transparent;
         border: none;
         outline: none;
-        font-family: Arial, sans-serif;
+        font-family: inherit;
         display: block;
       `;
       input.parentNode?.replaceChild(textDiv, input);
@@ -198,6 +234,12 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
           top: 0;
           width: 100%;
         }
+        #print-table thead {
+          display: table-header-group;
+        }
+        #print-table tbody {
+          display: table-row-group;
+        }
         @page {
           size: A4 landscape;
           margin: 0.3in;
@@ -210,14 +252,33 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
     // Print
     window.print();
 
-    // Restore original input elements
+    // Restore original input elements with proper functionality
     setTimeout(() => {
+      // Remove the header elements that were added for print
+      const headerDiv = element.querySelector('div:first-child');
+      if (headerDiv && headerDiv.querySelector('h1')) {
+        element.removeChild(headerDiv);
+      }
+      
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
           const restoredInput = originalInputs[index];
           restoredInput.value = inputValues[index];
-          div.parentNode?.replaceChild(restoredInput, div);
+          
+          // Restore the input with its original attributes and event handlers
+          const parent = div.parentNode;
+          if (parent) {
+            parent.replaceChild(restoredInput, div);
+            
+            // Re-attach click handler to the parent cell
+            const cell = parent as HTMLElement;
+            if (cell.classList.contains('cursor-text')) {
+              cell.onclick = () => {
+                restoredInput.focus();
+              };
+            }
+          }
         }
       });
       element.removeAttribute('id');
@@ -231,15 +292,51 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Create header elements for download
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    `;
+    
+    const title = document.createElement('h1');
+    title.textContent = 'Obrazac 5.';
+    title.style.cssText = `
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #000000;
+    `;
+    
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = 'Evidencija o zaposlenima koji su izloženi kancerogenima ili mutagenima, hemijskim materijama i azbestu, kao i o zdravstvenom stanju i izloženosti';
+    subtitle.style.cssText = `
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #000000;
+      line-height: 1.4;
+    `;
+    
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(subtitle);
+    
+    // Insert header at the beginning of the table container
+    element.insertBefore(headerDiv, element.firstChild);
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
     const inputValues: string[] = [];
+    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
 
     // Replace inputs with text divs and store originals
     inputs.forEach((input, index) => {
+      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
       originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
       inputValues[index] = input.value;
+      inputRefs[inputKey] = input;
       
       const textDiv = document.createElement('div');
       textDiv.textContent = input.value;
@@ -247,26 +344,26 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
         width: 100%;
         min-height: 24px;
         padding: 2px 4px;
-        font-size: 11px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         word-wrap: break-word;
         white-space: pre-wrap;
-        color: #000000;
+        color: #1f2937;
         background: transparent;
         border: none;
         outline: none;
-        font-family: Arial, sans-serif;
+        font-family: inherit;
         display: block;
       `;
       input.parentNode?.replaceChild(textDiv, input);
     });
 
     const opt = {
-      margin: 0.3,
+      margin: 1,
       filename: 'evidencija_kancerogeni_mutageni.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
-        scale: 1.2,
+        scale: 2,
         useCORS: true,
         letterRendering: true,
         scrollY: 0,
@@ -281,13 +378,32 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
-      // Restore original input elements
+      // Remove the header elements that were added for download
+      const headerDiv = element.querySelector('div:first-child');
+      if (headerDiv && headerDiv.querySelector('h1')) {
+        element.removeChild(headerDiv);
+      }
+      
+      // Restore original input elements with proper functionality
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
           const restoredInput = originalInputs[index];
           restoredInput.value = inputValues[index];
-          div.parentNode?.replaceChild(restoredInput, div);
+          
+          // Restore the input with its original attributes and event handlers
+          const parent = div.parentNode;
+          if (parent) {
+            parent.replaceChild(restoredInput, div);
+            
+            // Re-attach click handler to the parent cell
+            const cell = parent as HTMLElement;
+            if (cell.classList.contains('cursor-text')) {
+              cell.onclick = () => {
+                restoredInput.focus();
+              };
+            }
+          }
         }
       });
     });
@@ -416,6 +532,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.nazivKancerogena}
                         onChange={e => handleCellChange(rowIdx, 'nazivKancerogena', e.target.value)}
+                        data-input-key={`nazivKancerogena-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -429,6 +546,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.sabBroj}
                         onChange={e => handleCellChange(rowIdx, 'sabBroj', e.target.value)}
+                        data-input-key={`sabBroj-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -442,6 +560,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.esBroj}
                         onChange={e => handleCellChange(rowIdx, 'esBroj', e.target.value)}
+                        data-input-key={`esBroj-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -455,6 +574,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.klasaOpasnosti}
                         onChange={e => handleCellChange(rowIdx, 'klasaOpasnosti', e.target.value)}
+                        data-input-key={`klasaOpasnosti-${rowIdx}`}
                       />
                     </td>
                     <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400">Prethodni</td>
@@ -468,6 +588,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumPregledaPrethodni}
                         onChange={e => handleCellChange(rowIdx, 'datumPregledaPrethodni', e.target.value)}
+                        data-input-key={`datumPregledaPrethodni-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -481,6 +602,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumSledeci}
                         onChange={e => handleCellChange(rowIdx, 'datumSledeci', e.target.value)}
+                        data-input-key={`datumSledeci-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -494,6 +616,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.brojIzvestaja}
                         onChange={e => handleCellChange(rowIdx, 'brojIzvestaja', e.target.value)}
+                        data-input-key={`brojIzvestaja-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -507,6 +630,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.ocenaZdravstveneSposobnosti}
                         onChange={e => handleCellChange(rowIdx, 'ocenaZdravstveneSposobnosti', e.target.value)}
+                        data-input-key={`ocenaZdravstveneSposobnosti-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -520,6 +644,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.izlozenost}
                         onChange={e => handleCellChange(rowIdx, 'izlozenost', e.target.value)}
+                        data-input-key={`izlozenost-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -533,6 +658,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.napomena}
                         onChange={e => handleCellChange(rowIdx, 'napomena', e.target.value)}
+                        data-input-key={`napomena-${rowIdx}`}
                       />
                     </td>
                   </tr>
@@ -551,6 +677,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                           className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                           value={val}
                           onChange={e => handlePeriodicniChange(rowIdx, i, e.target.value)}
+                          data-input-key={`periodicni-${rowIdx}-${i}`}
                         />
                       </td>
                     </tr>
@@ -570,6 +697,7 @@ const EvidencijaKancerogeniMutageni: React.FC = () => {
                           className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                           value={val}
                           onChange={e => handleCiljaniChange(rowIdx, i, e.target.value)}
+                          data-input-key={`ciljani-${rowIdx}-${i}`}
                         />
                       </td>
                     </tr>

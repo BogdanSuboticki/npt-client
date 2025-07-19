@@ -103,15 +103,51 @@ const EvidencijaPovredaRad: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Create header elements for print
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    `;
+    
+    const title = document.createElement('h1');
+    title.textContent = 'Obrazac 2.';
+    title.style.cssText = `
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #000000;
+    `;
+    
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = 'Evidencija o povredama na radu';
+    subtitle.style.cssText = `
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #000000;
+      line-height: 1.4;
+    `;
+    
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(subtitle);
+    
+    // Insert header at the beginning of the table container
+    element.insertBefore(headerDiv, element.firstChild);
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
     const inputValues: string[] = [];
+    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
 
     // Replace inputs with text divs and store originals
     inputs.forEach((input, index) => {
+      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
       originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
       inputValues[index] = input.value;
+      inputRefs[inputKey] = input;
       
       const textDiv = document.createElement('div');
       textDiv.textContent = input.value;
@@ -119,15 +155,15 @@ const EvidencijaPovredaRad: React.FC = () => {
         width: 100%;
         min-height: 24px;
         padding: 2px 4px;
-        font-size: 11px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         word-wrap: break-word;
         white-space: pre-wrap;
-        color: #000000;
+        color: #1f2937;
         background: transparent;
         border: none;
         outline: none;
-        font-family: Arial, sans-serif;
+        font-family: inherit;
         display: block;
       `;
       input.parentNode?.replaceChild(textDiv, input);
@@ -149,6 +185,12 @@ const EvidencijaPovredaRad: React.FC = () => {
           top: 0;
           width: 100%;
         }
+        #print-table thead {
+          display: table-header-group;
+        }
+        #print-table tbody {
+          display: table-row-group;
+        }
         @page {
           size: A4 landscape;
           margin: 0.3in;
@@ -161,14 +203,33 @@ const EvidencijaPovredaRad: React.FC = () => {
     // Print
     window.print();
 
-    // Restore original input elements
+    // Restore original input elements with proper functionality
     setTimeout(() => {
+      // Remove the header elements that were added for print
+      const headerDiv = element.querySelector('div:first-child');
+      if (headerDiv && headerDiv.querySelector('h1')) {
+        element.removeChild(headerDiv);
+      }
+      
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
           const restoredInput = originalInputs[index];
           restoredInput.value = inputValues[index];
-          div.parentNode?.replaceChild(restoredInput, div);
+          
+          // Restore the input with its original attributes and event handlers
+          const parent = div.parentNode;
+          if (parent) {
+            parent.replaceChild(restoredInput, div);
+            
+            // Re-attach click handler to the parent cell
+            const cell = parent as HTMLElement;
+            if (cell.classList.contains('cursor-text')) {
+              cell.onclick = () => {
+                restoredInput.focus();
+              };
+            }
+          }
         }
       });
       element.removeAttribute('id');
@@ -182,15 +243,51 @@ const EvidencijaPovredaRad: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Create header elements for download
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    `;
+    
+    const title = document.createElement('h1');
+    title.textContent = 'Obrazac 2.';
+    title.style.cssText = `
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #000000;
+    `;
+    
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = 'Evidencija o povredama na radu';
+    subtitle.style.cssText = `
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #000000;
+      line-height: 1.4;
+    `;
+    
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(subtitle);
+    
+    // Insert header at the beginning of the table container
+    element.insertBefore(headerDiv, element.firstChild);
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
     const inputValues: string[] = [];
+    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
 
     // Replace inputs with text divs and store originals
     inputs.forEach((input, index) => {
+      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
       originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
       inputValues[index] = input.value;
+      inputRefs[inputKey] = input;
       
       const textDiv = document.createElement('div');
       textDiv.textContent = input.value;
@@ -232,13 +329,32 @@ const EvidencijaPovredaRad: React.FC = () => {
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
-      // Restore original input elements
+      // Remove the header elements that were added for download
+      const headerDiv = element.querySelector('div:first-child');
+      if (headerDiv && headerDiv.querySelector('h1')) {
+        element.removeChild(headerDiv);
+      }
+      
+      // Restore original input elements with proper functionality
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
           const restoredInput = originalInputs[index];
           restoredInput.value = inputValues[index];
-          div.parentNode?.replaceChild(restoredInput, div);
+          
+          // Restore the input with its original attributes and event handlers
+          const parent = div.parentNode;
+          if (parent) {
+            parent.replaceChild(restoredInput, div);
+            
+            // Re-attach click handler to the parent cell
+            const cell = parent as HTMLElement;
+            if (cell.classList.contains('cursor-text')) {
+              cell.onclick = () => {
+                restoredInput.focus();
+              };
+            }
+          }
         }
       });
     });
@@ -347,6 +463,7 @@ const EvidencijaPovredaRad: React.FC = () => {
                       className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
                       value={row.nazivRadnogMesta}
                       onChange={e => handleCellChange(rowIdx, 'nazivRadnogMesta', e.target.value)}
+                      data-input-key={`nazivRadnogMesta-${rowIdx}`}
                     />
                   </td>
                   <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
@@ -355,6 +472,7 @@ const EvidencijaPovredaRad: React.FC = () => {
                       className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
                       value={row.imePrezime}
                       onChange={e => handleCellChange(rowIdx, 'imePrezime', e.target.value)}
+                      data-input-key={`imePrezime-${rowIdx}`}
                     />
                   </td>
                   <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
@@ -363,6 +481,7 @@ const EvidencijaPovredaRad: React.FC = () => {
                       className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
                       value={row.vremeNastanka}
                       onChange={e => handleCellChange(rowIdx, 'vremeNastanka', e.target.value)}
+                      data-input-key={`vremeNastanka-${rowIdx}`}
                     />
                   </td>
                   <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
@@ -371,6 +490,7 @@ const EvidencijaPovredaRad: React.FC = () => {
                       className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
                       value={row.vrstaPovrede}
                       onChange={e => handleCellChange(rowIdx, 'vrstaPovrede', e.target.value)}
+                      data-input-key={`vrstaPovrede-${rowIdx}`}
                     />
                   </td>
                   <td className="border border-gray-200 dark:border-white/[0.1] px-2 py-1">
@@ -379,6 +499,7 @@ const EvidencijaPovredaRad: React.FC = () => {
                       className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px]"
                       value={row.ocenaTezine}
                       onChange={e => handleCellChange(rowIdx, 'ocenaTezine', e.target.value)}
+                      data-input-key={`ocenaTezine-${rowIdx}`}
                     />
                   </td>
                 </tr>

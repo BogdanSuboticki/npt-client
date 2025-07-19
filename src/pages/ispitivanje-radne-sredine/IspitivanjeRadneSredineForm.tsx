@@ -75,14 +75,15 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
             />
           </div>
 
-          <div className="col-span-1">
-            <Label>Napomena</Label>
-            <Input
-              type="text"
-              value={formData.napomena}
-              onChange={(e) => setFormData(prev => ({ ...prev, napomena: e.target.value }))}
-            />
-          </div>
+          <div className="col-span-1 lg:col-span-2">
+                <Label>Napomena</Label>
+                <textarea
+                  value={formData.napomena}
+                  onChange={(e) => setFormData({...formData, napomena: e.target.value})}
+                  className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
+                  rows={4}
+                />
+              </div>
         </div>
 
         <div className="mt-6 flex justify-end gap-2">

@@ -12,6 +12,7 @@ import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import CustomDatePicker from "../../components/form/input/DatePicker";
+import { useSidebar } from "../../context/SidebarContext";
 
 interface Column {
   key: string;
@@ -40,6 +41,7 @@ interface DataTableProps {
 }
 
 export default function PovredeDataTable({ data: initialData, columns }: DataTableProps) {
+  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -183,7 +185,7 @@ export default function PovredeDataTable({ data: initialData, columns }: DataTab
       </div>
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
-        <div className="min-h-[200px] max-w-[100px]">
+        <div className={`min-h-[200px] ${(isExpanded || isHovered || isMobileOpen) ? 'max-w-[100px]' : ''}`}>
           <Table>
             <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
               <TableRow>

@@ -5,7 +5,6 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import TextArea from "../../components/form/input/TextArea";
 import Button from "../../components/ui/button/Button";
 
 interface BezbednosneProvereFormProps {
@@ -159,27 +158,32 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
 
           <div className="col-span-1">
             <Label>Sledeća provera</Label>
-            <CustomDatePicker
-              value={formData.sledecaProvera}
-              onChange={(date) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, sledecaProvera: date }));
-                }
-              }}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.sledecaProvera ? formData.sledecaProvera.toLocaleDateString('sr-RS') : ''}
+                readOnly
+                disabled
+                className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-500 dark:text-gray-400">
+                  <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="col-span-2 mt-4">
-          <Label>Napomena</Label>
-          <TextArea
-            value={formData.napomena}
-            onChange={(value) => setFormData({...formData, napomena: value})}
-            placeholder="Unesite napomenu..."
-            rows={3}
-            className="bg-[#F9FAFB] dark:bg-[#101828]"
-          />
-        </div>
+        <div className="col-span-1 lg:col-span-2 mt-4">
+                <Label>Napomena</Label>
+                <textarea
+                  value={formData.napomena}
+                  onChange={(e) => setFormData({...formData, napomena: e.target.value})}
+                  className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
+                  rows={4}
+                />
+              </div>
 
         <div className="flex items-center justify-end w-full gap-3 mt-6">
           <Button variant="outline" onClick={onClose}>

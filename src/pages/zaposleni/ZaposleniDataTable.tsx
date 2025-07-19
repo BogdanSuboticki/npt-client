@@ -130,12 +130,14 @@ export default function ZaposleniDataTable({ data: initialData, columns }: DataT
       </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <FilterDropdown
-              label="Ime i prezime"
-              options={uniqueImePrezime}
-              selectedOptions={selectedImePrezime}
-              onSelectionChange={setSelectedImePrezime}
-            />
+            <div className="w-full lg:w-60">
+              <FilterDropdown
+                label="Ime i prezime"
+                options={uniqueImePrezime}
+                selectedOptions={selectedImePrezime}
+                onSelectionChange={setSelectedImePrezime}
+              />
+            </div>
           </div>
         </div>
       </div>

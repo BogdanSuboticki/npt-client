@@ -41,9 +41,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   const toggleDatePicker = () => {
     if (!disabled) {
-      setTimeout(() => {
-        setIsOpen(prev => !prev);
-      }, 150); // 150ms delay
+      setIsOpen(prev => !prev);
     }
   };
 

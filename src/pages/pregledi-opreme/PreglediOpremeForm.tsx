@@ -5,7 +5,6 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import TextArea from "../../components/form/input/TextArea";
 import Button from "../../components/ui/button/Button";
 import Slider from "../../components/ui/Slider";
 
@@ -91,12 +90,12 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
       className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 "
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 lg:p-10 pb-0">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Pregled Opreme</h2>
+        <div className="p-5 pt-10">
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Novi Pregled Opreme</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
-            <div className="flex flex-col space-y-4 pb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
               <div className="w-full">
                 <Label>Naziv opreme *</Label>
                 <Input
@@ -252,28 +251,28 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                     type="text"
                     value={formData.datumNarednogPregleda ? formData.datumNarednogPregleda.toLocaleDateString('sr-RS') : ''}
                     readOnly
-                    className="w-full px-4 h-11 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 pr-10"
+                    disabled
+                    className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-500 dark:text-gray-400">
                       <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                 </div>
               </div>
 
-              <div className="w-full">
+              <div className="col-span-1 lg:col-span-2">
                 <Label>Napomena</Label>
-                <TextArea
+                <textarea
                   value={formData.napomena}
-                  onChange={(value) => setFormData({...formData, napomena: value})}
-                  placeholder="Unesite napomenu..."
+                  onChange={(e) => setFormData({...formData, napomena: e.target.value})}
+                  className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
                   rows={4}
-                  className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                 />
               </div>
 
-              <div className="w-full">
+              <div className="w-full lg:col-span-2">
                 <Slider
                   label="Pratiti"
                   optionOne="Da"

@@ -154,15 +154,51 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Create header elements for print
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    `;
+    
+    const title = document.createElement('h1');
+    title.textContent = 'Obrazac 4.';
+    title.style.cssText = `
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #000000;
+    `;
+    
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = 'Evidencija o zaposlenim koji su izloženi biološkim štetnostima grupe 3 i/ili grupe 4';
+    subtitle.style.cssText = `
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #000000;
+      line-height: 1.4;
+    `;
+    
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(subtitle);
+    
+    // Insert header at the beginning of the table container
+    element.insertBefore(headerDiv, element.firstChild);
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
     const inputValues: string[] = [];
+    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
 
     // Replace inputs with text divs and store originals
     inputs.forEach((input, index) => {
+      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
       originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
       inputValues[index] = input.value;
+      inputRefs[inputKey] = input;
       
       const textDiv = document.createElement('div');
       textDiv.textContent = input.value;
@@ -170,15 +206,15 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
         width: 100%;
         min-height: 24px;
         padding: 2px 4px;
-        font-size: 11px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         word-wrap: break-word;
         white-space: pre-wrap;
-        color: #000000;
+        color: #1f2937;
         background: transparent;
         border: none;
         outline: none;
-        font-family: Arial, sans-serif;
+        font-family: inherit;
         display: block;
       `;
       input.parentNode?.replaceChild(textDiv, input);
@@ -200,6 +236,12 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
           top: 0;
           width: 100%;
         }
+        #print-table thead {
+          display: table-header-group;
+        }
+        #print-table tbody {
+          display: table-row-group;
+        }
         @page {
           size: A4 landscape;
           margin: 0.3in;
@@ -212,14 +254,33 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
     // Print
     window.print();
 
-    // Restore original input elements
+    // Restore original input elements with proper functionality
     setTimeout(() => {
+      // Remove the header elements that were added for print
+      const headerDiv = element.querySelector('div:first-child');
+      if (headerDiv && headerDiv.querySelector('h1')) {
+        element.removeChild(headerDiv);
+      }
+      
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
           const restoredInput = originalInputs[index];
           restoredInput.value = inputValues[index];
-          div.parentNode?.replaceChild(restoredInput, div);
+          
+          // Restore the input with its original attributes and event handlers
+          const parent = div.parentNode;
+          if (parent) {
+            parent.replaceChild(restoredInput, div);
+            
+            // Re-attach click handler to the parent cell
+            const cell = parent as HTMLElement;
+            if (cell.classList.contains('cursor-text')) {
+              cell.onclick = () => {
+                restoredInput.focus();
+              };
+            }
+          }
         }
       });
       element.removeAttribute('id');
@@ -233,15 +294,51 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
+    // Create header elements for download
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    `;
+    
+    const title = document.createElement('h1');
+    title.textContent = 'Obrazac 4.';
+    title.style.cssText = `
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #000000;
+    `;
+    
+    const subtitle = document.createElement('h2');
+    subtitle.textContent = 'Evidencija o zaposlenim koji su izloženi biološkim štetnostima grupe 3 i/ili grupe 4';
+    subtitle.style.cssText = `
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+      color: #000000;
+      line-height: 1.4;
+    `;
+    
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(subtitle);
+    
+    // Insert header at the beginning of the table container
+    element.insertBefore(headerDiv, element.firstChild);
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
     const inputValues: string[] = [];
+    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
 
     // Replace inputs with text divs and store originals
     inputs.forEach((input, index) => {
+      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
       originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
       inputValues[index] = input.value;
+      inputRefs[inputKey] = input;
       
       const textDiv = document.createElement('div');
       textDiv.textContent = input.value;
@@ -249,26 +346,26 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
         width: 100%;
         min-height: 24px;
         padding: 2px 4px;
-        font-size: 11px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         word-wrap: break-word;
         white-space: pre-wrap;
-        color: #000000;
+        color: #1f2937;
         background: transparent;
         border: none;
         outline: none;
-        font-family: Arial, sans-serif;
+        font-family: inherit;
         display: block;
       `;
       input.parentNode?.replaceChild(textDiv, input);
     });
 
     const opt = {
-      margin: 0.3,
+      margin: 1,
       filename: 'evidencija_biloske_stetnosti.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
-        scale: 1.2,
+        scale: 2,
         useCORS: true,
         letterRendering: true,
         scrollY: 0,
@@ -283,13 +380,32 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
-      // Restore original input elements
+      // Remove the header elements that were added for download
+      const headerDiv = element.querySelector('div:first-child');
+      if (headerDiv && headerDiv.querySelector('h1')) {
+        element.removeChild(headerDiv);
+      }
+      
+      // Restore original input elements with proper functionality
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
           const restoredInput = originalInputs[index];
           restoredInput.value = inputValues[index];
-          div.parentNode?.replaceChild(restoredInput, div);
+          
+          // Restore the input with its original attributes and event handlers
+          const parent = div.parentNode;
+          if (parent) {
+            parent.replaceChild(restoredInput, div);
+            
+            // Re-attach click handler to the parent cell
+            const cell = parent as HTMLElement;
+            if (cell.classList.contains('cursor-text')) {
+              cell.onclick = () => {
+                restoredInput.focus();
+              };
+            }
+          }
         }
       });
     });
@@ -415,6 +531,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.imePrezime}
                         onChange={e => handleCellChange(rowIdx, 'imePrezime', e.target.value)}
+                        data-input-key={`imePrezime-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -428,6 +545,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.klasifikacijaStetnosti}
                         onChange={e => handleCellChange(rowIdx, 'klasifikacijaStetnosti', e.target.value)}
+                        data-input-key={`klasifikacijaStetnosti-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -441,6 +559,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.brojStrucnogNalaza}
                         onChange={e => handleCellChange(rowIdx, 'brojStrucnogNalaza', e.target.value)}
+                        data-input-key={`brojStrucnogNalaza-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -454,6 +573,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumIspitivanja}
                         onChange={e => handleCellChange(rowIdx, 'datumIspitivanja', e.target.value)}
+                        data-input-key={`datumIspitivanja-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -467,6 +587,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumSledecegIspitivanja}
                         onChange={e => handleCellChange(rowIdx, 'datumSledecegIspitivanja', e.target.value)}
+                        data-input-key={`datumSledecegIspitivanja-${rowIdx}`}
                       />
                     </td>
                     <td className="border border-gray-200 dark:border-white/[0.1] text-[13px] px-2 py-1 text-gray-800 dark:text-gray-400">Prethodni</td>
@@ -480,6 +601,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumPregledaPrethodni}
                         onChange={e => handleCellChange(rowIdx, 'datumPregledaPrethodni', e.target.value)}
+                        data-input-key={`datumPregledaPrethodni-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -493,6 +615,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.datumSledeci}
                         onChange={e => handleCellChange(rowIdx, 'datumSledeci', e.target.value)}
+                        data-input-key={`datumSledeci-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -506,6 +629,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.brojIzvestaja}
                         onChange={e => handleCellChange(rowIdx, 'brojIzvestaja', e.target.value)}
+                        data-input-key={`brojIzvestaja-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -519,6 +643,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.ocenaZdravstveneSposobnosti}
                         onChange={e => handleCellChange(rowIdx, 'ocenaZdravstveneSposobnosti', e.target.value)}
+                        data-input-key={`ocenaZdravstveneSposobnosti-${rowIdx}`}
                       />
                     </td>
                     <td 
@@ -532,6 +657,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                         className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                         value={row.napomena}
                         onChange={e => handleCellChange(rowIdx, 'napomena', e.target.value)}
+                        data-input-key={`napomena-${rowIdx}`}
                       />
                     </td>
                   </tr>
@@ -550,6 +676,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                           className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                           value={val}
                           onChange={e => handlePeriodicniChange(rowIdx, i, e.target.value)}
+                          data-input-key={`periodicni-${rowIdx}-${i}`}
                         />
                       </td>
                     </tr>
@@ -569,6 +696,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
                           className="w-full outline-none bg-transparent text-[13px] text-gray-800 dark:text-gray-400 whitespace-pre-wrap break-words min-h-[24px] cursor-text"
                           value={val}
                           onChange={e => handleCiljaniChange(rowIdx, i, e.target.value)}
+                          data-input-key={`ciljani-${rowIdx}-${i}`}
                         />
                       </td>
                     </tr>

@@ -89,8 +89,8 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
       className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
           <div className="flex flex-col h-full">
-            <div className="p-5 lg:p-10 pb-0">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Firma</h2>
+            <div className="p-5 pt-10">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Nova Firma</h2>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
@@ -306,7 +306,7 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
               </div>
             </div>
 
-          <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+          <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
 
             <div className="flex justify-end gap-2">
               <Button

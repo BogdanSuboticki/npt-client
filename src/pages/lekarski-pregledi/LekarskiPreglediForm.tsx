@@ -72,12 +72,12 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
       className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 lg:p-10 pb-0">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Lekarski Pregled</h2>
+        <div className="p-5 pt-10">
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Novi Lekarski Pregled</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
-            <div className="flex flex-col space-y-4 pb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
               <div className="w-full">
                 <Label>Zaposleni *</Label>
                 <Input
@@ -210,7 +210,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                 />
               </div>
 
-              <div className="w-full">
+              <div className="w-full lg:col-span-2">
                 <Slider
                   label="Povećan rizik"
                   optionOne="Da"

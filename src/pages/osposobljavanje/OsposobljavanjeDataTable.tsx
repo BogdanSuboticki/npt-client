@@ -12,6 +12,7 @@ import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Checkbox from "../../components/form/input/Checkbox";
+import { useSidebar } from "../../context/SidebarContext";
 
 interface Column {
   key: string;
@@ -55,6 +56,7 @@ const formatDate = (dateStr: string | null | undefined): string => {
 };
 
 export default function OsposobljavanjeDataTable({ data: initialData, columns }: DataTableTwoProps) {
+  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
@@ -343,7 +345,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
           
 
           <div className="max-w-full overflow-x-auto custom-scrollbar">
-            <div className="min-h-[200px] !max-w-[100px]">
+            <div className={`min-h-[200px] ${(isExpanded || isHovered || isMobileOpen) ? '!max-w-[100px]' : ''}`}>
               <Table>
                 <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
                   <TableRow>

@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
-import TextArea from "../../components/form/input/TextArea";
 import Button from "../../components/ui/button/Button";
 
 interface PovredeFormProps {
@@ -71,8 +70,8 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
       className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 lg:p-10 pb-0">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Povreda</h2>
+        <div className="p-5 pt-10">
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Nova Povreda</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
@@ -232,16 +231,15 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             </div>
           </div>
 
-          <div className="w-full mt-4">
-            <Label>Napomena</Label>
-            <TextArea
-              value={formData.napomena}
-              onChange={(value) => setFormData({...formData, napomena: value})}
-              placeholder="Unesite napomenu..."
-              rows={3}
-              className="bg-[#F9FAFB] dark:bg-[#101828]"
-            />
-          </div>
+          <div className="col-span-1 lg:col-span-2">
+                <Label>Napomena</Label>
+                <textarea
+                  value={formData.napomena}
+                  onChange={(e) => setFormData({...formData, napomena: e.target.value})}
+                  className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
+                  rows={4}
+                />
+              </div>
         </div>
       </div>
 

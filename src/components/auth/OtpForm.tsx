@@ -75,7 +75,7 @@ export default function OtpForm() {
     <div className="flex flex-col flex-1 w-full lg:w-1/2">
       <div className="w-full max-w-md pt-10 mx-auto">
         <Link
-          to="/"
+          to="/signin"
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <svg
@@ -94,17 +94,16 @@ export default function OtpForm() {
               strokeLinejoin="round"
             />
           </svg>
-          Back to dashboard
+          Nazad na prijavljivanje
         </Link>
       </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div className="mb-5 sm:mb-8">
           <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-            Two Step Verification
+            Dvofaktorska verifikacija
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            A verification code has been sent to your mobile. Please enter it in
-            the field below.
+            Verifikacioni kod je poslat na vaš e-mail. Molimo unesite ga u polje ispod.
           </p>
         </div>
         <div>
@@ -112,7 +111,7 @@ export default function OtpForm() {
             <div className="space-y-5">
               {/* <!-- Email --> */}
               <div>
-                <Label>Type your 6 digits security code</Label>
+                <Label>Unesite svoj bezbednosni kod od 6 cifara</Label>
                 <div className="flex gap-2 sm:gap-4" id="otp-container">
                   {otp.map((_, index) => (
                     <input
@@ -141,19 +140,19 @@ export default function OtpForm() {
                   onClick={handleSubmit}
                   className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
                 >
-                  Verify My Account
+                  Verifikuj Moj Nalog
                 </button>
               </div>
             </div>
           </form>
           <div className="mt-5">
             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-              Didn’t get the code?{" "}
+              Niste dobili kod?{" "}
               <Link
-                to="/"
+                to="/signin"
                 className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
               >
-                Resend
+                Pošalji ponovo
               </Link>
             </p>
           </div>

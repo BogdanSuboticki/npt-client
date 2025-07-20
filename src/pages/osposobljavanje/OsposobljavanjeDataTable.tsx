@@ -12,6 +12,7 @@ import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Checkbox from "../../components/form/input/Checkbox";
+import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
 import { useSidebar } from "../../context/SidebarContext";
 
 interface Column {
@@ -200,38 +201,12 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
-                <div className="relative z-20 bg-transparent w-[80px]">
-                  <select
-                    className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
-                    value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                  >
-                    {[10, 20, 50, 100].map((value) => (
-                      <option
-                        key={value}
-                        value={value}
-                        className="text-gray-500 dark:bg-[#101828] dark:text-gray-400"
-                      >
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg
-                      className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                <ItemsPerPageDropdown
+                  value={itemsPerPage}
+                  onChange={setItemsPerPage}
+                  options={[10, 20, 50, 100]}
+                  className="w-[80px]"
+                />
                 <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
               </div>
 

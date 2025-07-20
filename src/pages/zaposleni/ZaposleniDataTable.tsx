@@ -11,6 +11,7 @@ import {
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
+import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
 
 interface Column {
   key: string;
@@ -91,43 +92,14 @@ export default function ZaposleniDataTable({ data: initialData, columns }: DataT
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
-            <div className="relative z-20 bg-transparent w-[80px]">
-              <select
-                className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg appearance-none dark:bg-[#101828] h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 cursor-pointer"
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              >
-                {[10, 20, 50, 100].map((value) => (
-                  <option
-                    key={value}
-                    value={value}
-                    className="text-gray-500 dark:bg-gray-900 dark:text-gray-400"
-                  >
-                    {value}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400 pointer-events-none">
-                <svg
-                  className="stroke-current"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165"
-                    stroke=""
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
+            <ItemsPerPageDropdown
+              value={itemsPerPage}
+              onChange={setItemsPerPage}
+              options={[10, 20, 50, 100]}
+              className="w-[80px]"
+            />
             <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
-      </div>
+          </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="w-full lg:w-60">

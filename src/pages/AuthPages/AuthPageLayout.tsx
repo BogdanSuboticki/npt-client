@@ -12,7 +12,7 @@ export default function AuthLayout({
     <div className="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div className="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900 sm:p-0">
         {/* HSEradar Title - Mobile Only */}
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 lg:hidden">
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 lg:hidden">
           <h1 className="text-3xl font-bold text-brand-500 dark:text-brand-400">
             HSEradar
           </h1>
@@ -25,7 +25,7 @@ export default function AuthLayout({
             <GridShape />
             <div className="flex flex-col items-center max-w-xs">
               <Link to="/" className="block mb-4">
-              <h1 className="text-white text-4xl font-bold">HSE Radar</h1>
+              <h1 className="text-white text-4xl font-bold">HSEradar</h1>
               </Link>
               <p className="text-center text-gray-400 dark:text-white/60">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut.

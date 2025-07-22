@@ -12,7 +12,7 @@ export default function SignUpForm() {
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto lg:mb-0 mb-30">
         <div>
-          <div className="mb-5 sm:mb-8">
+          <div className="mb-3 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
               Registracija
             </h1>
@@ -89,7 +89,7 @@ export default function SignUpForm() {
                     checked={isChecked}
                     onChange={setIsChecked}
                   />
-                  <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
+                  <p className="inline-block font-normal text-gray-500 dark:text-gray-400 text-sm">
                     Kreiranjem naloga, prihvatate naše{" "}
                     <span className="text-gray-800 dark:text-white/90">
                       Uslove korišćenja

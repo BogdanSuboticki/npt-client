@@ -1,5 +1,6 @@
 import PageMeta from "../../components/common/PageMeta";
 import AuthLayout from "./AuthPageLayout";
+import OtpForm from "../../components/auth/OtpForm";
 import { useDisableScroll } from "../../hooks/useDisableScroll";
 
 export default function TwoStepVerification() {
@@ -13,7 +14,7 @@ export default function TwoStepVerification() {
         description="This is React.js Two Step Verification Tables Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
       <AuthLayout>
-        <TwoStepVerification />
+        <OtpForm />
       </AuthLayout>
     </>
   );

@@ -11,6 +11,13 @@ export default function AuthLayout({
   return (
     <div className="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div className="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900 sm:p-0">
+        {/* HSEradar Title - Mobile Only */}
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 lg:hidden">
+          <h1 className="text-3xl font-bold text-brand-500 dark:text-brand-400">
+            HSEradar
+          </h1>
+        </div>
+        
         {children}
         <div className="items-center hidden w-full h-full lg:w-1/2 bg-brand-950 dark:bg-white/5 lg:grid">
           <div className="relative flex items-center justify-center z-1">
@@ -26,7 +33,7 @@ export default function AuthLayout({
             </div>
           </div>
         </div>
-        <div className="fixed z-50 hidden bottom-6 right-6 sm:block">
+        <div className="fixed z-50 bottom-6 right-6">
           <ThemeTogglerTwo />
         </div>
       </div>

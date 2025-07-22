@@ -1,8 +1,12 @@
 import PageMeta from "../../components/common/PageMeta";
 import AuthLayout from "./AuthPageLayout";
 import SignUpForm from "../../components/auth/SignUpForm";
+import { useDisableScroll } from "../../hooks/useDisableScroll";
 
 export default function SignUp() {
+  // Disable scroll on mobile devices
+  useDisableScroll();
+
   return (
     <>
       <PageMeta

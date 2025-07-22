@@ -1,7 +1,11 @@
 import PageMeta from "../../components/common/PageMeta";
 import AuthLayout from "./AuthPageLayout";
+import { useDisableScroll } from "../../hooks/useDisableScroll";
 
 export default function TwoStepVerification() {
+  // Disable scroll on mobile devices
+  useDisableScroll();
+
   return (
     <>
       <PageMeta

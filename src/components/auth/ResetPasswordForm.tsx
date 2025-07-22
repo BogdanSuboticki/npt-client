@@ -4,7 +4,7 @@ import Input from "../form/input/InputField";
 
 export default function ResetPasswordForm() {
   return (
-    <div className="flex flex-col flex-1 w-full lg:w-1/2">
+    <div className="flex flex-col flex-1 w-full lg:w-1/2 mb-20">
       <div className="w-full max-w-md pt-10 mx-auto">
         <Link
           to="/signin"
@@ -64,7 +64,7 @@ export default function ResetPasswordForm() {
           </form>
           <div className="mt-5">
             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Čekajte, sada se sećam lozinke...
+                Setio sam se lozinke...
               <Link
                 to="/signin"
                 className="text-brand-500 hover:text-brand-600 dark:text-brand-400"

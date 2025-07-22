@@ -1,8 +1,12 @@
 import PageMeta from "../../components/common/PageMeta";
 import AuthLayout from "./AuthPageLayout";
 import ResetPasswordForm from "../../components/auth/ResetPasswordForm";
+import { useDisableScroll } from "../../hooks/useDisableScroll";
 
 export default function ResetPassword() {
+  // Disable scroll on mobile devices
+  useDisableScroll();
+
   return (
     <>
       <PageMeta

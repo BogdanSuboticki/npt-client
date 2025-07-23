@@ -13,7 +13,7 @@ export default function AuthLayout({
       <div className="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900 sm:p-0">
         {/* HSEradar Title - Mobile Only */}
         <div className="absolute top-2 left-1/2 transform -translate-x-1/2 lg:hidden">
-          <h1 className="text-3xl font-bold text-brand-500 dark:text-brand-400">
+          <h1 className="text-3xl font-bold text-black dark:text-white">
             HSEradar
           </h1>
         </div>

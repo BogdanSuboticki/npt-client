@@ -10,6 +10,12 @@ import Label from '../components/form/Label';
 import Input from '../components/form/input/InputField';
 import Popover from '../components/ui/popover/Popover';
 import ItemsPerPageDropdown from '../components/ui/dropdown/ItemsPerPageDropdown';
+import { 
+  prepareElementForExport, 
+  restoreElementAfterExport, 
+  createPrintStyles, 
+  createPdfOptions 
+} from '../utils/printDownloadUtils';
 
 interface TableRow {
   redniBroj: number;
@@ -89,100 +95,15 @@ const EvidencijaZastitnaOprema: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
-    // Create header elements for print
-    const headerDiv = document.createElement('div');
-    headerDiv.style.cssText = `
-      text-align: center;
-      margin-bottom: 20px;
-      font-family: Arial, sans-serif;
-    `;
-    
-    const title = document.createElement('h1');
-    title.textContent = 'Obrazac 11.';
-    title.style.cssText = `
-      font-size: 18px;
-      font-weight: bold;
-      margin: 0 0 10px 0;
-      color: #000000;
-    `;
-    
-    const subtitle = document.createElement('h2');
-    subtitle.textContent = 'Evidencija o izdatoj ličnoj zaštitnoj opremi';
-    subtitle.style.cssText = `
-      font-size: 14px;
-      font-weight: normal;
-      margin: 0;
-      color: #000000;
-      line-height: 1.4;
-    `;
-    
-    headerDiv.appendChild(title);
-    headerDiv.appendChild(subtitle);
-    
-    // Insert header at the beginning of the table container
-    element.insertBefore(headerDiv, element.firstChild);
+    const config = {
+      title: 'Obrazac 11.',
+      subtitle: 'Evidencija o zaštitnoj opremi'
+    };
 
-    // Store original input elements and their values
-    const inputs = element.querySelectorAll('input');
-    const originalInputs: HTMLInputElement[] = [];
-    const inputValues: string[] = [];
-    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
-
-    // Replace inputs with text divs and store originals
-    inputs.forEach((input, index) => {
-      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
-      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
-      inputValues[index] = input.value;
-      inputRefs[inputKey] = input;
-      
-      const textDiv = document.createElement('div');
-      textDiv.textContent = input.value;
-      textDiv.style.cssText = `
-        width: 100%;
-        min-height: 24px;
-        padding: 2px 4px;
-        font-size: 13px;
-        line-height: 1.4;
-        word-wrap: break-word;
-        white-space: pre-wrap;
-        color: #1f2937;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-family: inherit;
-        display: block;
-      `;
-      input.parentNode?.replaceChild(textDiv, input);
-    });
+    const { originalInputs, inputValues } = prepareElementForExport(element, config);
 
     // Add print-specific CSS
-    const printStyle = document.createElement('style');
-    printStyle.textContent = `
-      @media print {
-        body * {
-          visibility: hidden;
-        }
-        #print-table, #print-table * {
-          visibility: visible;
-        }
-        #print-table {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-        }
-        #print-table thead {
-          display: table-header-group;
-        }
-        #print-table tbody {
-          display: table-row-group;
-        }
-        @page {
-          size: A4 landscape;
-          margin: 0.3in;
-        }
-      }
-    `;
+    const printStyle = createPrintStyles();
     element.id = 'print-table';
     element.appendChild(printStyle);
 
@@ -191,33 +112,7 @@ const EvidencijaZastitnaOprema: React.FC = () => {
 
     // Restore original input elements with proper functionality
     setTimeout(() => {
-      // Remove the header elements that were added for print
-      const headerDiv = element.querySelector('div:first-child');
-      if (headerDiv && headerDiv.querySelector('h1')) {
-        element.removeChild(headerDiv);
-      }
-      
-      const textDivs = element.querySelectorAll('div');
-      textDivs.forEach((div, index) => {
-        if (originalInputs[index]) {
-          const restoredInput = originalInputs[index];
-          restoredInput.value = inputValues[index];
-          
-          // Restore the input with its original attributes and event handlers
-          const parent = div.parentNode;
-          if (parent) {
-            parent.replaceChild(restoredInput, div);
-            
-            // Re-attach click handler to the parent cell
-            const cell = parent as HTMLElement;
-            if (cell.classList.contains('cursor-text')) {
-              cell.onclick = () => {
-                restoredInput.focus();
-              };
-            }
-          }
-        }
-      });
+      restoreElementAfterExport(element, originalInputs, inputValues);
       element.removeAttribute('id');
       if (printStyle.parentNode) {
         printStyle.parentNode.removeChild(printStyle);
@@ -229,120 +124,18 @@ const EvidencijaZastitnaOprema: React.FC = () => {
     const element = tableRef.current;
     if (!element) return;
 
-    // Create header elements for download
-    const headerDiv = document.createElement('div');
-    headerDiv.style.cssText = `
-      text-align: center;
-      margin-bottom: 20px;
-      font-family: Arial, sans-serif;
-    `;
-    
-    const title = document.createElement('h1');
-    title.textContent = 'Obrazac 11.';
-    title.style.cssText = `
-      font-size: 18px;
-      font-weight: bold;
-      margin: 0 0 10px 0;
-      color: #000000;
-    `;
-    
-    const subtitle = document.createElement('h2');
-    subtitle.textContent = 'Evidencija o izdatoj ličnoj zaštitnoj opremi';
-    subtitle.style.cssText = `
-      font-size: 14px;
-      font-weight: normal;
-      margin: 0;
-      color: #000000;
-      line-height: 1.4;
-    `;
-    
-    headerDiv.appendChild(title);
-    headerDiv.appendChild(subtitle);
-    
-    // Insert header at the beginning of the table container
-    element.insertBefore(headerDiv, element.firstChild);
-
-    // Store original input elements and their values
-    const inputs = element.querySelectorAll('input');
-    const originalInputs: HTMLInputElement[] = [];
-    const inputValues: string[] = [];
-    const inputRefs: { [key: string]: HTMLInputElement | null } = {};
-
-    // Replace inputs with text divs and store originals
-    inputs.forEach((input, index) => {
-      const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
-      originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
-      inputValues[index] = input.value;
-      inputRefs[inputKey] = input;
-      
-      const textDiv = document.createElement('div');
-      textDiv.textContent = input.value;
-      textDiv.style.cssText = `
-        width: 100%;
-        min-height: 24px;
-        padding: 2px 4px;
-        font-size: 13px;
-        line-height: 1.4;
-        word-wrap: break-word;
-        white-space: pre-wrap;
-        color: #1f2937;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-family: inherit;
-        display: block;
-      `;
-      input.parentNode?.replaceChild(textDiv, input);
-    });
-
-    const opt = {
-      margin: 1,
-      filename: 'evidencija_zastitna_oprema.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        letterRendering: true,
-        scrollY: 0,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
-      },
-      jsPDF: { 
-        unit: 'in', 
-        format: 'a4', 
-        orientation: 'landscape'
-      }
+    const config = {
+      title: 'Obrazac 11.',
+      subtitle: 'Evidencija o zaštitnoj opremi',
+      filename: 'evidencija_zastitna_oprema.pdf'
     };
 
+    const { originalInputs, inputValues } = prepareElementForExport(element, config);
+
+    const opt = createPdfOptions(config.filename);
+
     html2pdf().set(opt).from(element).save().then(() => {
-      // Remove the header elements that were added for download
-      const headerDiv = element.querySelector('div:first-child');
-      if (headerDiv && headerDiv.querySelector('h1')) {
-        element.removeChild(headerDiv);
-      }
-      
-      // Restore original input elements with proper functionality
-      const textDivs = element.querySelectorAll('div');
-      textDivs.forEach((div, index) => {
-        if (originalInputs[index]) {
-          const restoredInput = originalInputs[index];
-          restoredInput.value = inputValues[index];
-          
-          // Restore the input with its original attributes and event handlers
-          const parent = div.parentNode;
-          if (parent) {
-            parent.replaceChild(restoredInput, div);
-            
-            // Re-attach click handler to the parent cell
-            const cell = parent as HTMLElement;
-            if (cell.classList.contains('cursor-text')) {
-              cell.onclick = () => {
-                restoredInput.focus();
-              };
-            }
-          }
-        }
-      });
+      restoreElementAfterExport(element, originalInputs, inputValues);
     });
   };
 

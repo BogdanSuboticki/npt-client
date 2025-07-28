@@ -129,6 +129,23 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
     // Insert header at the beginning of the table container
     element.insertBefore(headerDiv, element.firstChild);
 
+    // --- SIGNATURES BLOCK ---
+    const signaturesDiv = document.createElement('div');
+    signaturesDiv.className = 'print-signatures';
+    signaturesDiv.style.cssText = 'display: flex; justify-content: space-between; margin-top: 60px;';
+    signaturesDiv.innerHTML = `
+      <div style="text-align: left;">
+        <div style="font-size: 13px; margin-bottom: 30px;">Savetnik za BZR</div>
+        <div style="border-bottom: 1px solid #000; width: 220px; height: 32px;"></div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 13px; margin-bottom: 30px;">Poslodavac</div>
+        <div style="border-bottom: 1px solid #000; width: 220px; height: 32px;"></div>
+      </div>
+    `;
+    element.appendChild(signaturesDiv);
+    // --- END SIGNATURES BLOCK ---
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
@@ -204,6 +221,12 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
         element.removeChild(headerDiv);
       }
       
+      // Remove the signatures block
+      const signatures = element.querySelector('.print-signatures');
+      if (signatures) {
+        element.removeChild(signatures);
+      }
+      
       const textDivs = element.querySelectorAll('div');
       textDivs.forEach((div, index) => {
         if (originalInputs[index]) {
@@ -269,6 +292,23 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
     // Insert header at the beginning of the table container
     element.insertBefore(headerDiv, element.firstChild);
 
+    // --- SIGNATURES BLOCK ---
+    const signaturesDiv = document.createElement('div');
+    signaturesDiv.className = 'print-signatures';
+    signaturesDiv.style.cssText = 'display: flex; justify-content: space-between; margin-top: 60px;';
+    signaturesDiv.innerHTML = `
+      <div style="text-align: left;">
+        <div style="font-size: 13px; margin-bottom: 30px;">Savetnik za BZR</div>
+        <div style="border-bottom: 1px solid #000; width: 220px; height: 32px;"></div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 13px; margin-bottom: 30px;">Poslodavac</div>
+        <div style="border-bottom: 1px solid #000; width: 220px; height: 32px;"></div>
+      </div>
+    `;
+    element.appendChild(signaturesDiv);
+    // --- END SIGNATURES BLOCK ---
+
     // Store original input elements and their values
     const inputs = element.querySelectorAll('input');
     const originalInputs: HTMLInputElement[] = [];
@@ -326,6 +366,12 @@ const EvidencijaProfesionalneBolesti: React.FC = () => {
       const headerDiv = element.querySelector('div:first-child');
       if (headerDiv && headerDiv.querySelector('h1')) {
         element.removeChild(headerDiv);
+      }
+      
+      // Remove the signatures block
+      const signatures = element.querySelector('.print-signatures');
+      if (signatures) {
+        element.removeChild(signatures);
       }
       
       // Restore original input elements with proper functionality

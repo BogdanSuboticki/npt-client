@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo} from "react";
 import {
   Table,
   TableBody,
@@ -22,9 +22,15 @@ interface Column {
 interface DataTableTwoProps {
   data: any[];
   columns: Column[];
+  onOpremaClick?: (item: any) => void;
+  onEditClick?: (item: any) => void;
+  onDeleteClick?: (item: any) => void;
+  showFilters?: boolean;
+  showPagination?: boolean;
+  showOpremaButton?: boolean;
 }
 
-export default function DataTableTwo({ data: initialData, columns }: DataTableTwoProps) {
+export default function DataTableTwo({ data: initialData, columns, onOpremaClick, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showOpremaButton = true }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -46,6 +52,10 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
+        // If filters are disabled, show all items
+        if (!showFilters) {
+          return true;
+        }
         // If no items are selected in either filter, show no results
         if (selectedRadnaMesta.length === 0 || selectedLokacije.length === 0) {
           return false;
@@ -62,7 +72,7 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedRadnaMesta, selectedLokacije, initialData]);
+  }, [sortKey, sortOrder, selectedRadnaMesta, selectedLokacije, initialData, showFilters]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -100,18 +110,22 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <FilterDropdown
-              label="Prikazana radna mesta"
-              options={uniqueRadnaMesta}
-              selectedOptions={selectedRadnaMesta}
-              onSelectionChange={setSelectedRadnaMesta}
-            />
-            <FilterDropdown
-              label="Prikazane lokacije"
-              options={uniqueLokacije}
-              selectedOptions={selectedLokacije}
-              onSelectionChange={setSelectedLokacije}
-            />
+            {showFilters && (
+              <>
+                <FilterDropdown
+                  label="Prikazana radna mesta"
+                  options={uniqueRadnaMesta}
+                  selectedOptions={selectedRadnaMesta}
+                  onSelectionChange={setSelectedRadnaMesta}
+                />
+                <FilterDropdown
+                  label="Prikazane lokacije"
+                  options={uniqueLokacije}
+                  selectedOptions={selectedLokacije}
+                  onSelectionChange={setSelectedLokacije}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -188,7 +202,10 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
             </TableHeader>
             <TableBody>
               {currentData.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow 
+                  key={item.id} 
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
                   {columns.map(({ key }, index) => (
                     <TableCell
                       key={key}
@@ -196,18 +213,60 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
                         key === 'nazivRadnogMesta' ? 'font-medium' : 'font-normal'
                       } ${index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''}`}
                     >
-                      {item[key]}
+                      {key === 'oprema' ? (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-1">
+                            {item.oprema && item.oprema.length > 0 ? (
+                              item.oprema.slice(0, 2).map((oprema: string, idx: number) => (
+                                <span key={idx} className="text-sm text-gray-600 dark:text-gray-300">
+                                  {oprema}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-sm text-gray-400 dark:text-gray-500">
+                                Nema opreme
+                              </span>
+                            )}
+                          </div>
+                          {item.oprema && item.oprema.length > 2 && (
+                            <button
+                              onClick={() => onOpremaClick?.(item)}
+                              className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-left"
+                            >
+                              Pogledaj sve ({item.oprema.length})
+                            </button>
+                          )}
+                          {item.oprema && item.oprema.length <= 2 && item.oprema.length > 0 && (
+                            <button
+                              onClick={() => onOpremaClick?.(item)}
+                              className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-left"
+                            >
+                              Pogledaj sve
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        item[key]
+                      )}
                     </TableCell>
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                        <OpremaDugmevIcon className="size-5" />
-                      </button>
-                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                      {showOpremaButton && (
+                        <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
+                          <OpremaDugmevIcon className="size-5" />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
                         <DeleteButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                      <button 
+                        onClick={() => onEditClick?.(item)}
+                        className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                      >
                         <EditButtonIcon className="size-4" />
                       </button> 
                     </div>
@@ -219,20 +278,22 @@ export default function DataTableTwo({ data: initialData, columns }: DataTableTw
         </div>
       </div>
 
-      <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05] pb-4">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
-          <PaginationWithTextAndIcon 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-          <div className="pt-3 xl:pt-0 px-6">
-            <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
-              Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
-            </p>
+      {showPagination && (
+        <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05] pb-4">
+          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
+            <PaginationWithTextAndIcon 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+            <div className="pt-3 xl:pt-0 px-6">
+              <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
+                Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

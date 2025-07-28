@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { ReactComponent as PrintIcon } from '../icons/Print.svg?react';
 import { ReactComponent as DownloadIcon } from '../icons/download.svg?react';
-import { ReactComponent as NoviRedIcon } from '../icons/Novi_red.svg?react';
 import { ReactComponent as SaveIcon } from '../icons/Save-icon.svg?react';
 import html2pdf from 'html2pdf.js';
 import { Modal } from '../components/ui/modal';
@@ -9,7 +8,6 @@ import { useModal } from '../hooks/useModal';
 import Label from '../components/form/Label';
 import Input from '../components/form/input/InputField';
 import Popover from '../components/ui/popover/Popover';
-import ItemsPerPageDropdown from '../components/ui/dropdown/ItemsPerPageDropdown';
 import { 
   prepareElementForExport, 
   restoreElementAfterExport, 

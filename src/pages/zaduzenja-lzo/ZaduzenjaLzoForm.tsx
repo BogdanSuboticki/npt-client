@@ -36,7 +36,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
   // Example options - replace with actual data
   const zaposleniOptions = ["Petar Petrović", "Ana Anić", "Marko Marković"];
   const radnoMestoOptions = ["Viljuškari", "Kranista", "Mehaničar", "Električar", "Vozac"];
-  const opremaOptions = ["Viljuškara", "Zaštitna oprema", "Alat za održavanje", "Multimetar", "Zaštitne rukavice", "Zaštitna kaciga", "Računar", "Mobilni telefon", "Laboratorijski pribor", "Mikroskop"];
 
   // Add click outside handler for dropdowns
   useEffect(() => {
@@ -220,7 +219,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                   </div>
                   
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {formData.oprema.map((item, index) => (
+                    {formData.oprema.map((item) => (
                       <div key={item.id} className="px-4 py-3">
                         <div className="grid grid-cols-6 gap-4 min-w-[800px]">
                                                    {/* Vrsta LZS */}

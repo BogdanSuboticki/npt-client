@@ -79,7 +79,6 @@ export function prepareElementForExport(
 
   // Replace inputs with text divs and store originals
   inputs.forEach((input, index) => {
-    const inputKey = input.getAttribute('data-input-key') || `input-${index}`;
     originalInputs[index] = input.cloneNode(true) as HTMLInputElement;
     inputValues[index] = input.value;
     

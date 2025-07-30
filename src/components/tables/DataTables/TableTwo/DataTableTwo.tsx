@@ -28,9 +28,11 @@ interface DataTableTwoProps {
   showFilters?: boolean;
   showPagination?: boolean;
   showOpremaButton?: boolean;
+  showResultsText?: boolean;
+  showItemsPerPage?: boolean;
 }
 
-export default function DataTableTwo({ data: initialData, columns, onOpremaClick, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showOpremaButton = true }: DataTableTwoProps) {
+export default function DataTableTwo({ data: initialData, columns, onOpremaClick, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showOpremaButton = true, showResultsText = true, showItemsPerPage = true }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -98,16 +100,18 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
       <div className="flex flex-col gap-4 px-4 py-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
-            <ItemsPerPageDropdown
-              value={itemsPerPage}
-              onChange={setItemsPerPage}
-              options={[10, 20, 50, 100]}
-              className="w-[80px]"
-            />
-            <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
-          </div>
+          {showItemsPerPage && (
+            <div className="flex items-center gap-3">
+              <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
+              <ItemsPerPageDropdown
+                value={itemsPerPage}
+                onChange={setItemsPerPage}
+                options={[10, 20, 50, 100]}
+                className="w-[80px]"
+              />
+              <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
+            </div>
+          )}
 
           <div className="flex flex-col lg:flex-row gap-4">
             {showFilters && (
@@ -286,11 +290,13 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />
-            <div className="pt-3 xl:pt-0 px-6">
-              <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
-                Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
-              </p>
-            </div>
+            {showResultsText && (
+              <div className="pt-3 xl:pt-0 px-6">
+                <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
+                  Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

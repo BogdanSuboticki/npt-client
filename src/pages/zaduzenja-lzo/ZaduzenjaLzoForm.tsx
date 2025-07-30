@@ -99,13 +99,13 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
   };
 
   return (
-         <Modal
-       isOpen={isOpen}
-       onClose={onClose}
-       className="max-w-[1200px] w-full mx-4 p-4 lg:p-10 dark:bg-gray-800"
-     >
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-[1200px] w-full mx-4 p-4 lg:p-10 dark:bg-gray-800"
+    >
       <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Zaduženje LZO</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="max-h-[70vh] overflow-y-auto">
         <div className="grid grid-cols-1 gap-4">
           <div className="col-span-1">
             <Label>Zaposleni *</Label>
@@ -189,123 +189,132 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
             </div>
           </div>
 
-                     <div className="col-span-1">
-             <div className="flex items-center justify-between mb-4">
-               <Label>Oprema</Label>
-               <Button
-                 size="sm"
-                 onClick={handleAddOprema}
-                 className="text-xs"
-               >
-                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                 </svg>
-                 Dodaj opremu
-               </Button>
-             </div>
-             
-                           {formData.oprema.length > 0 && (
-                <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
-                  {/* Header */}
-                  <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                    <div className="grid grid-cols-6 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
-                      <div>Vrsta LZS *</div>
-                      <div>Standard</div>
-                      <div>Dodatni opis</div>
-                      <div>Datum zaduženja *</div>
-                      <div>Rok (m) *</div>
-                      <div>Naredno zaduženje</div>
-                    </div>
+          <div className="col-span-1">
+            <div className="flex items-center justify-between mb-4">
+              <Label>Oprema</Label>
+              <Button
+                size="sm"
+                onClick={handleAddOprema}
+                className="text-xs"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Dodaj opremu
+              </Button>
+            </div>
+            
+            {formData.oprema.length > 0 && (
+              <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
+                {/* Header */}
+                <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                  <div className="grid grid-cols-6 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
+                    <div>Vrsta LZS *</div>
+                    <div>Standard</div>
+                    <div>Dodatni opis</div>
+                    <div>Datum zaduženja *</div>
+                    <div>Rok (m) *</div>
+                    <div>Naredno zaduženje</div>
                   </div>
-                  
-                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {formData.oprema.map((item) => (
-                      <div key={item.id} className="px-4 py-3">
-                        <div className="grid grid-cols-6 gap-4 min-w-[800px]">
-                                                   {/* Vrsta LZS */}
-                          <div>
-                            <input
-                              type="text"
-                              value={item.vrstaLzs}
-                              onChange={(e) => handleOpremaChange(item.id, 'vrstaLzs', e.target.value)}
-                              placeholder="Unesite vrstu LZS"
-                              className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                            />
-                          </div>
-                         
-                                                   {/* Standard */}
-                          <div>
-                            <input
-                              type="text"
-                              value={item.standard}
-                              onChange={(e) => handleOpremaChange(item.id, 'standard', e.target.value)}
-                              placeholder="Unesite standard"
-                              className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                            />
-                          </div>
-                         
-                                                   {/* Dodatni opis */}
-                          <div>
-                            <input
-                              type="text"
-                              value={item.dodatniOpis}
-                              onChange={(e) => handleOpremaChange(item.id, 'dodatniOpis', e.target.value)}
-                              placeholder="Unesite opis"
-                              className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                            />
-                          </div>
-                         
-                                                   {/* Datum zaduženja */}
-                                                     <div>
-                             <DatePicker
-                               value={item.datumZaduzenja}
-                               onChange={(date) => handleOpremaChange(item.id, 'datumZaduzenja', date)}
-                               placeholder="Izaberi datum"
-                               className="h-11 text-sm"
-                             />
-                           </div>
-                         
-                                                   {/* Rok */}
-                          <div>
-                            <input
-                              type="number"
-                              value={item.rok}
-                              onChange={(e) => handleOpremaChange(item.id, 'rok', e.target.value)}
-                              min="1"
-                              className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                            />
-                          </div>
-                         
-                                                   {/* Naredno zaduženje */}
-                          <div className="flex items-center gap-2">
-                                                         <div className="flex-1">
-                               <DatePicker
-                                 value={item.narednoZaduzenje}
-                                 onChange={(date) => handleOpremaChange(item.id, 'narednoZaduzenje', date)}
-                                 placeholder="Izaberi datum"
-                                 className="h-11 text-sm"
-                               />
-                             </div>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveOprema(item.id)}
-                              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </div>
+                </div>
+                
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {formData.oprema.map((item) => (
+                    <div key={item.id} className="px-4 py-3">
+                      <div className="grid grid-cols-6 gap-4 min-w-[800px]">
+                        {/* Vrsta LZS */}
+                        <div>
+                          <input
+                            type="text"
+                            value={item.vrstaLzs}
+                            onChange={(e) => handleOpremaChange(item.id, 'vrstaLzs', e.target.value)}
+                            placeholder="Unesite vrstu LZS"
+                            className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                          />
                         </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             )}
-           </div>
+                       
+                        {/* Standard */}
+                        <div>
+                          <input
+                            type="text"
+                            value={item.standard}
+                            onChange={(e) => handleOpremaChange(item.id, 'standard', e.target.value)}
+                            placeholder="Unesite standard"
+                            className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                          />
+                        </div>
+                       
+                        {/* Dodatni opis */}
+                        <div>
+                          <textarea
+                            value={item.dodatniOpis}
+                            onChange={(e) => handleOpremaChange(item.id, 'dodatniOpis', e.target.value)}
+                            placeholder="Unesite opis"
+                            rows={1}
+                            className="w-full min-h-[44px] px-4 py-2 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none overflow-hidden"
+                            style={{
+                              height: 'auto',
+                              minHeight: '44px'
+                            }}
+                            onInput={(e) => {
+                              const target = e.target as HTMLTextAreaElement;
+                              target.style.height = 'auto';
+                              target.style.height = Math.max(44, target.scrollHeight) + 'px';
+                            }}
+                          />
+                        </div>
+                       
+                        {/* Datum zaduženja */}
+                        <div>
+                          <DatePicker
+                            value={item.datumZaduzenja}
+                            onChange={(date) => handleOpremaChange(item.id, 'datumZaduzenja', date)}
+                            placeholder="Izaberi datum"
+                            className="h-11 text-sm"
+                          />
+                        </div>
+                       
+                        {/* Rok */}
+                        <div>
+                          <input
+                            type="number"
+                            value={item.rok}
+                            onChange={(e) => handleOpremaChange(item.id, 'rok', e.target.value)}
+                            min="1"
+                            className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                          />
+                        </div>
+                       
+                        {/* Naredno zaduženje */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1">
+                            <DatePicker
+                              value={item.narednoZaduzenje}
+                              onChange={(date) => handleOpremaChange(item.id, 'narednoZaduzenje', date)}
+                              placeholder="Izaberi datum"
+                              className="h-11 text-sm"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveOprema(item.id)}
+                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             variant="outline"
             onClick={onClose}

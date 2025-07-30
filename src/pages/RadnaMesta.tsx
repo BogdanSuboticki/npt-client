@@ -403,112 +403,118 @@ const RadnaMesta: React.FC = () => {
         onSave={handleSave}
       />
 
-      {/* LZS Modal */}
-      <Modal
-        isOpen={showLZSModal}
-        onClose={closeLZSModal}
-        className="max-w-4xl p-6"
-      >
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            LZS za {selectedRadnoMesto?.nazivRadnogMesta}
-          </h2>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] max-h-96 overflow-y-auto">
-          <DataTableTwo 
-            data={(lzsDataState as any)[selectedRadnoMesto?.id] || []}
-            columns={lzsColumns}
-            showFilters={false}
-            showPagination={false}
-            showOpremaButton={false}
-            onEditClick={handleEditLZS}
-            onDeleteClick={handleDeleteLZS}
-          />
-        </div>
-
-        {/* Add new LZS form */}
-        <div className="mt-6 p-4">
-                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-             {isEditing ? "Izmeni LZS" : "Dodaj novi LZS"}
-           </h3>
+             {/* LZS Modal */}
+       <Modal
+         isOpen={showLZSModal}
+         onClose={closeLZSModal}
+         className="max-w-4xl w-full mx-4 p-4 lg:p-6"
+       >
+         <div className="flex flex-col h-full max-h-[70vh]">
+          <div className="mb-6 flex-shrink-0">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              LZS za {selectedRadnoMesto?.nazivRadnogMesta}
+            </h2>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                LZS
-              </label>
-              <input
-                type="text"
-                value={newLZS.lzs}
-                onChange={(e) => handleInputChange('lzs', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                placeholder="Unesite naziv LZS-a"
+          <div className="flex-1 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] mb-6">
+              <DataTableTwo 
+                data={(lzsDataState as any)[selectedRadnoMesto?.id] || []}
+                columns={lzsColumns}
+                showFilters={false}
+                showPagination={false}
+                showOpremaButton={false}
+                showResultsText={false}
+                showItemsPerPage={false}
+                onEditClick={handleEditLZS}
+                onDeleteClick={handleDeleteLZS}
               />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Rok (meseci)
-              </label>
-              <input
-                type="number"
-                value={newLZS.rok}
-                onChange={(e) => handleInputChange('rok', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                placeholder="Unesite rok u mesecima"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Standard
-              </label>
-              <input
-                type="text"
-                value={newLZS.standard}
-                onChange={(e) => handleInputChange('standard', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                placeholder="Unesite standard"
-              />
+
+            {/* Add new LZS form */}
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                {isEditing ? "Izmeni LZS" : "Dodaj novi LZS"}
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    LZS
+                  </label>
+                  <input
+                    type="text"
+                    value={newLZS.lzs}
+                    onChange={(e) => handleInputChange('lzs', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                    placeholder="Unesite naziv LZS-a"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Rok (meseci)
+                  </label>
+                  <input
+                    type="number"
+                    value={newLZS.rok}
+                    onChange={(e) => handleInputChange('rok', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                    placeholder="Unesite rok u mesecima"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Standard
+                  </label>
+                  <input
+                    type="text"
+                    value={newLZS.standard}
+                    onChange={(e) => handleInputChange('standard', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                    placeholder="Unesite standard"
+                  />
+                </div>
+              </div>
             </div>
           </div>
           
-                     <div className="flex justify-end gap-2">
-             {isEditing && (
-               <Button
-                 size="sm"
-                 variant="outline"
-                 onClick={() => {
-                   setIsEditing(false);
-                   setEditingLZSId(null);
-                   setNewLZS({ lzs: "", rok: "", standard: "" });
-                 }}
-               >
-                 Otkaži
-               </Button>
-             )}
-             <Button
-               size="sm"
-               onClick={handleAddLZS}
-               disabled={!newLZS.lzs || !newLZS.rok || !newLZS.standard}
-             >
-               <svg
-                 className="w-4 h-4 mr-1"
-                 fill="none"
-                 stroke="currentColor"
-                 viewBox="0 0 24 24"
-               >
-                 <path
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   strokeWidth={2}
-                   d="M12 4v16m8-8H4"
-                 />
-               </svg>
-               {isEditing ? "Sačuvaj izmene" : "Dodaj"}
-             </Button>
-           </div>
+          <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+            {isEditing && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditingLZSId(null);
+                  setNewLZS({ lzs: "", rok: "", standard: "" });
+                }}
+              >
+                Otkaži
+              </Button>
+            )}
+            <Button
+              size="sm"
+              onClick={handleAddLZS}
+              disabled={!newLZS.lzs || !newLZS.rok || !newLZS.standard}
+            >
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              {isEditing ? "Sačuvaj izmene" : "Dodaj"}
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>

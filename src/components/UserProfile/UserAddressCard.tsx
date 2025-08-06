@@ -13,7 +13,6 @@ interface UserAddressCardProps {
 }
 
 export default function UserAddressCard({ 
-  userType = 'user',
   userCountry = "Srbija",
   userCity = "Beograd",
   userPostalCode = "11000",

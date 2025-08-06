@@ -14,19 +14,6 @@ export default function SidebarSettingsCard() {
     closeModal();
   };
 
-  const getModeDescription = (mode: string) => {
-    switch (mode) {
-      case 'both':
-        return 'Prikazuje oba dela - Moja Firma i Komitenti';
-      case 'moja-firma':
-        return 'Prikazuje samo Moja Firma sekciju';
-      case 'komitenti':
-        return 'Prikazuje samo Komitenti sekciju';
-      default:
-        return '';
-    }
-  };
-
   const getModeBadge = (mode: string) => {
     switch (mode) {
       case 'both':

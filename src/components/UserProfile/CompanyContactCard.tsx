@@ -4,70 +4,76 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-interface UserAddressCardProps {
-  userType?: 'super-admin' | 'admin' | 'user';
-  userCountry?: string;
-  userCity?: string;
-  userPostalCode?: string;
-  userTaxId?: string;
-}
-
-export default function UserAddressCard({ 
-  userCountry = "Srbija",
-  userCity = "Beograd",
-  userPostalCode = "11000",
-  userTaxId = "123456789"
-}: UserAddressCardProps) {
+export default function CompanyContactCard() {
   const { isOpen, openModal, closeModal } = useModal();
   
   const handleSave = () => {
     // Handle save logic here
-    console.log("Saving changes...");
+    console.log("Saving company contact changes...");
     closeModal();
   };
+
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Adresa
+              Kontakt informacije firme
             </h4>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Država
+                  Ime i prezime direktora firme
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userCountry}
+                  Marko Petrović
                 </p>
               </div>
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Grad
+                  Broj telefona direktora
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userCity}
+                  +381 11 123 4567
                 </p>
               </div>
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Poštanski broj
+                  Email adresa direktora
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userPostalCode}
+                  direktor@techsolutions.rs
                 </p>
               </div>
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  PIB
+                  Ime i prezime osobe za saradnju
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userTaxId}
+                  Ana Jovanović
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Broj telefona osobe za saradnju
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  +381 11 987 6543
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Email adresa osobe za saradnju
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  saradnja@techsolutions.rs
                 </p>
               </div>
             </div>
@@ -96,37 +102,62 @@ export default function UserAddressCard({
           </button>
         </div>
       </div>
+
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
+        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Uredi adresu
+              Uredi kontakt informacije firme
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Ažurirajte svoju adresu da biste održali profil ažurnim.
+              Ažurirajte kontakt informacije vaše firme.
             </p>
           </div>
           <form className="flex flex-col">
-            <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
-                  <Label>Država</Label>
-                  <Input type="text" value={userCountry} />
-                </div>
+            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+              <div>
+                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                  Direktor firme
+                </h5>
 
-                <div>
-                  <Label>Grad</Label>
-                  <Input type="text" value={userCity} />
-                </div>
+                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                  <div>
+                    <Label>Ime i prezime direktora firme</Label>
+                    <Input type="text" value="Marko Petrović" />
+                  </div>
 
-                <div>
-                  <Label>Poštanski broj</Label>
-                  <Input type="text" value={userPostalCode} />
-                </div>
+                  <div>
+                    <Label>Broj telefona direktora</Label>
+                    <Input type="tel" value="+381 11 123 4567" />
+                  </div>
 
-                <div>
-                  <Label>PIB</Label>
-                  <Input type="text" value={userTaxId} />
+                  <div>
+                    <Label>Email adresa direktora</Label>
+                    <Input type="email" value="direktor@techsolutions.rs" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7">
+                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                  Osoba za saradnju
+                </h5>
+
+                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                  <div>
+                    <Label>Ime i prezime osobe za saradnju</Label>
+                    <Input type="text" value="Ana Jovanović" />
+                  </div>
+
+                  <div>
+                    <Label>Broj telefona osobe za saradnju</Label>
+                    <Input type="tel" value="+381 11 987 6543" />
+                  </div>
+
+                  <div>
+                    <Label>Email adresa osobe za saradnju</Label>
+                    <Input type="email" value="saradnja@techsolutions.rs" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -143,4 +174,4 @@ export default function UserAddressCard({
       </Modal>
     </>
   );
-}
+} 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { useUser } from "../context/UserContext";
 
 // Assume these icons are imported from an icon library
 import {
@@ -232,6 +233,8 @@ const supportItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, setIsMobileOpen } = useSidebar();
   const location = useLocation();
+  const { userType, showMojaFirma, showKomitenti, organizationSettings } = useUser();
+  
   const [isMojaFirmaCollapsed, setIsMojaFirmaCollapsed] = useState(() => {
     const saved = localStorage.getItem('isMojaFirmaCollapsed');
     return saved ? JSON.parse(saved) : false;
@@ -266,7 +269,7 @@ const AppSidebar: React.FC = () => {
     if (ostaloRef.current) {
       setOstaloHeight(ostaloRef.current.scrollHeight);
     }
-  }, [isMojaFirmaCollapsed, isKomitentiCollapsed, isOstaloCollapsed, isExpanded, isHovered, isMobileOpen]);
+  }, [isMojaFirmaCollapsed, isKomitentiCollapsed, isOstaloCollapsed, isExpanded, isHovered, isMobileOpen, showMojaFirma, showKomitenti]);
 
   // Save states to localStorage whenever they change
   useEffect(() => {
@@ -363,79 +366,94 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pb-32 lg:pb-0">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
-            <div>
-              <button
-                onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  <div className="flex items-center gap-2">
-                    <span>MOJA FIRMA</span>
-                    <ChevronDownIcon
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        !isMojaFirmaCollapsed ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
-                ) : (
-                  <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
-                )}
-              </button>
-              <div
-                ref={mojaFirmaRef}
-                className="overflow-hidden transition-all duration-300"
-                style={{
-                  height: isMojaFirmaCollapsed ? "0px" : `${mojaFirmaHeight}px`,
-                }}
-              >
-                {renderMenuItems(navItems)}
+                               {/* Moja Firma Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
+                   {(userType === 'super-admin' || 
+                     (userType === 'admin' && showMojaFirma) || 
+                     (userType === 'user' && organizationSettings.usersCanSeeMojaFirma)) && (
+              <div>
+                <button
+                  onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
+                  className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
+                    !isExpanded && !isHovered
+                      ? "lg:justify-center"
+                      : "justify-start"
+                  }`}
+                >
+                  {isExpanded || isHovered || isMobileOpen ? (
+                    <div className="flex items-center gap-2">
+                      <span>MOJA FIRMA</span>
+                      <ChevronDownIcon
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          !isMojaFirmaCollapsed ? "rotate-180" : ""
+                        }`}
+                      />
+                    </div>
+                  ) : (
+                    <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
+                  )}
+                </button>
+                <div
+                  ref={mojaFirmaRef}
+                  className="overflow-hidden transition-all duration-300"
+                  style={{
+                    height: isMojaFirmaCollapsed ? "0px" : `${mojaFirmaHeight}px`,
+                  }}
+                >
+                  {renderMenuItems(navItems)}
+                </div>
               </div>
-            </div>
-            <div className="">
-              <button
-                onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  <div className="flex items-center gap-2">
-                    <span>KOMITENTI</span>
-                    <ChevronDownIcon
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        !isKomitentiCollapsed ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
-                ) : (
-                  <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
-                )}
-              </button>
-              <div
-                ref={komitentiRef}
-                className="overflow-hidden transition-all duration-300"
-                style={{
-                  height: isKomitentiCollapsed ? "0px" : `${komitentiHeight}px`,
-                }}
-              >
-                {renderMenuItems(supportItems)}
+            )}
+
+                               {/* Komitenti Section - Show for Super Admin, or Admin if showKomitenti is true, or User if allowed by organization */}
+                   {(userType === 'super-admin' || 
+                     (userType === 'admin' && showKomitenti) || 
+                     (userType === 'user' && organizationSettings.usersCanSeeKomitenti)) && (
+              <div className="">
+                <button
+                  onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
+                  className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
+                    !isExpanded && !isHovered
+                      ? "lg:justify-center"
+                      : "justify-start"
+                  }`}
+                >
+                  {isExpanded || isHovered || isMobileOpen ? (
+                    <div className="flex items-center gap-2">
+                      <span>KOMITENTI</span>
+                      <ChevronDownIcon
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          !isKomitentiCollapsed ? "rotate-180" : ""
+                        }`}
+                      />
+                    </div>
+                  ) : (
+                    <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
+                  )}
+                </button>
+                <div
+                  ref={komitentiRef}
+                  className="overflow-hidden transition-all duration-300"
+                  style={{
+                    height: isKomitentiCollapsed ? "0px" : `${komitentiHeight}px`,
+                  }}
+                >
+                  {renderMenuItems(supportItems)}
+                </div>
               </div>
-            </div>
-            <div className="">
-              <button
-                onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
+            )}
+                                                               {/* Ostalo Section - Show for Super Admin and Admin, or User if allowed by organization */}
+                    {(userType === 'super-admin' || 
+                      userType === 'admin' || 
+                      (userType === 'user' && organizationSettings.usersCanSeeOstalo)) && (
+                      <div className="">
+                        <button
+                          onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}
+                          className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
+                            !isExpanded && !isHovered
+                              ? "lg:justify-center"
+                              : "justify-start"
+                          }`}
+                        >
                 {isExpanded || isHovered || isMobileOpen ? (
                   <div className="flex items-center gap-2">
                     <span>OSTALO</span>
@@ -449,16 +467,17 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
                 )}
               </button>
-              <div
-                ref={ostaloRef}
-                className="overflow-hidden transition-all duration-300"
-                style={{
-                  height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
-                }}
-              >
-                {renderMenuItems(othersItems)}
-              </div>
-            </div>
+                             <div
+                 ref={ostaloRef}
+                 className="overflow-hidden transition-all duration-300"
+                 style={{
+                   height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
+                 }}
+               >
+                 {renderMenuItems(othersItems)}
+               </div>
+             </div>
+           )}
           </div>
         </nav>
 

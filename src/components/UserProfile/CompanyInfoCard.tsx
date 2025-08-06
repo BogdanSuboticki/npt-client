@@ -3,63 +3,42 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import Select from "../form/Select";
 
-interface UserAddressCardProps {
-  userType?: 'super-admin' | 'admin' | 'user';
-  userCountry?: string;
-  userCity?: string;
-  userPostalCode?: string;
-  userTaxId?: string;
-}
-
-export default function UserAddressCard({ 
-  userType = 'user',
-  userCountry = "Srbija",
-  userCity = "Beograd",
-  userPostalCode = "11000",
-  userTaxId = "123456789"
-}: UserAddressCardProps) {
+export default function CompanyInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
   
   const handleSave = () => {
     // Handle save logic here
-    console.log("Saving changes...");
+    console.log("Saving company changes...");
     closeModal();
   };
+
+  const countries = [
+    { value: "serbia", label: "Srbija" },
+    { value: "croatia", label: "Hrvatska" },
+    { value: "bosnia", label: "Bosna i Hercegovina" },
+    { value: "montenegro", label: "Crna Gora" },
+    { value: "north-macedonia", label: "Severna Makedonija" },
+    { value: "slovenia", label: "Slovenija" },
+  ];
+
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Adresa
+              Informacije o firmi
             </h4>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Država
+                  Naziv firme
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userCountry}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Grad
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userCity}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Poštanski broj
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userPostalCode}
+                  Tech Solutions d.o.o.
                 </p>
               </div>
 
@@ -68,7 +47,61 @@ export default function UserAddressCard({
                   PIB
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userTaxId}
+                  123456789
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Matični broj firme
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  12345678
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Šifra delatnosti
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  6201
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Adresa firme
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  Bulevar Nikole Tesle 15, Beograd
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Država
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  Srbija
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Mesto
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  Beograd
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Email adresa firme
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  info@techsolutions.rs
                 </p>
               </div>
             </div>
@@ -97,37 +130,63 @@ export default function UserAddressCard({
           </button>
         </div>
       </div>
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
+
+      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
+        <div className="no-scrollbar relative w-full max-w-[800px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Uredi adresu
+              Uredi informacije o firmi
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Ažurirajte svoju adresu da biste održali profil ažurnim.
+              Ažurirajte informacije o vašoj firmi.
             </p>
           </div>
           <form className="flex flex-col">
-            <div className="px-2 overflow-y-auto custom-scrollbar">
+            <div className="custom-scrollbar h-[500px] overflow-y-auto px-2 pb-3">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
+                  <Label>Naziv firme</Label>
+                  <Input type="text" value="Tech Solutions d.o.o." />
+                </div>
+
+                <div>
+                  <Label>PIB (poreski identifikacioni broj)</Label>
+                  <Input type="text" value="123456789" />
+                </div>
+
+                <div>
+                  <Label>Matični broj firme</Label>
+                  <Input type="text" value="12345678" />
+                </div>
+
+                <div>
+                  <Label>Šifra delatnosti</Label>
+                  <Input type="text" value="6201" />
+                </div>
+
+                <div>
+                  <Label>Adresa firme</Label>
+                  <Input type="text" value="Bulevar Nikole Tesle 15, Beograd" />
+                </div>
+
+                <div>
                   <Label>Država</Label>
-                  <Input type="text" value={userCountry} />
+                  <Select
+                    options={countries}
+                    placeholder="Izaberi državu"
+                    onChange={(value) => console.log(value)}
+                    defaultValue="serbia"
+                  />
                 </div>
 
                 <div>
-                  <Label>Grad</Label>
-                  <Input type="text" value={userCity} />
+                  <Label>Mesto</Label>
+                  <Input type="text" value="Beograd" />
                 </div>
 
                 <div>
-                  <Label>Poštanski broj</Label>
-                  <Input type="text" value={userPostalCode} />
-                </div>
-
-                <div>
-                  <Label>PIB</Label>
-                  <Input type="text" value={userTaxId} />
+                  <Label>Email adresa firme</Label>
+                  <Input type="email" value="info@techsolutions.rs" />
                 </div>
               </div>
             </div>
@@ -144,4 +203,4 @@ export default function UserAddressCard({
       </Modal>
     </>
   );
-}
+} 

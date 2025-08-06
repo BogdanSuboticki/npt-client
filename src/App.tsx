@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { srLatn } from "date-fns/locale";
+import { UserProvider } from "./context/UserContext";
 import Ecommerce from "./pages/Dashboard/Ecommerce";
 import Stocks from "./pages/Dashboard/Stocks";
 import Crm from "./pages/Dashboard/Crm";
@@ -90,10 +91,11 @@ import ZaduzenjaLzoPage from "./pages/zaduzenja-lzo/page";
 
 export default function App() {
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={srLatn}>
-      <Router>
-        <ScrollToTop />
-        <Routes>
+    <UserProvider>
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={srLatn}>
+        <Router>
+          <ScrollToTop />
+          <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Ecommerce />} />
@@ -205,5 +207,6 @@ export default function App() {
         </Routes>
       </Router>
     </LocalizationProvider>
+    </UserProvider>
   );
 }

@@ -65,7 +65,7 @@ export default function ProfileTypeSelector({ onProfileTypeChange, currentType }
               onProfileTypeChange(userType);
               setUserType(userType);
             }}
-            className={`p-4 rounded-xl border transition-all duration-200 text-left ${
+            className={`p-4 rounded-xl border text-left ${
               currentType === type.key
                 ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10 dark:border-brand-400'
                 : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'

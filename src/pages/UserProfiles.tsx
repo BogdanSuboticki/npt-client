@@ -57,6 +57,12 @@ const userData: Record<UserType, UserData> = {
 export default function UserProfiles() {
   const { userType, setUserType } = useUser();
   const currentUser = userData[userType];
+  const displayName =
+    userType === 'super-admin'
+      ? 'Super admin Profil 1'
+      : userType === 'admin'
+      ? currentUser.company
+      : currentUser.name;
 
   const handleProfileTypeChange = (type: UserType) => {
     setUserType(type);
@@ -83,32 +89,36 @@ export default function UserProfiles() {
             {/* User Meta Card - Always visible */}
             <UserMetaCard 
               userType={userType}
-              userName={currentUser.name}
+              userName={displayName}
               userRole={currentUser.role}
               userLocation={currentUser.location}
               userCompany={currentUser.company}
             />
 
-            {/* User Info Card - Always visible */}
-            <UserInfoCard 
-              userType={userType}
-              userName={currentUser.name}
-              userEmail={currentUser.email}
-              userPhone={currentUser.phone}
-              userBio={currentUser.bio}
-            />
+            {/* User Info Card - Hidden for Super Admin */}
+            {userType !== 'super-admin' && (
+              <UserInfoCard 
+                userType={userType}
+                userName={displayName}
+                userEmail={currentUser.email}
+                userPhone={currentUser.phone}
+                userBio={currentUser.bio}
+              />
+            )}
 
-            {/* User Address Card - Always visible */}
-            <UserAddressCard 
-              userType={userType}
-              userCountry="Srbija"
-              userCity={currentUser.location.split(', ')[0]}
-              userPostalCode="11000"
-              userTaxId="123456789"
-            />
+            {/* User Address Card - Hidden for Super Admin */}
+            {userType !== 'super-admin' && (
+              <UserAddressCard 
+                userType={userType}
+                userCountry="Srbija"
+                userCity={currentUser.location.split(', ')[0]}
+                userPostalCode="11000"
+                userTaxId="123456789"
+              />
+            )}
 
-            {/* Company Information Cards - Only for Super Admin and Admin */}
-            {(userType === 'super-admin' || userType === 'admin') && (
+            {/* Company Information Cards - Only for Admin */}
+            {userType === 'admin' && (
               <>
                 <CompanyInfoCard />
                 <CompanyContactCard />
@@ -116,13 +126,13 @@ export default function UserProfiles() {
               </>
             )}
 
-            {/* Sidebar Settings Card - Only for Admin */}
-            {userType === 'admin' && (
+            {/* Sidebar Settings Card - For Admin and Super Admin */}
+            {(userType === 'admin' || userType === 'super-admin') && (
               <SidebarSettingsCard />
             )}
 
-            {/* Organization Settings Card - Only for Admin */}
-            {userType === 'admin' && (
+            {/* Organization Settings Card - For Admin and Super Admin */}
+            {(userType === 'admin' || userType === 'super-admin') && (
               <OrganizationSettingsCard />
             )}
           </div>

@@ -22,8 +22,8 @@ export default function OrganizationSettingsCard() {
     closeModal();
   };
 
-  // Only show this card for Admin users
-  if (userType !== 'admin') {
+  // Show this card for Admin and Super Admin users
+  if (userType !== 'admin' && userType !== 'super-admin') {
     return null;
   }
 
@@ -68,7 +68,7 @@ export default function OrganizationSettingsCard() {
                   Tip korisnika
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  Administrator
+                  {userType === 'super-admin' ? 'Super Administrator' : 'Administrator'}
                 </p>
               </div>
 
@@ -196,52 +196,7 @@ export default function OrganizationSettingsCard() {
                 </div>
               </div>
 
-              <div>
-                <h5 className="mb-4 text-lg font-medium text-gray-800 dark:text-white/90">
-                  Dodatne opcije
-                </h5>
-                <div className="space-y-4">
-                  <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={tempSettings.usersCanCustomizeSettings}
-                        onChange={(e) => setTempSettings({
-                          ...tempSettings,
-                          usersCanCustomizeSettings: e.target.checked
-                        })}
-                        className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-0 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-gray-800 dark:text-white/90">Dozvoli korisnicima da menjaju svoja podešavanja</span>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Korisnici mogu da prilagode svoj sidebar prema svojim potrebama
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={tempSettings.restrictToBasicFunctions}
-                        onChange={(e) => setTempSettings({
-                          ...tempSettings,
-                          restrictToBasicFunctions: e.target.checked
-                        })}
-                        className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 rounded focus:ring-0 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-gray-800 dark:text-white/90">Ograniči pristup samo osnovnim funkcijama</span>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Korisnici vide samo osnovne opcije bez dodatnih funkcionalnosti
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
+              
             </div>
           </div>
 

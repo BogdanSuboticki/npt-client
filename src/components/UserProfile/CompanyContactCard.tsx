@@ -24,55 +24,55 @@ export default function CompanyContactCard() {
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Ime i prezime direktora firme
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   Marko Petrović
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Broj telefona direktora
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   +381 11 123 4567
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Email adresa direktora
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   direktor@techsolutions.rs
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Ime i prezime osobe za saradnju
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   Ana Jovanović
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Broj telefona osobe za saradnju
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   +381 11 987 6543
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Email adresa osobe za saradnju
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   saradnja@techsolutions.rs
                 </p>
               </div>

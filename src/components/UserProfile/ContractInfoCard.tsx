@@ -24,37 +24,37 @@ export default function ContractInfoCard() {
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Datum početka ugovora
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   01.01.2024
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Datum isteka ugovora
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   31.12.2024
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Status ugovora
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   Aktivan
                 </p>
               </div>
 
               <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
                   Broj ugovora
                 </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
                   UG-2024-001
                 </p>
               </div>

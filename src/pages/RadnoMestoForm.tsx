@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Button from "../components/ui/button/Button";
 import { Modal } from "../components/ui/modal";
 import Label from "../components/form/Label";
@@ -20,6 +20,41 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
     obavezanOftamoloskiPregled: false,
     obavezanPregledPoDrugomOsnovu: false
   });
+
+  // Add state for dropdowns
+  const [isLokacijaOpen, setIsLokacijaOpen] = React.useState(false);
+  const lokacijaRef = useRef<HTMLDivElement>(null);
+
+  // Location data
+  const lokacijeData = [
+    "Glavna zgrada",
+    "Skladište A",
+    "Magacin Novi Sad",
+    "Kancelarija Beograd",
+    "Proizvodna hala Niš",
+    "Pogon Subotica",
+    "Magacin Kragujevac",
+    "Skladište B",
+    "Proizvodna hala Beograd",
+    "Kancelarija Novi Sad",
+    "Pogon Niš",
+    "Magacin Subotica"
+  ];
+
+  // Add click outside handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Close dropdowns
+      if (lokacijaRef.current && !lokacijaRef.current.contains(target)) {
+        setIsLokacijaOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,12 +90,46 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
 
           <div className="col-span-1">
             <Label>Naziv lokacije *</Label>
-            <Input 
-              type="text" 
-              value={formData.nazivLokacije}
-              onChange={(e) => setFormData({...formData, nazivLokacije: e.target.value})}
-              className="bg-[#F9FAFB] dark:bg-[#101828]"
-            />
+            <div className="relative w-full" ref={lokacijaRef}>
+              <button
+                type="button"
+                onClick={() => setIsLokacijaOpen(!isLokacijaOpen)}
+                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              >
+                <span>{formData.nazivLokacije || "Izaberi lokaciju"}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isLokacijaOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isLokacijaOpen && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    {lokacijeData.map((option: string, index: number) => (
+                      <div
+                        key={option}
+                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                          formData.nazivLokacije === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                        } ${index === lokacijeData.length - 1 ? 'rounded-b-lg' : ''}`}
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            nazivLokacije: option,
+                          });
+                          setIsLokacijaOpen(false);
+                        }}
+                      >
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="col-span-1">

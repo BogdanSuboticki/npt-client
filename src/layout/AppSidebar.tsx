@@ -148,7 +148,7 @@ const othersItems: NavItem[] = [
   {
     icon: <MojNalogIcon />,
     name: "Moj nalog",
-    path: "/moj-nalog",
+    path: "/profile",
   },
 ];
 
@@ -255,7 +255,13 @@ const AppSidebar: React.FC = () => {
   const [ostaloHeight, setOstaloHeight] = useState<number>(0);
 
   const isActive = useCallback(
-    (path: string) => location.pathname === path,
+    (path: string) => {
+      // Special case for "Moj nalog" - should be active for both /moj-nalog and /profile
+      if (path === "/moj-nalog") {
+        return location.pathname === "/moj-nalog" || location.pathname === "/profile";
+      }
+      return location.pathname === path;
+    },
     [location.pathname]
   );
 

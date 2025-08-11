@@ -8,6 +8,7 @@ import CompanyContactCard from "../components/UserProfile/CompanyContactCard";
 import ContractInfoCard from "../components/UserProfile/ContractInfoCard";
 import SidebarSettingsCard from "../components/UserProfile/SidebarSettingsCard";
 import OrganizationSettingsCard from "../components/UserProfile/OrganizationSettingsCard";
+import SuperAdminDashboard from "../components/UserProfile/SuperAdminDashboard";
 import ProfileTypeSelector from "../components/UserProfile/ProfileTypeSelector";
 import PageMeta from "../components/common/PageMeta";
 import { useUser } from "../context/UserContext";
@@ -32,7 +33,7 @@ const userData: Record<UserType, UserData> = {
     company: "Sistem Administracija d.o.o.",
     email: "aleksandar.nikolic@sistem.rs",
     phone: "+381 11 555 1234",
-    bio: "Glavni administrator sistema sa punim pristupom svim nalozima i firmama"
+    bio: "Glavni administrator sistema sa punim pristupom svim organizacijama, korisnicima i sistemskim postavkama"
   },
   'admin': {
     name: "Marko Petrović",
@@ -95,8 +96,22 @@ export default function UserProfiles() {
               userCompany={currentUser.company}
             />
 
-            {/* User Info Card - Hidden for Super Admin */}
-            {userType !== 'super-admin' && (
+            {/* Super Admin Dashboard - Only for Super Admin */}
+            {userType === 'super-admin' && (
+              <SuperAdminDashboard />
+            )}
+
+            {/* Company Information Cards - Only for Admin, moved to top */}
+            {userType === 'admin' && (
+              <>
+                <CompanyInfoCard />
+                <CompanyContactCard />
+                <ContractInfoCard />
+              </>
+            )}
+
+            {/* User Info Card - Hidden for Super Admin and Admin */}
+            {userType === 'user' && (
               <UserInfoCard 
                 userType={userType}
                 userName={displayName}
@@ -106,8 +121,8 @@ export default function UserProfiles() {
               />
             )}
 
-            {/* User Address Card - Hidden for Super Admin */}
-            {userType !== 'super-admin' && (
+            {/* User Address Card - Hidden for Super Admin and Admin */}
+            {userType === 'user' && (
               <UserAddressCard 
                 userType={userType}
                 userCountry="Srbija"
@@ -115,15 +130,6 @@ export default function UserProfiles() {
                 userPostalCode="11000"
                 userTaxId="123456789"
               />
-            )}
-
-            {/* Company Information Cards - Only for Admin */}
-            {userType === 'admin' && (
-              <>
-                <CompanyInfoCard />
-                <CompanyContactCard />
-                <ContractInfoCard />
-              </>
             )}
 
             {/* Sidebar Settings Card - For Admin and Super Admin */}
@@ -149,7 +155,7 @@ export default function UserProfiles() {
                 Tip korisnika
               </h5>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {userType === 'super-admin' && 'Super Administrator - Pun pristup svim nalozima i firmama'}
+                {userType === 'super-admin' && 'Super Administrator - Pun pristup celokupnom sistemu i svim organizacijama'}
                 {userType === 'admin' && 'Administrator - Pristup korisnicima u svojoj firmi'}
                 {userType === 'user' && 'Korisnik - Pristup samo svom nalogu'}
               </p>
@@ -162,10 +168,12 @@ export default function UserProfiles() {
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 {userType === 'super-admin' && (
                   <>
+                    <li>• Kreiranje i upravljanje svim organizacijama</li>
                     <li>• Kreiranje novih admina i korisnika</li>
-                    <li>• Pristup svim firmama</li>
-                    <li>• Upravljanje svim nalozima</li>
-                    <li>• Pregled svih podataka</li>
+                    <li>• Pristup svim podacima u sistemu</li>
+                    <li>• Sistemske postavke i konfiguracija</li>
+                    <li>• Upravljanje dozvolama i pristupima</li>
+                    <li>• Monitoring sistema i backup</li>
                   </>
                 )}
                 {userType === 'admin' && (
@@ -188,12 +196,17 @@ export default function UserProfiles() {
 
             <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
               <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                Firma
+                {userType === 'super-admin' ? 'Sistem' : 'Firma'}
               </h5>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {currentUser.company}
+                {userType === 'super-admin' ? 'Sistem Administracija d.o.o.' : currentUser.company}
               </p>
-              {userType !== 'user' && (
+              {userType === 'super-admin' && (
+                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                  Glavni administrator sistema
+                </p>
+              )}
+              {userType === 'admin' && (
                 <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
                   Administrator firme
                 </p>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -33,6 +33,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 }) => {
   const { theme: appTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDateChange = (newValue: Date | null) => {
     onChange(newValue);
@@ -44,6 +45,22 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       setIsOpen(prev => !prev);
     }
   };
+
+  // Handle outside clicks
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen]);
 
   // Create theme based on app theme with high z-index for MUI Popper
   const muiTheme = createTheme({
@@ -65,7 +82,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     <ThemeProvider theme={muiTheme}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sr}>
         {/* Use the same custom UI for both mobile and desktop for consistency */}
-        <div className="relative custom-date-picker-input">
+        <div ref={containerRef} className="relative custom-date-picker-input">
           <div 
             className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
             onClick={toggleDatePicker}
@@ -117,6 +134,17 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   opacity: 0,
                   pointerEvents: 'none'
                 }
+              },
+              popper: {
+                placement: 'bottom-start',
+                modifiers: [
+                  {
+                    name: 'preventOverflow',
+                    options: {
+                      boundary: 'viewport',
+                    },
+                  },
+                ],
               },
             }}
           />

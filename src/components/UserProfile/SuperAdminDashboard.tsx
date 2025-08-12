@@ -7,6 +7,7 @@ import Checkbox from "../form/input/Checkbox";
 interface Firma {
   id: string;
   name: string;
+  email: string;
   type: 'admin' | 'client';
   status: 'active' | 'suspended' | 'pending';
   userCount: number;
@@ -71,6 +72,7 @@ export default function SuperAdminDashboard() {
     {
       id: "1",
       name: "Tech Solutions d.o.o.",
+      email: "info@techsolutions.rs",
       type: "admin",
       status: "active",
       userCount: 45,
@@ -81,6 +83,7 @@ export default function SuperAdminDashboard() {
     {
       id: "2",
       name: "Client Company A",
+      email: "contact@clienta.rs",
       type: "client",
       status: "active",
       userCount: 12,
@@ -91,6 +94,7 @@ export default function SuperAdminDashboard() {
     {
       id: "3",
       name: "Client Company B",
+      email: "info@clientb.rs",
       type: "client",
       status: "active",
       userCount: 8,
@@ -101,6 +105,7 @@ export default function SuperAdminDashboard() {
     {
       id: "4",
       name: "New Organization",
+      email: "admin@neworg.rs",
       type: "admin",
       status: "pending",
       userCount: 0,
@@ -192,6 +197,7 @@ export default function SuperAdminDashboard() {
       const newFirmaObj: Firma = {
         id: (firme.length + 1).toString(),
         name: newFirma.naziv,
+        email: newFirma.email,
         type: 'client',
         status: 'active',
         userCount: 0,
@@ -397,7 +403,7 @@ export default function SuperAdminDashboard() {
                           {org.name}
                         </td>
                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
-                          {org.type === 'admin' ? 'Admin' : 'Klijent'}
+                          {org.email}
                         </td>
                                                  <td className="px-4 py-4">
                            <div className="flex justify-center">

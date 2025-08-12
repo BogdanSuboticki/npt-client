@@ -225,8 +225,8 @@ export default function OrganizationSettingsCard() {
   const adminOrganizations = Object.values(groupedOrganizations).filter(org => org.type === 'admin');
   const clientOrganizations = Object.values(groupedOrganizations).filter(org => org.type === 'client');
 
-  // Show this card for Admin and Super Admin users
-  if (userType !== 'admin' && userType !== 'super-admin') {
+  // Show this card for Admin users only
+  if (userType !== 'admin') {
     return null;
   }
 
@@ -254,7 +254,7 @@ export default function OrganizationSettingsCard() {
                   Tip korisnika
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {userType === 'super-admin' ? 'Super Administrator' : 'Administrator'}
+                  Administrator
                 </p>
               </div>
 

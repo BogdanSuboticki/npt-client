@@ -137,8 +137,8 @@ export default function UserProfiles() {
               <SidebarSettingsCard />
             )}
 
-            {/* Organization Settings Card - For Admin and Super Admin */}
-            {(userType === 'admin' || userType === 'super-admin') && (
+            {/* Organization Settings Card - For Admin only */}
+            {userType === 'admin' && (
               <OrganizationSettingsCard />
             )}
           </div>

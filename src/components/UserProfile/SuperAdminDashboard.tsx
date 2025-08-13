@@ -3,6 +3,7 @@ import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
 import Label from "../form/Label";
 import Checkbox from "../form/input/Checkbox";
+import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 
 interface Firma {
   id: string;
@@ -52,9 +53,29 @@ export default function SuperAdminDashboard() {
     };
   }>({});
 
+  // State for user access checkboxes (separate from organization access)
+  const [userAccess, setUserAccess] = useState<{
+    [key: string]: {
+      mojaFirma: boolean;
+      komitenti: boolean;
+      ostalo: boolean;
+    };
+  }>({});
+
   // State for add forms
   const [showAddFirmaModal, setShowAddFirmaModal] = useState(false);
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
+  
+  // State for access change confirmation modal
+  const [showAccessChangeModal, setShowAccessChangeModal] = useState(false);
+  const [pendingAccessChange, setPendingAccessChange] = useState<{
+    orgId: string;
+    accessType: 'mojaFirma' | 'komitenti' | 'ostalo';
+    checked: boolean;
+    orgName: string;
+    accessTypeLabel: string;
+    isUser: boolean;
+  } | null>(null);
   const [newFirma, setNewFirma] = useState({
     naziv: '',
     email: '',
@@ -182,18 +203,81 @@ export default function SuperAdminDashboard() {
     setSelectedUser(null);
   };
 
-  const handleOrganizationAccessChange = (orgId: string, accessType: 'mojaFirma' | 'komitenti' | 'ostalo', checked: boolean) => {
-    setOrganizationAccess(prev => ({
-      ...prev,
-      [orgId]: {
-        ...prev[orgId],
-        [accessType]: checked
+  const handleOrganizationAccessChange = (orgId: string, accessType: 'mojaFirma' | 'komitenti' | 'ostalo', checked: boolean, isUser: boolean = false) => {
+    // Find the organization/user name for display based on isUser parameter
+    let entityName = '';
+    
+    if (isUser) {
+      // Looking for a user
+      const user = users.find(u => u.id === orgId);
+      if (user) {
+        entityName = user.name;
+      } else {
+        return; // User not found
       }
-    }));
+    } else {
+      // Looking for an organization
+      const org = firme.find(f => f.id === orgId);
+      if (org) {
+        entityName = org.name;
+      } else {
+        return; // Organization not found
+      }
+    }
+    
+    const accessTypeLabels = {
+      mojaFirma: 'Moja Firma',
+      komitenti: 'Komitenti',
+      ostalo: 'Ostalo'
+    };
+    
+    // Show confirmation modal instead of immediately applying
+    setPendingAccessChange({
+      orgId,
+      accessType,
+      checked,
+      orgName: entityName,
+      accessTypeLabel: accessTypeLabels[accessType],
+      isUser
+    });
+    setShowAccessChangeModal(true);
+  };
+  
+  const confirmAccessChange = () => {
+    if (pendingAccessChange) {
+      if (pendingAccessChange.isUser) {
+        // Update user access
+        setUserAccess(prev => ({
+          ...prev,
+          [pendingAccessChange.orgId]: {
+            ...prev[pendingAccessChange.orgId],
+            [pendingAccessChange.accessType]: pendingAccessChange.checked
+          }
+        }));
+      } else {
+        // Update organization access
+        setOrganizationAccess(prev => ({
+          ...prev,
+          [pendingAccessChange.orgId]: {
+            ...prev[pendingAccessChange.orgId],
+            [pendingAccessChange.accessType]: pendingAccessChange.checked
+          }
+        }));
+      }
+      
+      // Close modal and reset pending change
+      setShowAccessChangeModal(false);
+      setPendingAccessChange(null);
+    }
+  };
+  
+  const cancelAccessChange = () => {
+    setShowAccessChangeModal(false);
+    setPendingAccessChange(null);
   };
 
   const handleAddFirma = () => {
-    if (newFirma.naziv && newFirma.email && newFirma.sifra) {
+    if (newFirma.naziv && newFirma.email) {
       const newFirmaObj: Firma = {
         id: (firme.length + 1).toString(),
         name: newFirma.naziv,
@@ -216,7 +300,7 @@ export default function SuperAdminDashboard() {
   };
 
   const handleAddKorisnik = () => {
-    if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email && newKorisnik.firma && newKorisnik.sifra) {
+    if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email && newKorisnik.firma) {
       const newKorisnikObj: User = {
         id: (users.length + 1).toString(),
         name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
@@ -250,6 +334,44 @@ export default function SuperAdminDashboard() {
   const handleCloseAddKorisnikModal = () => {
     setShowAddKorisnikModal(false);
     setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+  };
+
+  const handleEditFirma = (firma: Firma) => {
+    // Set the form data for editing
+    setNewFirma({
+      naziv: firma.name,
+      email: firma.email,
+      sifra: '' // Password field is empty for editing
+    });
+    setShowAddFirmaModal(true);
+    console.log('Editing firma:', firma);
+  };
+
+  const handleDeleteFirma = (firma: Firma) => {
+    if (window.confirm(`Da li ste sigurni da želite da obrišete firmu "${firma.name}"?`)) {
+      // In a real app, you would delete from backend here
+      console.log('Deleted firma:', firma);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    // Set the form data for editing
+    setNewKorisnik({
+      ime: user.name.split(' ')[0] || '',
+      prezime: user.name.split(' ').slice(1).join(' ') || '',
+      email: user.email,
+      firma: user.organization,
+      sifra: '' // Password field is empty for editing
+    });
+    setShowAddKorisnikModal(true);
+    console.log('Editing user:', user);
+  };
+
+  const handleDeleteUser = (user: User) => {
+    if (window.confirm(`Da li ste sigurni da želite da obrišete korisnika "${user.name}"?`)) {
+      // In a real app, you would delete from backend here
+      console.log('Deleted user:', user);
+    }
   };
 
   const totalFirme = firme.length;
@@ -394,6 +516,7 @@ export default function SuperAdminDashboard() {
                       <th className="px-4 py-3 text-center">Moja Firma</th>
                       <th className="px-4 py-3 text-center">Komitenti</th>
                       <th className="px-4 py-3 text-center">Ostalo</th>
+                      <th className="px-4 py-3 text-center">Akcije</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -407,29 +530,45 @@ export default function SuperAdminDashboard() {
                         </td>
                                                  <td className="px-4 py-4">
                            <div className="flex justify-center">
-                             <Checkbox
-                               checked={organizationAccess[org.id]?.mojaFirma || false}
-                               onChange={(checked) => handleOrganizationAccessChange(org.id, 'mojaFirma', checked)}
-                               className="w-4 h-4"
-                             />
+                                                           <Checkbox
+                                checked={organizationAccess[org.id]?.mojaFirma || false}
+                                onChange={(checked) => handleOrganizationAccessChange(org.id, 'mojaFirma', checked, false)}
+                                className="w-4 h-4"
+                              />
                            </div>
                          </td>
                          <td className="px-4 py-4">
                            <div className="flex justify-center">
-                             <Checkbox
-                               checked={organizationAccess[org.id]?.komitenti || false}
-                               onChange={(checked) => handleOrganizationAccessChange(org.id, 'komitenti', checked)}
-                               className="w-4 h-4"
-                             />
+                                                           <Checkbox
+                                checked={organizationAccess[org.id]?.komitenti || false}
+                                onChange={(checked) => handleOrganizationAccessChange(org.id, 'komitenti', checked, false)}
+                                className="w-4 h-4"
+                              />
                            </div>
                          </td>
                          <td className="px-4 py-4">
                            <div className="flex justify-center">
-                             <Checkbox
-                               checked={organizationAccess[org.id]?.ostalo || false}
-                               onChange={(checked) => handleOrganizationAccessChange(org.id, 'ostalo', checked)}
-                               className="w-4 h-4"
-                             />
+                                                           <Checkbox
+                                checked={organizationAccess[org.id]?.ostalo || false}
+                                onChange={(checked) => handleOrganizationAccessChange(org.id, 'ostalo', checked, false)}
+                                className="w-4 h-4"
+                              />
+                           </div>
+                         </td>
+                         <td className="px-4 py-4">
+                           <div className="flex items-center justify-center gap-2">
+                             <button 
+                               onClick={() => handleEditFirma(org)}
+                               className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                             >
+                               <EditButtonIcon className="size-4" />
+                             </button>
+                             <button 
+                               onClick={() => handleDeleteFirma(org)}
+                               className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                             >
+                               <DeleteButtonIcon className="size-4" />
+                             </button>
                            </div>
                          </td>
                       </tr>
@@ -494,6 +633,7 @@ export default function SuperAdminDashboard() {
                              <th className="px-4 py-3 text-center">Moja Firma</th>
                              <th className="px-4 py-3 text-center">Komitenti</th>
                              <th className="px-4 py-3 text-center">Ostalo</th>
+                             <th className="px-4 py-3 text-center">Akcije</th>
                            </tr>
                          </thead>
                          <tbody>
@@ -507,29 +647,45 @@ export default function SuperAdminDashboard() {
                                </td>
                                <td className="px-4 py-4">
                                  <div className="flex justify-center">
-                                   <Checkbox
-                                     checked={organizationAccess[user.id]?.mojaFirma || false}
-                                     onChange={(checked) => handleOrganizationAccessChange(user.id, 'mojaFirma', checked)}
-                                     className="w-4 h-4"
-                                   />
+                                                                       <Checkbox
+                                      checked={userAccess[user.id]?.mojaFirma || false}
+                                      onChange={(checked) => handleOrganizationAccessChange(user.id, 'mojaFirma', checked, true)}
+                                      className="w-4 h-4"
+                                    />
                                  </div>
                                </td>
                                <td className="px-4 py-4">
                                  <div className="flex justify-center">
-                                   <Checkbox
-                                     checked={organizationAccess[user.id]?.komitenti || false}
-                                     onChange={(checked) => handleOrganizationAccessChange(user.id, 'komitenti', checked)}
-                                     className="w-4 h-4"
-                                   />
+                                                                       <Checkbox
+                                      checked={userAccess[user.id]?.komitenti || false}
+                                      onChange={(checked) => handleOrganizationAccessChange(user.id, 'komitenti', checked, true)}
+                                      className="w-4 h-4"
+                                    />
                                  </div>
                                </td>
                                <td className="px-4 py-4">
                                  <div className="flex justify-center">
-                                   <Checkbox
-                                     checked={organizationAccess[user.id]?.ostalo || false}
-                                     onChange={(checked) => handleOrganizationAccessChange(user.id, 'ostalo', checked)}
-                                     className="w-4 h-4"
-                                   />
+                                                                       <Checkbox
+                                      checked={userAccess[user.id]?.ostalo || false}
+                                      onChange={(checked) => handleOrganizationAccessChange(user.id, 'ostalo', checked, true)}
+                                      className="w-4 h-4"
+                                    />
+                                 </div>
+                               </td>
+                               <td className="px-4 py-4">
+                                 <div className="flex items-center justify-center gap-2">
+                                   <button 
+                                     onClick={() => handleEditUser(user)}
+                                     className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                                   >
+                                     <EditButtonIcon className="size-4" />
+                                   </button>
+                                   <button 
+                                     onClick={() => handleDeleteUser(user)}
+                                     className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                                   >
+                                     <DeleteButtonIcon className="size-4" />
+                                   </button>
                                  </div>
                                </td>
                              </tr>
@@ -738,31 +894,18 @@ export default function SuperAdminDashboard() {
                  />
                </div>
                
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Email
-                 </Label>
-                 <input
-                   type="email"
-                   value={newFirma.email}
-                   onChange={(e) => setNewFirma({ ...newFirma, email: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                   placeholder="Unesite email adresu"
-                 />
-               </div>
-               
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Šifra
-                 </Label>
-                 <input
-                   type="password"
-                   value={newFirma.sifra}
-                   onChange={(e) => setNewFirma({ ...newFirma, sifra: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                   placeholder="Unesite šifru"
-                 />
-               </div>
+                               <div>
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Email
+                  </Label>
+                  <input
+                    type="email"
+                    value={newFirma.email}
+                    onChange={(e) => setNewFirma({ ...newFirma, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="Unesite email adresu"
+                  />
+                </div>
              </div>
            </div>
 
@@ -836,36 +979,23 @@ export default function SuperAdminDashboard() {
                  />
                </div>
                
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Firma
-                 </Label>
-                 <select
-                   value={newKorisnik.firma}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, firma: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                 >
-                   <option value="">Izaberite firmu</option>
-                   {firme.map((firma) => (
-                     <option key={firma.id} value={firma.name}>
-                       {firma.name}
-                     </option>
-                   ))}
-                 </select>
-               </div>
-               
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Šifra
-                 </Label>
-                 <input
-                   type="password"
-                   value={newKorisnik.sifra}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, sifra: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                   placeholder="Unesite šifru"
-                 />
-               </div>
+                               <div>
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Firma
+                  </Label>
+                  <select
+                    value={newKorisnik.firma}
+                    onChange={(e) => setNewKorisnik({ ...newKorisnik, firma: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="">Izaberite firmu</option>
+                    {firme.map((firma) => (
+                      <option key={firma.id} value={firma.name}>
+                        {firma.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
              </div>
            </div>
 
@@ -880,7 +1010,33 @@ export default function SuperAdminDashboard() {
                </div>
            </div>
          </div>
-       </Modal>
-     </div>
-   );
- }
+               </Modal>
+
+        {/* Access Change Confirmation Modal */}
+        <Modal
+          isOpen={showAccessChangeModal}
+          onClose={cancelAccessChange}
+          className="max-w-[450px] dark:bg-gray-800"
+        >
+          <div className="p-6">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Da li ste sigurni?
+            </h4>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Menjate pristup "{pendingAccessChange?.accessTypeLabel}" za "{pendingAccessChange?.orgName}"
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={cancelAccessChange}>
+                Otkaži
+              </Button>
+              <Button onClick={confirmAccessChange}>
+                Potvrdi
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </div>
+    );
+  }

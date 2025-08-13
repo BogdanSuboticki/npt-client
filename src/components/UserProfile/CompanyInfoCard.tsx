@@ -3,7 +3,7 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import Select from "../form/Select";
+import React, { useEffect, useRef } from "react";
 
 export default function CompanyInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -14,6 +14,11 @@ export default function CompanyInfoCard() {
     closeModal();
   };
 
+  // Add state for dropdowns
+  const [isDrzavaOpen, setIsDrzavaOpen] = React.useState(false);
+  const [selectedDrzava, setSelectedDrzava] = React.useState("serbia");
+  const drzavaRef = useRef<HTMLDivElement>(null);
+
   const countries = [
     { value: "serbia", label: "Srbija" },
     { value: "croatia", label: "Hrvatska" },
@@ -22,6 +27,21 @@ export default function CompanyInfoCard() {
     { value: "north-macedonia", label: "Severna Makedonija" },
     { value: "slovenia", label: "Slovenija" },
   ];
+
+  // Add click outside handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Close dropdowns
+      if (drzavaRef.current && !drzavaRef.current.contains(target)) {
+        setIsDrzavaOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -132,7 +152,7 @@ export default function CompanyInfoCard() {
       </div>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[800px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[800px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+                 <div className="no-scrollbar relative w-full max-w-[800px] rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
               Uredi informacije o firmi
@@ -141,8 +161,8 @@ export default function CompanyInfoCard() {
               Ažurirajte informacije o vašoj firmi.
             </p>
           </div>
-          <form className="flex flex-col">
-            <div className="custom-scrollbar overflow-y-auto px-2 pb-3">
+                     <form className="flex flex-col">
+             <div className="px-2 pb-3">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Naziv firme</Label>
@@ -171,12 +191,47 @@ export default function CompanyInfoCard() {
 
                 <div>
                   <Label>Država</Label>
-                  <Select
-                    options={countries}
-                    placeholder="Izaberi državu"
-                    onChange={(value) => console.log(value)}
-                    defaultValue="serbia"
-                  />
+                  <div
+                    ref={drzavaRef}
+                    className="relative w-full"
+                  >
+                                         <button
+                       type="button"
+                       onClick={() => setIsDrzavaOpen(!isDrzavaOpen)}
+                       className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                     >
+                       <span>{countries.find(country => country.value === selectedDrzava)?.label || "Izaberi državu"}</span>
+                       <svg
+                         className={`w-4 h-4 transition-transform ${isDrzavaOpen ? 'rotate-180' : ''}`}
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24"
+                       >
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                       </svg>
+                     </button>
+
+                                         {isDrzavaOpen && (
+                       <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                         <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                           {countries.map((option, index) => (
+                             <div
+                               key={option.value}
+                               className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                                 index === countries.length - 1 ? 'rounded-bl-lg' : ''
+                               }`}
+                               onClick={() => {
+                                 setSelectedDrzava(option.value);
+                                 setIsDrzavaOpen(false);
+                               }}
+                             >
+                               <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{option.label}</span>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                  </div>
                 </div>
 
                 <div>

@@ -2,7 +2,7 @@ import { useUser } from "../../context/UserContext";
 import Badge from "../ui/badge/Badge";
 
 export default function SidebarSettingsCard() {
-  const { userType, sidebarMode, setSidebarMode, organizationSettings } = useUser();
+  const { userType, sidebarMode, setSidebarMode } = useUser();
 
   const getModeBadge = (mode: string) => {
     switch (mode) {
@@ -27,7 +27,7 @@ export default function SidebarSettingsCard() {
       <div className="flex flex-col gap-6">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Podešavanja sidebara
+            Podešavanje menija
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
@@ -38,51 +38,11 @@ export default function SidebarSettingsCard() {
               <div className="flex items-center gap-2">
                 {getModeBadge(sidebarMode)}
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {sidebarMode === 'both' && 'Oba dela'}
-                  {sidebarMode === 'moja-firma' && 'Samo Moja Firma'}
-                  {sidebarMode === 'komitenti' && 'Samo Komitenti'}
+                  {sidebarMode === 'both' && 'Prikazuje i "Moja Firma" i "Komitenti" sekcije u meniju'}
+                  {sidebarMode === 'moja-firma' && 'Prikazuje samo "Moja Firma" sekciju u meniju'}
+                  {sidebarMode === 'komitenti' && 'Prikazuje samo "Komitenti" sekciju u meniju'}
                 </p>
               </div>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Podešavanja organizacije
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {organizationSettings.usersCanSeeMojaFirma && (
-                  <Badge color="success" variant="light">Moja Firma</Badge>
-                )}
-                {organizationSettings.usersCanSeeKomitenti && (
-                  <Badge color="warning" variant="light">Komitenti</Badge>
-                )}
-                {organizationSettings.usersCanSeeOstalo && (
-                  <Badge color="info" variant="light">Ostalo</Badge>
-                )}
-              </div>
-              {!organizationSettings.usersCanCustomizeSettings && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Podešavanja su kontrolisana od strane administratora
-                </p>
-              )}
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Tip korisnika
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Administrator
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Status
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Aktivan
-              </p>
             </div>
           </div>
         </div>
@@ -109,7 +69,7 @@ export default function SidebarSettingsCard() {
                     <span className="font-medium text-gray-800 dark:text-white/90">Prikazuj oba dela</span>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Prikazuje i "Moja Firma" i "Komitenti" sekcije u sidebaru
+                    Prikazuje i "Moja Firma" i "Komitenti" sekcije u meniju
                   </p>
                 </div>
               </label>
@@ -131,7 +91,7 @@ export default function SidebarSettingsCard() {
                     <span className="font-medium text-gray-800 dark:text-white/90">Samo Moja Firma</span>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Prikazuje samo "Moja Firma" sekciju u sidebaru
+                    Prikazuje samo "Moja Firma" sekciju u meniju
                   </p>
                 </div>
               </label>
@@ -153,7 +113,7 @@ export default function SidebarSettingsCard() {
                     <span className="font-medium text-gray-800 dark:text-white/90">Samo Komitenti</span>
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Prikazuje samo "Komitenti" sekciju u sidebaru
+                    Prikazuje samo "Komitenti" sekciju u meniju
                   </p>
                 </div>
               </label>

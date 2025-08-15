@@ -66,6 +66,12 @@ export default function SuperAdminDashboard() {
   const [showAddFirmaModal, setShowAddFirmaModal] = useState(false);
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
   
+  // State for edit forms
+  const [isEditingFirma, setIsEditingFirma] = useState(false);
+  const [editingFirmaId, setEditingFirmaId] = useState<string | null>(null);
+  const [isEditingUser, setIsEditingUser] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  
   // State for access change confirmation modal
   const [showAccessChangeModal, setShowAccessChangeModal] = useState(false);
   const [pendingAccessChange, setPendingAccessChange] = useState<{
@@ -76,6 +82,12 @@ export default function SuperAdminDashboard() {
     accessTypeLabel: string;
     isUser: boolean;
   } | null>(null);
+
+  // State for delete confirmation modals
+  const [showDeleteFirmaModal, setShowDeleteFirmaModal] = useState(false);
+  const [firmaToDelete, setFirmaToDelete] = useState<Firma | null>(null);
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [newFirma, setNewFirma] = useState({
     naziv: '',
     email: '',
@@ -278,61 +290,83 @@ export default function SuperAdminDashboard() {
 
   const handleAddFirma = () => {
     if (newFirma.naziv && newFirma.email) {
-      const newFirmaObj: Firma = {
-        id: (firme.length + 1).toString(),
-        name: newFirma.naziv,
-        email: newFirma.email,
-        type: 'client',
-        status: 'active',
-        userCount: 0,
-        adminCount: 0,
-        createdAt: new Date().toISOString().split('T')[0],
-        lastActivity: 'N/A'
-      };
-      
-      // In a real app, you would save to backend here
-      console.log('Adding new firma:', newFirmaObj);
+      if (isEditingFirma && editingFirmaId) {
+        // Update existing firma
+        console.log('Updating firma:', editingFirmaId, newFirma);
+        // In a real app, you would update in backend here
+      } else {
+        // Add new firma
+        const newFirmaObj: Firma = {
+          id: (firme.length + 1).toString(),
+          name: newFirma.naziv,
+          email: newFirma.email,
+          type: 'client',
+          status: 'active',
+          userCount: 0,
+          adminCount: 0,
+          createdAt: new Date().toISOString().split('T')[0],
+          lastActivity: 'N/A'
+        };
+        
+        // In a real app, you would save to backend here
+        console.log('Adding new firma:', newFirmaObj);
+      }
       
       // Reset form and close modal
       setNewFirma({ naziv: '', email: '', sifra: '' });
+      setIsEditingFirma(false);
+      setEditingFirmaId(null);
       setShowAddFirmaModal(false);
     }
   };
 
   const handleAddKorisnik = () => {
     if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email && newKorisnik.firma) {
-      const newKorisnikObj: User = {
-        id: (users.length + 1).toString(),
-        name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
-        email: newKorisnik.email,
-        role: 'user',
-        organization: newKorisnik.firma,
-        status: 'active',
-        lastLogin: 'N/A',
-        permissions: {
-          canCreateUsers: false,
-          canManageOrganizations: false,
-          canAccessAllData: false,
-          canManageSystem: false
-        }
-      };
-      
-      // In a real app, you would save to backend here
-      console.log('Adding new korisnik:', newKorisnikObj);
+      if (isEditingUser && editingUserId) {
+        // Update existing user
+        console.log('Updating user:', editingUserId, newKorisnik);
+        // In a real app, you would update in backend here
+      } else {
+        // Add new user
+        const newKorisnikObj: User = {
+          id: (users.length + 1).toString(),
+          name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
+          email: newKorisnik.email,
+          role: 'user',
+          organization: newKorisnik.firma,
+          status: 'active',
+          lastLogin: 'N/A',
+          permissions: {
+            canCreateUsers: false,
+            canManageOrganizations: false,
+            canAccessAllData: false,
+            canManageSystem: false
+          }
+        };
+        
+        // In a real app, you would save to backend here
+        console.log('Adding new korisnik:', newKorisnikObj);
+      }
       
       // Reset form and close modal
       setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+      setIsEditingUser(false);
+      setEditingUserId(null);
       setShowAddKorisnikModal(false);
     }
   };
 
   const handleCloseAddFirmaModal = () => {
     setShowAddFirmaModal(false);
+    setIsEditingFirma(false);
+    setEditingFirmaId(null);
     setNewFirma({ naziv: '', email: '', sifra: '' });
   };
 
   const handleCloseAddKorisnikModal = () => {
     setShowAddKorisnikModal(false);
+    setIsEditingUser(false);
+    setEditingUserId(null);
     setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
   };
 
@@ -343,15 +377,29 @@ export default function SuperAdminDashboard() {
       email: firma.email,
       sifra: '' // Password field is empty for editing
     });
+    setIsEditingFirma(true);
+    setEditingFirmaId(firma.id);
     setShowAddFirmaModal(true);
     console.log('Editing firma:', firma);
   };
 
   const handleDeleteFirma = (firma: Firma) => {
-    if (window.confirm(`Da li ste sigurni da želite da obrišete firmu "${firma.name}"?`)) {
+    setFirmaToDelete(firma);
+    setShowDeleteFirmaModal(true);
+  };
+
+  const confirmDeleteFirma = () => {
+    if (firmaToDelete) {
       // In a real app, you would delete from backend here
-      console.log('Deleted firma:', firma);
+      console.log('Deleted firma:', firmaToDelete);
+      setShowDeleteFirmaModal(false);
+      setFirmaToDelete(null);
     }
+  };
+
+  const cancelDeleteFirma = () => {
+    setShowDeleteFirmaModal(false);
+    setFirmaToDelete(null);
   };
 
   const handleEditUser = (user: User) => {
@@ -363,15 +411,29 @@ export default function SuperAdminDashboard() {
       firma: user.organization,
       sifra: '' // Password field is empty for editing
     });
+    setIsEditingUser(true);
+    setEditingUserId(user.id);
     setShowAddKorisnikModal(true);
     console.log('Editing user:', user);
   };
 
   const handleDeleteUser = (user: User) => {
-    if (window.confirm(`Da li ste sigurni da želite da obrišete korisnika "${user.name}"?`)) {
+    setUserToDelete(user);
+    setShowDeleteUserModal(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
       // In a real app, you would delete from backend here
-      console.log('Deleted user:', user);
+      console.log('Deleted user:', userToDelete);
+      setShowDeleteUserModal(false);
+      setUserToDelete(null);
     }
+  };
+
+  const cancelDeleteUser = () => {
+    setShowDeleteUserModal(false);
+    setUserToDelete(null);
   };
 
   const totalFirme = firme.length;
@@ -489,7 +551,12 @@ export default function SuperAdminDashboard() {
                 <h5 className="text-lg font-medium text-gray-800 dark:text-white/90">
                   Upravljanje firmama
                 </h5>
-                <Button size="sm" onClick={() => setShowAddFirmaModal(true)}>
+                <Button size="sm" onClick={() => {
+                  setIsEditingFirma(false);
+                  setEditingFirmaId(null);
+                  setNewFirma({ naziv: '', email: '', sifra: '' });
+                  setShowAddFirmaModal(true);
+                }}>
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -585,7 +652,12 @@ export default function SuperAdminDashboard() {
                  <h5 className="text-lg font-medium text-gray-800 dark:text-white/90">
                    Upravljanje korisnicima
                  </h5>
-                                   <Button size="sm" onClick={() => setShowAddKorisnikModal(true)}>
+                                   <Button size="sm" onClick={() => {
+                    setIsEditingUser(false);
+                    setEditingUserId(null);
+                    setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+                    setShowAddKorisnikModal(true);
+                  }}>
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -870,14 +942,14 @@ export default function SuperAdminDashboard() {
          className="max-w-[500px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
        >
          <div className="flex flex-col h-full">
-           <div className="p-5 pt-10">
-             <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-               Dodaj novu firmu
-             </h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-               Unesite podatke o novoj firmi
-             </p>
-           </div>
+                       <div className="p-5 pt-10">
+              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {isEditingFirma ? 'Izmeni firmu' : 'Dodaj novu firmu'}
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {isEditingFirma ? 'Izmenite podatke o firmi' : 'Unesite podatke o novoj firmi'}
+              </p>
+            </div>
            
            <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-200px)]">
              <div className="space-y-4 pb-4">
@@ -915,7 +987,7 @@ export default function SuperAdminDashboard() {
                  Otkaži
                </Button>
                <Button onClick={handleAddFirma}>
-                 Dodaj firmu
+                 {isEditingFirma ? 'Izmeni firmu' : 'Dodaj firmu'}
                </Button>
              </div>
            </div>
@@ -929,14 +1001,14 @@ export default function SuperAdminDashboard() {
          className="max-w-[500px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
        >
          <div className="flex flex-col h-full">
-           <div className="p-5 pt-10">
-             <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-               Dodaj novog korisnika
-             </h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-               Unesite podatke o novom korisniku
-             </p>
-           </div>
+                       <div className="p-5 pt-10">
+              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {isEditingUser ? 'Izmeni korisnika' : 'Dodaj novog korisnika'}
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {isEditingUser ? 'Izmenite podatke o korisniku' : 'Unesite podatke o novom korisniku'}
+              </p>
+            </div>
            
            <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-200px)]">
              <div className="space-y-4 pb-4">
@@ -1005,7 +1077,7 @@ export default function SuperAdminDashboard() {
                  Otkaži
                </Button>
                <Button onClick={handleAddKorisnik}>
-                 Dodaj korisnika
+                 {isEditingUser ? 'Izmeni korisnika' : 'Dodaj korisnika'}
                </Button>
                </div>
            </div>
@@ -1033,6 +1105,72 @@ export default function SuperAdminDashboard() {
               </Button>
               <Button onClick={confirmAccessChange}>
                 Potvrdi
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Delete Firma Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteFirmaModal}
+          onClose={cancelDeleteFirma}
+          className="max-w-[450px] dark:bg-gray-800"
+        >
+          <div className="p-6">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Da li ste sigurni?
+            </h4>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Da li ste sigurni da želite da obrišete firmu "{firmaToDelete?.name}"?
+            </p>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+              Ova akcija se ne može poništiti.
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={cancelDeleteFirma}>
+                Otkaži
+              </Button>
+              <Button 
+                onClick={confirmDeleteFirma}
+                className="bg-error-500 hover:bg-error-600 text-white"
+              >
+                Obriši firmu
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Delete User Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteUserModal}
+          onClose={cancelDeleteUser}
+          className="max-w-[450px] dark:bg-gray-800"
+        >
+          <div className="p-6">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Da li ste sigurni?
+            </h4>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Da li ste sigurni da želite da obrišete korisnika "{userToDelete?.name}"?
+            </p>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+              Ova akcija se ne može poništiti.
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={cancelDeleteUser}>
+                Otkaži
+              </Button>
+              <Button 
+                onClick={confirmDeleteUser}
+                className="bg-error-500 hover:bg-error-600 text-white"
+              >
+                Obriši korisnika
               </Button>
             </div>
           </div>

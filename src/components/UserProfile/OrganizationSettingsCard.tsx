@@ -35,6 +35,8 @@ export default function OrganizationSettingsCard() {
   
   // State for add user modal
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [newKorisnik, setNewKorisnik] = useState({
     ime: '',
     prezime: '',
@@ -50,6 +52,10 @@ export default function OrganizationSettingsCard() {
     userName: string;
     accessTypeLabel: string;
   } | null>(null);
+
+  // State for delete user confirmation modal
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
 
   
@@ -173,47 +179,79 @@ export default function OrganizationSettingsCard() {
       prezime: user.name.split(' ').slice(1).join(' ') || '',
       email: user.email
     });
+    setIsEditing(true);
+    setEditingUserId(user.id);
     setShowAddKorisnikModal(true);
     console.log('Editing user:', user);
   };
 
   const handleDeleteUser = (user: User) => {
-    if (window.confirm(`Da li ste sigurni da želite da obrišete korisnika "${user.name}"?`)) {
-      setTempUsers(prev => prev.filter(u => u.id !== user.id));
-      setUsers(prev => prev.filter(u => u.id !== user.id));
-      console.log('Deleted user:', user);
+    setUserToDelete(user);
+    setShowDeleteUserModal(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
+      setTempUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      console.log('Deleted user:', userToDelete);
+      setShowDeleteUserModal(false);
+      setUserToDelete(null);
     }
+  };
+
+  const cancelDeleteUser = () => {
+    setShowDeleteUserModal(false);
+    setUserToDelete(null);
   };
 
   const handleAddKorisnik = () => {
     if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email) {
-      const newKorisnikObj: User = {
-        id: (users.length + 1).toString(),
-        name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
-        email: newKorisnik.email,
-        role: "Korisnik",
-        organization: {
-          id: 'org1',
-          name: 'Tech Solutions d.o.o.',
-          type: 'admin'
-        },
-        access: { mojaFirma: true, komitenti: false, ostalo: false }
-      };
-      
-      // In a real app, you would save to backend here
-      console.log('Adding new korisnik:', newKorisnikObj);
-      
-      // Add to users list
-      setUsers(prev => [...prev, newKorisnikObj]);
+      if (isEditing && editingUserId) {
+        // Update existing user
+        const updatedUsers = users.map(user => 
+          user.id === editingUserId 
+            ? { ...user, name: `${newKorisnik.ime} ${newKorisnik.prezime}`, email: newKorisnik.email }
+            : user
+        );
+        setUsers(updatedUsers);
+        setTempUsers(updatedUsers);
+        console.log('Updated user:', editingUserId);
+      } else {
+        // Add new user
+        const newKorisnikObj: User = {
+          id: (users.length + 1).toString(),
+          name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
+          email: newKorisnik.email,
+          role: "Korisnik",
+          organization: {
+            id: 'org1',
+            name: 'Tech Solutions d.o.o.',
+            type: 'admin'
+          },
+          access: { mojaFirma: true, komitenti: false, ostalo: false }
+        };
+        
+        // In a real app, you would save to backend here
+        console.log('Adding new korisnik:', newKorisnikObj);
+        
+        // Add to users list
+        setUsers(prev => [...prev, newKorisnikObj]);
+        setTempUsers(prev => [...prev, newKorisnikObj]);
+      }
       
       // Reset form and close modal
       setNewKorisnik({ ime: '', prezime: '', email: '' });
+      setIsEditing(false);
+      setEditingUserId(null);
       setShowAddKorisnikModal(false);
     }
   };
 
   const handleCloseAddKorisnikModal = () => {
     setShowAddKorisnikModal(false);
+    setIsEditing(false);
+    setEditingUserId(null);
     setNewKorisnik({ ime: '', prezime: '', email: '' });
   };
 
@@ -317,7 +355,12 @@ export default function OrganizationSettingsCard() {
             </h5>
             
                          {/* Add User Button */}
-             <Button size="sm" onClick={() => setShowAddKorisnikModal(true)}>
+             <Button size="sm" onClick={() => {
+               setIsEditing(false);
+               setEditingUserId(null);
+               setNewKorisnik({ ime: '', prezime: '', email: '' });
+               setShowAddKorisnikModal(true);
+             }}>
                <svg
                  className="w-4 h-4"
                  fill="none"
@@ -339,15 +382,6 @@ export default function OrganizationSettingsCard() {
           <div className="space-y-6">
             {adminOrganizations.map((organization) => (
               <div key={organization.id} className="border border-gray-200 rounded-lg dark:border-gray-700">
-                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                  <h6 className="font-medium text-gray-800 dark:text-white/90">
-                    {organization.name}
-                  </h6>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {organization.users.length} korisnika
-                  </p>
-                </div>
-                
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
                                          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -434,10 +468,10 @@ export default function OrganizationSettingsCard() {
          <div className="flex flex-col h-full">
            <div className="p-5 pt-10">
              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-               Dodaj novog korisnika
+               {isEditing ? 'Izmeni korisnika' : 'Dodaj novog korisnika'}
              </h4>
              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-               Unesite podatke o novom korisniku
+               {isEditing ? 'Izmenite podatke o korisniku' : 'Unesite podatke o novom korisniku'}
              </p>
            </div>
            
@@ -492,38 +526,71 @@ export default function OrganizationSettingsCard() {
                  Otkaži
                </Button>
                <Button onClick={handleAddKorisnik}>
-                 Dodaj korisnika
+                 {isEditing ? 'Izmeni korisnika' : 'Dodaj korisnika'}
                </Button>
                </div>
            </div>
          </div>
        </Modal>
 
-       {/* Access Change Confirmation Modal */}
-       <Modal
-         isOpen={showAccessChangeModal}
-         onClose={cancelAccessChange}
-         className="max-w-[450px] dark:bg-gray-800"
-       >
-         <div className="p-6">
-           <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-             Da li ste sigurni?
-           </h4>
-           
-           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-             Menjate pristup "{pendingAccessChange?.accessTypeLabel}" za "{pendingAccessChange?.userName}"
-           </p>
-           
-           <div className="flex justify-end gap-3">
-             <Button variant="outline" onClick={cancelAccessChange}>
-               Otkaži
-             </Button>
-             <Button onClick={confirmAccessChange}>
-               Potvrdi
-             </Button>
-           </div>
-         </div>
-       </Modal>
-     </div>
-   );
- } 
+               {/* Access Change Confirmation Modal */}
+        <Modal
+          isOpen={showAccessChangeModal}
+          onClose={cancelAccessChange}
+          className="max-w-[450px] dark:bg-gray-800"
+        >
+          <div className="p-6">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Da li ste sigurni?
+            </h4>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Menjate pristup "{pendingAccessChange?.accessTypeLabel}" za "{pendingAccessChange?.userName}"
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={cancelAccessChange}>
+                Otkaži
+              </Button>
+              <Button onClick={confirmAccessChange}>
+                Potvrdi
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Delete User Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteUserModal}
+          onClose={cancelDeleteUser}
+          className="max-w-[450px] dark:bg-gray-800"
+        >
+          <div className="p-6">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Da li ste sigurni?
+            </h4>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Da li ste sigurni da želite da obrišete korisnika "{userToDelete?.name}"?
+            </p>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+              Ova akcija se ne može poništiti.
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={cancelDeleteUser}>
+                Otkaži
+              </Button>
+              <Button 
+                onClick={confirmDeleteUser}
+                className="bg-error-500 hover:bg-error-600 text-white"
+              >
+                Obriši korisnika
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </div>
+    );
+  } 

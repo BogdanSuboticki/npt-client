@@ -104,7 +104,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <ZaduzenjaLZOIcon />,
-    name: "Zaduženja LZO",
+    name: "Zaduženja LZS",
     path: "/zaduzenja-lzo",
   },
   {
@@ -210,7 +210,7 @@ const supportItems: NavItem[] = [
   },
   {
     icon: <ZaduzenjaLZOIcon />,
-    name: "Zaduženja LZO",
+    name: "Zaduženja LZS",
     path: "/zaduzenja-lzo",
   },
   {
@@ -375,7 +375,7 @@ const AppSidebar: React.FC = () => {
                                {/* Moja Firma Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showMojaFirma) || 
-                     (userType === 'user' && organizationSettings.usersCanSeeMojaFirma)) && (
+                     ((userType === 'user' || userType === 'komitent') && organizationSettings.usersCanSeeMojaFirma)) && (
               <div>
                 <button
                   onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
@@ -413,7 +413,7 @@ const AppSidebar: React.FC = () => {
                                {/* Komitenti Section - Show for Super Admin, or Admin if showKomitenti is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showKomitenti) || 
-                     (userType === 'user' && organizationSettings.usersCanSeeKomitenti)) && (
+                     ((userType === 'user' || userType === 'komitent') && organizationSettings.usersCanSeeKomitenti)) && (
               <div className="">
                 <button
                   onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
@@ -450,7 +450,7 @@ const AppSidebar: React.FC = () => {
                                                                {/* Ostalo Section - Show for Super Admin and Admin, or User if allowed by organization */}
                     {(userType === 'super-admin' || 
                       userType === 'admin' || 
-                      (userType === 'user' && organizationSettings.usersCanSeeOstalo)) && (
+                      ((userType === 'user' || userType === 'komitent') && organizationSettings.usersCanSeeOstalo)) && (
                       <div className="">
                         <button
                           onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}

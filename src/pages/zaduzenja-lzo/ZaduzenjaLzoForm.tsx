@@ -197,12 +197,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
   };
 
 
-  const handleRemoveOprema = (idToRemove: number) => {
-    setFormData({
-      ...formData,
-      oprema: formData.oprema.filter(item => item.id !== idToRemove)
-    });
-  };
+
 
   const handleOpremaChange = (id: number, field: string, value: string | Date | null) => {
     setFormData(prevData => {
@@ -241,11 +236,11 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
       onClose={onClose}
       className="max-w-[1200px] w-full mx-4 p-4 lg:p-10 dark:bg-gray-800"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Zaduženje LZO</h2>
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Zaduženje LZS</h2>
       <form onSubmit={handleSubmit} className="max-h-[70vh] overflow-y-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="col-span-1">
-            <Label>Zaposleni *</Label>
+            <Label>Angažovani *</Label>
             <div className="relative w-full" ref={zaposleniRef}>
               <button
                 type="button"
@@ -316,30 +311,30 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
               <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
                 {/* Header */}
                 <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                  <div className="grid grid-cols-6 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
-                    <div>Vrsta LZS *</div>
-                    <div>Standard</div>
-                    <div>Dodatni opis</div>
-                    <div>Datum zaduženja *</div>
-                    <div>Rok (m) *</div>
-                    <div>Naredno zaduženje</div>
-                  </div>
+                                     <div className="grid grid-cols-6 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
+                     <div>Naziv LZS *</div>
+                     <div>Standard</div>
+                     <div>Dodatni opis</div>
+                     <div>Datum zaduženja *</div>
+                     <div>Rok (m) *</div>
+                     <div>Naredno zaduženje</div>
+                   </div>
                 </div>
                 
                                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
                    {formData.oprema.map((item) => (
                      <div key={item.id} className="px-4 py-3">
-                       <div className="grid grid-cols-6 gap-4 min-w-[800px] items-start">
-                        {/* Vrsta LZS */}
-                        <div>
-                          <input
-                            type="text"
-                            value={item.vrstaLzs}
-                            onChange={(e) => handleOpremaChange(item.id, 'vrstaLzs', e.target.value)}
-                            placeholder="Unesite vrstu LZS"
-                            className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                          />
-                        </div>
+                                               <div className="grid grid-cols-6 gap-4 min-w-[800px] items-start">
+                         {/* Naziv LZS */}
+                         <div>
+                           <input
+                             type="text"
+                             value={item.vrstaLzs}
+                             onChange={(e) => handleOpremaChange(item.id, 'vrstaLzs', e.target.value)}
+                             placeholder="Unesite naziv LZS"
+                             className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                           />
+                         </div>
                        
                         {/* Standard */}
                         <div>
@@ -378,15 +373,16 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                            />
                          </div>
                        
-                        {/* Datum zaduženja */}
-                        <div>
-                          <DatePicker
-                            value={item.datumZaduzenja}
-                            onChange={(date) => handleOpremaChange(item.id, 'datumZaduzenja', date)}
-                            placeholder="Izaberi datum"
-                            className="h-11 text-sm"
-                          />
-                        </div>
+                                                 {/* Datum zaduženja */}
+                         <div>
+                           <DatePicker
+                             value={item.datumZaduzenja}
+                             onChange={(date) => handleOpremaChange(item.id, 'datumZaduzenja', date)}
+                             placeholder="Izaberi datum"
+                             className="h-11 text-sm"
+                             maxDate={new Date()}
+                           />
+                         </div>
                        
                         {/* Rok */}
                         <div>
@@ -400,25 +396,14 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                         </div>
                        
                         {/* Naredno zaduženje */}
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1">
-                            <DatePicker
-                              value={item.narednoZaduzenje}
-                              onChange={() => {}} // No-op function since it's disabled
-                              placeholder=""
-                              disabled={true}
-                              className="h-11 text-sm"
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveOprema(item.id)}
-                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
+                        <div>
+                          <DatePicker
+                            value={item.narednoZaduzenje}
+                            onChange={() => {}} // No-op function since it's disabled
+                            placeholder=""
+                            disabled={true}
+                            className="h-11 text-sm"
+                          />
                         </div>
                       </div>
                     </div>

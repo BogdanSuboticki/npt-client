@@ -3,8 +3,8 @@ import Badge from "../ui/badge/Badge";
 import { useUser } from "../../context/UserContext";
 
 interface ProfileTypeSelectorProps {
-  onProfileTypeChange: (type: 'super-admin' | 'admin' | 'user') => void;
-  currentType: 'super-admin' | 'admin' | 'user';
+  onProfileTypeChange: (type: 'super-admin' | 'admin' | 'user' | 'komitent') => void;
+  currentType: 'super-admin' | 'admin' | 'user' | 'komitent';
 }
 
 export default function ProfileTypeSelector({ onProfileTypeChange, currentType }: ProfileTypeSelectorProps) {
@@ -42,6 +42,17 @@ export default function ProfileTypeSelector({ onProfileTypeChange, currentType }
           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
         </svg>
       )
+    },
+    {
+      key: 'komitent',
+      title: 'Komitent',
+      description: 'Samo pregled podataka - bez izmena',
+      badge: <Badge color="info" variant="light">Komitent</Badge>,
+      icon: (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+        </svg>
+      )
     }
   ];
 
@@ -56,12 +67,12 @@ export default function ProfileTypeSelector({ onProfileTypeChange, currentType }
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {profileTypes.map((type) => (
           <button
             key={type.key}
             onClick={() => {
-              const userType = type.key as 'super-admin' | 'admin' | 'user';
+              const userType = type.key as 'super-admin' | 'admin' | 'user' | 'komitent';
               onProfileTypeChange(userType);
               setUserType(userType);
             }}

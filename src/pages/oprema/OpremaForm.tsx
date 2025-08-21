@@ -3,8 +3,6 @@ import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import Checkbox from "../../components/form/input/Checkbox";
-import Slider from "../../components/ui/Slider";
 
 interface OpremaFormProps {
   isOpen: boolean;
@@ -19,9 +17,7 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
     inventarniBroj: "",
     godinaProizvodnje: new Date().getFullYear(),
     intervalPregleda: 12,
-    zop: false,
-    napomena: "",
-    pratiSe: true // true = "Da", false = "Ne"
+    napomena: ""
   });
 
   // Add state for dropdown
@@ -160,31 +156,6 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
                   onChange={(e) => setFormData({...formData, napomena: e.target.value})}
                   className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
                   rows={4}
-                />
-              </div>
-
-              <div className="col-span-1">
-                <div className="flex items-center gap-2 h-11">
-                  <Checkbox
-                    checked={formData.zop}
-                    onChange={(checked) => setFormData({...formData, zop: checked})}
-                    className="w-4 h-4"
-                    id="zop"
-                  />
-                  <Label className="mb-0 cursor-pointer" htmlFor="zop">
-                    ZOP
-                  </Label>
-                </div>
-              </div>
-
-              <div className="col-span-1">
-                <Slider
-                  label="Pratiti"
-                  optionOne="Da"
-                  optionTwo="Ne"
-                  value={formData.pratiSe}
-                  onChange={(value) => setFormData({...formData, pratiSe: value})}
-                  size="full"
                 />
               </div>
             </div>

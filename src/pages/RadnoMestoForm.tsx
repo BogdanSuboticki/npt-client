@@ -14,32 +14,18 @@ interface RadnoMestoFormProps {
 export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFormProps) {
   const [formData, setFormData] = React.useState({
     nazivRadnogMesta: "",
-    nazivLokacije: "",
     povecanRizik: false,
-    obaveznaObuka: false,
     obavezanOftamoloskiPregled: false,
-    obavezanPregledPoDrugomOsnovu: false
+    obavezanPregledPoDrugomOsnovu: false,
+    lekarskiPregledPovecanRizik: ""
   });
 
   // Add state for dropdowns
-  const [isLokacijaOpen, setIsLokacijaOpen] = React.useState(false);
-  const lokacijaRef = useRef<HTMLDivElement>(null);
+  const [isLekarskiPregledOpen, setIsLekarskiPregledOpen] = React.useState(false);
+  const lekarskiPregledRef = useRef<HTMLDivElement>(null);
 
-  // Location data
-  const lokacijeData = [
-    "Glavna zgrada",
-    "Skladište A",
-    "Magacin Novi Sad",
-    "Kancelarija Beograd",
-    "Proizvodna hala Niš",
-    "Pogon Subotica",
-    "Magacin Kragujevac",
-    "Skladište B",
-    "Proizvodna hala Beograd",
-    "Kancelarija Novi Sad",
-    "Pogon Niš",
-    "Magacin Subotica"
-  ];
+  // Lekarski pregled options
+  const lekarskiPregledOptions = ["Da", "Ne"];
 
   // Add click outside handler for dropdowns
   useEffect(() => {
@@ -47,8 +33,8 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
       const target = event.target as HTMLElement;
       
       // Close dropdowns
-      if (lokacijaRef.current && !lokacijaRef.current.contains(target)) {
-        setIsLokacijaOpen(false);
+      if (lekarskiPregledRef.current && !lekarskiPregledRef.current.contains(target)) {
+        setIsLekarskiPregledOpen(false);
       }
     };
 
@@ -58,7 +44,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nazivRadnogMesta || !formData.nazivLokacije) {
+    if (!formData.nazivRadnogMesta) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
@@ -89,16 +75,16 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
           </div>
 
           <div className="col-span-1">
-            <Label>Naziv lokacije *</Label>
-            <div className="relative w-full" ref={lokacijaRef}>
+            <Label>Lekarski pregled za radna mesta sa povećanim rizikom</Label>
+            <div className="relative w-full" ref={lekarskiPregledRef}>
               <button
                 type="button"
-                onClick={() => setIsLokacijaOpen(!isLokacijaOpen)}
+                onClick={() => setIsLekarskiPregledOpen(!isLekarskiPregledOpen)}
                 className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <span>{formData.nazivLokacije || "Izaberi lokaciju"}</span>
+                <span>{formData.lekarskiPregledPovecanRizik || "Izaberi opciju"}</span>
                 <svg
-                  className={`w-4 h-4 transition-transform ${isLokacijaOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 transition-transform ${isLekarskiPregledOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -106,21 +92,21 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {isLokacijaOpen && (
+              {isLekarskiPregledOpen && (
                 <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                   <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {lokacijeData.map((option: string, index: number) => (
+                    {lekarskiPregledOptions.map((option: string, index: number) => (
                       <div
                         key={option}
                         className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                          formData.nazivLokacije === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                        } ${index === lokacijeData.length - 1 ? 'rounded-b-lg' : ''}`}
+                          formData.lekarskiPregledPovecanRizik === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                        } ${index === lekarskiPregledOptions.length - 1 ? 'rounded-b-lg' : ''}`}
                         onClick={() => {
                           setFormData({
                             ...formData,
-                            nazivLokacije: option,
+                            lekarskiPregledPovecanRizik: option,
                           });
-                          setIsLokacijaOpen(false);
+                          setIsLekarskiPregledOpen(false);
                         }}
                       >
                         <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
@@ -133,7 +119,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
           </div>
 
           <div className="col-span-1">
-            <div className="flex items-center gap-2 pt-4">
+            <div className="flex items-center gap-2 pt-6">
               <Checkbox
                 checked={formData.povecanRizik}
                 onChange={(checked) => setFormData({...formData, povecanRizik: checked})}
@@ -147,21 +133,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
           </div>
 
           <div className="col-span-1">
-            <div className="flex items-center gap-2 pt-4">
-              <Checkbox
-                checked={formData.obaveznaObuka}
-                onChange={(checked) => setFormData({...formData, obaveznaObuka: checked})}
-                className="w-4 h-4"
-                id="obaveznaObuka"
-              />
-              <Label className="mb-0 cursor-pointer" htmlFor="obaveznaObuka">
-                Obavezna obuka
-              </Label>
-            </div>
-          </div>
-
-          <div className="col-span-1">
-            <div className="flex items-center gap-2 pt-4">
+            <div className="flex items-center gap-2 pt-6">
               <Checkbox
                 checked={formData.obavezanOftamoloskiPregled}
                 onChange={(checked) => setFormData({...formData, obavezanOftamoloskiPregled: checked})}
@@ -175,7 +147,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
           </div>
 
           <div className="col-span-1">
-            <div className="flex items-center gap-2 pt-4">
+            <div className="flex items-center gap-2 pt-6">
               <Checkbox
                 checked={formData.obavezanPregledPoDrugomOsnovu}
                 onChange={(checked) => setFormData({...formData, obavezanPregledPoDrugomOsnovu: checked})}

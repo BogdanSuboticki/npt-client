@@ -33,6 +33,9 @@ interface Organization {
 export default function OrganizationSettingsCard() {
   const { userType } = useUser();
   
+  // State for active tab
+  const [activeTab, setActiveTab] = useState<'korisnici' | 'komitenti'>('korisnici');
+  
   // State for add user modal
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -40,6 +43,11 @@ export default function OrganizationSettingsCard() {
   const [newKorisnik, setNewKorisnik] = useState({
     ime: '',
     prezime: '',
+    email: ''
+  });
+
+  const [newCompany, setNewCompany] = useState({
+    naziv: '',
     email: ''
   });
 
@@ -99,11 +107,11 @@ export default function OrganizationSettingsCard() {
     {
       id: "4",
       name: "Stefan Đorđević",
-      email: "stefan.djordjevic@techsolutions.rs",
+      email: "stefan.djordjevic@inovativne.rs",
       role: "Korisnik",
       organization: {
         id: "org2",
-        name: "Client Company A",
+        name: "Inovativne Tehnologije d.o.o.",
         type: "client"
       },
       access: { mojaFirma: true, komitenti: true, ostalo: true }
@@ -111,11 +119,11 @@ export default function OrganizationSettingsCard() {
     {
       id: "5",
       name: "Jelena Stojanović",
-      email: "jelena.stojanovic@techsolutions.rs",
+      email: "jelena.stojanovic@inovativne.rs",
       role: "Korisnik",
       organization: {
         id: "org2",
-        name: "Client Company A",
+        name: "Inovativne Tehnologije d.o.o.",
         type: "client"
       },
       access: { mojaFirma: false, komitenti: true, ostalo: false }
@@ -123,11 +131,11 @@ export default function OrganizationSettingsCard() {
     {
       id: "6",
       name: "Marko Ivanović",
-      email: "marko.ivanovic@clientb.rs",
+      email: "marko.ivanovic@progres.rs",
       role: "Korisnik",
       organization: {
         id: "org3",
-        name: "Client Company B",
+        name: "Progres Konstrukcije d.o.o.",
         type: "client"
       },
       access: { mojaFirma: true, komitenti: false, ostalo: true }
@@ -135,11 +143,11 @@ export default function OrganizationSettingsCard() {
     {
       id: "7",
       name: "Sofija Petrović",
-      email: "sofija.petrovic@clientb.rs",
+      email: "sofija.petrovic@progres.rs",
       role: "Korisnik",
       organization: {
         id: "org3",
-        name: "Client Company B",
+        name: "Progres Konstrukcije d.o.o.",
         type: "client"
       },
       access: { mojaFirma: true, komitenti: true, ostalo: false }
@@ -185,6 +193,18 @@ export default function OrganizationSettingsCard() {
     console.log('Editing user:', user);
   };
 
+  const handleEditCompany = (organization: Organization) => {
+    // Set the form data for editing company
+    setNewCompany({
+      naziv: organization.name,
+      email: organization.users[0]?.email || ''
+    });
+    setIsEditing(true);
+    setEditingUserId(organization.id);
+    setShowAddKorisnikModal(true);
+    console.log('Editing company:', organization);
+  };
+
   const handleDeleteUser = (user: User) => {
     setUserToDelete(user);
     setShowDeleteUserModal(true);
@@ -206,45 +226,70 @@ export default function OrganizationSettingsCard() {
   };
 
   const handleAddKorisnik = () => {
-    if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email) {
-      if (isEditing && editingUserId) {
-        // Update existing user
-        const updatedUsers = users.map(user => 
-          user.id === editingUserId 
-            ? { ...user, name: `${newKorisnik.ime} ${newKorisnik.prezime}`, email: newKorisnik.email }
-            : user
-        );
-        setUsers(updatedUsers);
-        setTempUsers(updatedUsers);
-        console.log('Updated user:', editingUserId);
-      } else {
-        // Add new user
-        const newKorisnikObj: User = {
-          id: (users.length + 1).toString(),
-          name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
-          email: newKorisnik.email,
-          role: "Korisnik",
-          organization: {
-            id: 'org1',
-            name: 'Tech Solutions d.o.o.',
-            type: 'admin'
-          },
-          access: { mojaFirma: true, komitenti: false, ostalo: false }
-        };
+    if (activeTab === 'korisnici') {
+      if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email) {
+        if (isEditing && editingUserId) {
+          // Update existing user
+          const updatedUsers = users.map(user => 
+            user.id === editingUserId 
+              ? { ...user, name: `${newKorisnik.ime} ${newKorisnik.prezime}`, email: newKorisnik.email }
+              : user
+          );
+          setUsers(updatedUsers);
+          setTempUsers(updatedUsers);
+          console.log('Updated user:', editingUserId);
+        } else {
+          // Add new user
+          const newKorisnikObj: User = {
+            id: (users.length + 1).toString(),
+            name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
+            email: newKorisnik.email,
+            role: "Korisnik",
+            organization: {
+              id: 'org1',
+              name: 'Tech Solutions d.o.o.',
+              type: 'admin'
+            },
+            access: { mojaFirma: true, komitenti: false, ostalo: false }
+          };
+          
+          // In a real app, you would save to backend here
+          console.log('Adding new korisnik:', newKorisnikObj);
+          
+          // Add to users list
+          setUsers(prev => [...prev, newKorisnikObj]);
+          setTempUsers(prev => [...prev, newKorisnikObj]);
+        }
         
-        // In a real app, you would save to backend here
-        console.log('Adding new korisnik:', newKorisnikObj);
-        
-        // Add to users list
-        setUsers(prev => [...prev, newKorisnikObj]);
-        setTempUsers(prev => [...prev, newKorisnikObj]);
+        // Reset form and close modal
+        setNewKorisnik({ ime: '', prezime: '', email: '' });
+        setIsEditing(false);
+        setEditingUserId(null);
+        setShowAddKorisnikModal(false);
       }
-      
-      // Reset form and close modal
-      setNewKorisnik({ ime: '', prezime: '', email: '' });
-      setIsEditing(false);
-      setEditingUserId(null);
-      setShowAddKorisnikModal(false);
+    } else if (activeTab === 'komitenti') {
+      if (newCompany.naziv && newCompany.email) {
+        if (isEditing && editingUserId) {
+          // Update existing company
+          const updatedUsers = users.map(user => 
+            user.organization.id === editingUserId 
+              ? { ...user, organization: { ...user.organization, name: newCompany.naziv }, email: newCompany.email }
+              : user
+          );
+          setUsers(updatedUsers);
+          setTempUsers(updatedUsers);
+          console.log('Updated company:', editingUserId);
+        } else {
+          // Add new company (this would need more complex logic in a real app)
+          console.log('Adding new company:', newCompany);
+        }
+        
+        // Reset form and close modal
+        setNewCompany({ naziv: '', email: '' });
+        setIsEditing(false);
+        setEditingUserId(null);
+        setShowAddKorisnikModal(false);
+      }
     }
   };
 
@@ -253,6 +298,7 @@ export default function OrganizationSettingsCard() {
     setIsEditing(false);
     setEditingUserId(null);
     setNewKorisnik({ ime: '', prezime: '', email: '' });
+    setNewCompany({ naziv: '', email: '' });
   };
 
   const confirmAccessChange = () => {
@@ -290,6 +336,7 @@ export default function OrganizationSettingsCard() {
   }, {} as Record<string, Organization>);
 
   const adminOrganizations = Object.values(groupedOrganizations).filter(org => org.type === 'admin');
+  const clientOrganizations = Object.values(groupedOrganizations).filter(org => org.type === 'client');
 
   // Show this card for Admin users only
   if (userType !== 'admin') {
@@ -311,7 +358,7 @@ export default function OrganizationSettingsCard() {
                   Broj korisnika u organizaciji
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {users.length} korisnika ({adminOrganizations.length} admin organizacija)
+                  {users.length} korisnika ({adminOrganizations.length} admin, {clientOrganizations.length} komitenti)
                 </p>
               </div>
 
@@ -347,113 +394,181 @@ export default function OrganizationSettingsCard() {
 
         </div>
 
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setActiveTab('korisnici')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+              activeTab === 'korisnici'
+                ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+                         Korisnici ({adminOrganizations.reduce((total, org) => total + org.users.length, 0)})
+          </button>
+          <button
+            onClick={() => setActiveTab('komitenti')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+              activeTab === 'komitenti'
+                ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Komitenti ({clientOrganizations.length})
+          </button>
+        </div>
+
         {/* Organization Tabs */}
         <div className="mt-6">
           <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
             <h5 className="text-lg font-medium text-gray-800 dark:text-white/90">
-              Upravljanje korisnicima organizacije
+              {activeTab === 'korisnici' ? 'Upravljanje korisnicima organizacije' : 'Upravljanje komitentima organizacije'}
             </h5>
             
-                         {/* Add User Button */}
-             <Button size="sm" onClick={() => {
-               setIsEditing(false);
-               setEditingUserId(null);
-               setNewKorisnik({ ime: '', prezime: '', email: '' });
-               setShowAddKorisnikModal(true);
-             }}>
-               <svg
-                 className="w-4 h-4"
-                 fill="none"
-                 stroke="currentColor"
-                 viewBox="0 0 24 24"
-               >
-                 <path
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   strokeWidth={2}
-                   d="M12 4v16m8-8H4"
-                 />
-               </svg>
-               Dodaj korisnika
-             </Button>
+            {/* Add Button */}
+            <Button size="sm" onClick={() => {
+              setIsEditing(false);
+              setEditingUserId(null);
+              setNewKorisnik({ ime: '', prezime: '', email: '' });
+              setShowAddKorisnikModal(true);
+            }}>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              {activeTab === 'korisnici' ? 'Dodaj korisnika' : 'Dodaj komitenta'}
+            </Button>
           </div>
           
-          {/* Organization Content */}
-          <div className="space-y-6">
-            {adminOrganizations.map((organization) => (
-              <div key={organization.id} className="border border-gray-200 rounded-lg dark:border-gray-700">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                       <tr>
-                         <th className="px-4 py-3">Korisnik</th>
-                         <th className="px-4 py-3">Email</th>
-                         <th className="px-4 py-3 text-center">Moja Firma</th>
-                         <th className="px-4 py-3 text-center">Komitenti</th>
-                         <th className="px-4 py-3 text-center">Ostalo</th>
-                         <th className="px-4 py-3 text-center">Akcije</th>
-                       </tr>
-                     </thead>
-                    <tbody>
-                      {organization.users.map((user) => (
-                        <tr key={user.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                          <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
-                            {user.name}
-                          </td>
-                          <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
-                            {user.email}
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex justify-center">
-                                                             <Checkbox
-                                 checked={user.access.mojaFirma}
-                                 onChange={(checked) => handleAccessChange(user.id, 'mojaFirma', checked)}
-                                 className="w-4 h-4"
-                               />
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex justify-center">
-                                                             <Checkbox
-                                 checked={user.access.komitenti}
-                                 onChange={(checked) => handleAccessChange(user.id, 'komitenti', checked)}
-                                 className="w-4 h-4"
-                               />
-                            </div>
-                          </td>
-                                                     <td className="px-4 py-4">
-                             <div className="flex justify-center">
-                                                              <Checkbox
-                                   checked={user.access.ostalo}
-                                   onChange={(checked) => handleAccessChange(user.id, 'ostalo', checked)}
-                                   className="w-4 h-4"
-                                 />
-                               </div>
-                             </td>
-                             <td className="px-4 py-4">
-                               <div className="flex items-center justify-center gap-2">
-                                 <button 
-                                   onClick={() => handleEditUser(user)}
+          {/* Tab Content */}
+          {activeTab === 'korisnici' && (
+            <div className="space-y-6">
+              {adminOrganizations.map((organization) => (
+                <div key={organization.id} className="border border-gray-200 rounded-lg dark:border-gray-700">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                          <th className="px-4 py-3">Korisnik</th>
+                          <th className="px-4 py-3">Email</th>
+                          <th className="px-4 py-3 text-center">Moja Firma</th>
+                          <th className="px-4 py-3 text-center">Komitenti</th>
+                          <th className="px-4 py-3 text-center">Ostalo</th>
+                          <th className="px-4 py-3 text-center">Akcije</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {organization.users.map((user) => (
+                          <tr key={user.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
+                              {user.name}
+                            </td>
+                            <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                              {user.email}
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex justify-center">
+                                <Checkbox
+                                  checked={user.access.mojaFirma}
+                                  onChange={(checked) => handleAccessChange(user.id, 'mojaFirma', checked)}
+                                  className="w-4 h-4"
+                                />
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex justify-center">
+                                <Checkbox
+                                  checked={user.access.komitenti}
+                                  onChange={(checked) => handleAccessChange(user.id, 'komitenti', checked)}
+                                  className="w-4 h-4"
+                                />
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex justify-center">
+                                <Checkbox
+                                  checked={user.access.ostalo}
+                                  onChange={(checked) => handleAccessChange(user.id, 'ostalo', checked)}
+                                  className="w-4 h-4"
+                                />
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex items-center justify-center gap-2">
+                                <button 
+                                  onClick={() => handleEditUser(user)}
+                                  className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                                >
+                                  <EditButtonIcon className="size-4" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteUser(user)}
+                                  className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                                >
+                                  <DeleteButtonIcon className="size-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+                     {activeTab === 'komitenti' && (
+             <div className="overflow-x-auto">
+               <table className="w-full text-sm text-left">
+                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                   <tr>
+                     <th className="px-4 py-3">Naziv firme</th>
+                     <th className="px-4 py-3">Email</th>
+                     <th className="px-4 py-3 text-center">Akcije</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {clientOrganizations.map((organization) => (
+                     <tr key={organization.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                       <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
+                         {organization.name}
+                       </td>
+                       <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                         {organization.users[0]?.email || 'N/A'}
+                       </td>
+                       <td className="px-4 py-4">
+                         <div className="flex items-center justify-center gap-2">
+                                                            <button 
+                                   onClick={() => handleEditCompany(organization)}
                                    className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
                                  >
                                    <EditButtonIcon className="size-4" />
                                  </button>
-                                 <button 
-                                   onClick={() => handleDeleteUser(user)}
-                                   className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                                 >
-                                   <DeleteButtonIcon className="size-4" />
-                                 </button>
-                               </div>
-                             </td>
-                           </tr>
-                         ))}
-                       </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
-          </div>
+                           <button 
+                             onClick={() => handleDeleteUser(organization.users[0])}
+                             className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                           >
+                             <DeleteButtonIcon className="size-4" />
+                           </button>
+                         </div>
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+           )}
         </div>
 
 
@@ -463,71 +578,108 @@ export default function OrganizationSettingsCard() {
        <Modal
          isOpen={showAddKorisnikModal}
          onClose={handleCloseAddKorisnikModal}
-         className="max-w-[500px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+         className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
        >
          <div className="flex flex-col h-full">
            <div className="p-5 pt-10">
-             <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-               {isEditing ? 'Izmeni korisnika' : 'Dodaj novog korisnika'}
-             </h4>
-             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-               {isEditing ? 'Izmenite podatke o korisniku' : 'Unesite podatke o novom korisniku'}
-             </p>
+                           <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {isEditing 
+                  ? (activeTab === 'korisnici' ? 'Izmeni korisnika' : 'Izmeni komitenta')
+                  : (activeTab === 'korisnici' ? 'Dodaj novog korisnika' : 'Dodaj novog komitenta')
+                }
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {isEditing 
+                  ? (activeTab === 'korisnici' ? 'Izmenite podatke o korisniku' : 'Izmenite podatke o komitentu')
+                  : (activeTab === 'korisnici' ? 'Unesite podatke o novom korisniku' : 'Unesite podatke o novom komitentu')
+                }
+              </p>
            </div>
            
-           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-200px)]">
-             <div className="space-y-4 pb-4">
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Ime
-                 </Label>
-                 <input
-                   type="text"
-                   value={newKorisnik.ime}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, ime: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                   placeholder="Unesite ime"
-                 />
-               </div>
-               
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Prezime
-                 </Label>
-                 <input
-                   type="text"
-                   value={newKorisnik.prezime}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, prezime: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                   placeholder="Unesite prezime"
-                 />
-               </div>
-               
-               <div>
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Email
-                 </Label>
-                 <input
-                   type="email"
-                   value={newKorisnik.email}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, email: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                   placeholder="Unesite email adresu"
-                 />
-               </div>
-               
-
-             </div>
-           </div>
+                       <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+              {activeTab === 'korisnici' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+                  <div className="w-full">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Ime
+                    </Label>
+                    <input
+                      type="text"
+                      value={newKorisnik.ime}
+                      onChange={(e) => setNewKorisnik({ ...newKorisnik, ime: e.target.value })}
+                      className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Unesite ime"
+                    />
+                  </div>
+                  
+                  <div className="w-full">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Prezime
+                    </Label>
+                    <input
+                      type="text"
+                      value={newKorisnik.prezime}
+                      onChange={(e) => setNewKorisnik({ ...newKorisnik, prezime: e.target.value })}
+                      className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Unesite prezime"
+                    />
+                  </div>
+                  
+                  <div className="w-full">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Email
+                    </Label>
+                    <input
+                      type="email"
+                      value={newKorisnik.email}
+                      onChange={(e) => setNewKorisnik({ ...newKorisnik, email: e.target.value })}
+                      className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Unesite email adresu"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+                  <div className="w-full">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Naziv firme
+                    </Label>
+                    <input
+                      type="text"
+                      value={newCompany.naziv}
+                      onChange={(e) => setNewCompany({ ...newCompany, naziv: e.target.value })}
+                      className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Unesite naziv firme"
+                    />
+                  </div>
+                  
+                  <div className="w-full">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Email
+                    </Label>
+                    <input
+                      type="email"
+                      value={newCompany.email}
+                      onChange={(e) => setNewCompany({ ...newCompany, email: e.target.value })}
+                      className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Unesite email adresu"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
 
            <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
              <div className="flex justify-end gap-2">
                <Button variant="outline" onClick={handleCloseAddKorisnikModal}>
                  Otkaži
                </Button>
-               <Button onClick={handleAddKorisnik}>
-                 {isEditing ? 'Izmeni korisnika' : 'Dodaj korisnika'}
-               </Button>
+                               <Button onClick={handleAddKorisnik}>
+                  {isEditing 
+                    ? (activeTab === 'korisnici' ? 'Izmeni korisnika' : 'Izmeni komitenta')
+                    : (activeTab === 'korisnici' ? 'Dodaj korisnika' : 'Dodaj komitenta')
+                  }
+                </Button>
                </div>
            </div>
          </div>
@@ -565,7 +717,7 @@ export default function OrganizationSettingsCard() {
           onClose={cancelDeleteUser}
           className="max-w-[450px] dark:bg-gray-800"
         >
-          <div className="p-6">
+          <div className="p-8">
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
               Da li ste sigurni?
             </h4>

@@ -23,7 +23,7 @@ export default function ZaposleniForm({ isOpen, onClose, onSave }: ZaposleniForm
   const prvaPomocRef = useRef<HTMLDivElement>(null);
 
   // Example options - replace with actual data
-  const prvaPomocOptions = ["Da", "Ne"];
+  const prvaPomocOptions = ["Osnovni kurs", "Napredni kurs", "Ne"];
 
   // Add click outside handler for dropdowns
   useEffect(() => {

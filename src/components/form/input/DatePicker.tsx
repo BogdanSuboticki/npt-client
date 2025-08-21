@@ -22,6 +22,7 @@ interface CustomDatePickerProps {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  maxDate?: Date;
 }
 
 const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
@@ -29,7 +30,8 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   onChange,
   placeholder,
   disabled = false,
-  className = ""
+  className = "",
+  maxDate
 }) => {
   const { theme: appTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -120,6 +122,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             onClose={() => setIsOpen(false)}
             format="dd/MM/yyyy"
             disabled={disabled}
+            maxDate={maxDate}
             slots={{
               toolbar: () => null
             }}

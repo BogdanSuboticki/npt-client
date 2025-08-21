@@ -28,7 +28,6 @@ interface OpremaData {
   inventarniBroj: string;
   godinaProizvodnje: number;
   intervalPregleda: number;
-  zop: boolean;
   napomena: string;
   iskljucenaIzPracenja: boolean;
   [key: string]: any;
@@ -137,7 +136,7 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
-  const handleCheckboxChange = (id: number, field: 'zop' | 'iskljucenaIzPracenja') => {
+  const handleCheckboxChange = (id: number, field: 'iskljucenaIzPracenja') => {
     setData(prevData => 
       prevData.map(item => 
         item.id === id 
@@ -262,7 +261,9 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
                         index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                       }`}
                     >
-                      {key === 'zop' || key === 'iskljucenaIzPracenja' ? (
+                      {key === 'fabrickInventarniBroj' ? (
+                        <span>{item.fabrickBroj}/{item.inventarniBroj}</span>
+                      ) : key === 'iskljucenaIzPracenja' ? (
                         <Checkbox
                           checked={item[key]}
                           onChange={() => handleCheckboxChange(item.id, key)}

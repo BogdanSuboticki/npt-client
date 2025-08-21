@@ -13,7 +13,6 @@ const opremaData = [
     inventarniBroj: "INV789",
     godinaProizvodnje: 2020,
     intervalPregleda: 6,
-    zop: true,
     napomena: "Redovno održavanje",
     iskljucenaIzPracenja: false
   },
@@ -25,7 +24,6 @@ const opremaData = [
     inventarniBroj: "INV456",
     godinaProizvodnje: 2019,
     intervalPregleda: 12,
-    zop: true,
     napomena: "Potrebno zamena delova",
     iskljucenaIzPracenja: false
   }
@@ -34,11 +32,9 @@ const opremaData = [
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "nazivOpreme", label: "Naziv opreme", sortable: true },
-  { key: "fabrickBroj", label: "Fabrički broj", sortable: true },
-  { key: "inventarniBroj", label: "Inventarni broj", sortable: true },
+  { key: "fabrickInventarniBroj", label: "Fabrički/Inventarni broj", sortable: true },
   { key: "godinaProizvodnje", label: "Godina proizvodnje", sortable: true },
   { key: "intervalPregleda", label: "Interval pregleda (meseci)", sortable: true },
-  { key: "zop", label: "ZOP", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true }
 ];
 

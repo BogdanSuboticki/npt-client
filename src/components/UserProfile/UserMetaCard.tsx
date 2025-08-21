@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Badge from "../ui/badge/Badge";
 
 interface UserMetaCardProps {
-  userType?: 'super-admin' | 'admin' | 'user';
+  userType?: 'super-admin' | 'admin' | 'user' | 'komitent';
   userName?: string;
   userRole?: string;
   userLocation?: string;
@@ -50,6 +50,8 @@ export default function UserMetaCard({
         return <Badge color="warning" variant="light">Admin</Badge>;
       case 'user':
         return <Badge color="success" variant="light">Korisnik</Badge>;
+      case 'komitent':
+        return <Badge color="info" variant="light">Komitent</Badge>;
       default:
         return <Badge color="info" variant="light">Korisnik</Badge>;
     }

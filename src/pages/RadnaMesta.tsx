@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import DataTableTwo from '../components/tables/DataTables/TableTwo/DataTableTwo';
 import RadnoMestoForm from './RadnoMestoForm';
 import Button from "../components/ui/button/Button";
 import { Modal } from "../components/ui/modal";
+import Label from "../components/form/Label";
+import Input from "../components/form/input/InputField";
 
 // Sample data for the table
 const radnaMestaData = [
@@ -240,7 +242,7 @@ const columns = [
 // Columns for the second table (LZS table)
 const lzsColumns = [
   { key: "id", label: "", sortable: true },
-  { key: "lzs", label: "LZS", sortable: true },
+  { key: "lzs", label: "Naziv LZS", sortable: true },
   { key: "rok", label: "Rok (meseci)", sortable: true },
   { key: "standard", label: "Standard", sortable: true },
 ];
@@ -262,6 +264,28 @@ const RadnaMesta: React.FC = () => {
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
   const [editingLZSId, setEditingLZSId] = useState<number | null>(null);
+
+  // Add state for dropdowns
+  const [isRokOpen, setIsRokOpen] = useState(false);
+  const rokRef = useRef<HTMLDivElement>(null);
+
+  // Rok options
+  const rokOptions = ["1", "3", "6", "12", "24"];
+
+  // Add click outside handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Close dropdowns
+      if (rokRef.current && !rokRef.current.contains(target)) {
+        setIsRokOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSave = (newData: any) => {
     const newItem = {
@@ -404,19 +428,19 @@ const RadnaMesta: React.FC = () => {
       />
 
              {/* LZS Modal */}
-       <Modal
-         isOpen={showLZSModal}
-         onClose={closeLZSModal}
-         className="max-w-4xl w-full mx-4 p-4 lg:p-6"
-       >
-         <div className="flex flex-col h-full max-h-[70vh]">
-          <div className="mb-6 flex-shrink-0">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              LZS za {selectedRadnoMesto?.nazivRadnogMesta}
-            </h2>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto">
+               <Modal
+          isOpen={showLZSModal}
+          onClose={closeLZSModal}
+          className="max-w-4xl w-full mx-4 p-4 lg:p-6"
+        >
+          <div className="flex flex-col">
+           <div className="mb-6">
+             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+               Sredstva lične zaštite za {selectedRadnoMesto?.nazivRadnogMesta}
+             </h2>
+           </div>
+           
+           <div className="flex-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] mb-6">
               <DataTableTwo 
                 data={(lzsDataState as any)[selectedRadnoMesto?.id] || []}
@@ -439,14 +463,12 @@ const RadnaMesta: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    LZS
-                  </label>
-                  <input
-                    type="text"
+                  <Label>LZS</Label>
+                  <Input 
+                    type="text" 
                     value={newLZS.lzs}
                     onChange={(e) => handleInputChange('lzs', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                    className="bg-[#F9FAFB] dark:bg-[#101828]"
                     placeholder="Unesite naziv LZS-a"
                   />
                 </div>
@@ -455,24 +477,55 @@ const RadnaMesta: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Rok (meseci)
                   </label>
-                  <input
-                    type="number"
-                    value={newLZS.rok}
-                    onChange={(e) => handleInputChange('rok', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                    placeholder="Unesite rok u mesecima"
-                  />
+                  <div className="relative w-full" ref={rokRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsRokOpen(!isRokOpen)}
+                      className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                    >
+                      <span>{newLZS.rok || "Izaberi opciju"}</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${isRokOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isRokOpen && (
+                      <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                        <div className="pr-1">
+                          {rokOptions.map((option: string, index: number) => (
+                            <div
+                              key={option}
+                              className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                                newLZS.rok === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                              } ${index === rokOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                              onClick={() => {
+                                setNewLZS({
+                                  ...newLZS,
+                                  rok: option,
+                                });
+                                setIsRokOpen(false);
+                              }}
+                            >
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Standard
-                  </label>
-                  <input
-                    type="text"
+                  <Label>Standard</Label>
+                  <Input 
+                    type="text" 
                     value={newLZS.standard}
                     onChange={(e) => handleInputChange('standard', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                    className="bg-[#F9FAFB] dark:bg-[#101828]"
                     placeholder="Unesite standard"
                   />
                 </div>
@@ -480,7 +533,7 @@ const RadnaMesta: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             {isEditing && (
               <Button
                 size="sm"

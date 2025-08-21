@@ -13,7 +13,7 @@ import ProfileTypeSelector from "../components/UserProfile/ProfileTypeSelector";
 import PageMeta from "../components/common/PageMeta";
 import { useUser } from "../context/UserContext";
 
-type UserType = 'super-admin' | 'admin' | 'user';
+type UserType = 'super-admin' | 'admin' | 'user' | 'komitent';
 
 interface UserData {
   name: string;
@@ -52,6 +52,15 @@ const userData: Record<UserType, UserData> = {
     email: "ana.jovanovic@techsolutions.rs",
     phone: "+381 18 987 6543",
     bio: "Redovan korisnik sistema sa pristupom samo svom nalogu"
+  },
+  'komitent': {
+    name: "Petar Marković",
+    role: "Komitent",
+    location: "Kragujevac, Srbija",
+    company: "Tech Solutions d.o.o.",
+    email: "petar.markovic@techsolutions.rs",
+    phone: "+381 34 456 7890",
+    bio: "Komitent sa pristupom samo za pregled podataka - bez mogućnosti izmena"
   }
 };
 
@@ -63,6 +72,8 @@ export default function UserProfiles() {
       ? 'Super admin Profil 1'
       : userType === 'admin'
       ? currentUser.company
+      : userType === 'komitent'
+      ? currentUser.name
       : currentUser.name;
 
   const handleProfileTypeChange = (type: UserType) => {
@@ -94,6 +105,7 @@ export default function UserProfiles() {
               userRole={currentUser.role}
               userLocation={currentUser.location}
               userCompany={currentUser.company}
+              enableImageUpload={userType !== 'komitent'}
             />
 
             {/* Super Admin Dashboard - Only for Super Admin */}
@@ -111,7 +123,7 @@ export default function UserProfiles() {
             )}
 
             {/* User Info Card - Hidden for Super Admin and Admin */}
-            {userType === 'user' && (
+            {(userType === 'user' || userType === 'komitent') && (
               <UserInfoCard 
                 userType={userType}
                 userName={displayName}
@@ -122,7 +134,7 @@ export default function UserProfiles() {
             )}
 
             {/* User Address Card - Hidden for Super Admin and Admin */}
-            {userType === 'user' && (
+            {(userType === 'user' || userType === 'komitent') && (
               <UserAddressCard 
                 userType={userType}
                 userCountry="Srbija"
@@ -156,8 +168,9 @@ export default function UserProfiles() {
               </h5>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {userType === 'super-admin' && 'Super Administrator - Pun pristup celokupnom sistemu i svim organizacijama'}
-                {userType === 'admin' && 'Administrator - Pristup korisnicima u svojoj firmi'}
+                {userType === 'admin' && 'Administrator - Pristup korisnicima u svoji firmi'}
                 {userType === 'user' && 'Korisnik - Pristup samo svom nalogu'}
+                {userType === 'komitent' && 'Komitent - Samo pregled podataka bez mogućnosti izmena'}
               </p>
             </div>
 
@@ -191,6 +204,13 @@ export default function UserProfiles() {
                     <li>• Ograničen pristup</li>
                   </>
                 )}
+                {userType === 'komitent' && (
+                  <>
+                    <li>• Samo pregled podataka</li>
+                    <li>• Bez mogućnosti izmena</li>
+                    <li>• Ograničen pristup</li>
+                  </>
+                )}
               </ul>
             </div>
 
@@ -209,6 +229,11 @@ export default function UserProfiles() {
               {userType === 'admin' && (
                 <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
                   Administrator firme
+                </p>
+              )}
+              {userType === 'komitent' && (
+                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                  Komitent firme
                 </p>
               )}
             </div>

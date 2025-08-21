@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
 import Label from "../form/Label";
@@ -21,7 +21,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'super-admin' | 'admin' | 'user';
+  role: 'super-admin' | 'admin' | 'user' | 'komitent';
   organization: string;
   status: 'active' | 'inactive' | 'suspended';
   lastLogin: string;
@@ -35,6 +35,9 @@ interface User {
 
 export default function SuperAdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'organizations' | 'users'>('overview');
+  
+  // Refs for dropdowns
+  const firmaRef = useRef<HTMLDivElement>(null);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editingPermissions, setEditingPermissions] = useState({
@@ -65,6 +68,10 @@ export default function SuperAdminDashboard() {
   // State for add forms
   const [showAddFirmaModal, setShowAddFirmaModal] = useState(false);
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
+  
+  // State for dropdowns
+  const [isFirmaOpen, setIsFirmaOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   
   // State for edit forms
   const [isEditingFirma, setIsEditingFirma] = useState(false);
@@ -353,6 +360,8 @@ export default function SuperAdminDashboard() {
       setIsEditingUser(false);
       setEditingUserId(null);
       setShowAddKorisnikModal(false);
+      setIsFirmaOpen(false);
+      setDropdownPosition({ left: 0, top: 0 });
     }
   };
 
@@ -368,6 +377,8 @@ export default function SuperAdminDashboard() {
     setIsEditingUser(false);
     setEditingUserId(null);
     setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+    setIsFirmaOpen(false);
+    setDropdownPosition({ left: 0, top: 0 });
   };
 
   const handleEditFirma = (firma: Firma) => {
@@ -440,6 +451,40 @@ export default function SuperAdminDashboard() {
   const totalUsers = users.length;
   const activeUsers = users.filter(user => user.status === 'active').length;
   const totalAdmins = users.filter(user => user.role === 'admin').length;
+
+  // Add click outside handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Close dropdowns
+      if (firmaRef.current && !firmaRef.current.contains(target)) {
+        setIsFirmaOpen(false);
+      }
+    };
+
+    const handleScroll = () => {
+      if (isFirmaOpen) {
+        setIsFirmaOpen(false);
+      }
+    };
+
+    const handleResize = () => {
+      if (isFirmaOpen) {
+        setIsFirmaOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isFirmaOpen]);
 
   return (
     <div className="p-5 border border-gray-200 bg-white dark:bg-gray-800 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -939,7 +984,7 @@ export default function SuperAdminDashboard() {
        <Modal
          isOpen={showAddFirmaModal}
          onClose={handleCloseAddFirmaModal}
-         className="max-w-[500px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+         className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
        >
          <div className="flex flex-col h-full">
                        <div className="p-5 pt-10">
@@ -951,9 +996,9 @@ export default function SuperAdminDashboard() {
               </p>
             </div>
            
-           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-200px)]">
-             <div className="space-y-4 pb-4">
-               <div>
+           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+               <div className="w-full">
                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                    Naziv firme
                  </Label>
@@ -961,12 +1006,12 @@ export default function SuperAdminDashboard() {
                    type="text"
                    value={newFirma.naziv}
                    onChange={(e) => setNewFirma({ ...newFirma, naziv: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                    placeholder="Unesite naziv firme"
                  />
                </div>
                
-                               <div>
+                               <div className="w-full">
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Email
                   </Label>
@@ -974,7 +1019,7 @@ export default function SuperAdminDashboard() {
                     type="email"
                     value={newFirma.email}
                     onChange={(e) => setNewFirma({ ...newFirma, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Unesite email adresu"
                   />
                 </div>
@@ -998,7 +1043,7 @@ export default function SuperAdminDashboard() {
        <Modal
          isOpen={showAddKorisnikModal}
          onClose={handleCloseAddKorisnikModal}
-         className="max-w-[500px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+         className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
        >
          <div className="flex flex-col h-full">
                        <div className="p-5 pt-10">
@@ -1010,9 +1055,9 @@ export default function SuperAdminDashboard() {
               </p>
             </div>
            
-           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-200px)]">
-             <div className="space-y-4 pb-4">
-               <div>
+           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+               <div className="w-full">
                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                    Ime
                  </Label>
@@ -1020,12 +1065,12 @@ export default function SuperAdminDashboard() {
                    type="text"
                    value={newKorisnik.ime}
                    onChange={(e) => setNewKorisnik({ ...newKorisnik, ime: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                    placeholder="Unesite ime"
                  />
                </div>
                
-               <div>
+               <div className="w-full">
                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                    Prezime
                  </Label>
@@ -1033,12 +1078,12 @@ export default function SuperAdminDashboard() {
                    type="text"
                    value={newKorisnik.prezime}
                    onChange={(e) => setNewKorisnik({ ...newKorisnik, prezime: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                    placeholder="Unesite prezime"
                  />
                </div>
                
-               <div>
+               <div className="w-full">
                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                    Email
                  </Label>
@@ -1046,27 +1091,61 @@ export default function SuperAdminDashboard() {
                    type="email"
                    value={newKorisnik.email}
                    onChange={(e) => setNewKorisnik({ ...newKorisnik, email: e.target.value })}
-                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                    placeholder="Unesite email adresu"
                  />
                </div>
                
-                               <div>
+                               <div className="w-full">
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Firma
                   </Label>
-                  <select
-                    value={newKorisnik.firma}
-                    onChange={(e) => setNewKorisnik({ ...newKorisnik, firma: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  >
-                    <option value="">Izaberite firmu</option>
-                    {firme.map((firma) => (
-                      <option key={firma.id} value={firma.name}>
-                        {firma.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative w-full" ref={firmaRef}>
+                                         <button
+                       type="button"
+                       onClick={() => {
+                         if (!isFirmaOpen && firmaRef.current) {
+                           const rect = firmaRef.current.getBoundingClientRect();
+                           setDropdownPosition({
+                             left: rect.left,
+                             top: rect.bottom + 4
+                           });
+                         }
+                         setIsFirmaOpen(!isFirmaOpen);
+                       }}
+                       className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                     >
+                      <span>{newKorisnik.firma || "Izaberi firmu"}</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${isFirmaOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                                                              {isFirmaOpen && (
+                        <div className="fixed z-[100] bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700" style={{ left: dropdownPosition.left, top: dropdownPosition.top, width: firmaRef.current?.offsetWidth || 'auto' }}>
+                         <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                           {firme.map((firma, index) => (
+                             <div
+                               key={firma.id}
+                               className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                                 newKorisnik.firma === firma.name ? 'bg-gray-100 dark:bg-gray-700' : ''
+                               } ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
+                               onClick={() => {
+                                 setNewKorisnik({ ...newKorisnik, firma: firma.name });
+                                 setIsFirmaOpen(false);
+                               }}
+                             >
+                               <span className="text-sm text-gray-700 dark:text-gray-300">{firma.name}</span>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                  </div>
                 </div>
              </div>
            </div>

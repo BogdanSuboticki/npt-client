@@ -9,10 +9,8 @@ const sampleData = [
     id: 1,
     redniBroj: 1,
     nazivLokacije: 'Fabrika Novi Sad',
-    nazivObjekta: 'Proizvodni pogon A',
     brojMernihMesta: 8,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Redovno ispitivanje - prioritet',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '15.06.2023',
       narednoIspitivanje: '15.12.2023'
@@ -38,10 +36,8 @@ const sampleData = [
     id: 2,
     redniBroj: 2,
     nazivLokacije: 'Skladište Beograd',
-    nazivObjekta: 'Magacin 1',
     brojMernihMesta: 4,
     intervalIspitivanja: '12 meseci',
-    napomena: 'Periodično ispitivanje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '12.07.2022',
       narednoIspitivanje: '12.07.2023'
@@ -67,10 +63,8 @@ const sampleData = [
     id: 3,
     redniBroj: 3,
     nazivLokacije: 'Upravna zgrada Niš',
-    nazivObjekta: 'Administrativni centar',
     brojMernihMesta: 6,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Kontrolno merenje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '20.05.2023',
       narednoIspitivanje: '20.11.2023'
@@ -96,10 +90,8 @@ const sampleData = [
     id: 4,
     redniBroj: 4,
     nazivLokacije: 'Pogon Subotica',
-    nazivObjekta: 'Proizvodna hala B',
     brojMernihMesta: 12,
     intervalIspitivanja: '3 meseca',
-    napomena: 'Vanredno ispitivanje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '30.06.2023',
       narednoIspitivanje: '30.09.2023'
@@ -125,10 +117,8 @@ const sampleData = [
     id: 5,
     redniBroj: 5,
     nazivLokacije: 'Distributivni centar Kragujevac',
-    nazivObjekta: 'Skladišna hala',
     brojMernihMesta: 5,
     intervalIspitivanja: '12 meseci',
-    napomena: 'Standardno ispitivanje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '22.08.2022',
       narednoIspitivanje: '22.08.2023'
@@ -154,10 +144,8 @@ const sampleData = [
     id: 6,
     redniBroj: 6,
     nazivLokacije: 'Tehnički centar Zrenjanin',
-    nazivObjekta: 'Servisni objekat',
     brojMernihMesta: 7,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Redovna kontrola',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '11.04.2023',
       narednoIspitivanje: '11.10.2023'
@@ -183,10 +171,8 @@ const sampleData = [
     id: 7,
     redniBroj: 7,
     nazivLokacije: 'Logistički centar Čačak',
-    nazivObjekta: 'Magacinski prostor C',
     brojMernihMesta: 9,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Godišnje ispitivanje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '16.09.2022',
       narednoIspitivanje: '16.03.2023'
@@ -212,10 +198,8 @@ const sampleData = [
     id: 8,
     redniBroj: 8,
     nazivLokacije: 'Proizvodni kompleks Pančevo',
-    nazivObjekta: 'Proizvodna linija 2',
     brojMernihMesta: 15,
     intervalIspitivanja: '3 meseca',
-    napomena: 'Hitno ispitivanje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '02.08.2023',
       narednoIspitivanje: '02.11.2023'
@@ -241,10 +225,8 @@ const sampleData = [
     id: 9,
     redniBroj: 9,
     nazivLokacije: 'Poslovni centar Valjevo',
-    nazivObjekta: 'Kancelarijski prostor',
     brojMernihMesta: 3,
     intervalIspitivanja: '12 meseci',
-    napomena: 'Standardna provera',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '09.12.2022',
       narednoIspitivanje: '09.12.2023'
@@ -270,10 +252,8 @@ const sampleData = [
     id: 10,
     redniBroj: 10,
     nazivLokacije: 'Industrijska zona Šabac',
-    nazivObjekta: 'Montažni objekat D',
     brojMernihMesta: 6,
     intervalIspitivanja: '6 meseci',
-    napomena: 'Kvartalno ispitivanje',
     mikroklimaLetnja: {
       prethodnoIspitivanje: '25.03.2023',
       narednoIspitivanje: '25.09.2023'
@@ -301,10 +281,8 @@ const sampleData = [
 const columns = [
   { key: 'redniBroj', label: '', sortable: true },
   { key: 'nazivLokacije', label: 'Naziv lokacije', sortable: true },
-  { key: 'nazivObjekta', label: 'Naziv objekta', sortable: true },
   { key: 'brojMernihMesta', label: 'Broj mernih mesta', sortable: true },
   { key: 'intervalIspitivanja', label: 'Interval ispitivanja', sortable: true },
-  { key: 'napomena', label: 'Napomena', sortable: true },
   { key: 'mikroklimaLetnja', label: 'Mikroklima letnja', sortable: true },
   { key: 'mikroklimaZimska', label: 'Mikroklima zimska', sortable: true },
   { key: 'fizickeStetnosti', label: 'Fizičke štetnosti', sortable: true },

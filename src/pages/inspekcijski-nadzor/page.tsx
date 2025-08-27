@@ -1,48 +1,53 @@
 "use client";
 
 import React, { useState } from "react";
-    import BezbednosneProvereDataTable from "./BezbednosneProvereDataTable";
-    import BezbednosneProvereForm from "./BezbednosneProvereForm";
-    import Button from "../../components/ui/button/Button";
+import InspekcijskiNadzorDataTable from "./InspekcijskiNadzorDataTable";
+import InspekcijskiNadzorForm from "./InspekcijskiNadzorForm";
+import Button from "../../components/ui/button/Button";
 
 // Sample data for the table
-const lekarskiPreglediData = [
+const inspekcijskiNadzorData = [
   {
     id: 1,
-    redniBroj: 1,
-    lokacija: "Lokacija 1",
-    datumObilaska: new Date("2024-01-01"),
-    periodObilaska: "Period 1",
-    sledeciObilazak: "Sledeći obilazak 1",
-    napomena: "Napomena 1",
+    brojResenja: "123-45/2024",
+    datumNadzora: new Date("2024-01-12"),
+    napomena: "Uočene nepravilnosti u skladištu hemikalija",
+    mera: "Sanacija opasnosti",
+    rokIzvrsenja: new Date("2024-02-15"),
+    datumRealizacije: new Date("2024-02-10"),
+    datumObavestavanja: new Date("2024-02-12"),
   },
   {
     id: 2,
-    redniBroj: 2,
-    lokacija: "Lokacija 2",
-    datumObilaska: new Date("2024-02-01"),
-    periodObilaska: "Period 2",
-    sledeciObilazak: "Sledeći obilazak 2",
-    napomena: "Napomena 2",
+    brojResenja: "678-90/2024",
+    datumNadzora: new Date("2024-02-05"),
+    napomena: "Potrebna obuka zaposlenih za rad na visini",
+    mera: "Obuka zaposlenih",
+    rokIzvrsenja: new Date("2024-03-01"),
+    datumRealizacije: null,
+    datumObavestavanja: null,
   },
   {
     id: 3,
-    redniBroj: 3,
-    lokacija: "Lokacija 3",
-    datumObilaska: new Date("2024-03-01"),
-    periodObilaska: "Period 3",
-    sledeciObilazak: "Sledeći obilazak 3",
-    napomena: "Napomena 3",
+    brojResenja: "555-11/2024",
+    datumNadzora: new Date("2024-03-18"),
+    napomena: "Zabrana upotrebe neispravne opreme",
+    mera: "Zabrana rada",
+    rokIzvrsenja: new Date("2024-03-25"),
+    datumRealizacije: new Date("2024-03-22"),
+    datumObavestavanja: new Date("2024-03-24"),
   },
 ];
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "lokacija", label: "Lokacija", sortable: true },
-  { key: "datumProvere", label: "Datum provere", sortable: true },
-  { key: "intervalProvere", label: "Interval provere", sortable: true },
-  { key: "sledecaProvera", label: "Sledeća provera", sortable: true },
+  { key: "brojResenja", label: "Broj rešenja", sortable: true },
+  { key: "datumNadzora", label: "Datum nadzora", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
+  { key: "mera", label: "Naziv mere", sortable: true },
+  { key: "rokIzvrsenja", label: "Rok izvršenja", sortable: true },
+  { key: "datumRealizacije", label: "Datum realizacije mere", sortable: true },
+  { key: "datumObavestavanja", label: "Datum obaveštavanja inspekcije", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -56,7 +61,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error in LekarskiPregledi component:', error);
+    console.error('Error in InspekcijskiNadzor component:', error);
     console.error('Error info:', errorInfo);
   }
 
@@ -76,13 +81,11 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const LekarskiPreglediPage: React.FC = () => {
+const InspekcijskiNadzorPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
 
   const handleSave = (data: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', data);
-    // For now, we'll just close the form
+    console.log('Saving new inspekcijski nadzor entry:', data);
     setShowForm(false);
   };
 
@@ -91,7 +94,7 @@ const LekarskiPreglediPage: React.FC = () => {
       <div className="container mx-auto py-8">
         <div className="mb-6 flex items-center">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Kontrola Radnih Mesta
+            Inspekcijski nadzor
           </h1>
           <Button
             onClick={() => setShowForm(true)}
@@ -114,15 +117,15 @@ const LekarskiPreglediPage: React.FC = () => {
             Novi Unos
           </Button>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <BezbednosneProvereDataTable 
-            data={lekarskiPreglediData}
+          <InspekcijskiNadzorDataTable 
+            data={inspekcijskiNadzorData}
             columns={columns}
           />
         </div>
 
-        <BezbednosneProvereForm 
+        <InspekcijskiNadzorForm 
           isOpen={showForm}
           onClose={() => setShowForm(false)}
           onSave={handleSave}
@@ -132,4 +135,6 @@ const LekarskiPreglediPage: React.FC = () => {
   );
 };
 
-export default LekarskiPreglediPage; 
+export default InspekcijskiNadzorPage;
+
+

@@ -409,18 +409,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                               className="w-4 h-4"
                             />
                           ) : key === 'datumNarednogBZR' || key === 'osposobljavanjeBZR' || key === 'osposobljavanjeZOP' || key === 'datumNarednogZOP' ? (
-                            <div className="flex items-center">
-                              <span className="flex-1">{formatDate(item[key])}</span>
-                              {key === 'datumNarednogBZR' && (
-                                <div className="w-[40px] flex justify-center">
-                                  <Checkbox
-                                    checked={item.prikaziUPodsetniku}
-                                    onChange={() => handleCheckboxChange(item.id, 'prikaziUPodsetniku')}
-                                    className="w-4 h-4"
-                                  />
-                                </div>
-                              )}
-                            </div>
+                            formatDate(item[key])
                           ) : (
                             item[key]
                           )}

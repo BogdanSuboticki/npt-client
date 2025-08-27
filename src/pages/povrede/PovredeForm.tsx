@@ -32,7 +32,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
   const tezinaPovredeRef = useRef<HTMLDivElement>(null);
 
   // Example options - replace with actual data
-  const zaposleniOptions = ["Zaposleni 1", "Zaposleni 2", "Zaposleni 3"];
+  const zaposleniOptions = ["Angažovani 1", "Angažovani 2", "Angažovani 3"];
   const tezinaPovredeOptions = ["Laka", "Srednja", "Teška", "Smrtna", "Kolektivna"];
 
   // Add click outside handler for dropdowns
@@ -77,14 +77,14 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 pb-4">
           <div className="w-full">
-            <Label>Zaposleni *</Label>
+            <Label>Angažovani *</Label>
             <div className="relative w-full" ref={zaposleniRef}>
               <button
                 type="button"
                 onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
                 className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
               >
-                <span>{formData.zaposleni || "Izaberi zaposlenog"}</span>
+                <span>{formData.zaposleni || "Izaberi angažovanog"}</span>
                 <svg
                   className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''}`}
                   fill="none"

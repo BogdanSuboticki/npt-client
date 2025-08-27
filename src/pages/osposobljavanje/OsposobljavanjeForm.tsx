@@ -78,9 +78,53 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Automatically calculate next BZR date when risk level or BZR training date changes
+  useEffect(() => {
+    if (formData.osposobljavanjeBZR) {
+      const nextBZRDate = new Date(formData.osposobljavanjeBZR);
+      if (formData.povecanRizik) {
+        // High risk: next BZR in 12 months
+        nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 1);
+      } else {
+        // Low risk: next BZR in 36 months (3 years)
+        nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
+      }
+      setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
+    }
+  }, [formData.povecanRizik, formData.osposobljavanjeBZR]);
+
+  // Automatically calculate next ZOP date when ZOP training date changes
+  useEffect(() => {
+    if (formData.osposobljavanjeZOP) {
+      const nextZOPDate = new Date(formData.osposobljavanjeZOP);
+      // ZOP is always 36 months (3 years) from training date
+      nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
+      setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+    }
+  }, [formData.osposobljavanjeZOP]);
+
+  // Initialize next BZR date on component mount
+  useEffect(() => {
+    const nextBZRDate = new Date(formData.osposobljavanjeBZR);
+    if (formData.povecanRizik) {
+      // High risk: next BZR in 12 months
+      nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 1);
+    } else {
+      // Low risk: next BZR in 36 months (3 years)
+      nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
+    }
+    setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
+
+    // Initialize next ZOP date on component mount
+    const nextZOPDate = new Date(formData.osposobljavanjeZOP);
+    // ZOP is always 36 months (3 years) from training date
+    nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
+    setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+  }, []); // Empty dependency array means this runs only once on mount
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.zaposleni || !formData.radnoMesto || !formData.lokacija) {
+    if (!formData.zaposleni || !formData.radnoMesto || !formData.lokacija || !formData.osposobljavanjeBZR) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
@@ -91,6 +135,27 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
   const handleDateChange = (field: string, value: Date | null) => {
     if (value) {
       setFormData(prev => ({ ...prev, [field]: value }));
+      
+      // If BZR training date changes, automatically calculate next BZR date
+      if (field === 'osposobljavanjeBZR') {
+        const nextBZRDate = new Date(value);
+        if (formData.povecanRizik) {
+          // High risk: next BZR in 12 months
+          nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 1);
+        } else {
+          // Low risk: next BZR in 36 months (3 years)
+          nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
+        }
+        setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
+      }
+      
+      // If ZOP training date changes, automatically calculate next ZOP date
+      if (field === 'osposobljavanjeZOP') {
+        const nextZOPDate = new Date(value);
+        // ZOP is always 36 months (3 years) from training date
+        nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
+        setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+      }
     }
   };
 
@@ -103,7 +168,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
       <div className="flex flex-col h-full">
         <div className="p-5 pt-10">
           <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Novo Osposobljavanje
+            Novo Osposobljavanje/Provera BZR
           </h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
@@ -138,12 +203,27 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                             } ${index === zaposleniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
                             onClick={() => {
                               const selectedEmployeeData = zaposleniData[option];
-                              setFormData({
+                              const newFormData = {
                                 ...formData,
                                 zaposleni: option,
                                 radnoMesto: selectedEmployeeData.radnoMesto,
                                 povecanRizik: selectedEmployeeData.povecanRizik,
-                              });
+                              };
+                              
+                              // Automatically calculate next BZR date based on risk level
+                              if (formData.osposobljavanjeBZR) {
+                                const nextBZRDate = new Date(formData.osposobljavanjeBZR);
+                                if (selectedEmployeeData.povecanRizik) {
+                                  // High risk: next BZR in 12 months
+                                  nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 1);
+                                } else {
+                                  // Low risk: next BZR in 36 months (3 years)
+                                  nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
+                                }
+                                newFormData.datumNarednogBZR = nextBZRDate;
+                              }
+                              
+                              setFormData(newFormData);
                               setIsZaposleniOpen(false);
                             }}
                           >
@@ -179,21 +259,31 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                 />
               </div>
 
-              <div className="w-full">
-                <Label>Osposobljavanje BZR</Label>
-                <CustomDatePicker
-                  value={formData.osposobljavanjeBZR}
-                  onChange={(newValue) => handleDateChange('osposobljavanjeBZR', newValue)}
-                />
-              </div>
+                             <div className="w-full">
+                 <Label>Osposobljavanje BZR *</Label>
+                 <CustomDatePicker
+                   value={formData.osposobljavanjeBZR}
+                   onChange={(newValue) => handleDateChange('osposobljavanjeBZR', newValue)}
+                 />
+               </div>
 
-              <div className="w-full">
-                <Label>Datum Narednog BZR</Label>
-                <CustomDatePicker
-                  value={formData.datumNarednogBZR}
-                  onChange={(newValue) => handleDateChange('datumNarednogBZR', newValue)}
-                />
-              </div>
+                             <div className="w-full">
+                 <Label>Datum Narednog BZR</Label>
+                 <div className="relative">
+                   <input
+                     type="text"
+                     value={formData.datumNarednogBZR ? formData.datumNarednogBZR.toLocaleDateString('sr-RS') : ''}
+                     readOnly
+                     disabled
+                     className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
+                   />
+                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-500 dark:text-gray-400">
+                       <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                     </svg>
+                   </div>
+                 </div>
+               </div>
 
               <div className="w-full">
                 <Label>Osposobljavanje ZOP</Label>
@@ -205,10 +295,20 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
 
               <div className="w-full">
                 <Label>Datum Narednog ZOP</Label>
-                <CustomDatePicker
-                  value={formData.datumNarednogZOP}
-                  onChange={(newValue) => handleDateChange('datumNarednogZOP', newValue)}
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.datumNarednogZOP ? formData.datumNarednogZOP.toLocaleDateString('sr-RS') : ''}
+                    readOnly
+                    disabled
+                    className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-500 dark:text-gray-400">
+                      <path d="M18 2V4M6 2V4M11.996 13H12.004M11.996 17H12.004M15.991 13H16M8 13H8.009M8 17H8.009M3.5 8H20.5M3 8H21M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div className="w-full lg:col-span-2">

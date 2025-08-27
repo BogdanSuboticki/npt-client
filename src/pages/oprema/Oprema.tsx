@@ -9,8 +9,10 @@ const opremaData = [
     id: 1,
     redniBroj: 1,
     nazivOpreme: "Viljuškar",
+    vrstaOpreme: "Oprema za rad",
     fabrickBroj: "FB123456",
     inventarniBroj: "INV789",
+    lokacija: "Skladište A",
     godinaProizvodnje: 2020,
     intervalPregleda: 6,
     napomena: "Redovno održavanje",
@@ -20,11 +22,26 @@ const opremaData = [
     id: 2,
     redniBroj: 2,
     nazivOpreme: "Kran",
+    vrstaOpreme: "Oprema za rad",
     fabrickBroj: "FB789012",
     inventarniBroj: "INV456",
+    lokacija: "Proizvodna hala 1",
     godinaProizvodnje: 2019,
     intervalPregleda: 12,
     napomena: "Potrebno zamena delova",
+    iskljucenaIzPracenja: false
+  },
+  {
+    id: 3,
+    redniBroj: 3,
+    nazivOpreme: "Transformator",
+    vrstaOpreme: "Elektro i gromobranska instalacija",
+    fabrickBroj: "FB345678",
+    inventarniBroj: "INV123",
+    lokacija: "Lokacija 1",
+    godinaProizvodnje: 2021,
+    intervalPregleda: 24,
+    napomena: "Godišnji pregled",
     iskljucenaIzPracenja: false
   }
 ];
@@ -32,6 +49,8 @@ const opremaData = [
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "nazivOpreme", label: "Naziv opreme", sortable: true },
+  { key: "vrstaOpreme", label: "Vrsta opreme", sortable: true },
+  { key: "lokacija", label: "Lokacija", sortable: true },
   { key: "fabrickInventarniBroj", label: "Fabrički/Inventarni broj", sortable: true },
   { key: "godinaProizvodnje", label: "Godina proizvodnje", sortable: true },
   { key: "intervalPregleda", label: "Interval pregleda (meseci)", sortable: true },

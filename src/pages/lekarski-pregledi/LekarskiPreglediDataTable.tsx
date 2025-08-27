@@ -31,7 +31,6 @@ interface LekarskiPreglediData {
   zaposleni: string;
   radnoMesto: string;
   povecanRizik: boolean;
-  nocniRad: boolean;
   vrstaLekarskog: string;
   datumLekarskog: Date;
   datumNarednogLekarskog: Date;
@@ -282,7 +281,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                     >
                       {key === 'redniBroj' ? (
                         startIndex + index + 1
-                      ) : key === 'povecanRizik' || key === 'nocniRad' ? (
+                      ) : key === 'povecanRizik' ? (
                         item[key] ? 'DA' : 'NE'
                       ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' ? (
                         formatDate(item[key])

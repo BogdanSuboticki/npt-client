@@ -24,8 +24,10 @@ interface OpremaData {
   id: number;
   redniBroj: number;
   nazivOpreme: string;
+  vrstaOpreme: string;
   fabrickBroj: string;
   inventarniBroj: string;
+  lokacija: string;
   godinaProizvodnje: number;
   intervalPregleda: number;
   napomena: string;
@@ -55,6 +57,24 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
     }
   }, [data]);
 
+  const uniqueVrsteOpreme = useMemo(() => {
+    try {
+      return Array.from(new Set(data?.map(item => item.vrstaOpreme) || []));
+    } catch (error) {
+      console.error('Error getting unique equipment types:', error);
+      return [];
+    }
+  }, [data]);
+
+  const uniqueLokacije = useMemo(() => {
+    try {
+      return Array.from(new Set(data?.map(item => item.lokacija) || []));
+    } catch (error) {
+      console.error('Error getting unique locations:', error);
+      return [];
+    }
+  }, [data]);
+
   const uniqueYears = useMemo(() => {
     try {
       return Array.from(new Set(data?.map(item => item.godinaProizvodnje) || [])).map(String);
@@ -66,12 +86,20 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
 
   // Set all as selected by default
   const [selectedNazivOpreme, setSelectedNazivOpreme] = useState<string[]>(uniqueNaziviOpreme);
+  const [selectedVrstaOpreme, setSelectedVrstaOpreme] = useState<string[]>(uniqueVrsteOpreme);
+  const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
   const [selectedYears, setSelectedYears] = useState<string[]>(uniqueYears);
 
   // Update selected options if unique values change
   useEffect(() => {
     setSelectedNazivOpreme(uniqueNaziviOpreme);
   }, [uniqueNaziviOpreme]);
+  useEffect(() => {
+    setSelectedVrstaOpreme(uniqueVrsteOpreme);
+  }, [uniqueVrsteOpreme]);
+  useEffect(() => {
+    setSelectedLokacije(uniqueLokacije);
+  }, [uniqueLokacije]);
   useEffect(() => {
     setSelectedYears(uniqueYears);
   }, [uniqueYears]);
@@ -85,9 +113,11 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
         .filter((item) => {
           try {
             const matchesNaziv = selectedNazivOpreme.length === 0 || selectedNazivOpreme.includes(item.nazivOpreme);
+            const matchesVrsta = selectedVrstaOpreme.length === 0 || selectedVrstaOpreme.includes(item.vrstaOpreme);
+            const matchesLokacija = selectedLokacije.length === 0 || selectedLokacije.includes(item.lokacija);
             const matchesGodina = selectedYears.length === 0 || selectedYears.includes(String(item.godinaProizvodnje));
 
-            return matchesNaziv && matchesGodina;
+            return matchesNaziv && matchesVrsta && matchesLokacija && matchesGodina;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -114,7 +144,7 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, selectedNazivOpreme, selectedYears]);
+  }, [data, sortKey, sortOrder, selectedNazivOpreme, selectedVrstaOpreme, selectedLokacije, selectedYears]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -169,6 +199,18 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
                 options={uniqueNaziviOpreme}
                 selectedOptions={selectedNazivOpreme}
                 onSelectionChange={setSelectedNazivOpreme}
+              />
+              <FilterDropdown
+                label="Vrsta opreme"
+                options={uniqueVrsteOpreme}
+                selectedOptions={selectedVrstaOpreme}
+                onSelectionChange={setSelectedVrstaOpreme}
+              />
+              <FilterDropdown
+                label="Lokacija"
+                options={uniqueLokacije}
+                selectedOptions={selectedLokacije}
+                onSelectionChange={setSelectedLokacije}
               />
               <FilterDropdown
                 label="Godina proizvodnje"

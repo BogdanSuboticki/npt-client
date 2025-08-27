@@ -48,6 +48,7 @@ import Osposobljavanje from "./pages/osposobljavanje/Osposobljavanje";
 import Oprema from "./pages/oprema/Oprema";
 import Lokacije from "./pages/lokacije/Lokacije";
 import LekarskiPreglediPage from "./pages/lekarski-pregledi/page";
+import InspekcijskiNadzorPage from "./pages/inspekcijski-nadzor/page";
 import IspitivanjeRadneSredine from "./pages/ispitivanje-radne-sredine/page";
 
 import TaskKanban from "./pages/Task/TaskKanban";
@@ -105,6 +106,7 @@ export default function App() {
             <Route path="/stocks" element={<Stocks />} />
             <Route path="/saas" element={<Saas />} />
             <Route path="/lekarski-pregledi" element={<LekarskiPreglediPage />} />
+            <Route path="/inspekcijski-nadzor" element={<InspekcijskiNadzorPage />} />
             <Route path="/ispitivanje-radne-sredine" element={<IspitivanjeRadneSredine />} />
             <Route path="/bezbednosne-provere" element={<BezbednosneProverePage />} />
             <Route path="/povrede" element={<PovredePage />} />

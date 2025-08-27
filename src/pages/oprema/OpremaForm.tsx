@@ -13,22 +13,34 @@ interface OpremaFormProps {
 export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps) {
   const [formData, setFormData] = React.useState({
     nazivOpreme: "",
+    vrstaOpreme: "",
     fabrickBroj: "",
     inventarniBroj: "",
+    lokacija: "",
     godinaProizvodnje: new Date().getFullYear(),
     intervalPregleda: 12,
     napomena: ""
   });
 
-  // Add state for dropdown
+  // Add state for dropdowns
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [isVrstaDropdownOpen, setIsVrstaDropdownOpen] = React.useState(false);
+  const [isLokacijaDropdownOpen, setIsLokacijaDropdownOpen] = React.useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const vrstaDropdownRef = useRef<HTMLDivElement>(null);
+  const lokacijaDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (vrstaDropdownRef.current && !vrstaDropdownRef.current.contains(event.target as Node)) {
+        setIsVrstaDropdownOpen(false);
+      }
+      if (lokacijaDropdownRef.current && !lokacijaDropdownRef.current.contains(event.target as Node)) {
+        setIsLokacijaDropdownOpen(false);
       }
     };
 
@@ -42,9 +54,26 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
     (_, i) => new Date().getFullYear() - i
   );
 
+  // Vrsta opreme options
+  const vrstaOpremeOptions = [
+    "Oprema za rad",
+    "Elektro i gromobranska instalacija"
+  ];
+
+  // Lokacija options
+  const lokacijaOptions = [
+    "Lokacija 1",
+    "Lokacija 2", 
+    "Lokacija 3",
+    "Skladište A",
+    "Skladište B",
+    "Proizvodna hala 1",
+    "Proizvodna hala 2"
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nazivOpreme || !formData.intervalPregleda) {
+    if (!formData.nazivOpreme || !formData.vrstaOpreme || !formData.lokacija || !formData.intervalPregleda) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
@@ -77,6 +106,47 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
               </div>
 
               <div className="col-span-1">
+                <Label>Vrsta opreme *</Label>
+                <div className="relative w-full" ref={vrstaDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsVrstaDropdownOpen(!isVrstaDropdownOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>{formData.vrstaOpreme || "Izaberite vrste opreme"}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform ml-2 ${isVrstaDropdownOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isVrstaDropdownOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                        {vrstaOpremeOptions.map((item, index) => (
+                          <div
+                            key={item}
+                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                              formData.vrstaOpreme === item ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === vrstaOpremeOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => {
+                              setFormData({ ...formData, vrstaOpreme: item });
+                              setIsVrstaDropdownOpen(false);
+                            }}
+                          >
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-1">
                 <Label>Fabrički broj</Label>
                 <Input 
                   type="text" 
@@ -94,6 +164,47 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
                   onChange={(e) => setFormData({...formData, inventarniBroj: e.target.value})}
                   className="bg-[#F9FAFB] dark:bg-[#101828]"
                 />
+              </div>
+
+              <div className="col-span-1">
+                <Label>Lokacija *</Label>
+                <div className="relative w-full" ref={lokacijaDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsLokacijaDropdownOpen(!isLokacijaDropdownOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>{formData.lokacija || "Izaberite lokaciju"}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform ml-2 ${isLokacijaDropdownOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isLokacijaDropdownOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                        {lokacijaOptions.map((item, index) => (
+                          <div
+                            key={item}
+                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                              formData.lokacija === item ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === lokacijaOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => {
+                              setFormData({ ...formData, lokacija: item });
+                              setIsLokacijaDropdownOpen(false);
+                            }}
+                          >
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="col-span-1">

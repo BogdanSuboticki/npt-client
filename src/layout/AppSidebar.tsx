@@ -94,7 +94,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <BezbednosnePromeneIcon />,
-    name: "Bezbednosne provere",
+    name: "Kontrola Radnih Mesta",
     path: "/bezbednosne-provere",
   },
   {
@@ -200,7 +200,7 @@ const supportItems: NavItem[] = [
   },
   {
     icon: <BezbednosnePromeneIcon />,
-    name: "Bezbednosne provere",
+    name: "Kontrola Radnih Mesta",
     path: "/bezbednosne-provere",
   },
   {

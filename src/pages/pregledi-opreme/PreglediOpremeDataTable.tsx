@@ -29,6 +29,7 @@ interface PreglediOpremeData {
   id: number;
   redniBroj: number;
   nazivOpreme: string;
+  vrstaOpreme: string;
   inventarniBroj: string;
   lokacija: string;
   datumPregleda: Date;
@@ -59,10 +60,15 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
     return Array.from(new Set(initialData.map(item => item.nazivOpreme)));
   }, [initialData]);
 
+  const uniqueVrsteOpreme = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.vrstaOpreme)));
+  }, [initialData]);
+
   const statusOptions = ["Ispravno", "Neispravno"];
 
   // Initialize with all items selected
   const [selectedOprema, setSelectedOprema] = useState<string[]>(uniqueOprema);
+  const [selectedVrsteOpreme, setSelectedVrsteOpreme] = useState<string[]>(uniqueVrsteOpreme);
   const [selectedStatus, setSelectedStatus] = useState<string[]>(statusOptions);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
@@ -70,14 +76,15 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
-        if (selectedOprema.length === 0 || selectedStatus.length === 0) {
+        if (selectedOprema.length === 0 || selectedVrsteOpreme.length === 0 || selectedStatus.length === 0) {
           return false;
         }
         const matchesOprema = selectedOprema.includes(item.nazivOpreme);
+        const matchesVrsta = selectedVrsteOpreme.includes(item.vrstaOpreme);
         const matchesStatus = selectedStatus.includes(item.status);
         const matchesDateRange = (!dateFrom || item.datumPregleda >= dateFrom) &&
                                (!dateTo || item.datumPregleda <= dateTo);
-        return matchesOprema && matchesStatus && matchesDateRange;
+        return matchesOprema && matchesVrsta && matchesStatus && matchesDateRange;
       })
       .sort((a, b) => {
         if (sortKey.includes('datum')) {
@@ -94,7 +101,7 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedOprema, selectedStatus, dateFrom, dateTo, initialData]);
+  }, [sortKey, sortOrder, selectedOprema, selectedVrsteOpreme, selectedStatus, dateFrom, dateTo, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -163,6 +170,14 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
                 options={uniqueOprema}
                 selectedOptions={selectedOprema}
                 onSelectionChange={setSelectedOprema}
+              />
+            </div>
+            <div className="w-full lg:w-48">
+              <FilterDropdown
+                label="Vrsta opreme"
+                options={uniqueVrsteOpreme}
+                selectedOptions={selectedVrsteOpreme}
+                onSelectionChange={setSelectedVrsteOpreme}
               />
             </div>
             <div className="w-full lg:w-48">

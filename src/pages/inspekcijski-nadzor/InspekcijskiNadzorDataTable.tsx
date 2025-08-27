@@ -24,52 +24,55 @@ interface Column {
   sortable: boolean;
 }
 
-interface BezbednosneProvereData {
+interface InspekcijskiNadzorItem {
   id: number;
-  redniBroj: number;
-  lokacija: string;
-  datumObilaska: Date;
-  periodObilaska: string;
-  sledeciObilazak: string;
+  brojResenja: string;
+  datumNadzora: Date;
   napomena: string;
+  mera: string; // naziv mere
+  rokIzvrsenja: Date;
+  datumRealizacije: Date | null;
+  datumObavestavanja: Date | null;
   [key: string]: any;
 }
 
 interface DataTableProps {
-  data: BezbednosneProvereData[];
+  data: InspekcijskiNadzorItem[];
   columns: Column[];
 }
 
-export default function BezbednosneProvereDataTable({ data: initialData, columns }: DataTableProps) {
+export default function InspekcijskiNadzorDataTable({ data: initialData, columns }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
-  const [modalNapomena, setModalNapomena] = useState<string>('');
+  const [modalNote, setModalNote] = useState<string>("");
 
-  
-  // Get unique values for dropdowns
-  const uniqueLokacije = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.lokacija)));
+  // Filters
+  const uniqueMere = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.mera)));
+  }, [initialData]);
+  const uniqueBrojResenja = useMemo(() => {
+    return Array.from(new Set(initialData.map(item => item.brojResenja)));
   }, [initialData]);
 
-  // Initialize with all items selected
-  const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
+  const [selectedMere, setSelectedMere] = useState<string[]>(uniqueMere);
+  const [selectedResenja, setSelectedResenja] = useState<string[]>(uniqueBrojResenja);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData
       .filter((item) => {
-        if (selectedLokacije.length === 0) {
+        if (selectedMere.length === 0 || selectedResenja.length === 0) {
           return false;
         }
-        const matchesLokacije = selectedLokacije.includes(item.lokacija);
-        const matchesDateRange = (!dateFrom || item.datumObilaska >= dateFrom) &&
-                               (!dateTo || item.datumObilaska <= dateTo);
-        return matchesLokacije && matchesDateRange;
+        const matchesMera = selectedMere.includes(item.mera);
+        const matchesResenje = selectedResenja.includes(item.brojResenja);
+        const matchesDateRange = (!dateFrom || item.datumNadzora >= dateFrom) && (!dateTo || item.datumNadzora <= dateTo);
+        return matchesMera && matchesResenje && matchesDateRange;
       })
       .sort((a, b) => {
         if (sortKey.includes('datum')) {
@@ -77,23 +80,19 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
           const bDate = b[sortKey] instanceof Date ? b[sortKey] : new Date(b[sortKey]);
           return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
         }
-        
         if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
           return sortOrder === "asc" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
         }
-        
         return sortOrder === "asc"
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedLokacije, dateFrom, dateTo, initialData]);
+  }, [sortKey, sortOrder, selectedMere, selectedResenja, dateFrom, dateTo, initialData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -104,15 +103,14 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
     }
   };
 
-  const handleCheckboxClick = () => {
-    setModalDate(new Date()); // Reset to today's date when opening
-    setModalNapomena(''); // Reset napomena field
+  const handleActionClick = () => {
+    setModalDate(new Date());
+    setModalNote("");
     openModal();
   };
 
   const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving bezbednosna provera with date:", modalDate, "and napomena:", modalNapomena);
+    console.log("Saving inspekcijski nadzor action with date:", modalDate, "and note:", modalNote);
     closeModal();
   };
 
@@ -120,12 +118,9 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('sr-Latn-RS', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+  const formatDate = (value: Date | null): string => {
+    if (!value) return "";
+    return value.toLocaleDateString('sr-Latn-RS', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   return (
@@ -144,20 +139,23 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="w-full lg:w-60">
-              <FilterDropdown
-                label="Lokacija"
-                options={uniqueLokacije}
-                selectedOptions={selectedLokacije}
-                onSelectionChange={setSelectedLokacije}
-              />
-            </div>
+            <FilterDropdown
+              label="Broj rešenja"
+              options={uniqueBrojResenja}
+              selectedOptions={selectedResenja}
+              onSelectionChange={setSelectedResenja}
+            />
+            <FilterDropdown
+              label="Mera"
+              options={uniqueMere}
+              selectedOptions={selectedMere}
+              onSelectionChange={setSelectedMere}
+            />
             <div className="relative w-full lg:w-42">
               <CustomDatePicker
                 value={dateFrom}
                 onChange={(date) => setDateFrom(date)}
                 placeholder="Datum od"
-                className="bg-[#F9FAFB] dark:bg-[#101828]"
               />
             </div>
             <div className="relative w-full lg:w-42">
@@ -165,10 +163,8 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                 value={dateTo}
                 onChange={(date) => setDateTo(date)}
                 placeholder="Datum do"
-                className="bg-[#F9FAFB] dark:bg-[#101828]"
               />
             </div>
-
           </div>
         </div>
       </div>
@@ -255,9 +251,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                     >
                       {key === 'redniBroj' ? (
                         startIndex + index + 1
-                      ) : key === 'povecanRizik' || key === 'nocniRad' ? (
-                        item[key] ? 'DA' : 'NE'
-                      ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' ? (
+                      ) : key.includes('datum') || key === 'rokIzvrsenja' ? (
                         formatDate(item[key])
                       ) : (
                         item[key]
@@ -268,7 +262,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                     <div className="flex items-center w-full gap-2">
                       <button 
                         className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={handleCheckboxClick}
+                        onClick={handleActionClick}
                       >
                         <svg
                           className="size-4"
@@ -334,36 +328,18 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
       <Modal
         isOpen={isOpen}
         onClose={closeModal}
-        className="max-w-[500px] p-5 lg:p-8"
+        className="max-w-[600px] p-5 lg:p-8"
       >
         <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
-        Da li je izvršena nova kontrola radnih mesta? 
+          Evidentiraj realizaciju mere
         </h4>
-        <div className="mb-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-            Datum izvršenog pregleda:
-          </p>
-          <CustomDatePicker
-            value={modalDate}
-            onChange={(date) => {
-              if (date) {
-                setModalDate(date);
-              }
-            }}
-            className="bg-[#F9FAFB] dark:bg-[#101828]"
-          />
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Datum realizacije:</p>
+          <CustomDatePicker value={modalDate} onChange={(d) => d && setModalDate(d)} />
         </div>
         <div className="mb-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-            Napomena:
-          </p>
-          <TextArea
-            value={modalNapomena}
-            onChange={setModalNapomena}
-            placeholder="Unesite napomenu..."
-            rows={3}
-            className="bg-[#F9FAFB] dark:bg-[#101828]"
-          />
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Napomena:</p>
+          <TextArea value={modalNote} onChange={(e: any) => setModalNote(e.target.value)} placeholder="Unesite napomenu" />
         </div>
         <div className="flex items-center justify-end w-full gap-3">
           <Button size="sm" variant="outline" onClick={closeModal}>
@@ -376,4 +352,6 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
       </Modal>
     </div>
   );
-} 
+}
+
+

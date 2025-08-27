@@ -43,12 +43,29 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Validate period on mount and ensure it's never below 1
+  useEffect(() => {
+    if (formData.periodProvere && parseInt(formData.periodProvere) < 1) {
+      setFormData(prev => ({ ...prev, periodProvere: "1" }));
+    }
+  }, [formData.periodProvere]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
     if (!formData.lokacija || !formData.datumProvere || !formData.periodProvere) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
+    
+    // Validate period is at least 1 day
+    const period = parseInt(formData.periodProvere);
+    if (period < 1) {
+      alert('Interval kontrole mora biti najmanje 1 dan');
+      return;
+    }
+    
     onSave(formData);
     onClose();
   };
@@ -59,7 +76,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
       onClose={onClose}
       className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Bezbednosna Provera</h2>
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Kontrola Radnih Mesta</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="col-span-1">
@@ -119,7 +136,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
           </div>
 
           <div className="col-span-1">
-            <Label>Datum provere *</Label>
+            <Label>Datum kontrole *</Label>
             <CustomDatePicker
               value={formData.datumProvere}
               onChange={(date) => {
@@ -132,22 +149,28 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
           </div>
 
           <div className="col-span-1">
-            <Label>Interval provere (u danima) *</Label>
+            <Label>Interval kontrole (u danima) *</Label>
             <Input
               type="number"
               name="periodProvere"
               value={formData.periodProvere}
               onChange={(e) => {
                 const value = e.target.value;
-                setFormData(prev => ({ ...prev, periodProvere: value }));
+                const numValue = parseInt(value);
                 
-                // Automatically calculate next inspection date
-                if (value && formData.datumProvere) {
-                  const days = parseInt(value);
-                  const nextDate = new Date(formData.datumProvere);
-                  nextDate.setDate(nextDate.getDate() + days);
-                  setFormData(prev => ({ ...prev, sledecaProvera: nextDate }));
+                // Prevent negative values and ensure minimum of 1
+                if (value === "" || (numValue >= 1)) {
+                  setFormData(prev => ({ ...prev, periodProvere: value }));
+                  
+                  // Automatically calculate next inspection date
+                  if (value && formData.datumProvere && numValue >= 1) {
+                    const days = numValue;
+                    const nextDate = new Date(formData.datumProvere);
+                    nextDate.setDate(nextDate.getDate() + days);
+                    setFormData(prev => ({ ...prev, sledecaProvera: nextDate }));
+                  }
                 }
+                // If negative value is entered, don't update the form data
               }}
               placeholder="Unesite broj dana"
               min="1"
@@ -157,7 +180,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
           </div>
 
           <div className="col-span-1">
-            <Label>Sledeća provera</Label>
+            <Label>Sledeća kontrola</Label>
             <div className="relative">
               <input
                 type="text"

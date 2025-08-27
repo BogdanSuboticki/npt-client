@@ -105,7 +105,7 @@ export default function UserProfiles() {
               userRole={currentUser.role}
               userLocation={currentUser.location}
               userCompany={currentUser.company}
-              enableImageUpload={userType !== 'komitent'}
+              enableImageUpload={true}
             />
 
             {/* Super Admin Dashboard - Only for Super Admin */}
@@ -170,7 +170,7 @@ export default function UserProfiles() {
                 {userType === 'super-admin' && 'Super Administrator - Pun pristup celokupnom sistemu i svim organizacijama'}
                 {userType === 'admin' && 'Administrator - Pristup korisnicima u svoji firmi'}
                 {userType === 'user' && 'Korisnik - Pristup samo svom nalogu'}
-                {userType === 'komitent' && 'Komitent - Samo pregled podataka bez mogućnosti izmena'}
+                {userType === 'komitent' && 'Komitent - Može promeniti profilnu sliku; ostalo samo pregled'}
               </p>
             </div>
 
@@ -206,8 +206,8 @@ export default function UserProfiles() {
                 )}
                 {userType === 'komitent' && (
                   <>
-                    <li>• Samo pregled podataka</li>
-                    <li>• Bez mogućnosti izmena</li>
+                    <li>• Može promeniti profilnu sliku</li>
+                    <li>• Samo pregled ostalih podataka</li>
                     <li>• Ograničen pristup</li>
                   </>
                 )}

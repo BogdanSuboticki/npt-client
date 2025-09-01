@@ -76,7 +76,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
       onClose={onClose}
       className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Kontrola Radnih Mesta</h2>
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Nova Kontrola Radnih Mesta</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="col-span-1">

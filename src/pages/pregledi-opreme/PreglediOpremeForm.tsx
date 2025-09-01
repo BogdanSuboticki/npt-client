@@ -26,11 +26,9 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
 
   // Add state for dropdowns
   const [isNazivOpremeOpen, setIsNazivOpremeOpen] = React.useState(false);
-  const [isLokacijaOpen, setIsLokacijaOpen] = React.useState(false);
   const [isIntervalOpen, setIsIntervalOpen] = React.useState(false);
   const [isStatusOpen, setIsStatusOpen] = React.useState(false);
   const nazivOpremeRef = useRef<HTMLDivElement>(null);
-  const lokacijaRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<HTMLDivElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
 
@@ -56,9 +54,6 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
       
       if (nazivOpremeRef.current && !nazivOpremeRef.current.contains(target)) {
         setIsNazivOpremeOpen(false);
-      }
-      if (lokacijaRef.current && !lokacijaRef.current.contains(target)) {
-        setIsLokacijaOpen(false);
       }
       if (intervalRef.current && !intervalRef.current.contains(target)) {
         setIsIntervalOpen(false);
@@ -161,53 +156,27 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
 
               <div className="w-full">
                 <Label>Vrsta opreme</Label>
-                <input
-                  type="text"
-                  value={formData.vrstaOpreme}
-                  readOnly
-                  disabled
-                  className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
-                />
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={formData.vrstaOpreme || ""}
+                    placeholder="Izaberite opremu"
+                    readOnly
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
+                </div>
               </div>
 
               <div className="w-full">
                 <Label>Lokacija *</Label>
-                <div className="relative w-full" ref={lokacijaRef}>
-                  <button
-                    type="button"
-                    onClick={() => setIsLokacijaOpen(!isLokacijaOpen)}
-                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                  >
-                    <span>{formData.lokacija || "Izaberi lokaciju"}</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform ${isLokacijaOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isLokacijaOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                        {lokacijaOptions.map((option, index) => (
-                          <div
-                            key={option}
-                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                              formData.lokacija === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            } ${index === lokacijaOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                            onClick={() => {
-                              setFormData({ ...formData, lokacija: option });
-                              setIsLokacijaOpen(false);
-                            }}
-                          >
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={formData.lokacija || ""}
+                    placeholder="Izaberite opremu"
+                    readOnly
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
                 </div>
               </div>
 

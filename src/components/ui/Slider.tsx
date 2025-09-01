@@ -7,6 +7,7 @@ interface SliderProps {
   onChange: (value: boolean) => void;
   className?: string;
   size?: "sm" | "md" | "lg" | "full";
+  name?: string;
 }
 
 export default function Slider({ 
@@ -16,7 +17,8 @@ export default function Slider({
   value, 
   onChange, 
   className = "",
-  size = "md"
+  size = "md",
+  name = "slider-tabs"
 }: SliderProps) {
   const getSizeClasses = () => {
     switch (size) {
@@ -40,22 +42,22 @@ export default function Slider({
         <div className={`tabs-wrapper ${getSizeClasses()}`}>
           <input 
             type="radio" 
-            id={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}`}
-            name="slider-tabs" 
+            id={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}-${name}`}
+            name={name} 
             checked={value}
             onChange={() => onChange(true)}
           />
-          <label className="tab" htmlFor={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}`}>
+          <label className="tab" htmlFor={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}-${name}`}>
             {optionOne}
           </label>
           <input 
             type="radio" 
-            id={`radio-${optionTwo.toLowerCase().replace(/\s+/g, '-')}`}
-            name="slider-tabs" 
+            id={`radio-${optionTwo.toLowerCase().replace(/\s+/g, '-')}-${name}`}
+            name={name} 
             checked={!value}
             onChange={() => onChange(false)}
           />
-          <label className="tab" htmlFor={`radio-${optionTwo.toLowerCase().replace(/\s+/g, '-')}`}>
+          <label className="tab" htmlFor={`radio-${optionTwo.toLowerCase().replace(/\s+/g, '-')}-${name}`}>
             {optionTwo}
           </label>
           <span className="glider"></span>

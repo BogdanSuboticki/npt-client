@@ -23,6 +23,7 @@ interface CustomDatePickerProps {
   disabled?: boolean;
   className?: string;
   maxDate?: Date;
+  minDate?: Date;
 }
 
 const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
@@ -31,7 +32,8 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   placeholder,
   disabled = false,
   className = "",
-  maxDate
+  maxDate,
+  minDate
 }) => {
   const { theme: appTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -52,6 +54,11 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        // Check if the click is within the MUI DatePicker popup
+        const muiPopup = document.querySelector('[role="dialog"]');
+        if (muiPopup && muiPopup.contains(event.target as Node)) {
+          return; // Don't close if click is within the MUI popup
+        }
         setIsOpen(false);
       }
     };
@@ -88,7 +95,6 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           <div 
             className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
             onClick={toggleDatePicker}
-            onTouchStart={toggleDatePicker}
           >
             <div className="flex items-center justify-between h-full">
               <span className={`${value ? 'text-gray-800 dark:text-white/90' : 'text-gray-400 dark:text-gray-500'}`}>
@@ -97,12 +103,6 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               <div 
                 className={`text-gray-500 dark:text-gray-400 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
                 onClick={(e: React.MouseEvent) => {
-                  if (!disabled) {
-                    e.stopPropagation();
-                    toggleDatePicker();
-                  }
-                }}
-                onTouchStart={(e: React.TouchEvent) => {
                   if (!disabled) {
                     e.stopPropagation();
                     toggleDatePicker();
@@ -123,6 +123,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             format="dd/MM/yyyy"
             disabled={disabled}
             maxDate={maxDate}
+            minDate={minDate}
             slots={{
               toolbar: () => null
             }}

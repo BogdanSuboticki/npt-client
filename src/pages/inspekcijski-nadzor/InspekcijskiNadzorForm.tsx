@@ -65,14 +65,14 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[800px] max-h-[90vh] dark:bg-[#11181E] overflow-visible"
+      className="max-w-[800px] max-h-[90vh] dark:bg-[#11181E] overflow-hidden"
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 pt-10">
-          <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Novi zapis - Inspekcijski nadzor</h4>
+        <div className="p-5 lg:p-10 pb-0">
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi zapis - Inspekcijski nadzor</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="px-5 lg:px-10 overflow-visible flex-1 max-h-[calc(90vh-220px)]">
+          <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
               <div className="w-full">
                 <Label>Broj rešenja *</Label>
@@ -125,8 +125,8 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
                     </svg>
                   </button>
                   {isMeraOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
-                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700 max-h-60">
+                      <div className="overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                         {meraOptions.map((option, index) => (
                           <div
                             key={option}
@@ -174,7 +174,7 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
             </div>
           </div>
 
-          <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+          <div className="pt-3 pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"

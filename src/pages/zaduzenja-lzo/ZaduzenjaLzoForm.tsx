@@ -330,9 +330,8 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                            <input
                              type="text"
                              value={item.vrstaLzs}
-                             onChange={(e) => handleOpremaChange(item.id, 'vrstaLzs', e.target.value)}
-                             placeholder="Unesite naziv LZS"
-                             className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                             readOnly
+                             className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
                            />
                          </div>
                        
@@ -341,9 +340,8 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                           <input
                             type="text"
                             value={item.standard}
-                            onChange={(e) => handleOpremaChange(item.id, 'standard', e.target.value)}
-                            placeholder="Unesite standard"
-                            className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            readOnly
+                            className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
                           />
                         </div>
                        
@@ -351,18 +349,12 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                          <div>
                            <textarea
                              value={item.dodatniOpis}
-                             onChange={(e) => handleOpremaChange(item.id, 'dodatniOpis', e.target.value)}
-                             placeholder="Unesite opis"
+                             readOnly
                              rows={1}
-                             className="w-full min-h-[44px] px-4 py-2 pt-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none overflow-hidden"
+                             className="w-full min-h-[44px] px-4 py-2 pt-2.5 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed resize-none overflow-hidden"
                              style={{
                                height: 'auto',
                                minHeight: '44px'
-                             }}
-                             onInput={(e) => {
-                               const target = e.target as HTMLTextAreaElement;
-                               target.style.height = 'auto';
-                               target.style.height = Math.max(44, target.scrollHeight) + 'px';
                              }}
                              ref={(el) => {
                                if (el) {
@@ -373,16 +365,16 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                            />
                          </div>
                        
-                                                 {/* Datum zaduženja */}
-                         <div>
-                           <DatePicker
-                             value={item.datumZaduzenja}
-                             onChange={(date) => handleOpremaChange(item.id, 'datumZaduzenja', date)}
-                             placeholder="Izaberi datum"
-                             className="h-11 text-sm"
-                             maxDate={new Date()}
-                           />
-                         </div>
+                                                                                                   {/* Datum zaduženja */}
+                          <div>
+                            <DatePicker
+                              value={item.datumZaduzenja}
+                              onChange={(date) => handleOpremaChange(item.id, 'datumZaduzenja', date)}
+                              placeholder="Izaberi datum"
+                              className="h-11 text-sm"
+                              minDate={new Date()}
+                            />
+                          </div>
                        
                         {/* Rok */}
                         <div>

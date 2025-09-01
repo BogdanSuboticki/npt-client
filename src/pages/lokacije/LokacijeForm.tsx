@@ -31,6 +31,13 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
       return;
     }
 
+    // Validate that broj mernih mesta is not negative
+    const brojMernihMesta = parseInt(formData.brojMernihMesta);
+    if (brojMernihMesta < 0) {
+      alert("Broj mernih mesta ne može biti negativan");
+      return;
+    }
+
     onSave(formData);
     setFormData({
       nazivLokacije: "",
@@ -66,10 +73,14 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
             <Label>Broj mernih mesta *</Label>
             <Input
               type="number"
+              min="0"
               value={formData.brojMernihMesta}
-              onChange={(e) =>
-                setFormData({ ...formData, brojMernihMesta: e.target.value })
-              }
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                if (value >= 0) {
+                  setFormData({ ...formData, brojMernihMesta: e.target.value });
+                }
+              }}
               className="bg-[#F9FAFB] dark:bg-[#101828]"
               required
             />

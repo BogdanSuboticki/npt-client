@@ -135,7 +135,8 @@ const Osposobljavanje: React.FC = () => {
       <div className="container mx-auto py-8">
         <div className="mb-6 flex items-center">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Osposobljavanje/Provera BZR
+            <span className="block lg:inline">Osposobljavanje/</span>
+            <span className="block lg:inline">Provera BZR</span>
           </h1>
           <Button
             onClick={() => setShowForm(true)}

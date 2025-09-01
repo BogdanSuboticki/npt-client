@@ -4,9 +4,7 @@ import React, { useEffect, useRef } from "react";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
-import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
-import Slider from "../../components/ui/Slider";
 
 interface LekarskiPreglediFormProps {
   isOpen: boolean;
@@ -18,7 +16,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",
-    povecanRizik: false, // false = "Ne", true = "Da"
+    povecanRizik: false,
     vrstaLekarskog: "",
     datumLekarskog: new Date(),
     intervalLekarskog: "",
@@ -33,34 +31,34 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
   const vrstaLekarskogRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<HTMLDivElement>(null);
 
-  // Employee data with their job positions and risk levels
+  // Employee data with their job positions
   const zaposleniData: Record<string, {
     radnoMesto: string;
     povecanRizik: boolean;
   }> = {
     "Petar Petrović": {
       radnoMesto: "Viljuškari",
-      povecanRizik: true, // Viljuškari has increased risk
+      povecanRizik: true,
     },
     "Ana Anić": {
       radnoMesto: "Kranista",
-      povecanRizik: true, // Kranista has increased risk
+      povecanRizik: true,
     },
     "Marko Marković": {
       radnoMesto: "Mehaničar",
-      povecanRizik: true, // Mehaničar has increased risk
+      povecanRizik: false,
     },
     "Jovana Jovanović": {
       radnoMesto: "Električar",
-      povecanRizik: true, // Električar has increased risk
+      povecanRizik: true,
     },
     "Stefan Stefanović": {
       radnoMesto: "Viljuškari",
-      povecanRizik: true, // Viljuškari has increased risk
+      povecanRizik: true,
     },
     "Marija Marić": {
       radnoMesto: "Kontrolor kvaliteta",
-      povecanRizik: false, // Kontrolor kvaliteta typically has lower risk
+      povecanRizik: false,
     }
   };
 
@@ -73,20 +71,23 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       
-      if (zaposleniRef.current && !zaposleniRef.current.contains(target)) {
+      if (isZaposleniOpen && zaposleniRef.current && !zaposleniRef.current.contains(target)) {
         setIsZaposleniOpen(false);
       }
-      if (vrstaLekarskogRef.current && !vrstaLekarskogRef.current.contains(target)) {
+      if (isVrstaLekarskogOpen && vrstaLekarskogRef.current && !vrstaLekarskogRef.current.contains(target)) {
         setIsVrstaLekarskogOpen(false);
       }
-      if (intervalRef.current && !intervalRef.current.contains(target)) {
+      if (isIntervalOpen && intervalRef.current && !intervalRef.current.contains(target)) {
         setIsIntervalOpen(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isZaposleniOpen, isVrstaLekarskogOpen, isIntervalOpen]);
 
   // Auto-calculate next medical exam date when interval or exam date changes
   useEffect(() => {
@@ -111,15 +112,11 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[800px] max-h-[90vh] dark:bg-[#11181E] overflow-visible"
+      className="max-w-[800px] p-5 lg:p-10 dark:bg-[#11181E]"
     >
-      <div className="flex flex-col h-full">
-        <div className="p-5 pt-10">
-          <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Novi Lekarski Pregled</h4>
-        </div>
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="px-5 lg:px-10 overflow-visible flex-1 max-h-[calc(90vh-280px)]">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Lekarski Pregled</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="w-full">
                 <Label>Angažovani *</Label>
                 <div className="relative w-full" ref={zaposleniRef}>
@@ -138,6 +135,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
+                  
                   {isZaposleniOpen && (
                     <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
                       <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
@@ -147,16 +145,16 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                             className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
                               formData.zaposleni === option ? 'bg-gray-100 dark:bg-gray-700' : ''
                             } ${index === zaposleniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                            onClick={() => {
-                              const selectedEmployeeData = zaposleniData[option];
-                              setFormData({
-                                ...formData,
-                                zaposleni: option,
-                                radnoMesto: selectedEmployeeData.radnoMesto,
-                                povecanRizik: selectedEmployeeData.povecanRizik,
-                              });
-                              setIsZaposleniOpen(false);
-                            }}
+                                                         onClick={() => {
+                               const selectedEmployeeData = zaposleniData[option];
+                               setFormData({
+                                 ...formData,
+                                 zaposleni: option,
+                                 radnoMesto: selectedEmployeeData.radnoMesto,
+                                 povecanRizik: selectedEmployeeData.povecanRizik,
+                               });
+                               setIsZaposleniOpen(false);
+                             }}
                           >
                             <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
                           </div>
@@ -167,17 +165,29 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                 </div>
               </div>
 
-              <div className="w-full">
-                <Label>Radno mesto *</Label>
-                <Input
-                  type="text"
-                  name="radnoMesto"
-                  value={formData.radnoMesto}
-                  className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
-                  required
-                  disabled
-                />
-              </div>
+                             <div className="w-full">
+                 <div className="flex items-center gap-2">
+                   <Label>Radno mesto *</Label>
+                   {formData.radnoMesto && (
+                     <span className={`text-sm font-medium ${
+                       formData.povecanRizik 
+                         ? 'text-red-600 dark:text-red-400 mb-1.5' 
+                         : 'text-blue-600 dark:text-blue-400 mb-1.5'
+                     }`}>
+                       {formData.povecanRizik ? 'Povećan rizik' : 'Nije povećan rizik'}
+                     </span>
+                   )}
+                 </div>
+                 <div className="relative w-full">
+                   <input
+                     type="text"
+                     value={formData.radnoMesto || ""}
+                     placeholder="Izaberite angazovanog"
+                     readOnly
+                     className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                   />
+                 </div>
+               </div>
 
               <div className="w-full">
                 <Label>Vrsta lekarskog *</Label>
@@ -197,6 +207,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
+                  
                   {isVrstaLekarskogOpen && (
                     <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
                       <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
@@ -251,8 +262,9 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
+                  
                   {isIntervalOpen && (
-                     <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
                       <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
                         {intervalOptions.map((option, index) => (
                           <div
@@ -288,36 +300,23 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                 />
               </div>
 
-              <div className="w-full lg:col-span-2">
-                <Slider
-                  label="Povećan rizik"
-                  optionOne="Da"
-                  optionTwo="Ne"
-                  value={formData.povecanRizik}
-                  onChange={(value) => setFormData(prev => ({ ...prev, povecanRizik: value }))}
-                  size="full"
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-              >
-                Otkaži
-              </Button>
-              <Button
-                type="submit"
-              >
-                Sačuvaj
-              </Button>
-            </div>
-          </div>
-        </form>
-      </div>
+                    </div>
+
+        <div className="flex justify-end gap-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={onClose}
+          >
+            Otkaži
+          </Button>
+          <Button
+            type="submit"
+          >
+            Sačuvaj
+          </Button>
+        </div>
+      </form>
     </Modal>
-  );
-} 
+   );
+ } 

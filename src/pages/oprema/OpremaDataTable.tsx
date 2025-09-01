@@ -304,7 +304,7 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
                       }`}
                     >
                       {key === 'fabrickInventarniBroj' ? (
-                        <span>{item.fabrickBroj}/{item.inventarniBroj}</span>
+                        <span>{item.fabrickBroj}<strong className="font-bold">/</strong>{item.inventarniBroj}</span>
                       ) : key === 'iskljucenaIzPracenja' ? (
                         <Checkbox
                           checked={item[key]}

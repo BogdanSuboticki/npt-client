@@ -13,7 +13,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Operater viljuškara",
     nazivLokacije: "Magacin Novi Sad",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Viljuškara", "Zaštitna oprema", "Alat za održavanje"]
@@ -23,7 +22,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Administrativni radnik",
     nazivLokacije: "Kancelarija Beograd",
     povecanRizik: "Ne",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Ne",
     oprema: ["Računar", "Stolica"]
@@ -33,7 +31,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Zavarivač",
     nazivLokacije: "Proizvodna hala Niš",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Zavarivačka maska", "Zaštitna odela", "Zavarivački aparat"]
@@ -43,7 +40,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Električar održavanja",
     nazivLokacije: "Pogon Subotica",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Multimetar", "Zaštitne rukavice", "Alat za električne radove"]
@@ -53,7 +49,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Magacioner",
     nazivLokacije: "Magacin Kragujevac",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Ne",
     oprema: ["Viljuškara", "Zaštitna kaciga"]
@@ -63,7 +58,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Menadžer proizvodnje",
     nazivLokacije: "Proizvodna hala Beograd",
     povecanRizik: "Ne",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Ne",
     oprema: ["Računar", "Mobilni telefon"]
@@ -73,7 +67,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Laboratorijski tehničar",
     nazivLokacije: "Laboratorija Novi Sad",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Laboratorijski pribor", "Zaštitna odela", "Mikroskop"]
@@ -83,7 +76,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Vozač viljuškara",
     nazivLokacije: "Skladište Čačak",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Viljuškara", "Zaštitna kaciga"]
@@ -93,7 +85,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Inženjer bezbednosti",
     nazivLokacije: "Kancelarija Novi Sad",
     povecanRizik: "Ne",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Ne",
     oprema: ["Računar", "Mobilni telefon"]
@@ -103,7 +94,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Operater na mašini",
     nazivLokacije: "Pogon Valjevo",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Proizvodna mašina", "Zaštitna odela"]
@@ -113,7 +103,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Tehničar održavanja",
     nazivLokacije: "Pogon Pančevo",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Alat za održavanje", "Multimetar"]
@@ -123,7 +112,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Kontrolor kvaliteta",
     nazivLokacije: "Proizvodna hala Šabac",
     povecanRizik: "Ne",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Ne",
     oprema: ["Mikroskop", "Računar"]
@@ -133,7 +121,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Hemijski tehničar",
     nazivLokacije: "Laboratorija Beograd",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Laboratorijski pribor", "Zaštitna odela"]
@@ -143,7 +130,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Referent nabavke",
     nazivLokacije: "Kancelarija Kragujevac",
     povecanRizik: "Ne",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Ne",
     oprema: ["Računar", "Mobilni telefon"]
@@ -153,7 +139,6 @@ const radnaMestaData = [
     nazivRadnogMesta: "Bravar",
     nazivLokacije: "Radionica Zrenjanin",
     povecanRizik: "Da",
-    obaveznaObuka: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Da",
     oprema: ["Alat za bravarske radove", "Zaštitna odela"]
@@ -233,7 +218,6 @@ const columns = [
   { key: "nazivRadnogMesta", label: "Naziv radnog mesta", sortable: true },
   { key: "nazivLokacije", label: "Naziv lokacije", sortable: true },
   { key: "povecanRizik", label: "Povećan rizik", sortable: true },
-  { key: "obaveznaObuka", label: "Obavezna obuka", sortable: true },
   { key: "obavezanOftamoloskiPregled", label: "Obavezan oftamološki pregled", sortable: true },
   { key: "obavezanPregledPoDrugomOsnovu", label: "Obavezan pregled po drugom osnovu", sortable: true },
   { key: "oprema", label: "Oprema", sortable: false },
@@ -292,7 +276,6 @@ const RadnaMesta: React.FC = () => {
       id: data.length + 1,
       ...newData,
       povecanRizik: newData.povecanRizik ? "Da" : "Ne",
-      obaveznaObuka: newData.obaveznaObuka ? "Da" : "Ne",
       obavezanOftamoloskiPregled: newData.obavezanOftamoloskiPregled ? "Da" : "Ne",
       obavezanPregledPoDrugomOsnovu: newData.obavezanPregledPoDrugomOsnovu ? "Da" : "Ne",
       oprema: newData.oprema || []

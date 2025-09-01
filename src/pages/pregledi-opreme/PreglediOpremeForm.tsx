@@ -43,7 +43,6 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
   ];
 
   // Example options - replace with actual data
-  const lokacijaOptions = ["Lokacija 1", "Lokacija 2", "Lokacija 3"];
   const intervalOptions = ["6", "36"];
   const statusOptions = ["Ispravno", "Neispravno"];
 

@@ -88,6 +88,7 @@ import PovredePage from "./pages/povrede/page";
 import PreglediOpremePage from "./pages/pregledi-opreme/page";
 import Firme from "./pages/firme/page";
 import ZaposleniPage from "./pages/zaposleni/page";
+import AngazovanjaPage from "./pages/angazovanja/page";
 import ZaduzenjaLzoPage from "./pages/zaduzenja-lzo/page";
 
 export default function App() {
@@ -113,6 +114,7 @@ export default function App() {
             <Route path="/pregledi-opreme" element={<PreglediOpremePage />} />
             <Route path="/firme" element={<Firme />} />
             <Route path="/zaposleni" element={<ZaposleniPage />} />
+            <Route path="/angazovanja" element={<AngazovanjaPage />} />
             <Route path="/zaduzenja-lzo" element={<ZaduzenjaLzoPage />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

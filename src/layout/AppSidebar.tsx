@@ -58,6 +58,11 @@ const navItems: NavItem[] = [
     path: "/zaposleni",
   },
   {
+    icon: <ZaposleniIcon />,
+    name: "Angažovanja",
+    path: "/angazovanja",
+  },
+  {
     icon: <RadnaMestaIcon />,
     name: "Radna mesta",
     path: "/radna-mesta",

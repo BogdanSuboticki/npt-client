@@ -30,9 +30,10 @@ interface DataTableTwoProps {
   showOpremaButton?: boolean;
   showResultsText?: boolean;
   showItemsPerPage?: boolean;
+  showEditButton?: boolean;
 }
 
-export default function DataTableTwo({ data: initialData, columns, onOpremaClick, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showOpremaButton = true, showResultsText = true, showItemsPerPage = true }: DataTableTwoProps) {
+export default function DataTableTwo({ data: initialData, columns, onOpremaClick, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showOpremaButton = true, showResultsText = true, showItemsPerPage = true, showEditButton = true }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -267,12 +268,14 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
                       >
                         <DeleteButtonIcon className="size-4" />
                       </button>
-                      <button 
-                        onClick={() => onEditClick?.(item)}
-                        className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                      >
-                        <EditButtonIcon className="size-4" />
-                      </button> 
+                      {showEditButton && (
+                        <button 
+                          onClick={() => onEditClick?.(item)}
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -17,15 +17,41 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
     povecanRizik: false,
     obavezanOftamoloskiPregled: false,
     obavezanPregledPoDrugomOsnovu: false,
-    lekarskiPregledPovecanRizik: ""
+    lekarskiPregledPovecanRizik: "",
+    oprema: [] as string[]
   });
 
   // Add state for dropdowns
   const [isLekarskiPregledOpen, setIsLekarskiPregledOpen] = React.useState(false);
+  const [isOpremaOpen, setIsOpremaOpen] = React.useState(false);
   const lekarskiPregledRef = useRef<HTMLDivElement>(null);
+  const opremaRef = useRef<HTMLDivElement>(null);
 
   // Lekarski pregled options
   const lekarskiPregledOptions = ["Da", "Ne"];
+
+  // Equipment options
+  const opremaOptions = [
+    "Viljuškara",
+    "Zaštitna kaciga", 
+    "Zaštitne rukavice",
+    "Sigurnosna obuća",
+    "Zaštitni pojas",
+    "Zaštitne naočare",
+    "Zaštitna odela",
+    "Multimetar",
+    "Alat za održavanje",
+    "Laboratorijski pribor",
+    "Mikroskop",
+    "Računar",
+    "Mobilni telefon",
+    "Stolica",
+    "Zavarivačka maska",
+    "Zavarivački aparat",
+    "Alat za električne radove",
+    "Alat za bravarske radove",
+    "Proizvodna mašina"
+  ];
 
   // Add click outside handler for dropdowns
   useEffect(() => {
@@ -35,6 +61,9 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
       // Close dropdowns
       if (lekarskiPregledRef.current && !lekarskiPregledRef.current.contains(target)) {
         setIsLekarskiPregledOpen(false);
+      }
+      if (opremaRef.current && !opremaRef.current.contains(target)) {
+        setIsOpremaOpen(false);
       }
     };
 
@@ -50,6 +79,24 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
     }
     onSave(formData);
     onClose();
+  };
+
+  const handleOpremaSelectAll = () => {
+    if (formData.oprema.length === opremaOptions.length) {
+      // If all are selected, deselect all
+      setFormData({...formData, oprema: []});
+    } else {
+      // If not all are selected, select all
+      setFormData({...formData, oprema: [...opremaOptions]});
+    }
+  };
+
+  const handleOpremaOptionChange = (value: string) => {
+    const newSelection = formData.oprema.includes(value)
+      ? formData.oprema.filter(item => item !== value)
+      : [...formData.oprema, value];
+    
+    setFormData({...formData, oprema: newSelection});
   };
 
   return (
@@ -72,6 +119,73 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
               onChange={(e) => setFormData({...formData, nazivRadnogMesta: e.target.value})}
               className="bg-[#F9FAFB] dark:bg-[#101828]"
             />
+          </div>
+
+          <div className="col-span-1">
+            <Label>Oprema</Label>
+            <div className="relative w-full" ref={opremaRef}>
+              <button
+                type="button"
+                onClick={() => setIsOpremaOpen(!isOpremaOpen)}
+                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              >
+                <span>
+                  {formData.oprema.length === 0 
+                    ? "Izaberi opremu" 
+                    : formData.oprema.length === 1 
+                      ? formData.oprema[0]
+                      : `${formData.oprema.length} stavki izabrano`
+                  }
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isOpremaOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isOpremaOpen && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10">
+                      <div
+                        className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                        onClick={handleOpremaSelectAll}
+                      >
+                        <Checkbox
+                          checked={formData.oprema.length === opremaOptions.length}
+                          onChange={handleOpremaSelectAll}
+                          className="w-4 h-4 min-w-[16px] min-h-[16px] flex-shrink-0"
+                          id="select-all-oprema"
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Izaberi sve</span>
+                      </div>
+                    </div>
+                    <div className="pt-1">
+                      {opremaOptions.map((option, index) => (
+                        <div
+                          key={option}
+                          className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                            index === opremaOptions.length - 1 ? 'rounded-bl-lg' : ''
+                          }`}
+                          onClick={() => handleOpremaOptionChange(option)}
+                        >
+                          <Checkbox
+                            checked={formData.oprema.includes(option)}
+                            onChange={() => handleOpremaOptionChange(option)}
+                            className="w-4 h-4 min-w-[16px] min-h-[16px] flex-shrink-0"
+                            id={`oprema-${option}`}
+                          />
+                          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate">{option}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="col-span-1">

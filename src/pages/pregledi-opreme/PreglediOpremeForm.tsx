@@ -42,8 +42,8 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     { naziv: "Pumpa", vrsta: "Oprema za rad", lokacija: "Lokacija 3" }
   ];
 
-  // Example options - replace with actual data
-  const intervalOptions = ["6", "36"];
+  // Interval is fixed to 36 months
+  const intervalOptions = ["36"];
   const statusOptions = ["Ispravno", "Neispravno"];
 
   // Add click outside handler for dropdowns

@@ -1,64 +1,52 @@
-import React, { useState } from 'react';
-import OpremaDataTable from './OpremaDataTable';
-import OpremaForm from './OpremaForm';
-import Button from '../../components/ui/button/Button';
+"use client";
+
+import React, { useState } from "react";
+import AngazovanjaDataTable from "./AngazovanjaDataTable";
+import AngazovanjaForm from "./AngazovanjaForm";
+import Button from "../../components/ui/button/Button";
 
 // Sample data for the table
-const opremaData = [
+const angazovanjaData = [
   {
     id: 1,
     redniBroj: 1,
-    nazivLZS: "Viljuškar",
-    vrstaOpreme: "Oprema za rad",
-    fabrickBroj: "FB123456",
-    inventarniBroj: "INV789",
-    lokacija: "Skladište A",
-    godinaProizvodnje: 2020,
-    intervalPregleda: 6,
-    napomena: "Redovno održavanje",
-    iskljucenaIzPracenja: false,
-    standard: "EN ISO 3691-1"
+    imePrezime: "Petar Petrović",
+    radnoMesto: "Inženjer bezbednosti",
+    vrstaAngazovanja: "Redovno angažovanje",
+    lokacija: "Beograd",
+    pocetakAngazovanja: "2023-01-15",
+    prestanakAngazovanja: null,
   },
   {
     id: 2,
     redniBroj: 2,
-    nazivLZS: "Kran",
-    vrstaOpreme: "Oprema za rad",
-    fabrickBroj: "FB789012",
-    inventarniBroj: "INV456",
-    lokacija: "Proizvodna hala 1",
-    godinaProizvodnje: 2019,
-    intervalPregleda: 12,
-    napomena: "Potrebno zamena delova",
-    iskljucenaIzPracenja: false,
-    standard: "EN 13001"
+    imePrezime: "Ana Anić",
+    radnoMesto: "Tehničar za radnu zaštitu",
+    vrstaAngazovanja: "Stručna praksa",
+    lokacija: "Novi Sad",
+    pocetakAngazovanja: "2023-03-01",
+    prestanakAngazovanja: "2023-09-01",
   },
   {
     id: 3,
     redniBroj: 3,
-    nazivLZS: "Transformator",
-    vrstaOpreme: "Elektro i gromobranska instalacija",
-    fabrickBroj: "FB345678",
-    inventarniBroj: "INV123",
-    lokacija: "Lokacija 1",
-    godinaProizvodnje: 2021,
-    intervalPregleda: 24,
-    napomena: "Godišnji pregled",
-    iskljucenaIzPracenja: false,
-    standard: "IEC 60076"
-  }
+    imePrezime: "Marko Marković",
+    radnoMesto: "Koordinator bezbednosti",
+    vrstaAngazovanja: "Redovno angažovanje",
+    lokacija: "Niš",
+    pocetakAngazovanja: "2022-11-10",
+    prestanakAngazovanja: null,
+  },
 ];
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "nazivLZS", label: "Naziv LZS", sortable: true },
-  { key: "vrstaOpreme", label: "Vrsta opreme", sortable: true },
-  { key: "standard", label: "Standard", sortable: true },
+  { key: "imePrezime", label: "Ime i prezime zaposlenog", sortable: true },
+  { key: "radnoMesto", label: "Radno mesto", sortable: true },
+  { key: "vrstaAngazovanja", label: "Vrsta angažovanja", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },
-  { key: "fabrickInventarniBroj", label: "Fabrički/Inventarni broj", sortable: true },
-  { key: "godinaProizvodnje", label: "Godina proizvodnje", sortable: true },
-  { key: "intervalPregleda", label: "Interval pregleda (meseci)", sortable: true },
-  { key: "napomena", label: "Napomena", sortable: true }
+  { key: "pocetakAngazovanja", label: "Početak angažovanja", sortable: true },
+  { key: "prestanakAngazovanja", label: "Prestanak angažovanja", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -72,7 +60,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error in Oprema component:', error);
+    console.error('Error in Angazovanja component:', error);
     console.error('Error info:', errorInfo);
   }
 
@@ -92,7 +80,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const Oprema: React.FC = () => {
+const AngazovanjaPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
 
   const handleSave = (data: any) => {
@@ -107,7 +95,7 @@ const Oprema: React.FC = () => {
       <div className="container mx-auto py-8">
         <div className="mb-6 flex items-center">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Oprema
+           Angažovanja
           </h1>
           <Button
             onClick={() => setShowForm(true)}
@@ -132,13 +120,13 @@ const Oprema: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <OpremaDataTable 
-            data={opremaData}
+          <AngazovanjaDataTable 
+            data={angazovanjaData}
             columns={columns}
           />
         </div>
 
-        <OpremaForm 
+        <AngazovanjaForm 
           isOpen={showForm}
           onClose={() => setShowForm(false)}
           onSave={handleSave}
@@ -148,4 +136,4 @@ const Oprema: React.FC = () => {
   );
 };
 
-export default Oprema; 
+export default AngazovanjaPage;

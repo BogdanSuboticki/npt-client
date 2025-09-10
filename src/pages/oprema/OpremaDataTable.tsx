@@ -23,7 +23,7 @@ interface Column {
 interface OpremaData {
   id: number;
   redniBroj: number;
-  nazivOpreme: string;
+  nazivLZS: string;
   vrstaOpreme: string;
   fabrickBroj: string;
   inventarniBroj: string;
@@ -32,6 +32,7 @@ interface OpremaData {
   intervalPregleda: number;
   napomena: string;
   iskljucenaIzPracenja: boolean;
+  standard?: string;
   [key: string]: any;
 }
 
@@ -43,9 +44,70 @@ interface DataTableTwoProps {
 export default function OpremaDataTable({ data: initialData, columns }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
+  const effectiveColumns = useMemo(() => {
+    const hasStandard = columns?.some(col => col.key === 'standard');
+    if (hasStandard) return columns;
+    return [
+      ...columns,
+      { key: 'standard', label: 'Standard', sortable: true } as Column,
+    ];
+  }, [columns]);
+  const [sortKey, setSortKey] = useState<string>(effectiveColumns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [data, setData] = useState<OpremaData[]>(initialData);
+
+  // Seed mock data when none provided
+  useEffect(() => {
+    if (!initialData || initialData.length === 0) {
+      setData([
+        {
+          id: 1,
+          redniBroj: 1,
+          nazivOpreme: 'Zaštitna kaciga',
+          nazivLZS: 'Zaštitna kaciga',
+          vrstaOpreme: 'LZS',
+          fabrickBroj: 'FK-001',
+          inventarniBroj: 'INV-001',
+          lokacija: 'Magacin',
+          godinaProizvodnje: 2023,
+          intervalPregleda: 24,
+          napomena: '',
+          iskljucenaIzPracenja: false,
+          standard: 'EN 397',
+        },
+        {
+          id: 2,
+          redniBroj: 2,
+          nazivOpreme: 'Zaštitne rukavice',
+          nazivLZS: 'Zaštitne rukavice',
+          vrstaOpreme: 'LZS',
+          fabrickBroj: 'FK-002',
+          inventarniBroj: 'INV-002',
+          lokacija: 'Skladište 1',
+          godinaProizvodnje: 2024,
+          intervalPregleda: 6,
+          napomena: '',
+          iskljucenaIzPracenja: false,
+          standard: 'EN 388',
+        },
+        {
+          id: 3,
+          redniBroj: 3,
+          nazivOpreme: 'Sigurnosna obuća',
+          nazivLZS: 'Sigurnosna obuća',
+          vrstaOpreme: 'LZS',
+          fabrickBroj: 'FK-003',
+          inventarniBroj: 'INV-003',
+          lokacija: 'Magacin',
+          godinaProizvodnje: 2022,
+          intervalPregleda: 12,
+          napomena: '',
+          iskljucenaIzPracenja: false,
+          standard: 'EN ISO 20345',
+        },
+      ]);
+    }
+  }, [initialData]);
   
   // Get unique values for dropdowns
   const uniqueNaziviOpreme = useMemo(() => {
@@ -228,12 +290,12 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
           <Table>
             <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
               <TableRow>
-                {columns.map(({ key, label, sortable }, index) => (
+                {effectiveColumns.map(({ key, label, sortable }, index) => (
                   <TableCell
                     key={key}
                     isHeader
                     className={`px-4 py-3 border border-gray-100 dark:border-white/[0.05] ${
-                      index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
+                      index === 0 ? 'border-l-0' : index === effectiveColumns.length - 1 ? 'border-r-0' : ''
                     }`}
                   >
                     {sortable ? (
@@ -296,11 +358,11 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
             <TableBody>
               {currentData.map((item) => (
                 <TableRow key={item.id}>
-                  {columns.map(({ key }, index) => (
+                  {effectiveColumns.map(({ key }, index) => (
                     <TableCell
                       key={key}
-                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                        index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
+                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 ${
+                        index === 0 ? 'border-l-0' : index === effectiveColumns.length - 1 ? 'border-r-0' : ''
                       }`}
                     >
                       {key === 'fabrickInventarniBroj' ? (

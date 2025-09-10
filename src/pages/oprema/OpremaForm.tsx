@@ -18,7 +18,7 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
     inventarniBroj: "",
     lokacija: "",
     godinaProizvodnje: new Date().getFullYear(),
-    intervalPregleda: 12,
+    intervalPregleda: 36,
     napomena: ""
   });
 
@@ -95,7 +95,7 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
               <div className="col-span-1">
-                <Label>Naziv opreme *</Label>
+                <Label>Naziv LZS *</Label>
                 <Input 
                   type="text" 
                   value={formData.nazivOpreme}
@@ -250,14 +250,15 @@ export default function OpremaForm({ isOpen, onClose, onSave }: OpremaFormProps)
 
               <div className="col-span-1">
                 <Label>Interval pregleda (meseci) *</Label>
-                <Input 
-                  type="number" 
-                  value={formData.intervalPregleda}
-                  onChange={(e) => setFormData({...formData, intervalPregleda: parseInt(e.target.value)})}
-                  className="bg-[#F9FAFB] dark:bg-[#101828]"
-                  required
-                  min="1"
-                />
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={formData.intervalPregleda}
+                    readOnly
+                    disabled
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
+                </div>
               </div>
 
               <div className="col-span-1 lg:col-span-2">

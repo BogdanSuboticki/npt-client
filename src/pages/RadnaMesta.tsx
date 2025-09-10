@@ -4,7 +4,6 @@ import RadnoMestoForm from './RadnoMestoForm';
 import Button from "../components/ui/button/Button";
 import { Modal } from "../components/ui/modal";
 import Label from "../components/form/Label";
-import Input from "../components/form/input/InputField";
 
 // Sample data for the table
 const radnaMestaData = [
@@ -216,7 +215,6 @@ const lzsData = {
 const columns = [
   { key: "id", label: "", sortable: true },
   { key: "nazivRadnogMesta", label: "Naziv radnog mesta", sortable: true },
-  { key: "nazivLokacije", label: "Naziv lokacije", sortable: true },
   { key: "povecanRizik", label: "Povećan rizik", sortable: true },
   { key: "obavezanOftamoloskiPregled", label: "Obavezan oftamološki pregled", sortable: true },
   { key: "obavezanPregledPoDrugomOsnovu", label: "Obavezan pregled po drugom osnovu", sortable: true },
@@ -245,16 +243,28 @@ const RadnaMesta: React.FC = () => {
     standard: ""
   });
   
-  // Edit state
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingLZSId, setEditingLZSId] = useState<number | null>(null);
-
   // Add state for dropdowns
-  const [isRokOpen, setIsRokOpen] = useState(false);
-  const rokRef = useRef<HTMLDivElement>(null);
+  const [isLzsOpen, setIsLzsOpen] = useState(false);
+  const lzsRef = useRef<HTMLDivElement>(null);
 
-  // Rok options
-  const rokOptions = ["1", "3", "6", "12", "24"];
+  // Options for LZS based on selected workplace equipment
+  const lzsOptions = (selectedRadnoMesto?.oprema as string[]) || [];
+
+  // Infer defaults for rok and standard by selected LZS name
+  const inferDefaults = (name: string): { rok: string; standard: string } => {
+    const lower = name.toLowerCase();
+    if (lower.includes('kacig')) return { rok: '6', standard: 'ISO-2023-020' };
+    if (lower.includes('rukavic')) return { rok: '6', standard: 'ISO-2023-010' };
+    if (lower.includes('viljuškar') || lower.includes('viljusk')) return { rok: '12', standard: 'ISO-2023-019' };
+    if (lower.includes('alat')) return { rok: '24', standard: 'ISO-2023-033' };
+    if (lower.includes('multimetar')) return { rok: '24', standard: 'ISO-2023-009' };
+    if (lower.includes('laborator') && lower.includes('pribor')) return { rok: '12', standard: 'ISO-2023-016' };
+    if (lower.includes('odel') || lower.includes('odij')) return { rok: '6', standard: 'ISO-2023-017' };
+    if (lower.includes('mikroskop')) return { rok: '60', standard: 'ISO-2023-018' };
+    if (lower.includes('računar') || lower.includes('racunar')) return { rok: '36', standard: 'ISO-2023-014' };
+    if (lower.includes('mobilni')) return { rok: '24', standard: 'ISO-2023-015' };
+    return { rok: '12', standard: 'ISO-2023-000' };
+  };
 
   // Add click outside handler for dropdowns
   useEffect(() => {
@@ -262,8 +272,8 @@ const RadnaMesta: React.FC = () => {
       const target = event.target as HTMLElement;
       
       // Close dropdowns
-      if (rokRef.current && !rokRef.current.contains(target)) {
-        setIsRokOpen(false);
+      if (lzsRef.current && !lzsRef.current.contains(target)) {
+        setIsLzsOpen(false);
       }
     };
 
@@ -291,70 +301,33 @@ const RadnaMesta: React.FC = () => {
   const closeLZSModal = () => {
     setShowLZSModal(false);
     setSelectedRadnoMesto(null);
-    // Reset form and edit state
+    // Reset form state
     setNewLZS({ lzs: "", rok: "", standard: "" });
-    setIsEditing(false);
-    setEditingLZSId(null);
   };
 
   const handleAddLZS = () => {
     if (newLZS.lzs && newLZS.rok && newLZS.standard && selectedRadnoMesto) {
       const currentLZSData = lzsDataState[selectedRadnoMesto.id as keyof typeof lzsDataState] || [];
-      
-      if (isEditing && editingLZSId) {
-        // Update existing LZS
-        const updatedLZSData = currentLZSData.map((item: any) => 
-          item.id === editingLZSId 
-            ? { ...item, lzs: newLZS.lzs, rok: parseInt(newLZS.rok), standard: newLZS.standard }
-            : item
-        );
-        
-        setLzsDataState({
-          ...lzsDataState,
-          [selectedRadnoMesto.id]: updatedLZSData
-        });
-        
-        // Reset edit state
-        setIsEditing(false);
-        setEditingLZSId(null);
-      } else {
-        // Add new LZS
-        const newId = Math.max(...currentLZSData.map((item: any) => item.id), 0) + 1;
-        
-        const newLZSEntry = {
-          id: newId,
-          lzs: newLZS.lzs,
-          rok: parseInt(newLZS.rok),
-          standard: newLZS.standard
-        };
 
-        setLzsDataState({
-          ...lzsDataState,
-          [selectedRadnoMesto.id]: [...currentLZSData, newLZSEntry]
-        });
-      }
+      const newId = Math.max(...currentLZSData.map((item: any) => item.id), 0) + 1;
+      const newLZSEntry = {
+        id: newId,
+        lzs: newLZS.lzs,
+        rok: parseInt(newLZS.rok),
+        standard: newLZS.standard
+      };
+
+      setLzsDataState({
+        ...lzsDataState,
+        [selectedRadnoMesto.id]: [...currentLZSData, newLZSEntry]
+      });
 
       // Reset form
       setNewLZS({ lzs: "", rok: "", standard: "" });
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setNewLZS(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleEditLZS = (lzsItem: any) => {
-    setNewLZS({
-      lzs: lzsItem.lzs,
-      rok: lzsItem.rok.toString(),
-      standard: lzsItem.standard
-    });
-    setIsEditing(true);
-    setEditingLZSId(lzsItem.id);
-  };
+  
 
   const handleDeleteLZS = (lzsItem: any) => {
     if (selectedRadnoMesto) {
@@ -419,7 +392,7 @@ const RadnaMesta: React.FC = () => {
           <div className="flex flex-col">
            <div className="mb-6">
              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-               Sredstva lične zaštite za {selectedRadnoMesto?.nazivRadnogMesta}
+               Lična zaštititna sredstva za {selectedRadnoMesto?.nazivRadnogMesta}
              </h2>
            </div>
            
@@ -431,9 +404,9 @@ const RadnaMesta: React.FC = () => {
                 showFilters={false}
                 showPagination={false}
                 showOpremaButton={false}
+                showEditButton={false}
                 showResultsText={false}
                 showItemsPerPage={false}
-                onEditClick={handleEditLZS}
                 onDeleteClick={handleDeleteLZS}
               />
             </div>
@@ -441,34 +414,21 @@ const RadnaMesta: React.FC = () => {
             {/* Add new LZS form */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                {isEditing ? "Izmeni LZS" : "Dodaj novi LZS"}
+                Dodaj LZS
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <Label>LZS</Label>
-                  <Input 
-                    type="text" 
-                    value={newLZS.lzs}
-                    onChange={(e) => handleInputChange('lzs', e.target.value)}
-                    className="bg-[#F9FAFB] dark:bg-[#101828]"
-                    placeholder="Unesite naziv LZS-a"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Rok (meseci)
-                  </label>
-                  <div className="relative w-full" ref={rokRef}>
+                  <Label>Oprema (LZS)</Label>
+                  <div className="relative w-full" ref={lzsRef}>
                     <button
                       type="button"
-                      onClick={() => setIsRokOpen(!isRokOpen)}
+                      onClick={() => setIsLzsOpen(!isLzsOpen)}
                       className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
                     >
-                      <span>{newLZS.rok || "Izaberi opciju"}</span>
+                      <span>{newLZS.lzs || "Izaberi opremu"}</span>
                       <svg
-                        className={`w-4 h-4 transition-transform ${isRokOpen ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 transition-transform ${isLzsOpen ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -476,21 +436,19 @@ const RadnaMesta: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    {isRokOpen && (
+                    {isLzsOpen && (
                       <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                         <div className="pr-1">
-                          {rokOptions.map((option: string, index: number) => (
+                          {lzsOptions.map((option: string, index: number) => (
                             <div
                               key={option}
                               className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                                newLZS.rok === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                              } ${index === rokOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                                newLZS.lzs === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                              } ${index === lzsOptions.length - 1 ? 'rounded-b-lg' : ''}`}
                               onClick={() => {
-                                setNewLZS({
-                                  ...newLZS,
-                                  rok: option,
-                                });
-                                setIsRokOpen(false);
+                                const defaults = inferDefaults(option);
+                                setNewLZS({ lzs: option, rok: defaults.rok, standard: defaults.standard });
+                                setIsLzsOpen(false);
                               }}
                             >
                               <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
@@ -501,35 +459,39 @@ const RadnaMesta: React.FC = () => {
                     )}
                   </div>
                 </div>
-                
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Interval pregleda (meseci)
+                  </label>
+                  <div className="relative w-full">
+                    <input
+                      type="text"
+                      value={newLZS.rok || ""}
+                      placeholder="Automatski"
+                      readOnly
+                      className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <Label>Standard</Label>
-                  <Input 
-                    type="text" 
-                    value={newLZS.standard}
-                    onChange={(e) => handleInputChange('standard', e.target.value)}
-                    className="bg-[#F9FAFB] dark:bg-[#101828]"
-                    placeholder="Unesite standard"
-                  />
+                  <div className="relative w-full">
+                    <input
+                      type="text"
+                      value={newLZS.standard || ""}
+                      placeholder="Automatski"
+                      readOnly
+                      className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
           <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            {isEditing && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditingLZSId(null);
-                  setNewLZS({ lzs: "", rok: "", standard: "" });
-                }}
-              >
-                Otkaži
-              </Button>
-            )}
             <Button
               size="sm"
               onClick={handleAddLZS}
@@ -548,7 +510,7 @@ const RadnaMesta: React.FC = () => {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              {isEditing ? "Sačuvaj izmene" : "Dodaj"}
+              Dodaj
             </Button>
           </div>
         </div>

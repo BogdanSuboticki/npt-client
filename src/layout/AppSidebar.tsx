@@ -25,6 +25,7 @@ import {
   CestaPitanjaIcon,
   TehnickaPodrskaIcon,
   MojNalogIcon,
+  TaskIcon,
 } from "../icons";
 
 // Import the shop icon for Firme
@@ -56,6 +57,11 @@ const navItems: NavItem[] = [
     icon: <ZaposleniIcon />,
     name: "Zaposleni",
     path: "/zaposleni",
+  },
+  {
+    icon: <ZaposleniIcon />,
+    name: "Angažovanja",
+    path: "/angazovanja",
   },
   {
     icon: <RadnaMestaIcon />,

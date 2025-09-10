@@ -20,7 +20,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
       id: number;
       vrstaLzs: string;
       standard: string;
-      dodatniOpis: string;
       datumZaduzenja: Date | null;
       rok: string;
       narednoZaduzenje: Date | null;
@@ -38,7 +37,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
       id: number;
       vrstaLzs: string;
       standard: string;
-      dodatniOpis: string;
       datumZaduzenja: Date | null;
       rok: string;
       narednoZaduzenje: Date | null;
@@ -51,7 +49,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 1,
           vrstaLzs: "Zaštitna kaciga",
           standard: "EN 397",
-          dodatniOpis: "Industrijska zaštitna kaciga",
           datumZaduzenja: null,
           rok: "24",
           narednoZaduzenje: null
@@ -60,7 +57,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 2,
           vrstaLzs: "Zaštitne rukavice",
           standard: "EN 388",
-          dodatniOpis: "Rukavice za mehaničke rizike",
           datumZaduzenja: null,
           rok: "6",
           narednoZaduzenje: null
@@ -69,7 +65,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 3,
           vrstaLzs: "Sigurnosne obuće",
           standard: "EN ISO 20345",
-          dodatniOpis: "Obuća sa zaštitnim prstom",
           datumZaduzenja: null,
           rok: "12",
           narednoZaduzenje: null
@@ -83,7 +78,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 1,
           vrstaLzs: "Zaštitna kaciga",
           standard: "EN 397",
-          dodatniOpis: "Industrijska zaštitna kaciga",
           datumZaduzenja: null,
           rok: "24",
           narednoZaduzenje: null
@@ -92,7 +86,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 2,
           vrstaLzs: "Zaštitne rukavice",
           standard: "EN 388",
-          dodatniOpis: "Rukavice za mehaničke rizike",
           datumZaduzenja: null,
           rok: "6",
           narednoZaduzenje: null
@@ -101,7 +94,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 3,
           vrstaLzs: "Sigurnosna obuća",
           standard: "EN ISO 20345",
-          dodatniOpis: "Obuća sa zaštitnim prstom",
           datumZaduzenja: null,
           rok: "12",
           narednoZaduzenje: null
@@ -110,7 +102,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 4,
           vrstaLzs: "Zaštitni pojas",
           standard: "EN 361",
-          dodatniOpis: "Pojas za zaštitu od pada",
           datumZaduzenja: null,
           rok: "36",
           narednoZaduzenje: null
@@ -124,7 +115,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 1,
           vrstaLzs: "Zaštitna kaciga",
           standard: "EN 397",
-          dodatniOpis: "Industrijska zaštitna kaciga",
           datumZaduzenja: null,
           rok: "24",
           narednoZaduzenje: null
@@ -133,7 +123,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 2,
           vrstaLzs: "Zaštitne rukavice",
           standard: "EN 388",
-          dodatniOpis: "Rukavice za mehaničke rizike",
           datumZaduzenja: null,
           rok: "6",
           narednoZaduzenje: null
@@ -142,7 +131,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 3,
           vrstaLzs: "Sigurnosna obuća",
           standard: "EN ISO 20345",
-          dodatniOpis: "Obuća sa zaštitnim prstom",
           datumZaduzenja: null,
           rok: "12",
           narednoZaduzenje: null
@@ -151,7 +139,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 4,
           vrstaLzs: "Zaštitne naočare",
           standard: "EN 166",
-          dodatniOpis: "Naočare za zaštitu očiju",
           datumZaduzenja: null,
           rok: "24",
           narednoZaduzenje: null
@@ -160,7 +147,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           id: 5,
           vrstaLzs: "Zaštitna odela",
           standard: "EN 11612",
-          dodatniOpis: "Odelo za zaštitu od toplote i plamena",
           datumZaduzenja: null,
           rok: "24",
           narednoZaduzenje: null
@@ -311,10 +297,9 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
               <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
                 {/* Header */}
                 <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                                     <div className="grid grid-cols-6 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
+                                     <div className="grid grid-cols-5 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
                      <div>Naziv LZS *</div>
                      <div>Standard</div>
-                     <div>Dodatni opis</div>
                      <div>Datum zaduženja *</div>
                      <div>Rok (m) *</div>
                      <div>Naredno zaduženje</div>
@@ -324,7 +309,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
                    {formData.oprema.map((item) => (
                      <div key={item.id} className="px-4 py-3">
-                                               <div className="grid grid-cols-6 gap-4 min-w-[800px] items-start">
+                                               <div className="grid grid-cols-5 gap-4 min-w-[800px] items-start">
                          {/* Naziv LZS */}
                          <div>
                            <input
@@ -345,25 +330,6 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                           />
                         </div>
                        
-                                                 {/* Dodatni opis */}
-                         <div>
-                           <textarea
-                             value={item.dodatniOpis}
-                             readOnly
-                             rows={1}
-                             className="w-full min-h-[44px] px-4 py-2 pt-2.5 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed resize-none overflow-hidden"
-                             style={{
-                               height: 'auto',
-                               minHeight: '44px'
-                             }}
-                             ref={(el) => {
-                               if (el) {
-                                 el.style.height = 'auto';
-                                 el.style.height = Math.max(44, el.scrollHeight) + 'px';
-                               }
-                             }}
-                           />
-                         </div>
                        
                                                                                                    {/* Datum zaduženja */}
                           <div>

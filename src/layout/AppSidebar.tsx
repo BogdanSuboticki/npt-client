@@ -25,7 +25,6 @@ import {
   CestaPitanjaIcon,
   TehnickaPodrskaIcon,
   MojNalogIcon,
-  TaskIcon,
 } from "../icons";
 
 // Import the shop icon for Firme

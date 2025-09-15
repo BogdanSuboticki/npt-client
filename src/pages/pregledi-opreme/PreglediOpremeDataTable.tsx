@@ -164,7 +164,7 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="w-full lg:w-64">
+            <div className="w-full lg:w-48">
               <FilterDropdown
                 label="Oprema"
                 options={uniqueOprema}
@@ -180,7 +180,7 @@ export default function PreglediOpremeDataTable({ data: initialData, columns }: 
                 onSelectionChange={setSelectedVrsteOpreme}
               />
             </div>
-            <div className="w-full lg:w-48">
+            <div className="w-full lg:w-40">
               <FilterDropdown
                 label="Status"
                 options={statusOptions}

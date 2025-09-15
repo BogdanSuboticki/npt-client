@@ -4,44 +4,74 @@ import React, { useState } from "react";
 import FirmeDataTable from "./FirmeDataTable";
 import FirmeForm from "./FirmeForm";
 import Button from "../../components/ui/button/Button";
+import { usePageContext } from "../../hooks/usePageContext";
+import TableExportButtons from "../../components/ui/table/TableExportButtons";
 
-// Sample data for the table
-const firmeData = [
+// Sample data for Moja Firma context
+const mojaFirmaData = [
   {
     id: 1,
     redniBroj: 1,
-    naziv: "Firma 1",
-    adresa: "Adresa 1",
-    mesto: "Mesto 1",
+    naziv: "Moja Firma 1",
+    adresa: "Adresa Moja Firma 1",
+    mesto: "Beograd",
     pib: "1234567890",
     maticniBroj: "1234567890",
-    delatnost: "Delatnost 1",
-    datumIstekaUgovora: new Date("2024-01-01"),
+    delatnost: "IT delatnost",
+    datumIstekaUgovora: new Date("2024-12-31"),
     aktivan: true,
   },
   {
     id: 2,
     redniBroj: 2,
-    naziv: "Firma 2",
-    adresa: "Adresa 2",
-    mesto: "Mesto 2",
-    pib: "1234567890",
-    maticniBroj: "1234567890",
-    delatnost: "Delatnost 2",
-    datumIstekaUgovora: new Date("2024-01-01"),
+    naziv: "Moja Firma 2",
+    adresa: "Adresa Moja Firma 2",
+    mesto: "Novi Sad",
+    pib: "0987654321",
+    maticniBroj: "0987654321",
+    delatnost: "Proizvodnja",
+    datumIstekaUgovora: new Date("2024-06-30"),
+    aktivan: true,
+  },
+];
+
+// Sample data for Komitenti context
+const komitentiData = [
+  {
+    id: 1,
+    redniBroj: 1,
+    naziv: "Komitent Firma 1",
+    adresa: "Adresa Komitent 1",
+    mesto: "Niš",
+    pib: "1122334455",
+    maticniBroj: "1122334455",
+    delatnost: "Uslužne delatnosti",
+    datumIstekaUgovora: new Date("2024-03-15"),
+    aktivan: true,
+  },
+  {
+    id: 2,
+    redniBroj: 2,
+    naziv: "Komitent Firma 2",
+    adresa: "Adresa Komitent 2",
+    mesto: "Kragujevac",
+    pib: "5566778899",
+    maticniBroj: "5566778899",
+    delatnost: "Trgovina",
+    datumIstekaUgovora: new Date("2024-09-20"),
     aktivan: true,
   },
   {
     id: 3,
     redniBroj: 3,
-    naziv: "Firma 3",
-    adresa: "Adresa 3",
-    mesto: "Mesto 3",
-    pib: "1234567890",
-    maticniBroj: "1234567890",
-    delatnost: "Delatnost 3",
-    datumIstekaUgovora: new Date("2024-01-01"),
-    aktivan: true,
+    naziv: "Komitent Firma 3",
+    adresa: "Adresa Komitent 3",
+    mesto: "Subotica",
+    pib: "9988776655",
+    maticniBroj: "9988776655",
+    delatnost: "Poljoprivreda",
+    datumIstekaUgovora: new Date("2024-11-10"),
+    aktivan: false,
   },
 ];
 
@@ -89,10 +119,22 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const Firme: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const context = usePageContext();
+
+  // Get data based on context
+  const getDataForContext = () => {
+    switch (context) {
+      case 'komitenti':
+        return komitentiData;
+      case 'moja-firma':
+      default:
+        return mojaFirmaData;
+    }
+  };
 
   const handleSave = (data: any) => {
     // Here you would typically save the data to your backend
-    console.log('Saving new entry:', data);
+    console.log(`Saving new entry for ${context}:`, data);
     // For now, we'll just close the form
     setShowForm(false);
   };
@@ -100,35 +142,42 @@ const Firme: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className="container mx-auto py-8">
-        <div className="mb-6 flex items-center">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Firme
           </h1>
-          <Button
-            onClick={() => setShowForm(true)}
-            size="sm"
-            className="ml-5"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex items-center gap-4">
+            <TableExportButtons
+              data={getDataForContext()}
+              columns={columns}
+              title="Firme"
+              filename={`firme-${context}`}
+            />
+            <Button
+              onClick={() => setShowForm(true)}
+              size="sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Novi Unos
-          </Button>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Novi Unos
+            </Button>
+          </div>
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <FirmeDataTable 
-            data={firmeData}
+            data={getDataForContext()}
             columns={columns}
           />
         </div>

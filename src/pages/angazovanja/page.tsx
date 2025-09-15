@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import AngazovanjaDataTable from "./AngazovanjaDataTable";
 import AngazovanjaForm from "./AngazovanjaForm";
 import Button from "../../components/ui/button/Button";
-import TableExportButtons from "../../components/ui/table/TableExportButtons";
+import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 
 // Sample data for the table
 const angazovanjaData = [
@@ -94,36 +94,75 @@ const AngazovanjaPage: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className="container mx-auto py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-           Angažovanja
-          </h1>
-          <div className="flex items-center gap-4">
-            <TableExportButtons
-              data={angazovanjaData}
-              columns={columns}
-              title="Angažovanja"
-              filename="angazovanja"
-            />
-            <Button
-              onClick={() => setShowForm(true)}
-              size="sm"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+             Angažovanja
+            </h1>
+            <div className="hidden sm:flex items-center gap-4">
+              <ExportPopoverButton
+                data={angazovanjaData}
+                columns={columns}
+                title="Angažovanja"
+                filename="angazovanja"
+              />
+              <Button
+                onClick={() => setShowForm(true)}
+                size="sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Novi Unos
+              </Button>
+            </div>
+          </div>
+          
+          {/* Mobile buttons div with same width as table */}
+          <div className="sm:hidden mt-4">
+            <div className="flex gap-4 w-full">
+              <div className="flex-1">
+                <ExportPopoverButton
+                  data={angazovanjaData}
+                  columns={columns}
+                  title="Angažovanja"
+                  filename="angazovanja"
+                  className="w-full"
                 />
-              </svg>
-              Novi Unos
-            </Button>
+              </div>
+              <div className="flex-1">
+                <Button
+                  onClick={() => setShowForm(true)}
+                  size="sm"
+                  className="w-full"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Novi Unos
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
         

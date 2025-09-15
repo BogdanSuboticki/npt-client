@@ -50,82 +50,82 @@ const navItems: NavItem[] = [
   {
     icon: <FirmeIcon />,
     name: "Firme",
-    path: "/firme",
+    path: "/firme?context=moja-firma",
   },
   {
     icon: <ZaposleniIcon />,
     name: "Zaposleni",
-    path: "/zaposleni",
+    path: "/zaposleni?context=moja-firma",
   },
   {
     icon: <ZaposleniIcon />,
     name: "Angažovanja",
-    path: "/angazovanja",
+    path: "/angazovanja?context=moja-firma",
   },
   {
     icon: <RadnaMestaIcon />,
     name: "Radna mesta",
-    path: "/radna-mesta",
+    path: "/radna-mesta?context=moja-firma",
   },
   {
     icon: <OsposobljavanjeIcon />,
     name: "Osposobljavanje",
-    path: "/osposobljavanje",
+    path: "/osposobljavanje?context=moja-firma",
   },
   {
     icon: <LokacijeIcon />,
     name: "Lokacije",
-    path: "/lokacije",
+    path: "/lokacije?context=moja-firma",
   },
   {
     icon: <OpremaIcon />,
     name: "Oprema",
-    path: "/oprema",
+    path: "/oprema?context=moja-firma",
   },
   {
     icon: <LekarskiPreglediIcon />,
     name: "Lekarski pregledi",
-    path: "/lekarski-pregledi",
+    path: "/lekarski-pregledi?context=moja-firma",
   },
   {
     icon: <PreglediOpremeIcon />,
     name: "Pregledi opreme",
-    path: "/pregledi-opreme",
+    path: "/pregledi-opreme?context=moja-firma",
   },
   {
     icon: <IspitivanjeSredineIcon />,
     name: "Ispitivanje sredine",
-    path: "/ispitivanje-radne-sredine",
+    path: "/ispitivanje-radne-sredine?context=moja-firma",
   },
   {
     icon: <BezbednosnePromeneIcon />,
     name: "Kontrola Radnih Mesta",
-    path: "/bezbednosne-provere",
+    path: "/bezbednosne-provere?context=moja-firma",
   },
   {
     icon: <InspekcijskiNadzorIcon />,
     name: "Inspekcijski nadzor",
-    path: "/inspekcijski-nadzor",
+    path: "/inspekcijski-nadzor?context=moja-firma",
   },
   {
     icon: <ZaduzenjaLZOIcon />,
     name: "Zaduženja LZS",
-    path: "/zaduzenja-lzo",
+    path: "/zaduzenja-lzo?context=moja-firma",
   },
   {
     icon: <PovredeIcon />,
     name: "Povrede",
-    path: "/povrede",
+    path: "/povrede?context=moja-firma",
   },
   {
     icon: <DnevniIzvestajiIcon />,
     name: "Dnevni izveštaji",
-    path: "/dnevni-izvestaji",
+    path: "/dnevni-izvestaji?context=moja-firma",
   },
   {
     icon: <RokoviIcon />,
     name: "Rokovi",
-    path: "/rokovi",
+    path: "/rokovi?context=moja-firma",
   },
 ];
 
@@ -161,77 +161,82 @@ const supportItems: NavItem[] = [
   {
     icon: <FirmeIcon />,
     name: "Firme",
-    path: "/firme",
+    path: "/firme?context=komitenti",
   },
   {
     icon: <ZaposleniIcon />,
     name: "Zaposleni",
-    path: "/zaposleni",
+    path: "/zaposleni?context=komitenti",
+  },
+  {
+    icon: <ZaposleniIcon />,
+    name: "Angažovanja",
+    path: "/angazovanja?context=komitenti",
   },
   {
     icon: <RadnaMestaIcon />,
     name: "Radna mesta",
-    path: "/radna-mesta",
+    path: "/radna-mesta?context=komitenti",
   },
   {
     icon: <OsposobljavanjeIcon />,
     name: "Osposobljavanje",
-    path: "/osposobljavanje",
+    path: "/osposobljavanje?context=komitenti",
   },
   {
     icon: <LokacijeIcon />,
     name: "Lokacije",
-    path: "/lokacije",
+    path: "/lokacije?context=komitenti",
   },
   {
     icon: <OpremaIcon />,
     name: "Oprema",
-    path: "/oprema",
+    path: "/oprema?context=komitenti",
   },
   {
     icon: <LekarskiPreglediIcon />,
     name: "Lekarski pregledi",
-    path: "/lekarski-pregledi",
+    path: "/lekarski-pregledi?context=komitenti",
   },
   {
     icon: <PreglediOpremeIcon />,
     name: "Pregledi opreme",
-    path: "/pregledi-opreme",
+    path: "/pregledi-opreme?context=komitenti",
   },
   {
     icon: <IspitivanjeSredineIcon />,
     name: "Ispitivanje sredine",
-    path: "/ispitivanje-radne-sredine",
+    path: "/ispitivanje-radne-sredine?context=komitenti",
   },
   {
     icon: <BezbednosnePromeneIcon />,
     name: "Kontrola Radnih Mesta",
-    path: "/bezbednosne-provere",
+    path: "/bezbednosne-provere?context=komitenti",
   },
   {
     icon: <InspekcijskiNadzorIcon />,
     name: "Inspekcijski nadzor",
-    path: "/inspekcijski-nadzor",
+    path: "/inspekcijski-nadzor?context=komitenti",
   },
   {
     icon: <ZaduzenjaLZOIcon />,
     name: "Zaduženja LZS",
-    path: "/zaduzenja-lzo",
+    path: "/zaduzenja-lzo?context=komitenti",
   },
   {
     icon: <PovredeIcon />,
     name: "Povrede",
-    path: "/povrede",
+    path: "/povrede?context=komitenti",
   },
   {
     icon: <DnevniIzvestajiIcon />,
     name: "Dnevni izveštaji",
-    path: "/dnevni-izvestaji",
+    path: "/dnevni-izvestaji?context=komitenti",
   },
   {
     icon: <RokoviIcon />,
     name: "Rokovi",
-    path: "/rokovi",
+    path: "/rokovi?context=komitenti",
   },
 ];
 
@@ -265,9 +270,25 @@ const AppSidebar: React.FC = () => {
       if (path === "/moj-nalog") {
         return location.pathname === "/moj-nalog" || location.pathname === "/profile";
       }
+      
+      // Handle paths with query parameters
+      if (path.includes('?')) {
+        const [pathname, queryString] = path.split('?');
+        const urlParams = new URLSearchParams(queryString);
+        const currentParams = new URLSearchParams(location.search);
+        
+        // Check if pathname matches and context parameter matches
+        if (location.pathname === pathname) {
+          const contextParam = urlParams.get('context');
+          const currentContextParam = currentParams.get('context');
+          return contextParam === currentContextParam;
+        }
+        return false;
+      }
+      
       return location.pathname === path;
     },
-    [location.pathname]
+    [location.pathname, location.search]
   );
 
   useEffect(() => {

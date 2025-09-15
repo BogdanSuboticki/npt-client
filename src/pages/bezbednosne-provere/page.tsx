@@ -4,6 +4,7 @@ import React, { useState } from "react";
     import BezbednosneProvereDataTable from "./BezbednosneProvereDataTable";
     import BezbednosneProvereForm from "./BezbednosneProvereForm";
     import Button from "../../components/ui/button/Button";
+    import TableExportButtons from "../../components/ui/table/TableExportButtons";
 
 // Sample data for the table
 const lekarskiPreglediData = [
@@ -89,30 +90,37 @@ const LekarskiPreglediPage: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className="container mx-auto py-8">
-        <div className="mb-6 flex items-center">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Kontrola Radnih Mesta
           </h1>
-          <Button
-            onClick={() => setShowForm(true)}
-            size="sm"
-            className="ml-5"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex items-center gap-4">
+            <TableExportButtons
+              data={lekarskiPreglediData}
+              columns={columns}
+              title="Kontrola Radnih Mesta"
+              filename="bezbednosne-provere"
+            />
+            <Button
+              onClick={() => setShowForm(true)}
+              size="sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Novi Unos
-          </Button>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Novi Unos
+            </Button>
+          </div>
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">

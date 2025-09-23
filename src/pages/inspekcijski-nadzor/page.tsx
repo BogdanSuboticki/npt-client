@@ -13,30 +13,54 @@ const inspekcijskiNadzorData = [
     brojResenja: "123-45/2024",
     datumNadzora: new Date("2024-01-12"),
     napomena: "Uočene nepravilnosti u skladištu hemikalija",
-    mera: "Sanacija opasnosti",
-    rokIzvrsenja: new Date("2024-02-15"),
-    datumRealizacije: new Date("2024-02-10"),
-    datumObavestavanja: new Date("2024-02-12"),
+    mere: [
+      {
+        id: 1,
+        nazivMere: "Sanacija opasnosti",
+        rokIzvrsenja: new Date("2024-02-15"),
+        datumRealizacije: new Date("2024-02-10"),
+      },
+      {
+        id: 2,
+        nazivMere: "Obuka zaposlenih",
+        rokIzvrsenja: new Date("2024-02-20"),
+        datumRealizacije: new Date("2024-02-18"),
+      },
+      {
+        id: 3,
+        nazivMere: "Zabrana rada",
+        rokIzvrsenja: new Date("2024-02-25"),
+        datumRealizacije: null,
+      }
+    ],
   },
   {
     id: 2,
     brojResenja: "678-90/2024",
     datumNadzora: new Date("2024-02-05"),
     napomena: "Potrebna obuka zaposlenih za rad na visini",
-    mera: "Obuka zaposlenih",
-    rokIzvrsenja: new Date("2024-03-01"),
-    datumRealizacije: null,
-    datumObavestavanja: null,
+    mere: [
+      {
+        id: 2,
+        nazivMere: "Obuka zaposlenih",
+        rokIzvrsenja: new Date("2024-03-01"),
+        datumRealizacije: null,
+      }
+    ],
   },
   {
     id: 3,
     brojResenja: "555-11/2024",
     datumNadzora: new Date("2024-03-18"),
     napomena: "Zabrana upotrebe neispravne opreme",
-    mera: "Zabrana rada",
-    rokIzvrsenja: new Date("2024-03-25"),
-    datumRealizacije: new Date("2024-03-22"),
-    datumObavestavanja: new Date("2024-03-24"),
+    mere: [
+      {
+        id: 3,
+        nazivMere: "Zabrana rada",
+        rokIzvrsenja: new Date("2024-03-25"),
+        datumRealizacije: new Date("2024-03-22"),
+      }
+    ],
   },
 ];
 
@@ -45,10 +69,9 @@ const columns = [
   { key: "brojResenja", label: "Broj rešenja", sortable: true },
   { key: "datumNadzora", label: "Datum nadzora", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
-  { key: "mera", label: "Naziv mere", sortable: true },
+  { key: "nazivMere", label: "Naziv mere", sortable: true },
   { key: "rokIzvrsenja", label: "Rok izvršenja", sortable: true },
   { key: "datumRealizacije", label: "Datum realizacije mere", sortable: true },
-  { key: "datumObavestavanja", label: "Datum obaveštavanja inspekcije", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

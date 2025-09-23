@@ -3,16 +3,37 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Link } from "react-router";
 
-export default function NotificationDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
+interface NotificationDropdownProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+  onClose?: () => void;
+}
+
+export default function NotificationDropdown({ 
+  isOpen: externalIsOpen, 
+  onToggle: externalOnToggle, 
+  onClose: externalOnClose 
+}: NotificationDropdownProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
 
+  // Use external control if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+
   function toggleDropdown() {
-    setIsOpen(!isOpen);
+    if (externalOnToggle) {
+      externalOnToggle();
+    } else {
+      setInternalIsOpen(!internalIsOpen);
+    }
   }
 
   function closeDropdown() {
-    setIsOpen(false);
+    if (externalOnClose) {
+      externalOnClose();
+    } else {
+      setInternalIsOpen(false);
+    }
   }
 
   const handleClick = () => {

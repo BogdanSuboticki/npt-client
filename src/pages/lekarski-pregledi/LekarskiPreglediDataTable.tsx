@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
+import { EditButtonIcon, DeleteButtonIcon, CheckmarkIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
@@ -296,36 +296,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                         className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
                         onClick={handleCheckboxClick}
                       >
-                        <svg
-                          className="size-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                        >
-                          <rect
-                            x="2"
-                            y="2"
-                            width="12"
-                            height="12"
-                            rx="2"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            fill="none"
-                          />
-                          <path
-                            d="M6 8L8 10L10 6"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                          />
-                        </svg>
-                      </button>
-                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                        <LightbulbIcon className="size-5" />
+                        <CheckmarkIcon className="size-4" />
                       </button>
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />

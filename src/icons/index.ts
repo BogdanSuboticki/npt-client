@@ -77,6 +77,7 @@ import { ReactComponent as DeleteButtonIcon } from "./Delete-button.svg?react";
 import { ReactComponent as OpremaDugmevIcon } from "./Oprema-dugme-v2.svg?react";
 import { ReactComponent as SaveIcon } from './Save.svg?react';
 import { ReactComponent as LightbulbIcon } from './lightbulb.svg?react';
+import { ReactComponent as CheckmarkIcon } from './checkmark.svg?react';
 
 export {
   ErrorHexaIcon,
@@ -158,4 +159,5 @@ export {
   OpremaDugmevIcon,
   SaveIcon,
   LightbulbIcon,
+  CheckmarkIcon,
 };

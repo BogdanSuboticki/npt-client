@@ -41,7 +41,7 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.brojResenja || !formData.datumNadzora) {
-      alert('Molimo popunite obavezna polja (Broj rešenja, Datum nadzora)');
+      alert('Molimo popunite sva obavezna polja (Broj rešenja, Datum nadzora)');
       return;
     }
     onSave(formData);

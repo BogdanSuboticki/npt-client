@@ -4,15 +4,36 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
 import { MojNalogIcon } from "../../icons";
 
-export default function UserDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
+interface UserDropdownProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+  onClose?: () => void;
+}
+
+export default function UserDropdown({ 
+  isOpen: externalIsOpen, 
+  onToggle: externalOnToggle, 
+  onClose: externalOnClose 
+}: UserDropdownProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external control if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
 
   function toggleDropdown() {
-    setIsOpen(!isOpen);
+    if (externalOnToggle) {
+      externalOnToggle();
+    } else {
+      setInternalIsOpen(!internalIsOpen);
+    }
   }
 
   function closeDropdown() {
-    setIsOpen(false);
+    if (externalOnClose) {
+      externalOnClose();
+    } else {
+      setInternalIsOpen(false);
+    }
   }
   return (
     <div className="relative">
@@ -50,7 +71,7 @@ export default function UserDropdown() {
         className="absolute right-0 mt-[25px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
         <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
+          <span className="block font-medium text-gray-700 text-theme-sm dark:text-white">
             Stefan Stefanović
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
@@ -70,7 +91,7 @@ export default function UserDropdown() {
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
             >
               <MojNalogIcon className="w-6 h-6 text-gray-500" />
-              Podešavanje profila
+              <span className="dark:text-white">Podešavanje profila</span>
             </DropdownItem>
           </li>
 
@@ -82,7 +103,7 @@ export default function UserDropdown() {
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
             >
               <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
+                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-500 dark:group-hover:fill-gray-300"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -96,7 +117,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Tehnička podrska
+              <span className="dark:text-white">Tehnička podrska</span>
             </DropdownItem>
           </li>
         </ul>
@@ -119,7 +140,7 @@ export default function UserDropdown() {
               fill=""
             />
           </svg>
-          Izloguj se 
+          <span className="dark:text-white">Izloguj se</span>
         </Link>
       </Dropdown>
     </div>

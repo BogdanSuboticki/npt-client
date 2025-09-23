@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -8,9 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { EditButtonIcon, DeleteButtonIcon, LightbulbIcon } from "../../icons";
+import { EditButtonIcon, DeleteButtonIcon, CheckmarkIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
-import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
@@ -24,15 +23,19 @@ interface Column {
   sortable: boolean;
 }
 
+interface Mera {
+  id: number;
+  nazivMere: string;
+  rokIzvrsenja: Date;
+  datumRealizacije: Date | null;
+}
+
 interface InspekcijskiNadzorItem {
   id: number;
   brojResenja: string;
   datumNadzora: Date;
   napomena: string;
-  mera: string; // naziv mere
-  rokIzvrsenja: Date;
-  datumRealizacije: Date | null;
-  datumObavestavanja: Date | null;
+  mere: Mera[];
   [key: string]: any;
 }
 
@@ -51,28 +54,77 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
   const [modalNote, setModalNote] = useState<string>("");
 
   // Filters
-  const uniqueMere = useMemo(() => {
-    return Array.from(new Set(initialData.map(item => item.mera)));
-  }, [initialData]);
   const uniqueBrojResenja = useMemo(() => {
     return Array.from(new Set(initialData.map(item => item.brojResenja)));
   }, [initialData]);
 
-  const [selectedMere, setSelectedMere] = useState<string[]>(uniqueMere);
-  const [selectedResenja, setSelectedResenja] = useState<string[]>(uniqueBrojResenja);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Filter broj resenja based on search term
+  const filteredBrojResenja = useMemo(() => {
+    if (!searchTerm) return uniqueBrojResenja;
+    return uniqueBrojResenja.filter(resenje => 
+      resenje.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [uniqueBrojResenja, searchTerm]);
+
+  // Close search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Flatten data to show each mera as a separate row
+  const flattenedData = useMemo(() => {
+    const flattened: Array<InspekcijskiNadzorItem & { meraIndex: number; isFirstRow: boolean; totalRows: number }> = [];
+    
+    initialData.forEach((item) => {
+      if (item.mere && item.mere.length > 0) {
+        item.mere.forEach((mera, index) => {
+          flattened.push({
+            ...item,
+            meraIndex: index,
+            isFirstRow: index === 0,
+            totalRows: item.mere.length,
+            // Override with mera-specific data
+            nazivMere: mera.nazivMere,
+            rokIzvrsenja: mera.rokIzvrsenja,
+            datumRealizacije: mera.datumRealizacije,
+          });
+        });
+      } else {
+        // If no mere, show as single row
+        flattened.push({
+          ...item,
+          meraIndex: 0,
+          isFirstRow: true,
+          totalRows: 1,
+          nazivMere: '',
+          rokIzvrsenja: new Date(),
+          datumRealizacije: null,
+        });
+      }
+    });
+    
+    return flattened;
+  }, [initialData]);
 
   const filteredAndSortedData = useMemo(() => {
-    return initialData
+    return flattenedData
       .filter((item) => {
-        if (selectedMere.length === 0 || selectedResenja.length === 0) {
-          return false;
-        }
-        const matchesMera = selectedMere.includes(item.mera);
-        const matchesResenje = selectedResenja.includes(item.brojResenja);
+        const matchesResenje = !searchTerm || item.brojResenja.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesDateRange = (!dateFrom || item.datumNadzora >= dateFrom) && (!dateTo || item.datumNadzora <= dateTo);
-        return matchesMera && matchesResenje && matchesDateRange;
+        return matchesResenje && matchesDateRange;
       })
       .sort((a, b) => {
         if (sortKey.includes('datum')) {
@@ -87,7 +139,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedMere, selectedResenja, dateFrom, dateTo, initialData]);
+  }, [sortKey, sortOrder, searchTerm, dateFrom, dateTo, flattenedData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -114,9 +166,29 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
     closeModal();
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setIsSearchOpen(true);
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleOptionSelect = (resenje: string) => {
+    setSearchTerm(resenje);
+    setIsSearchOpen(false);
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
+  
+  // Calculate unique resolutions for display count
+  const uniqueResolutions = useMemo(() => {
+    const uniqueIds = new Set(filteredAndSortedData.map(item => item.id));
+    return uniqueIds.size;
+  }, [filteredAndSortedData]);
 
   const formatDate = (value: Date | null): string => {
     if (!value) return "";
@@ -139,18 +211,48 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
           </div>
 
           <div className="flex flex-col lg:flex-row gap-4">
-            <FilterDropdown
-              label="Broj rešenja"
-              options={uniqueBrojResenja}
-              selectedOptions={selectedResenja}
-              onSelectionChange={setSelectedResenja}
-            />
-            <FilterDropdown
-              label="Mera"
-              options={uniqueMere}
-              selectedOptions={selectedMere}
-              onSelectionChange={setSelectedMere}
-            />
+            <div className="relative w-full lg:w-64" ref={searchRef}>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={handleSearchFocus}
+                  placeholder="Pretraži broj rešenja..."
+                  className="w-full h-11 px-4 pr-10 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                />
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              {isSearchOpen && filteredBrojResenja.length > 0 && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    {filteredBrojResenja.map((resenje, index) => (
+                      <div
+                        key={resenje}
+                        className={`px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                          index === filteredBrojResenja.length - 1 ? 'rounded-b-lg' : ''
+                        }`}
+                        onClick={() => handleOptionSelect(resenje)}
+                      >
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{resenje}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="relative w-full lg:w-42">
               <CustomDatePicker
                 value={dateFrom}
@@ -241,59 +343,48 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
             </TableHeader>
             <TableBody>
               {currentData.map((item, index) => (
-                <TableRow key={item.id}>
-                  {columns.map(({ key }, colIndex) => (
-                    <TableCell
-                      key={key}
-                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                        colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
-                      }`}
-                    >
-                      {key === 'redniBroj' ? (
-                        startIndex + index + 1
-                      ) : key.includes('datum') || key === 'rokIzvrsenja' ? (
-                        formatDate(item[key])
-                      ) : (
-                        item[key]
-                      )}
-                    </TableCell>
-                  ))}
+                <TableRow key={`${item.id}-${item.meraIndex}`}>
+                  {columns.map(({ key }, colIndex) => {
+                    // Only render spanning columns on the first row of each group
+                    if ((key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena') && !item.isFirstRow) {
+                      return null;
+                    }
+                    
+                    return (
+                      <TableCell
+                        key={key}
+                        className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
+                          colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
+                        }`}
+                        rowSpan={key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena' ? item.totalRows : undefined}
+                      >
+                        {key === 'redniBroj' ? (
+                          item.isFirstRow ? startIndex + index + 1 : ''
+                        ) : key === 'brojResenja' ? (
+                          item.brojResenja
+                        ) : key === 'datumNadzora' ? (
+                          formatDate(item.datumNadzora)
+                        ) : key === 'napomena' ? (
+                          item.napomena
+                        ) : key === 'nazivMere' ? (
+                          item.nazivMere
+                        ) : key === 'rokIzvrsenja' ? (
+                          formatDate(item.rokIzvrsenja)
+                        ) : key === 'datumRealizacije' ? (
+                          formatDate(item.datumRealizacije)
+                        ) : (
+                          item[key]
+                        )}
+                      </TableCell>
+                    );
+                  })}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
                       <button 
                         className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
                         onClick={handleActionClick}
                       >
-                        <svg
-                          className="size-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                        >
-                          <rect
-                            x="2"
-                            y="2"
-                            width="12"
-                            height="12"
-                            rx="2"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            fill="none"
-                          />
-                          <path
-                            d="M6 8L8 10L10 6"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                          />
-                        </svg>
-                      </button>
-                      <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                        <LightbulbIcon className="size-5" />
+                        <CheckmarkIcon className="size-4" />
                       </button>
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />
@@ -319,7 +410,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
           />
           <div className="pt-3 xl:pt-0 px-6">
             <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
-              Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
+              Prikaz {startIndex + 1} - {endIndex} od {totalItems} redova ({uniqueResolutions} rešenja)
             </p>
           </div>
         </div>

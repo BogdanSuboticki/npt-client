@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import TextArea from "../../components/form/input/TextArea";
 import Button from "../../components/ui/button/Button";
+import { DeleteButtonIcon } from "../../icons";
 
 interface InspekcijskiNadzorFormProps {
   isOpen: boolean;
@@ -19,46 +20,68 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
     brojResenja: "",
     datumNadzora: new Date(),
     napomena: "",
-    mera: "",
-    rokIzvrsenja: new Date(),
-    datumRealizacije: null as Date | null,
-    datumObavestavanja: null as Date | null,
+    mere: [] as Array<{
+      id: number;
+      nazivMere: string;
+      rokIzvrsenja: Date | null;
+      datumRealizacije: Date | null;
+    }>,
   });
 
-  // Dropdown state for "mera"
-  const [isMeraOpen, setIsMeraOpen] = React.useState(false);
-  const meraRef = useRef<HTMLDivElement>(null);
-  const meraOptions = ["Sanacija opasnosti", "Obuka zaposlenih", "Zabrana rada"];
 
   useEffect(() => {
     // Ensure dates are Date objects
     setFormData((prev) => ({
       ...prev,
       datumNadzora: prev.datumNadzora ? new Date(prev.datumNadzora) : new Date(),
-      rokIzvrsenja: prev.rokIzvrsenja ? new Date(prev.rokIzvrsenja) : new Date(),
     }));
   }, []);
 
-  // Close mera dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (meraRef.current && !meraRef.current.contains(target)) {
-        setIsMeraOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.brojResenja || !formData.datumNadzora || !formData.mera || !formData.rokIzvrsenja) {
-      alert('Molimo popunite obavezna polja (Broj rešenja, Datum nadzora, Mera, Rok izvršenja)');
+    if (!formData.brojResenja || !formData.datumNadzora) {
+      alert('Molimo popunite obavezna polja (Broj rešenja, Datum nadzora)');
       return;
     }
     onSave(formData);
     onClose();
+  };
+
+  const addMera = () => {
+    const newMera = {
+      id: Date.now(),
+      nazivMere: "",
+      rokIzvrsenja: null as Date | null,
+      datumRealizacije: null as Date | null,
+    };
+    setFormData(prev => ({
+      ...prev,
+      mere: [...prev.mere, newMera]
+    }));
+  };
+
+  const removeMera = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      mere: prev.mere.filter(mera => mera.id !== id)
+    }));
+  };
+
+  const handleMeraChange = (id: number, field: string, value: string | Date | null) => {
+    setFormData(prevData => {
+      const updatedMere = prevData.mere.map(item => {
+        if (item.id === id) {
+          return { ...item, [field]: value };
+        }
+        return item;
+      });
+      
+      return {
+        ...prevData,
+        mere: updatedMere
+      };
+    });
   };
 
   return (
@@ -69,7 +92,7 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
     >
       <div className="flex flex-col h-full">
         <div className="p-5 lg:p-10 pb-0">
-          <h4 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi zapis - Inspekcijski nadzor</h4>
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Inspekcijski Nadzor</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
@@ -106,70 +129,85 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
                 />
               </div>
 
-              <div className="w-full">
-                <Label>Naziv mere *</Label>
-                <div className="relative w-full" ref={meraRef}>
-                  <button
+              <div className="w-full lg:col-span-2">
+                <div className="flex items-center justify-between mb-4">
+                  <Label>Mere</Label>
+                  <Button
                     type="button"
-                    onClick={() => setIsMeraOpen(!isMeraOpen)}
-                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                    variant="outline"
+                    onClick={addMera}
+                    className="text-sm"
                   >
-                    <span>{formData.mera || "Izaberi meru"}</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform ${isMeraOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isMeraOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700 max-h-60">
-                      <div className="overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                        {meraOptions.map((option, index) => (
-                          <div
-                            key={option}
-                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                              formData.mera === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            } ${index === meraOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                            onClick={() => {
-                              setFormData({ ...formData, mera: option });
-                              setIsMeraOpen(false);
-                            }}
-                          >
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                          </div>
-                        ))}
+                    + Dodaj meru
+                  </Button>
+                </div>
+                
+                {formData.mere.length > 0 && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700">
+                    {/* Header */}
+                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                      <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <div>Naziv mere *</div>
+                        <div>Rok izvršenja *</div>
+                        <div>Datum realizacije mere</div>
+                        <div>Akcija</div>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="w-full">
-                <Label>Rok izvršenja *</Label>
-                <CustomDatePicker
-                  value={formData.rokIzvrsenja}
-                  onChange={(date) => date && setFormData({ ...formData, rokIzvrsenja: date })}
-                  required
-                />
-              </div>
-
-              <div className="w-full">
-                <Label>Datum realizacije mere</Label>
-                <CustomDatePicker
-                  value={formData.datumRealizacije}
-                  onChange={(date) => setFormData({ ...formData, datumRealizacije: date })}
-                />
-              </div>
-
-              <div className="w-full">
-                <Label>Datum obaveštavanja inspekcije</Label>
-                <CustomDatePicker
-                  value={formData.datumObavestavanja}
-                  onChange={(date) => setFormData({ ...formData, datumObavestavanja: date })}
-                />
+                    
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {formData.mere.map((mera) => (
+                        <div key={mera.id} className="px-4 py-3">
+                          <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 items-start">
+                            {/* Naziv mere */}
+                            <div className="w-full">
+                              <Input
+                                type="text"
+                                value={mera.nazivMere}
+                                onChange={(e) => handleMeraChange(mera.id, 'nazivMere', e.target.value)}
+                                placeholder="Unesite naziv mere"
+                                className="h-11 text-sm w-full"
+                                required
+                              />
+                            </div>
+                          
+                            {/* Rok izvršenja */}
+                            <div className="w-full">
+                              <CustomDatePicker
+                                value={mera.rokIzvrsenja}
+                                onChange={(date) => handleMeraChange(mera.id, 'rokIzvrsenja', date)}
+                                placeholder="Izaberi datum"
+                                className="h-11 text-sm w-full"
+                                required
+                              />
+                            </div>
+                          
+                            {/* Datum realizacije mere */}
+                            <div className="w-full">
+                              <CustomDatePicker
+                                value={mera.datumRealizacije}
+                                onChange={(date) => handleMeraChange(mera.id, 'datumRealizacije', date)}
+                                placeholder="Izaberi datum"
+                                className="h-11 text-sm w-full"
+                              />
+                            </div>
+                          
+                            {/* Delete button */}
+                            <div className="flex items-center justify-start h-11">
+                              <button
+                                type="button"
+                                onClick={() => removeMera(mera.id)}
+                                className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                                title="Obriši meru"
+                              >
+                                <DeleteButtonIcon className="size-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

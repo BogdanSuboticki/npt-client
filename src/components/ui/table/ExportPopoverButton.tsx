@@ -95,7 +95,7 @@ const ExportPopoverButton: React.FC<ExportPopoverButtonProps> = ({
               value={maxRows || ''}
               onChange={handleMaxRowsChange}
               placeholder="Svi"
-              className="w-full px-3 py-2 text-sm border bg-[#F9FAFB] border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              className="w-full px-3 py-2 text-sm border bg-[#F9FAFB] border-gray-300 rounded-lg dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-[#101828]"
             />
           </div>
           

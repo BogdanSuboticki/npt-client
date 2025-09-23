@@ -34,10 +34,10 @@ export default function Popover({ position, trigger, children }: PopoverProps) {
   const togglePopover = () => setIsOpen(!isOpen);
 
   const positionClasses = {
-    top: "bottom-full transform mb-2",
-    right: "left-full top-1/2 transform -translate-y-1/2 ml-2",
-    bottom: "top-full transform  mt-2",
-    left: "right-full top-1/2 transform -translate-y-1/2 mr-2",
+    top: "bottom-full transform mb-2 -translate-x-4 lg:-translate-x-4",
+    right: "left-full top-1/2 transform -translate-y-1/2 ml-2 -translate-x-4 lg:-translate-x-4",
+    bottom: "top-full transform mt-2 -translate-x-4 lg:-translate-x-4",
+    left: "right-full top-1/2 transform -translate-y-1/2 mr-2 -translate-x-4 lg:-translate-x-4",
   };
 
   const arrowClasses = {
@@ -59,7 +59,7 @@ export default function Popover({ position, trigger, children }: PopoverProps) {
           ref={popoverRef}
           className={`absolute w-[300px]  z-99999 ${positionClasses[position]}`}
         >
-          <div className="w-full bg-white rounded-xl shadow-theme-lg dark:bg-[#1E2634]">
+          <div className="w-full bg-white rounded-xl shadow-theme-lg dark:bg-gray-dark">
             {children}
             <div
               className={`absolute w-3 h-3  bg-white shadow-theme-lg dark:bg-[#1E2634] ${arrowClasses[position]}`}

@@ -6,9 +6,14 @@ import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 import SearchInput from "../pages/UiElements/SearchInput";
+import { companies, Company } from "../data/companies";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<'notification' | 'user' | null>(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -22,6 +27,50 @@ const AppHeader: React.FC = () => {
 
   const toggleApplicationMenu = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
+  };
+
+  const handleNotificationToggle = () => {
+    setOpenDropdown(openDropdown === 'notification' ? null : 'notification');
+  };
+
+  const handleUserToggle = () => {
+    setOpenDropdown(openDropdown === 'user' ? null : 'user');
+  };
+
+  const closeAllDropdowns = () => {
+    setOpenDropdown(null);
+  };
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchValue(value);
+    
+    if (value.length > 0) {
+      const filtered = companies.filter(company =>
+        company.naziv.toLowerCase().includes(value.toLowerCase()) ||
+        company.mesto.toLowerCase().includes(value.toLowerCase()) ||
+        (company.delatnost && company.delatnost.toLowerCase().includes(value.toLowerCase()))
+      );
+      setFilteredCompanies(filtered.slice(0, 8)); // Limit to 8 suggestions
+      setShowSuggestions(true);
+    } else {
+      setFilteredCompanies([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionSelect = (company: Company) => {
+    setSearchValue(company.naziv);
+    setShowSuggestions(false);
+    setFilteredCompanies([]);
+    // Here you could add navigation to company details or search results
+    console.log('Selected company:', company);
+  };
+
+  const handleSearchButtonClick = () => {
+    if (searchValue.trim()) {
+      // Here you could add search functionality
+      console.log('Searching for:', searchValue);
+    }
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -113,12 +162,18 @@ const AppHeader: React.FC = () => {
               <SearchInput
                 ref={inputRef}
                 placeholder="Unesite naziv firme..."
-                className="xl:w-[430px]"
+                className="xl:w-[430px] !bg-[#F9FAFB] dark:!bg-[#101828]"
                 buttonContent={
                   <>
                     <span>Pretraži</span>
                   </>
                 }
+                onButtonClick={handleSearchButtonClick}
+                suggestions={filteredCompanies}
+                onSuggestionSelect={handleSuggestionSelect}
+                showSuggestions={showSuggestions}
+                onInputChange={handleSearchInputChange}
+                value={searchValue}
               />
             </form>
           </div>
@@ -132,11 +187,19 @@ const AppHeader: React.FC = () => {
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
-            <NotificationDropdown />
+            <NotificationDropdown 
+              isOpen={openDropdown === 'notification'}
+              onToggle={handleNotificationToggle}
+              onClose={closeAllDropdowns}
+            />
             {/* <!-- Notification Menu Area --> */}
           </div>
           {/* <!-- User Area --> */}
-          <UserDropdown />
+          <UserDropdown 
+            isOpen={openDropdown === 'user'}
+            onToggle={handleUserToggle}
+            onClose={closeAllDropdowns}
+          />
         </div>
       </div>
     </header>

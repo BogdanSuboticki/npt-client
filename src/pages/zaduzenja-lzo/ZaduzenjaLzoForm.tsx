@@ -16,6 +16,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",
+    povecanRizik: false,
     oprema: [] as Array<{
       id: number;
       vrstaLzs: string;
@@ -33,6 +34,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
   // Employee data with their job positions and equipment
   const zaposleniData: Record<string, {
     radnoMesto: string;
+    povecanRizik: boolean;
     oprema: Array<{
       id: number;
       vrstaLzs: string;
@@ -44,6 +46,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
   }> = {
     "Petar Petrović": {
       radnoMesto: "Viljuškari",
+      povecanRizik: true,
       oprema: [
         {
           id: 1,
@@ -73,6 +76,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
     },
     "Ana Anić": {
       radnoMesto: "Kranista",
+      povecanRizik: true,
       oprema: [
         {
           id: 1,
@@ -110,6 +114,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
     },
     "Marko Marković": {
       radnoMesto: "Mehaničar",
+      povecanRizik: false,
       oprema: [
         {
           id: 1,
@@ -226,7 +231,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
       <form onSubmit={handleSubmit} className="max-h-[70vh] overflow-y-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="col-span-1">
-            <Label>Angažovani *</Label>
+            <Label>Zaposleni *</Label>
             <div className="relative w-full" ref={zaposleniRef}>
               <button
                 type="button"
@@ -258,6 +263,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                             ...formData,
                             zaposleni: option,
                             radnoMesto: selectedEmployeeData.radnoMesto,
+                            povecanRizik: selectedEmployeeData.povecanRizik,
                             oprema: selectedEmployeeData.oprema.map((item, index) => ({
                               ...item,
                               id: Date.now() + index // Generate new IDs to avoid conflicts
@@ -276,7 +282,18 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
           </div>
 
           <div className="col-span-1">
-            <Label>Radno mesto *</Label>
+            <div className="flex items-center gap-2">
+              <Label>Radno mesto</Label>
+              {formData.radnoMesto && (
+                <span className={`text-sm font-medium ${
+                  formData.povecanRizik 
+                    ? 'text-red-600 dark:text-red-400 mb-1.5' 
+                    : 'text-blue-600 dark:text-blue-400 mb-1.5'
+                }`}>
+                  {formData.povecanRizik ? 'Povećan rizik' : 'Nije povećan rizik'}
+                </span>
+              )}
+            </div>
             <div className="relative w-full">
               <input
                 type="text"

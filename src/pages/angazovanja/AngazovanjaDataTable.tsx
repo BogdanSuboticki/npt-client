@@ -148,7 +148,7 @@ export default function AngazovanjaDataTable({ data: initialData, columns }: Dat
             <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-2">
             <div className="w-full lg:w-50">
               <FilterDropdown
                 label="Ime i prezime"

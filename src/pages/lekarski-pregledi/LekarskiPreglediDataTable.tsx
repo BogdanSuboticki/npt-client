@@ -157,7 +157,7 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
             <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-2">
             <FilterDropdown
               label="Zaposleni"
               options={uniqueZaposleni}

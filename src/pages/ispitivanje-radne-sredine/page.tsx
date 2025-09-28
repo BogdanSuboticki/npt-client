@@ -281,7 +281,7 @@ const sampleData = [
 // Column definitions for the table
 const columns = [
   { key: 'redniBroj', label: '', sortable: true },
-  { key: 'nazivLokacije', label: 'Naziv lokacije', sortable: true },
+  { key: 'nazivLokacije', label: 'Lokacija', sortable: true },
   { key: 'brojMernihMesta', label: 'Broj mernih mesta', sortable: true },
   { key: 'intervalIspitivanja', label: 'Interval ispitivanja', sortable: true },
   { key: 'mikroklimaLetnja', label: 'Mikroklima letnja', sortable: true },
@@ -344,7 +344,7 @@ const IspitivanjeRadneSredine: React.FC = () => {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Ispitivanje radne sredine
+              Ispitivanje Radne Sredine
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton

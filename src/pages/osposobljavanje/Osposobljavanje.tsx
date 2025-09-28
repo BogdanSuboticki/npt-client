@@ -83,11 +83,11 @@ const columns = [
   { key: "zaposleni", label: "Zaposleni", sortable: true },
   { key: "radnoMesto", label: "Radno mesto", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },
-  { key: "povecanRizik", label: "Povećani rizik", sortable: true },
-  { key: "osposobljavanjeBZR", label: "Osposobljavanje BZR", sortable: true },
-  { key: "datumNarednogBZR", label: "Datum narednog osposobljavanja", sortable: true },
-  { key: "osposobljavanjeZOP", label: "Osposobljavanje ZOP", sortable: true },
-  { key: "datumNarednogZOP", label: "Datum narednog ZOP", sortable: true }
+  { key: "povecanRizik", label: "Povećan rizik", sortable: true },
+  { key: "osposobljavanjeBZR", label: "Poslednji BZR", sortable: true },
+  { key: "datumNarednogBZR", label: "Naredni BZR", sortable: true },
+  { key: "osposobljavanjeZOP", label: "Poslednji ZOP", sortable: true },
+  { key: "datumNarednogZOP", label: "Naredni ZOP", sortable: true }
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

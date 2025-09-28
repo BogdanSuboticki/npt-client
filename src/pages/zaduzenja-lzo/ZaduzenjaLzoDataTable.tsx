@@ -20,7 +20,8 @@ interface Column {
 
 interface ZaduzenaOprema {
   naziv: string;
-  kolicina: number;
+  datumOd?: Date;
+  datumDo?: Date;
 }
 
 interface ZaduzenjaLzoData {
@@ -44,13 +45,54 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns }: Da
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
+  // Flatten data to show each piece of equipment as a separate row
+  const flattenedData = useMemo(() => {
+    const flattened: Array<ZaduzenjaLzoData & { opremaIndex: number; isFirstRow: boolean; totalRows: number }> = [];
+    
+    initialData.forEach((item) => {
+      if (item.zaduzenaOprema && item.zaduzenaOprema.length > 0) {
+        item.zaduzenaOprema.forEach((oprema, index) => {
+          flattened.push({
+            ...item,
+            opremaIndex: index,
+            isFirstRow: index === 0,
+            totalRows: item.zaduzenaOprema.length,
+            // Override with oprema-specific data
+            nazivLzs: oprema.naziv,
+            datumZaduzenja: oprema.datumOd,
+            narednoZaduzenje: oprema.datumDo,
+          });
+        });
+      } else {
+        // If no oprema, show as single row
+        flattened.push({
+          ...item,
+          opremaIndex: 0,
+          isFirstRow: true,
+          totalRows: 1,
+          nazivLzs: '',
+          datumZaduzenja: undefined,
+          narednoZaduzenje: undefined,
+        });
+      }
+    });
+    
+    return flattened;
+  }, [initialData]);
+
   const filteredAndSortedData = useMemo(() => {
-    return initialData
+    return flattenedData
       .sort((a, b) => {
         if (sortKey === 'povecanRizik') {
           return sortOrder === "asc" 
             ? (a[sortKey] === b[sortKey] ? 0 : a[sortKey] ? -1 : 1)
             : (a[sortKey] === b[sortKey] ? 0 : a[sortKey] ? 1 : -1);
+        }
+        
+        if (sortKey.includes('datum')) {
+          const aDate = a[sortKey] instanceof Date ? a[sortKey] : new Date(a[sortKey]);
+          const bDate = b[sortKey] instanceof Date ? b[sortKey] : new Date(b[sortKey]);
+          return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
         }
         
         if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
@@ -61,7 +103,7 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns }: Da
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, initialData]);
+  }, [sortKey, sortOrder, flattenedData]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -83,16 +125,13 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns }: Da
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
-  const renderZaduzenaOprema = (oprema: ZaduzenaOprema[]) => {
-    return (
-      <div className="space-y-1">
-        {oprema.map((item, index) => (
-          <div key={index} className="text-sm">
-            {item.naziv} - {item.kolicina} kom
-          </div>
-        ))}
-      </div>
-    );
+  const formatDate = (date: Date | undefined | null): string => {
+    if (!date) return 'N/A';
+    return date.toLocaleDateString('sr-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -184,25 +223,37 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns }: Da
             </TableHeader>
             <TableBody>
               {currentData.map((item, index) => (
-                <TableRow key={item.id}>
-                  {columns.map(({ key }, colIndex) => (
-                    <TableCell
-                      key={key}
-                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                        colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
-                      }`}
-                    >
-                      {key === 'redniBroj' ? (
-                        startIndex + index + 1
-                      ) : key === 'povecanRizik' ? (
-                        item[key] ? 'DA' : 'NE'
-                      ) : key === 'zaduzenaOprema' ? (
-                        renderZaduzenaOprema(item[key])
-                      ) : (
-                        item[key]
-                      )}
-                    </TableCell>
-                  ))}
+                <TableRow key={`${item.id}-${item.opremaIndex}`}>
+                  {columns.map(({ key }, colIndex) => {
+                    // Only render spanning columns on the first row of each group
+                    if ((key === 'zaposleni' || key === 'radnoMesto' || key === 'povecanRizik' || key === 'redniBroj') && !item.isFirstRow) {
+                      return null;
+                    }
+                    
+                    return (
+                      <TableCell
+                        key={key}
+                        className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
+                          colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
+                        }`}
+                        rowSpan={key === 'zaposleni' || key === 'radnoMesto' || key === 'povecanRizik' || key === 'redniBroj' ? item.totalRows : undefined}
+                      >
+                        {key === 'redniBroj' ? (
+                          startIndex + index + 1
+                        ) : key === 'povecanRizik' ? (
+                          item[key] ? 'DA' : 'NE'
+                        ) : key === 'nazivLzs' ? (
+                          item.nazivLzs
+                        ) : key === 'datumZaduzenja' ? (
+                          formatDate(item.datumZaduzenja)
+                        ) : key === 'narednoZaduzenje' ? (
+                          formatDate(item.narednoZaduzenje)
+                        ) : (
+                          item[key]
+                        )}
+                      </TableCell>
+                    );
+                  })}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">

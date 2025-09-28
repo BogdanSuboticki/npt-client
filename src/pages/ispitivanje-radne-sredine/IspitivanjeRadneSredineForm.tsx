@@ -16,7 +16,6 @@ interface IspitivanjeRadneSredineFormProps {
 interface TipIspitivanjaData {
   key: string;
   naziv: string;
-  description: string;
   selected: boolean;
   ispravno: boolean;
   datumIspitivanja: Date | null;
@@ -37,7 +36,6 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     {
       key: 'mikroklimaLetnja',
       naziv: 'Ispitivanje Mikroklime letnje',
-      description: 'Ispitivanje mikroklime u letnjem periodu',
       selected: false,
       ispravno: true,
       datumIspitivanja: null
@@ -45,7 +43,6 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     {
       key: 'mikroklimaZimska',
       naziv: 'Ispitivanje Mikroklime zimske',
-      description: 'Ispitivanje mikroklime u zimskom periodu',
       selected: false,
       ispravno: true,
       datumIspitivanja: null
@@ -53,7 +50,6 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     {
       key: 'fizickeStetnosti',
       naziv: 'Ispitivanje Fizičkih štetnosti',
-      description: 'Ispitivanje fizičkih faktora radne sredine',
       selected: false,
       ispravno: true,
       datumIspitivanja: null
@@ -61,7 +57,6 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     {
       key: 'hemijskeStetnosti',
       naziv: 'Ispitivanje Hemijskih štetnosti',
-      description: 'Ispitivanje hemijskih faktora radne sredine',
       selected: false,
       ispravno: true,
       datumIspitivanja: null
@@ -69,7 +64,6 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     {
       key: 'osvetljenje',
       naziv: 'Ispitivanje Osvetljenja',
-      description: 'Ispitivanje osvetljenja radne sredine',
       selected: false,
       ispravno: true,
       datumIspitivanja: null
@@ -177,8 +171,8 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
       className="max-w-[900px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 lg:p-10 pb-0">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Ispitivanje radne sredine</h2>
+        <div className="p-5 lg:pb-5 lg:pt-10 pb-0">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Ispitivanje Radne Sredine</h2>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
@@ -254,7 +248,7 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAll}
-                className="text-xs px-3 py-1"
+                className="text-[13px] px-3 py-1"
               >
                 Izaberi sve
               </Button>
@@ -263,7 +257,7 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
                 variant="outline"
                 size="sm"
                 onClick={handleSelectNone}
-                className="text-xs px-3 py-1"
+                className="text-[13px] px-3 py-1"
               >
                 Poništi sve
               </Button>
@@ -292,9 +286,7 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
                   <div className="text-sm font-medium text-gray-800 dark:text-white">
                     {tip.naziv}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {tip.description}
-                  </div>
+
                 </div>
               </div>
             ))}
@@ -326,6 +318,7 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
                          onChange={(value) => handleTipIspitivanjaStatusChange(tip.key, value)}
                          size="full"
                          name={`slider-${tip.key.replace(/[^a-zA-Z0-9]/g, '')}`}
+                         showRedWhenFalse={true}
                        />
                      </div>
 
@@ -336,6 +329,7 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
                         onChange={(date) => handleTipIspitivanjaDateChange(tip.key, date)}
                         placeholder="Izaberi datum ispitivanja"
                         required
+                        className="!bg-white dark:!bg-white"
                       />
                     </div>
                   </div>

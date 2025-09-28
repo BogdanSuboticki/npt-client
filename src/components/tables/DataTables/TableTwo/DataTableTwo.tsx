@@ -114,7 +114,7 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
             </div>
           )}
 
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-2">
             {showFilters && (
               <>
                 <FilterDropdown

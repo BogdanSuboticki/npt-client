@@ -20,6 +20,7 @@ const preglediOpremeData = [
     status: "Ispravno",
     datumNarednogPregleda: new Date("2024-07-01"),
     napomena: "Redovna kontrola",
+    standard: "EN 1012-1",
   },
   {
     id: 2,
@@ -33,6 +34,7 @@ const preglediOpremeData = [
     status: "Ispravno",
     datumNarednogPregleda: new Date("2024-08-15"),
     napomena: "Redovna kontrola",
+    standard: "EN 13001-1",
   },
   {
     id: 3,
@@ -46,6 +48,7 @@ const preglediOpremeData = [
     status: "Neispravno",
     datumNarednogPregleda: new Date("2024-06-10"),
     napomena: "Potrebna je zamena motora, oprema trenutno neispravna",
+    standard: "EN 60335-2-80",
   },
   {
     id: 4,
@@ -59,6 +62,7 @@ const preglediOpremeData = [
     status: "Ispravno",
     datumNarednogPregleda: new Date("2026-01-30"),
     napomena: "Oprema u odličnom stanju, nema potrebe za intervencijom",
+    standard: "EN 809",
   },
   {
     id: 5,
@@ -72,6 +76,7 @@ const preglediOpremeData = [
     status: "Ispravno",
     datumNarednogPregleda: new Date("2025-02-05"),
     napomena: "Redovna kontrola, potrebna je zamena ulja",
+    standard: "EN 60034-1",
   },
 ];
 
@@ -81,9 +86,9 @@ const columns = [
   { key: "vrstaOpreme", label: "Vrsta opreme", sortable: true },
   { key: "inventarniBroj", label: "Inventarni broj", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },
-  { key: "datumPregleda", label: "Datum pregleda", sortable: true },
-  { key: "intervalPregleda", label: "Interval pregleda", sortable: true },
-  { key: "status", label: "Status", sortable: true },
+  { key: "standard", label: "Standard", sortable: true },
+  { key: "datumPregleda", label: "Poslednji pregled", sortable: true },
+  { key: "status", label: "Status pregleda", sortable: true },
   { key: "naredniPregled", label: "Naredni pregled", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
 ];

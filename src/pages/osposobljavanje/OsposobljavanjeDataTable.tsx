@@ -210,7 +210,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                 <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
               </div>
 
-              <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex flex-col lg:flex-row gap-2">
                 {/* Zaposleni Dropdown */}
                 <div className="relative w-full lg:w-48" ref={zaposleniRef}>
                   <button
@@ -320,7 +320,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
           
 
           <div className="max-w-full overflow-x-auto custom-scrollbar">
-            <div className={`min-h-[200px] ${(isExpanded || isHovered || isMobileOpen) ? '!max-w-[100px]' : ''}`}>
+            <div className={`min-h-[200px] ${(isExpanded || isHovered || isMobileOpen) ? '' : ''}`}>
               <Table>
                 <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
                   <TableRow>

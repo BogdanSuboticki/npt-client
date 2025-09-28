@@ -219,7 +219,7 @@ const columns = [
   { key: "povecanRizik", label: "Povećan rizik", sortable: true },
   { key: "obavezanOftamoloskiPregled", label: "Obavezan oftamološki pregled", sortable: true },
   { key: "obavezanPregledPoDrugomOsnovu", label: "Obavezan pregled po drugom osnovu", sortable: true },
-  { key: "oprema", label: "Oprema", sortable: false },
+  { key: "oprema", label: "Oprema (LZS)", sortable: false },
 ];
 
 // Columns for the second table (LZS table)

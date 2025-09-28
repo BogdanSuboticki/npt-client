@@ -15,9 +15,9 @@ const zaduzenjaLzoData = [
     radnoMesto: "Viljuškari",
     povecanRizik: true,
     zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", kolicina: 1 },
-      { naziv: "Zaštitne rukavice", kolicina: 2 },
-      { naziv: "Zaštitne naočare", kolicina: 1 }
+      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") },
+      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") },
+      { naziv: "Zaštitne naočare", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") }
     ],
   },
   {
@@ -27,8 +27,8 @@ const zaduzenjaLzoData = [
     radnoMesto: "Kranista",
     povecanRizik: false,
     zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", kolicina: 1 },
-      { naziv: "Zaštitne rukavice", kolicina: 1 }
+      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-02-01"), datumDo: new Date("2024-11-30") },
+      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-02-01"), datumDo: new Date("2024-11-30") }
     ],
   },
   {
@@ -38,10 +38,10 @@ const zaduzenjaLzoData = [
     radnoMesto: "Mehaničar",
     povecanRizik: true,
     zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", kolicina: 1 },
-      { naziv: "Zaštitne rukavice", kolicina: 2 },
-      { naziv: "Zaštitne naočare", kolicina: 1 },
-      { naziv: "Zaštitna obuća", kolicina: 1 }
+      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
+      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
+      { naziv: "Zaštitne naočare", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
+      { naziv: "Zaštitna obuća", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") }
     ],
   },
 ];
@@ -51,7 +51,9 @@ const columns = [
   { key: "zaposleni", label: "Zaposleni", sortable: true },
   { key: "radnoMesto", label: "Radno mesto", sortable: true },
   { key: "povecanRizik", label: "Povećan rizik", sortable: true },
-  { key: "zaduzenaOprema", label: "Zadužena oprema", sortable: false },
+  { key: "nazivLzs", label: "Naziv LZS", sortable: true },
+  { key: "datumZaduzenja", label: "Datum zaduženja", sortable: true },
+  { key: "narednoZaduzenje", label: "Naredno zaduženje", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

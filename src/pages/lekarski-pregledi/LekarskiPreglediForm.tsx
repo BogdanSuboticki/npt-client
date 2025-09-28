@@ -118,7 +118,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="w-full">
-                <Label>Angažovani *</Label>
+                <Label>Zaposleni *</Label>
                 <div className="relative w-full" ref={zaposleniRef}>
                   <button
                     type="button"
@@ -182,7 +182,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                    <input
                      type="text"
                      value={formData.radnoMesto || ""}
-                     placeholder="Izaberite angazovanog"
+                     placeholder="Izaberite zaposlenog"
                      readOnly
                      className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
                    />

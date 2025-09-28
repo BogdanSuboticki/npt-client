@@ -16,6 +16,7 @@ const lekarskiPreglediData = [
     periodObilaska: "Period 1",
     sledeciObilazak: "Sledeći obilazak 1",
     napomena: "Napomena 1",
+    primalacZapisnika: "Marko Petrović",
   },
   {
     id: 2,
@@ -25,6 +26,7 @@ const lekarskiPreglediData = [
     periodObilaska: "Period 2",
     sledeciObilazak: "Sledeći obilazak 2",
     napomena: "Napomena 2",
+    primalacZapisnika: "Ana Jovanović",
   },
   {
     id: 3,
@@ -34,6 +36,7 @@ const lekarskiPreglediData = [
     periodObilaska: "Period 3",
     sledeciObilazak: "Sledeći obilazak 3",
     napomena: "Napomena 3",
+    primalacZapisnika: "Stefan Nikolić",
   },
 ];
 
@@ -44,6 +47,7 @@ const columns = [
   { key: "intervalProvere", label: "Interval provere", sortable: true },
   { key: "sledecaProvera", label: "Sledeća provera", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
+  { key: "primalacZapisnika", label: "Primalac zapisnika", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

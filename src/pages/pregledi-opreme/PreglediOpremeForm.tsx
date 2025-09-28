@@ -21,7 +21,8 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     datumPregleda: new Date(),
     status: "",
     datumNarednogPregleda: new Date(),
-    napomena: ""
+    napomena: "",
+    standard: ""
   });
 
   // Add state for dropdowns
@@ -34,12 +35,12 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
 
   // Equipment data with names and their corresponding types
   const opremaData = [
-    { naziv: "Viljuškar", vrsta: "Oprema za rad", lokacija: "Lokacija 1" },
-    { naziv: "Kran", vrsta: "Oprema za rad", lokacija: "Lokacija 2" },
-    { naziv: "Transformator", vrsta: "Elektro i gromobranska instalacija", lokacija: "Lokacija 3" },
-    { naziv: "Kompresor", vrsta: "Oprema za rad", lokacija: "Lokacija 1" },
-    { naziv: "Generator", vrsta: "Elektro i gromobranska instalacija", lokacija: "Lokacija 2" },
-    { naziv: "Pumpa", vrsta: "Oprema za rad", lokacija: "Lokacija 3" }
+    { naziv: "Viljuškar", vrsta: "Oprema za rad", lokacija: "Lokacija 1", standard: "EN 1175-1" },
+    { naziv: "Kran", vrsta: "Oprema za rad", lokacija: "Lokacija 2", standard: "EN 13001-1" },
+    { naziv: "Transformator", vrsta: "Elektro i gromobranska instalacija", lokacija: "Lokacija 3", standard: "EN 60076" },
+    { naziv: "Kompresor", vrsta: "Oprema za rad", lokacija: "Lokacija 1", standard: "EN 1012-1" },
+    { naziv: "Generator", vrsta: "Elektro i gromobranska instalacija", lokacija: "Lokacija 2", standard: "EN 60034-1" },
+    { naziv: "Pumpa", vrsta: "Oprema za rad", lokacija: "Lokacija 3", standard: "EN 809" }
   ];
 
   // Interval is fixed to 36 months
@@ -66,14 +67,15 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Auto-fill vrsta opreme when naziv opreme is selected
+  // Auto-fill vrsta opreme, lokacija and standard when naziv opreme is selected
   const handleNazivOpremeChange = (naziv: string) => {
     const selectedOprema = opremaData.find(item => item.naziv === naziv);
     setFormData(prev => ({
       ...prev,
       nazivOpreme: naziv,
       vrstaOpreme: selectedOprema ? selectedOprema.vrsta : "",
-      lokacija: selectedOprema ? selectedOprema.lokacija : ""
+      lokacija: selectedOprema ? selectedOprema.lokacija : "",
+      standard: selectedOprema ? selectedOprema.standard : ""
     }));
     setIsNazivOpremeOpen(false);
   };
@@ -167,11 +169,24 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
               </div>
 
               <div className="w-full">
-                <Label>Lokacija *</Label>
+                <Label>Lokacija</Label>
                 <div className="relative w-full">
                   <input
                     type="text"
                     value={formData.lokacija || ""}
+                    placeholder="Izaberite opremu"
+                    readOnly
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
+                <Label>Standard</Label>
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={formData.standard || ""}
                     placeholder="Izaberite opremu"
                     readOnly
                     className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
@@ -220,21 +235,10 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                 </div>
               </div>
 
-              <div className="w-full">
-                <Label>Datum pregleda opreme *</Label>
-                <CustomDatePicker
-                  value={formData.datumPregleda}
-                  onChange={(date) => {
-                    if (date) {
-                      setFormData(prev => ({ ...prev, datumPregleda: date }));
-                    }
-                  }}
-                  required
-                />
-              </div>
+
 
               <div className="w-full">
-                <Label>Status *</Label>
+                <Label>Status Pregleda *</Label>
                 <div className="relative w-full" ref={statusRef}>
                   <button
                     type="button"
@@ -273,16 +277,28 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                   )}
                 </div>
               </div>
+              <div className="w-full">
+                <Label>Datum pregleda opreme *</Label>
+                <CustomDatePicker
+                  value={formData.datumPregleda}
+                  onChange={(date) => {
+                    if (date) {
+                      setFormData(prev => ({ ...prev, datumPregleda: date }));
+                    }
+                  }}
+                  required
+                />
+              </div>
 
               <div className="w-full">
                 <Label>Datum narednog pregleda opreme</Label>
-                <div className="relative">
+                <div className="relative w-full">
                   <input
                     type="text"
                     value={formData.datumNarednogPregleda ? formData.datumNarednogPregleda.toLocaleDateString('sr-RS') : ''}
+                    placeholder="Izaberite opremu"
                     readOnly
-                    disabled
-                    className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed pr-10"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-500 dark:text-gray-400">

@@ -79,7 +79,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <OpremaIcon />,
-    name: "Oprema",
+    name: "Oprema - LZS",
     path: "/oprema?context=moja-firma",
   },
   {

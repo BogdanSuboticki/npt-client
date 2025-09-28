@@ -15,7 +15,7 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import CustomDatePicker from "../../components/form/input/DatePicker";
-import TextArea from "../../components/form/input/TextArea";
+import Slider from "../../components/ui/Slider";
 
 interface Column {
   key: string;
@@ -34,6 +34,7 @@ interface InspekcijskiNadzorItem {
   id: number;
   brojResenja: string;
   datumNadzora: Date;
+  datumObavestavanjaInspekcije: Date;
   napomena: string;
   mere: Mera[];
   [key: string]: any;
@@ -51,7 +52,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
-  const [modalNote, setModalNote] = useState<string>("");
+  const [isRealizovanaMera, setIsRealizovanaMera] = useState<boolean>(true);
 
   // Filters
   const uniqueBrojResenja = useMemo(() => {
@@ -157,12 +158,13 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
 
   const handleActionClick = () => {
     setModalDate(new Date());
-    setModalNote("");
+    setIsRealizovanaMera(true);
     openModal();
   };
 
   const handleSave = () => {
-    console.log("Saving inspekcijski nadzor action with date:", modalDate, "and note:", modalNote);
+    const status = isRealizovanaMera ? "Realizovana mera" : "Obavešten inspektor";
+    console.log("Saving inspekcijski nadzor action with date:", modalDate, "and status:", status);
     closeModal();
   };
 
@@ -184,11 +186,6 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
   
-  // Calculate unique resolutions for display count
-  const uniqueResolutions = useMemo(() => {
-    const uniqueIds = new Set(filteredAndSortedData.map(item => item.id));
-    return uniqueIds.size;
-  }, [filteredAndSortedData]);
 
   const formatDate = (value: Date | null): string => {
     if (!value) return "";
@@ -210,7 +207,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
             <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-2">
             <div className="relative w-full lg:w-64" ref={searchRef}>
               <div className="relative">
                 <input
@@ -346,7 +343,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
                 <TableRow key={`${item.id}-${item.meraIndex}`}>
                   {columns.map(({ key }, colIndex) => {
                     // Only render spanning columns on the first row of each group
-                    if ((key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena') && !item.isFirstRow) {
+                    if ((key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena' || key === 'redniBroj') && !item.isFirstRow) {
                       return null;
                     }
                     
@@ -356,14 +353,16 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
                         className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
                           colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''
                         }`}
-                        rowSpan={key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena' ? item.totalRows : undefined}
+                        rowSpan={key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena' || key === 'redniBroj' ? item.totalRows : undefined}
                       >
                         {key === 'redniBroj' ? (
-                          item.isFirstRow ? startIndex + index + 1 : ''
+                          startIndex + index + 1
                         ) : key === 'brojResenja' ? (
                           item.brojResenja
                         ) : key === 'datumNadzora' ? (
                           formatDate(item.datumNadzora)
+                        ) : key === 'datumObavestavanjaInspekcije' ? (
+                          formatDate(item.datumObavestavanjaInspekcije)
                         ) : key === 'napomena' ? (
                           item.napomena
                         ) : key === 'nazivMere' ? (
@@ -410,7 +409,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
           />
           <div className="pt-3 xl:pt-0 px-6">
             <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
-              Prikaz {startIndex + 1} - {endIndex} od {totalItems} redova ({uniqueResolutions} rešenja)
+              Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
             </p>
           </div>
         </div>
@@ -425,12 +424,19 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
           Evidentiraj realizaciju mere
         </h4>
         <div className="mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Datum realizacije:</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Datum:</p>
           <CustomDatePicker value={modalDate} onChange={(d) => d && setModalDate(d)} />
         </div>
         <div className="mb-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Napomena:</p>
-          <TextArea value={modalNote} onChange={(e: any) => setModalNote(e.target.value)} placeholder="Unesite napomenu" />
+          <Slider
+            label="Status realizacije:"
+            optionOne="Realizovana mera"
+            optionTwo="Obavešten inspektor"
+            value={isRealizovanaMera}
+            onChange={setIsRealizovanaMera}
+            size="full"
+            name="realizacija-status"
+          />
         </div>
         <div className="flex items-center justify-end w-full gap-3">
           <Button size="sm" variant="outline" onClick={closeModal}>

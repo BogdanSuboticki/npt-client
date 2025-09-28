@@ -26,52 +26,53 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
 
   // Add state for dropdowns
   const [isAngazovaniOpen, setIsAngazovaniOpen] = React.useState(false);
-  const [isLokacijaOpen, setIsLokacijaOpen] = React.useState(false);
   const angazovaniRef = useRef<HTMLDivElement>(null);
-  const lokacijaRef = useRef<HTMLDivElement>(null);
 
-  // Employee data with their job positions
+  // Employee data with their job positions and locations
   const angazovaniData: Record<string, {
     radnoMesto: string;
     povecanRizik: boolean;
+    lokacija: string;
   }> = {
     "Petar Petrović": {
       radnoMesto: "Viljuškari",
       povecanRizik: true,
+      lokacija: "Beograd",
     },
     "Ana Anić": {
       radnoMesto: "Kranista",
       povecanRizik: true,
+      lokacija: "Novi Sad",
     },
     "Marko Marković": {
       radnoMesto: "Mehaničar",
       povecanRizik: false,
+      lokacija: "Niš",
     },
     "Jovana Jovanović": {
       radnoMesto: "Električar",
       povecanRizik: true,
+      lokacija: "Kragujevac",
     },
     "Stefan Stefanović": {
       radnoMesto: "Viljuškari",
       povecanRizik: true,
+      lokacija: "Subotica",
     },
     "Marija Marić": {
       radnoMesto: "Kontrolor kvaliteta",
       povecanRizik: false,
+      lokacija: "Zrenjanin",
     }
   };
 
   const angazovaniOptions = Object.keys(angazovaniData);
-  const lokacijaOptions = ["Beograd", "Novi Sad", "Niš", "Kragujevac", "Subotica", "Zrenjanin", "Pančevo", "Čačak"];
 
   // Add click outside handler for dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (angazovaniRef.current && !angazovaniRef.current.contains(event.target as Node)) {
         setIsAngazovaniOpen(false);
-      }
-      if (lokacijaRef.current && !lokacijaRef.current.contains(event.target as Node)) {
-        setIsLokacijaOpen(false);
       }
     };
 
@@ -155,14 +156,14 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="w-full">
-                <Label>Angazovani *</Label>
+                <Label>Zaposleni *</Label>
                                 <div className="relative w-full" ref={angazovaniRef}>
                   <button
                     type="button"
                     onClick={() => setIsAngazovaniOpen(!isAngazovaniOpen)}
                     className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
                   >
-                    <span>{formData.angazovani || "Izaberi angazovanog"}</span>
+                    <span>{formData.angazovani || "Izaberi zaposlenog"}</span>
                     <svg
                       className={`w-4 h-4 transition-transform ml-2 ${isAngazovaniOpen ? 'rotate-180' : ''}`}
                       fill="none"
@@ -188,6 +189,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                                  angazovani: option,
                                  radnoMesto: selectedEmployeeData.radnoMesto,
                                  povecanRizik: selectedEmployeeData.povecanRizik,
+                                 lokacija: selectedEmployeeData.lokacija,
                                };
                                
                                // Automatically calculate next BZR date
@@ -213,7 +215,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
 
                              <div className="w-full">
                  <div className="flex items-center gap-2">
-                   <Label>Radno Mesto *</Label>
+                   <Label>Radno Mesto</Label>
                    {formData.radnoMesto && (
                      <span className={`text-sm font-medium ${
                        formData.povecanRizik 
@@ -228,7 +230,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                    <input
                      type="text"
                      value={formData.radnoMesto || ""}
-                     placeholder="Izaberite angazovanog"
+                     placeholder="Izaberite zaposlenog"
                      readOnly
                      className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
                    />
@@ -236,48 +238,20 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                </div>
 
               <div className="w-full">
-                <Label>Lokacija *</Label>
-                                <div className="relative w-full" ref={lokacijaRef}>
-                  <button
-                    type="button"
-                    onClick={() => setIsLokacijaOpen(!isLokacijaOpen)}
-                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                  >
-                    <span>{formData.lokacija || "Izaberi lokaciju"}</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform ml-2 ${isLokacijaOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                                     {isLokacijaOpen && (
-                     <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
-                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                        {lokacijaOptions.map((option, index) => (
-                          <div
-                            key={option}
-                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                              formData.lokacija === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            } ${index === lokacijaOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                            onClick={() => {
-                              setFormData({ ...formData, lokacija: option });
-                              setIsLokacijaOpen(false);
-                            }}
-                          >
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <Label>Lokacija</Label>
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={formData.lokacija || ""}
+                     placeholder="Izaberite zaposlenog"
+                    readOnly
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
                 </div>
               </div>
 
                              <div className="w-full">
-                 <Label>Osposobljavanje BZR *</Label>
+                 <Label>Datum Provere BZR *</Label>
                  <CustomDatePicker
                    value={formData.osposobljavanjeBZR}
                    onChange={(newValue) => handleDateChange('osposobljavanjeBZR', newValue)}
@@ -285,7 +259,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                </div>
 
                              <div className="w-full">
-                 <Label>Datum Narednog BZR</Label>
+                 <Label>Datum Naredne Provere BZR</Label>
                  <div className="relative">
                    <input
                      type="text"
@@ -303,7 +277,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
                </div>
 
               <div className="w-full">
-                <Label>Osposobljavanje ZOP</Label>
+                <Label>Datum Provere ZOP</Label>
                 <CustomDatePicker
                   value={formData.osposobljavanjeZOP}
                   onChange={(newValue) => handleDateChange('osposobljavanjeZOP', newValue)}
@@ -311,7 +285,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave }: Osposob
               </div>
 
               <div className="w-full">
-                <Label>Datum Narednog ZOP</Label>
+                <Label>Datum Naredne Provere ZOP</Label>
                 <div className="relative">
                   <input
                     type="text"

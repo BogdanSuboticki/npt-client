@@ -62,19 +62,7 @@ const ExportPopoverButton: React.FC<ExportPopoverButtonProps> = ({
             size="sm"
             className="flex items-center w-full"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+            <PrintIcon className="w-4 h-4" />
             Preuzmi Tabelu
           </Button>
         }
@@ -104,7 +92,7 @@ const ExportPopoverButton: React.FC<ExportPopoverButtonProps> = ({
               onClick={handlePrint}
               className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-2 w-full border border-gray-200"
             >
-              <PrintIcon className="w-5 h-5" />
+              <PrintIcon className="w-4 h-4" />
               Štampaj
             </button>
             

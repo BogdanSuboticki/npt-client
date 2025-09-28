@@ -25,6 +25,7 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
       nazivMere: string;
       rokIzvrsenja: Date | null;
       datumRealizacije: Date | null;
+      datumObavestavanja: Date | null;
     }>,
   });
 
@@ -54,6 +55,7 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
       nazivMere: "",
       rokIzvrsenja: null as Date | null,
       datumRealizacije: null as Date | null,
+      datumObavestavanja: null as Date | null,
     };
     setFormData(prev => ({
       ...prev,
@@ -143,21 +145,22 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
                 </div>
                 
                 {formData.mere.length > 0 && (
-                  <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700">
+                  <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
                     {/* Header */}
-                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                      <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 text-xs font-medium text-gray-700 dark:text-gray-300">
-                        <div>Naziv mere *</div>
-                        <div>Rok izvršenja *</div>
-                        <div>Datum realizacije mere</div>
-                        <div>Akcija</div>
+                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 min-w-[900px] w-full">
+                      <div className="grid grid-cols-[1fr_1fr_1fr_1fr_80px] gap-4 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Naziv mere *</div>
+                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Rok izvršenja *</div>
+                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum realizacije mere</div>
+                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum obaveštavanja inspekcije</div>
+                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Akcija</div>
                       </div>
                     </div>
                     
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
                       {formData.mere.map((mera) => (
                         <div key={mera.id} className="px-4 py-3">
-                          <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 items-start">
+                          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_80px] gap-4 min-w-[900px] items-start">
                             {/* Naziv mere */}
                             <div className="w-full">
                               <Input
@@ -191,8 +194,18 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
                               />
                             </div>
                           
+                            {/* Datum obaveštavanja inspekcije */}
+                            <div className="w-full">
+                              <CustomDatePicker
+                                value={mera.datumObavestavanja}
+                                onChange={(date) => handleMeraChange(mera.id, 'datumObavestavanja', date)}
+                                placeholder="Izaberi datum"
+                                className="h-11 text-sm w-full"
+                              />
+                            </div>
+                          
                             {/* Delete button */}
-                            <div className="flex items-center justify-start h-11">
+                            <div className="flex items-center justify-center h-11">
                               <button
                                 type="button"
                                 onClick={() => removeMera(mera.id)}

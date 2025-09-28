@@ -32,6 +32,7 @@ interface BezbednosneProvereData {
   periodObilaska: string;
   sledeciObilazak: string;
   napomena: string;
+  primalacZapisnika: string;
   [key: string]: any;
 }
 
@@ -48,6 +49,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
   const { isOpen, openModal, closeModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [modalNapomena, setModalNapomena] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
 
   
   // Get unique values for dropdowns
@@ -104,7 +106,8 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
     }
   };
 
-  const handleCheckboxClick = () => {
+  const handleCheckboxClick = (location: string) => {
+    setSelectedLocation(location);
     setModalDate(new Date()); // Reset to today's date when opening
     setModalNapomena(''); // Reset napomena field
     openModal();
@@ -143,7 +146,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
             <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-2">
             <div className="w-full lg:w-60">
               <FilterDropdown
                 label="Lokacija"
@@ -268,7 +271,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                     <div className="flex items-center w-full gap-2">
                       <button 
                         className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={handleCheckboxClick}
+                        onClick={() => handleCheckboxClick(item.lokacija)}
                       >
                         <CheckmarkIcon className="size-4" />
                       </button>
@@ -308,7 +311,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
         className="max-w-[500px] p-5 lg:p-8"
       >
         <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
-        Da li je izvršena nova kontrola radnih mesta? 
+        Da li je izvršena nova <br /> kontrola  {selectedLocation}? 
         </h4>
         <div className="mb-6">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">

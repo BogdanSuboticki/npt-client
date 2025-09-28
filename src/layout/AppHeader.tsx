@@ -12,8 +12,8 @@ const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<'notification' | 'user' | null>(null);
   const [searchValue, setSearchValue] = useState('');
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showFullList, setShowFullList] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -43,37 +43,70 @@ const AppHeader: React.FC = () => {
 
   const handleSearchInputChange = (value: string) => {
     setSearchValue(value);
-    
-    if (value.length > 0) {
-      const filtered = companies.filter(company =>
-        company.naziv.toLowerCase().includes(value.toLowerCase()) ||
-        company.mesto.toLowerCase().includes(value.toLowerCase()) ||
-        (company.delatnost && company.delatnost.toLowerCase().includes(value.toLowerCase()))
-      );
-      setFilteredCompanies(filtered.slice(0, 8)); // Limit to 8 suggestions
-      setShowSuggestions(true);
-    } else {
-      setFilteredCompanies([]);
-      setShowSuggestions(false);
+    setShowFullList(true); // Always show the full list when typing
+  };
+
+  const handleSearchInputClick = () => {
+    if (searchValue.length === 0) {
+      setShowFullList(true);
     }
   };
 
-  const handleSuggestionSelect = (company: Company) => {
-    setSearchValue(company.naziv);
-    setShowSuggestions(false);
-    setFilteredCompanies([]);
-    // Here you could add navigation to company details or search results
-    console.log('Selected company:', company);
+  const handleMobileSearchToggle = () => {
+    setShowMobileSearch(!showMobileSearch);
+    if (!showMobileSearch) {
+      // When opening mobile search, show full list and focus the input
+      setShowFullList(true);
+      setTimeout(() => {
+        const mobileSearchInput = document.getElementById('mobile-search-input');
+        mobileSearchInput?.focus();
+      }, 100);
+    } else {
+      setShowFullList(false);
+    }
   };
+
 
   const handleSearchButtonClick = () => {
     if (searchValue.trim()) {
       // Here you could add search functionality
       console.log('Searching for:', searchValue);
+    } else {
+      // Show full alphabetical list when no search term
+      setShowFullList(true);
     }
   };
 
+  // Group companies alphabetically and filter based on search value
+  const getAlphabeticalGroups = () => {
+    // Filter companies based on search value
+    const filteredCompanies = searchValue.length > 0 
+      ? companies.filter(company =>
+          company.naziv.toLowerCase().includes(searchValue.toLowerCase()) ||
+          company.mesto.toLowerCase().includes(searchValue.toLowerCase()) ||
+          (company.delatnost && company.delatnost.toLowerCase().includes(searchValue.toLowerCase()))
+        )
+      : companies; // Show all companies when search is empty
+    
+    const sortedCompanies = [...filteredCompanies].sort((a, b) => 
+      a.naziv.toLowerCase().localeCompare(b.naziv.toLowerCase())
+    );
+    
+    const groups: { [key: string]: Company[] } = {};
+    sortedCompanies.forEach(company => {
+      const firstLetter = company.naziv.charAt(0).toUpperCase();
+      if (!groups[firstLetter]) {
+        groups[firstLetter] = [];
+      }
+      groups[firstLetter].push(company);
+    });
+    
+    return groups;
+  };
+
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const fullListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -81,14 +114,30 @@ const AppHeader: React.FC = () => {
         event.preventDefault();
         inputRef.current?.focus();
       }
+      if (event.key === "Escape" && showFullList) {
+        setShowFullList(false);
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fullListRef.current && !fullListRef.current.contains(event.target as Node)) {
+        setShowFullList(false);
+      }
+      // Close mobile search when clicking outside
+      const target = event.target as HTMLElement;
+      if (showMobileSearch && !target.closest('[data-mobile-search]')) {
+        setShowMobileSearch(false);
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [showFullList]);
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-50 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -133,14 +182,148 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to="/" className="lg:hidden">
-            <span className="text-[26px] font-semibold text-gray-800 dark:text-white">HSEradar</span>
-          </Link>
+           {!showMobileSearch ? (
+             <Link to="/" className="lg:hidden">
+               <span className="text-[26px] font-semibold text-gray-800 dark:text-white">HSEradar</span>
+             </Link>
+           ) : (
+             <div className="lg:hidden flex items-center gap-2 flex-1" data-mobile-search>
+               <div className="relative flex-1">
+                 <input
+                   id="mobile-search-input"
+                   type="text"
+                   placeholder="Unesite naziv firme..."
+                   value={searchValue}
+                   onChange={(e) => handleSearchInputChange(e.target.value)}
+                   onClick={() => setShowFullList(true)}
+                   className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                 />
+                 {searchValue && (
+                   <button
+                     onClick={() => setSearchValue('')}
+                     className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                   >
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                       <path
+                         fillRule="evenodd"
+                         clipRule="evenodd"
+                         d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                         fill="currentColor"
+                       />
+                     </svg>
+                   </button>
+                 )}
+               </div>
+               <button
+                 onClick={() => setShowMobileSearch(false)}
+                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+               >
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                   <path
+                     fillRule="evenodd"
+                     clipRule="evenodd"
+                     d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                     fill="currentColor"
+                   />
+                 </svg>
+               </button>
+             </div>
+           )}
 
-          <button
-            onClick={toggleApplicationMenu}
-            className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
-          >
+          {/* Mobile Search Results */}
+          {showMobileSearch && showFullList && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-theme-lg max-h-[400px] overflow-hidden lg:hidden" data-mobile-search>
+              {/* Header with close button */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {searchValue.length > 0 ? `Rezultati za "${searchValue}"` : "Sve firme"}
+                </h3>
+                <button
+                  onClick={() => setShowFullList(false)}
+                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </button>
+              </div>
+              {/* Company List */}
+              <div className="overflow-y-auto" style={{ height: 'calc(400px - 60px)' }}>
+                {Object.keys(getAlphabeticalGroups()).length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                    <div className="text-center">
+                      <p className="text-sm">Nema rezultata</p>
+                      <p className="text-xs mt-1">Pokušajte sa drugim pretraživanjem</p>
+                    </div>
+                  </div>
+                ) : (
+                  Object.entries(getAlphabeticalGroups())
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([letter, companies]) => (
+                      <div key={letter} id={`mobile-section-${letter}`} className="border-b border-gray-100 dark:border-gray-800 last:border-b-0">
+                        <div className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-4 py-2">
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{letter}</h3>
+                        </div>
+                        <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                          {companies.map((company) => (
+                            <div
+                              key={company.id}
+                              className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                              onClick={() => {
+                                setSearchValue(company.naziv);
+                                setShowFullList(false);
+                                setShowMobileSearch(false);
+                              }}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium text-gray-900 dark:text-white">
+                                  {company.naziv}
+                                </span>
+                                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                  <span>{company.mesto}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              onClick={handleMobileSearchToggle}
+              className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.5 17.5L14.5834 14.5833M16.6667 9.58333C16.6667 13.4954 13.4954 16.6667 9.58333 16.6667C5.67132 16.6667 2.5 13.4954 2.5 9.58333C2.5 5.67132 5.67132 2.5 9.58333 2.5C13.4954 2.5 16.6667 5.67132 16.6667 9.58333Z"
+                  stroke="currentColor"
+                  strokeWidth="1.66667"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            <button
+              onClick={toggleApplicationMenu}
+              className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            >
             <svg
               width="24"
               height="24"
@@ -155,27 +338,93 @@ const AppHeader: React.FC = () => {
                 fill="currentColor"
               />
             </svg>
-          </button>
+            </button>
+          </div>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:block relative">
             <form>
-              <SearchInput
-                ref={inputRef}
-                placeholder="Unesite naziv firme..."
-                className="xl:w-[430px] !bg-[#F9FAFB] dark:!bg-[#101828]"
-                buttonContent={
-                  <>
-                    <span>Pretraži</span>
-                  </>
-                }
-                onButtonClick={handleSearchButtonClick}
-                suggestions={filteredCompanies}
-                onSuggestionSelect={handleSuggestionSelect}
-                showSuggestions={showSuggestions}
-                onInputChange={handleSearchInputChange}
-                value={searchValue}
-              />
+               <SearchInput
+                 ref={inputRef}
+                 placeholder="Unesite naziv firme..."
+                 className="xl:w-[430px] !bg-[#F9FAFB] dark:!bg-[#101828]"
+                 buttonContent={
+                   <>
+                     <span>Pretraži</span>
+                   </>
+                 }
+                 onButtonClick={handleSearchButtonClick}
+                 onClick={handleSearchInputClick}
+                 onInputChange={handleSearchInputChange}
+                 value={searchValue}
+               />
             </form>
+            
+            {/* Full Company List Modal */}
+            {showFullList && (
+              <div ref={fullListRef} className="absolute top-full left-0 right-0 z-50 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-theme-lg max-h-[600px] overflow-hidden">
+                {/* Header with close button */}
+                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                     {searchValue.length > 0 ? `Rezultati za "${searchValue}"` : "Sve firme"}
+                   </h3>
+                  <button
+                    onClick={() => setShowFullList(false)}
+                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                 {/* Company List */}
+                 <div className="overflow-y-auto" style={{ height: 'calc(600px - 60px)' }}>
+                   {Object.keys(getAlphabeticalGroups()).length === 0 ? (
+                     <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                       <div className="text-center">
+                         <p className="text-sm">Nema rezultata</p>
+                         <p className="text-xs mt-1">Pokušajte sa drugim pretraživanjem</p>
+                       </div>
+                     </div>
+                   ) : (
+                     Object.entries(getAlphabeticalGroups())
+                       .sort(([a], [b]) => a.localeCompare(b))
+                       .map(([letter, companies]) => (
+                        <div key={letter} id={`section-${letter}`} className="border-b border-gray-100 dark:border-gray-800 last:border-b-0">
+                          <div className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-4 py-2">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{letter}</h3>
+                          </div>
+                          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                            {companies.map((company) => (
+                              <div
+                                key={company.id}
+                                className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                                 onClick={() => {
+                                   setSearchValue(company.naziv);
+                                   setShowFullList(false);
+                                 }}
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-gray-900 dark:text-white">
+                                    {company.naziv}
+                                  </span>
+                                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span>{company.mesto}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                   )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div

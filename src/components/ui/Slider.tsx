@@ -8,6 +8,7 @@ interface SliderProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "full";
   name?: string;
+  showRedWhenFalse?: boolean;
 }
 
 export default function Slider({ 
@@ -18,7 +19,8 @@ export default function Slider({
   onChange, 
   className = "",
   size = "md",
-  name = "slider-tabs"
+  name = "slider-tabs",
+  showRedWhenFalse = false
 }: SliderProps) {
   const getSizeClasses = () => {
     switch (size) {
@@ -35,11 +37,13 @@ export default function Slider({
     }
   };
 
+  const isErrorState = showRedWhenFalse && !value;
+
   return (
     <div className={className}>
       {label && <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</div>}
       <div className="tabs-container">
-        <div className={`tabs-wrapper ${getSizeClasses()}`}>
+        <div className={`tabs-wrapper ${getSizeClasses()} ${isErrorState ? 'error-state' : ''}`}>
           <input 
             type="radio" 
             id={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}-${name}`}
@@ -47,7 +51,7 @@ export default function Slider({
             checked={value}
             onChange={() => onChange(true)}
           />
-          <label className="tab" htmlFor={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}-${name}`}>
+          <label className={`tab ${isErrorState ? 'error-tab' : ''}`} htmlFor={`radio-${optionOne.toLowerCase().replace(/\s+/g, '-')}-${name}`}>
             {optionOne}
           </label>
           <input 
@@ -57,10 +61,10 @@ export default function Slider({
             checked={!value}
             onChange={() => onChange(false)}
           />
-          <label className="tab" htmlFor={`radio-${optionTwo.toLowerCase().replace(/\s+/g, '-')}-${name}`}>
+          <label className={`tab ${isErrorState ? 'error-tab' : ''}`} htmlFor={`radio-${optionTwo.toLowerCase().replace(/\s+/g, '-')}-${name}`}>
             {optionTwo}
           </label>
-          <span className="glider"></span>
+          <span className={`glider ${isErrorState ? 'error-glider' : ''}`}></span>
         </div>
       </div>
     </div>

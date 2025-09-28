@@ -109,7 +109,7 @@ const Oprema: React.FC = () => {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Oprema
+              Oprema - LZS
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton

@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
-import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
 
 interface BezbednosneProvereFormProps {
@@ -17,7 +16,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
   const [formData, setFormData] = React.useState({
     lokacija: "",
     datumProvere: new Date(),
-    periodProvere: "",
+    periodProvere: "15",
     sledecaProvera: new Date(),
     napomena: "",
   });
@@ -43,26 +42,24 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Validate period on mount and ensure it's never below 1
+  // Calculate next inspection date when form loads or date changes
   useEffect(() => {
-    if (formData.periodProvere && parseInt(formData.periodProvere) < 1) {
-      setFormData(prev => ({ ...prev, periodProvere: "1" }));
+    if (formData.periodProvere && formData.datumProvere) {
+      const days = parseInt(formData.periodProvere);
+      if (days >= 1) {
+        const nextDate = new Date(formData.datumProvere);
+        nextDate.setDate(nextDate.getDate() + days);
+        setFormData(prev => ({ ...prev, sledecaProvera: nextDate }));
+      }
     }
-  }, [formData.periodProvere]);
+  }, [formData.datumProvere, formData.periodProvere]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.lokacija || !formData.datumProvere || !formData.periodProvere) {
+    if (!formData.lokacija || !formData.datumProvere) {
       alert('Molimo popunite sva obavezna polja');
-      return;
-    }
-    
-    // Validate period is at least 1 day
-    const period = parseInt(formData.periodProvere);
-    if (period < 1) {
-      alert('Interval kontrole mora biti najmanje 1 dan');
       return;
     }
     
@@ -135,6 +132,22 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
             </div>
           </div>
 
+
+
+          <div className="col-span-1">
+            <Label>Interval kontrole (u danima) *</Label>
+            <div className="relative w-full">
+              <input
+                type="text"
+                value={formData.periodProvere}
+                placeholder="15 dana"
+                readOnly
+                className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+
           <div className="col-span-1">
             <Label>Datum kontrole *</Label>
             <CustomDatePicker
@@ -149,45 +162,14 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
           </div>
 
           <div className="col-span-1">
-            <Label>Interval kontrole (u danima) *</Label>
-            <Input
-              type="number"
-              name="periodProvere"
-              value={formData.periodProvere}
-              onChange={(e) => {
-                const value = e.target.value;
-                const numValue = parseInt(value);
-                
-                // Prevent negative values and ensure minimum of 1
-                if (value === "" || (numValue >= 1)) {
-                  setFormData(prev => ({ ...prev, periodProvere: value }));
-                  
-                  // Automatically calculate next inspection date
-                  if (value && formData.datumProvere && numValue >= 1) {
-                    const days = numValue;
-                    const nextDate = new Date(formData.datumProvere);
-                    nextDate.setDate(nextDate.getDate() + days);
-                    setFormData(prev => ({ ...prev, sledecaProvera: nextDate }));
-                  }
-                }
-                // If negative value is entered, don't update the form data
-              }}
-              placeholder="Unesite broj dana"
-              min="1"
-              className="bg-[#F9FAFB] dark:bg-[#101828]"
-              required
-            />
-          </div>
-
-          <div className="col-span-1">
             <Label>Sledeća kontrola</Label>
-            <div className="relative">
+            <div className="relative w-full">
               <input
                 type="text"
                 value={formData.sledecaProvera ? formData.sledecaProvera.toLocaleDateString('sr-RS') : ''}
+                placeholder="Izaberite datum kontrole"
                 readOnly
-                disabled
-                className="w-full h-11 px-4 py-2.5 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg shadow-theme-xs dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 pr-10 cursor-default focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-700"
+                className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed pr-10"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-500 dark:text-gray-400">

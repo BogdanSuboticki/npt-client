@@ -12,6 +12,7 @@ const inspekcijskiNadzorData = [
     id: 1,
     brojResenja: "123-45/2024",
     datumNadzora: new Date("2024-01-12"),
+    datumObavestavanjaInspekcije: new Date("2024-01-10"),
     napomena: "Uočene nepravilnosti u skladištu hemikalija",
     mere: [
       {
@@ -38,6 +39,7 @@ const inspekcijskiNadzorData = [
     id: 2,
     brojResenja: "678-90/2024",
     datumNadzora: new Date("2024-02-05"),
+    datumObavestavanjaInspekcije: new Date("2024-02-03"),
     napomena: "Potrebna obuka zaposlenih za rad na visini",
     mere: [
       {
@@ -52,6 +54,7 @@ const inspekcijskiNadzorData = [
     id: 3,
     brojResenja: "555-11/2024",
     datumNadzora: new Date("2024-03-18"),
+    datumObavestavanjaInspekcije: new Date("2024-03-16"),
     napomena: "Zabrana upotrebe neispravne opreme",
     mere: [
       {
@@ -72,6 +75,7 @@ const columns = [
   { key: "nazivMere", label: "Naziv mere", sortable: true },
   { key: "rokIzvrsenja", label: "Rok izvršenja", sortable: true },
   { key: "datumRealizacije", label: "Datum realizacije mere", sortable: true },
+  { key: "datumObavestavanjaInspekcije", label: "Datum obaveštavanja inspekcije", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

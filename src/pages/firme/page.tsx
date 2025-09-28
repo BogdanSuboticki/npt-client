@@ -77,7 +77,7 @@ const komitentiData = [
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "naziv", label: "Naziv", sortable: true },
+  { key: "naziv", label: "Naziv Firme", sortable: true },
   { key: "adresa", label: "Adresa", sortable: true },
   { key: "mesto", label: "Mesto", sortable: true },
   { key: "pib", label: "PIB", sortable: true },

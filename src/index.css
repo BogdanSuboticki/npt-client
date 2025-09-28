@@ -970,6 +970,31 @@ span.flatpickr-weekday,
   background-color: rgba(70, 95, 255, 0.1);
 }
 
+/* Error state styling for slider - only when Neispravno is selected */
+.tabs-wrapper.error-state .tab.error-tab {
+  color: #6b7280;
+}
+
+.tabs-wrapper.error-state input[type="radio"]:checked + .error-tab {
+  color: #ef4444;
+}
+
+.tabs-wrapper.error-state .error-glider {
+  background-color: #fef2f2;
+}
+
+.dark .tabs-wrapper.error-state .tab.error-tab {
+  color: #9ca3af;
+}
+
+.dark .tabs-wrapper.error-state input[type="radio"]:checked + .error-tab {
+  color: #f87171;
+}
+
+.dark .tabs-wrapper.error-state .error-glider {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
 /* Print styles */
 @media print {
   body * {

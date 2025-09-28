@@ -26,8 +26,7 @@ const sampleData = [
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "nazivLokacije", label: "Naziv lokacije", sortable: true },
-  { key: "brojMernihMesta", label: "Broj mernih mesta", sortable: true },
-  { key: "organizacionaJedinica", label: "Organizaciona jedinica", sortable: true }
+  { key: "brojMernihMesta", label: "Broj mernih mesta", sortable: true }
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

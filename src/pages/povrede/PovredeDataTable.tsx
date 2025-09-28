@@ -129,7 +129,7 @@ export default function PovredeDataTable({ data: initialData, columns }: DataTab
             <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-2">
             <FilterDropdown
               label="Zaposleni"
               options={uniqueZaposleni}
@@ -157,7 +157,7 @@ export default function PovredeDataTable({ data: initialData, columns }: DataTab
       </div>
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
-        <div className={`min-h-[200px] ${(isExpanded || isHovered || isMobileOpen) ? 'max-w-[100px]' : ''}`}>
+        <div className={`min-h-[200px] ${(isExpanded || isHovered || isMobileOpen) ? 'max-w-[100px]' : 'max-w-full'}`}>
           <Table>
             <TableHeader className="border-t border-gray-100 dark:border-white/[0.05]">
               <TableRow>

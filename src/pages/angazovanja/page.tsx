@@ -42,7 +42,7 @@ const angazovanjaData = [
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "imePrezime", label: "Ime i prezime zaposlenog", sortable: true },
+  { key: "zaposleni", label: "Zaposleni", sortable: true },
   { key: "radnoMesto", label: "Radno mesto", sortable: true },
   { key: "vrstaAngazovanja", label: "Vrsta angažovanja", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },

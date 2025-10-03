@@ -5,6 +5,7 @@ import Button from "../components/ui/button/Button";
 import { Modal } from "../components/ui/modal";
 import Label from "../components/form/Label";
 import ExportPopoverButton from "../components/ui/table/ExportPopoverButton";
+import ConfirmModal from "../components/ui/modal/ConfirmModal";
 
 // Sample data for the table
 const radnaMestaData = [
@@ -15,7 +16,11 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Viljuškara", "Zaštitna oprema", "Alat za održavanje"]
+    oprema: [
+      { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-001" },
+      { lzs: "Zaštitna oprema", rok: 6, standard: "ISO-2023-002" },
+      { lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-003" }
+    ]
   },
   {
     id: 2,
@@ -24,7 +29,10 @@ const radnaMestaData = [
     povecanRizik: "Ne",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: ["Računar", "Stolica"]
+    oprema: [
+      { lzs: "Računar", rok: 36, standard: "ISO-2023-004" },
+      { lzs: "Stolica", rok: 60, standard: "ISO-2023-005" }
+    ]
   },
   {
     id: 3,
@@ -33,7 +41,11 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Zavarivačka maska", "Zaštitna odela", "Zavarivački aparat"]
+    oprema: [
+      { lzs: "Zavarivačka maska", rok: 12, standard: "ISO-2023-006" },
+      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-007" },
+      { lzs: "Zavarivački aparat", rok: 48, standard: "ISO-2023-008" }
+    ]
   },
   {
     id: 4,
@@ -42,7 +54,11 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Multimetar", "Zaštitne rukavice", "Alat za električne radove"]
+    oprema: [
+      { lzs: "Multimetar", rok: 24, standard: "ISO-2023-009" },
+      { lzs: "Zaštitne rukavice", rok: 6, standard: "ISO-2023-010" },
+      { lzs: "Alat za električne radove", rok: 36, standard: "ISO-2023-011" }
+    ]
   },
   {
     id: 5,
@@ -51,7 +67,10 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: ["Viljuškara", "Zaštitna kaciga"]
+    oprema: [
+      { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-012" },
+      { lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-013" }
+    ]
   },
   {
     id: 6,
@@ -60,7 +79,10 @@ const radnaMestaData = [
     povecanRizik: "Ne",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: ["Računar", "Mobilni telefon"]
+    oprema: [
+      { lzs: "Računar", rok: 36, standard: "ISO-2023-014" },
+      { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-015" }
+    ]
   },
   {
     id: 7,
@@ -69,7 +91,11 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Laboratorijski pribor", "Zaštitna odela", "Mikroskop"]
+    oprema: [
+      { lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-016" },
+      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-017" },
+      { lzs: "Mikroskop", rok: 60, standard: "ISO-2023-018" }
+    ]
   },
   {
     id: 8,
@@ -78,7 +104,10 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Viljuškara", "Zaštitna kaciga"]
+    oprema: [
+      { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-019" },
+      { lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-020" }
+    ]
   },
   {
     id: 9,
@@ -87,7 +116,10 @@ const radnaMestaData = [
     povecanRizik: "Ne",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: ["Računar", "Mobilni telefon"]
+    oprema: [
+      { lzs: "Računar", rok: 36, standard: "ISO-2023-021" },
+      { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-022" }
+    ]
   },
   {
     id: 10,
@@ -96,7 +128,10 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Proizvodna mašina", "Zaštitna odela"]
+    oprema: [
+      { lzs: "Proizvodna mašina", rok: 48, standard: "ISO-2023-023" },
+      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-024" }
+    ]
   },
   {
     id: 11,
@@ -105,7 +140,10 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Alat za održavanje", "Multimetar"]
+    oprema: [
+      { lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-025" },
+      { lzs: "Multimetar", rok: 24, standard: "ISO-2023-026" }
+    ]
   },
   {
     id: 12,
@@ -114,7 +152,10 @@ const radnaMestaData = [
     povecanRizik: "Ne",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: ["Mikroskop", "Računar"]
+    oprema: [
+      { lzs: "Mikroskop", rok: 60, standard: "ISO-2023-027" },
+      { lzs: "Računar", rok: 36, standard: "ISO-2023-028" }
+    ]
   },
   {
     id: 13,
@@ -123,7 +164,10 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Laboratorijski pribor", "Zaštitna odela"]
+    oprema: [
+      { lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-029" },
+      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-030" }
+    ]
   },
   {
     id: 14,
@@ -132,7 +176,10 @@ const radnaMestaData = [
     povecanRizik: "Ne",
     obavezanOftamoloskiPregled: "Da",
     obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: ["Računar", "Mobilni telefon"]
+    oprema: [
+      { lzs: "Računar", rok: 36, standard: "ISO-2023-031" },
+      { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-032" }
+    ]
   },
   {
     id: 15,
@@ -141,7 +188,10 @@ const radnaMestaData = [
     povecanRizik: "Da",
     obavezanOftamoloskiPregled: "Ne",
     obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: ["Alat za bravarske radove", "Zaštitna odela"]
+    oprema: [
+      { lzs: "Alat za bravarske radove", rok: 24, standard: "ISO-2023-033" },
+      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-034" }
+    ]
   }
 ];
 
@@ -219,7 +269,9 @@ const columns = [
   { key: "povecanRizik", label: "Povećan rizik", sortable: true },
   { key: "obavezanOftamoloskiPregled", label: "Obavezan oftamološki pregled", sortable: true },
   { key: "obavezanPregledPoDrugomOsnovu", label: "Obavezan pregled po drugom osnovu", sortable: true },
-  { key: "oprema", label: "Oprema (LZS)", sortable: false },
+  { key: "opremaNaziv", label: "Oprema (LZS)", sortable: true },
+  { key: "opremaRok", label: "Rok (meseci)", sortable: true },
+  { key: "opremaStandard", label: "Standard", sortable: true },
 ];
 
 // Columns for the second table (LZS table)
@@ -236,6 +288,9 @@ const RadnaMesta: React.FC = () => {
   const [selectedRadnoMesto, setSelectedRadnoMesto] = useState<any>(null);
   const [showLZSModal, setShowLZSModal] = useState(false);
   const [lzsDataState, setLzsDataState] = useState(lzsData);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   
   // Form state for new LZS entry
   const [newLZS, setNewLZS] = useState({
@@ -283,21 +338,38 @@ const RadnaMesta: React.FC = () => {
   }, []);
 
   const handleSave = (newData: any) => {
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
-      povecanRizik: newData.povecanRizik ? "Da" : "Ne",
-      obavezanOftamoloskiPregled: newData.obavezanOftamoloskiPregled ? "Da" : "Ne",
-      obavezanPregledPoDrugomOsnovu: newData.obavezanPregledPoDrugomOsnovu ? "Da" : "Ne",
-      oprema: newData.oprema || []
-    };
-    setData([...data, newItem]);
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
+    
+    if (editingItem) {
+      // Update existing item
+      const updatedItem = {
+        ...editingItem,
+        nazivRadnogMesta: newData.nazivRadnogMesta,
+        povecanRizik: newData.povecanRizik ? "Da" : "Ne",
+        obavezanOftamoloskiPregled: newData.obavezanOftamoloskiPregled ? "Da" : "Ne",
+        obavezanPregledPoDrugomOsnovu: newData.obavezanPregledPoDrugomOsnovu ? "Da" : "Ne",
+        oprema: newData.oprema || []
+      };
+      
+      setData(data.map(item => 
+        item.id === editingItem.id ? updatedItem : item
+      ));
+      setEditingItem(null);
+    } else {
+      // Add new item
+      const newItem = {
+        id: data.length + 1,
+        ...newData,
+        povecanRizik: newData.povecanRizik ? "Da" : "Ne",
+        obavezanOftamoloskiPregled: newData.obavezanOftamoloskiPregled ? "Da" : "Ne",
+        obavezanPregledPoDrugomOsnovu: newData.obavezanPregledPoDrugomOsnovu ? "Da" : "Ne",
+        oprema: newData.oprema || []
+      };
+      setData([...data, newItem]);
+    }
+    setShowForm(false);
   };
 
-  const handleOpremaClick = (radnoMesto: any) => {
-    setSelectedRadnoMesto(radnoMesto);
-    setShowLZSModal(true);
-  };
 
   const closeLZSModal = () => {
     setShowLZSModal(false);
@@ -340,6 +412,34 @@ const RadnaMesta: React.FC = () => {
         [selectedRadnoMesto.id]: updatedLZSData
       });
     }
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setData(data.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -420,14 +520,16 @@ const RadnaMesta: React.FC = () => {
         <DataTableTwo 
           data={data}
           columns={columns}
-          onOpremaClick={handleOpremaClick}
+          onEditClick={handleEditClick}
+          onDeleteClick={handleDeleteClick}
         />
       </div>
 
       <RadnoMestoForm
         isOpen={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={handleFormClose}
         onSave={handleSave}
+        initialData={editingItem}
       />
 
              {/* LZS Modal */}
@@ -562,6 +664,17 @@ const RadnaMesta: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Potvrda brisanja"
+        message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+        confirmText="Obriši"
+        cancelText="Otkaži"
+        type="danger"
+      />
     </div>
   );
 };

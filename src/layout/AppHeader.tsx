@@ -46,6 +46,11 @@ const AppHeader: React.FC = () => {
     setShowFullList(true); // Always show the full list when typing
   };
 
+  const handleClearSearch = () => {
+    setSearchValue('');
+    // Don't change showFullList state - keep dropdown open
+  };
+
   const handleSearchInputClick = () => {
     if (searchValue.length === 0) {
       setShowFullList(true);
@@ -53,16 +58,19 @@ const AppHeader: React.FC = () => {
   };
 
   const handleMobileSearchToggle = () => {
-    setShowMobileSearch(!showMobileSearch);
     if (!showMobileSearch) {
       // When opening mobile search, show full list and focus the input
+      setShowMobileSearch(true);
       setShowFullList(true);
       setTimeout(() => {
         const mobileSearchInput = document.getElementById('mobile-search-input');
         mobileSearchInput?.focus();
       }, 100);
     } else {
+      // When closing mobile search, clear search and hide list
+      setShowMobileSearch(false);
       setShowFullList(false);
+      setSearchValue('');
     }
   };
 
@@ -114,17 +122,28 @@ const AppHeader: React.FC = () => {
         event.preventDefault();
         inputRef.current?.focus();
       }
-      if (event.key === "Escape" && showFullList) {
-        setShowFullList(false);
+      if (event.key === "Escape") {
+        if (showFullList) {
+          setShowFullList(false);
+        }
+        if (showMobileSearch) {
+          setShowMobileSearch(false);
+        }
       }
     };
 
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Don't close if clicking on the clear button
+      if (target.closest('button[title="Obriši pretragu"]')) {
+        return;
+      }
+      
       if (fullListRef.current && !fullListRef.current.contains(event.target as Node)) {
         setShowFullList(false);
       }
       // Close mobile search when clicking outside
-      const target = event.target as HTMLElement;
       if (showMobileSearch && !target.closest('[data-mobile-search]')) {
         setShowMobileSearch(false);
       }
@@ -137,7 +156,7 @@ const AppHeader: React.FC = () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showFullList]);
+  }, [showFullList, showMobileSearch]);
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-50 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -214,46 +233,14 @@ const AppHeader: React.FC = () => {
                    </button>
                  )}
                </div>
-               <button
-                 onClick={() => setShowMobileSearch(false)}
-                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-               >
-                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                   <path
-                     fillRule="evenodd"
-                     clipRule="evenodd"
-                     d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-                     fill="currentColor"
-                   />
-                 </svg>
-               </button>
              </div>
            )}
 
           {/* Mobile Search Results */}
           {showMobileSearch && showFullList && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-theme-lg max-h-[400px] overflow-hidden lg:hidden" data-mobile-search>
-              {/* Header with close button */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {searchValue.length > 0 ? `Rezultati za "${searchValue}"` : "Sve firme"}
-                </h3>
-                <button
-                  onClick={() => setShowFullList(false)}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </button>
-              </div>
+            <div className="absolute top-full left-0 right-0 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-lg shadow-theme-lg max-h-[400px] overflow-hidden lg:hidden" data-mobile-search>
               {/* Company List */}
-              <div className="overflow-y-auto" style={{ height: 'calc(400px - 60px)' }}>
+              <div className="overflow-y-auto" style={{ height: '400px' }}>
                 {Object.keys(getAlphabeticalGroups()).length === 0 ? (
                   <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
                     <div className="text-center">
@@ -298,26 +285,43 @@ const AppHeader: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-2 lg:hidden" data-mobile-search>
             <button
               onClick={handleMobileSearchToggle}
               className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M17.5 17.5L14.5834 14.5833M16.6667 9.58333C16.6667 13.4954 13.4954 16.6667 9.58333 16.6667C5.67132 16.6667 2.5 13.4954 2.5 9.58333C2.5 5.67132 5.67132 2.5 9.58333 2.5C13.4954 2.5 16.6667 5.67132 16.6667 9.58333Z"
-                  stroke="currentColor"
-                  strokeWidth="1.66667"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              {showMobileSearch ? (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17.5 17.5L14.5834 14.5833M16.6667 9.58333C16.6667 13.4954 13.4954 16.6667 9.58333 16.6667C5.67132 16.6667 2.5 13.4954 2.5 9.58333C2.5 5.67132 5.67132 2.5 9.58333 2.5C13.4954 2.5 16.6667 5.67132 16.6667 9.58333Z"
+                    stroke="currentColor"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
             </button>
 
             <button
@@ -356,33 +360,16 @@ const AppHeader: React.FC = () => {
                  onClick={handleSearchInputClick}
                  onInputChange={handleSearchInputChange}
                  value={searchValue}
+                 showClearButton={showFullList}
+                 onClearClick={handleClearSearch}
                />
             </form>
             
             {/* Full Company List Modal */}
             {showFullList && (
-              <div ref={fullListRef} className="absolute top-full left-0 right-0 z-50 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-theme-lg max-h-[600px] overflow-hidden">
-                {/* Header with close button */}
-                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                     {searchValue.length > 0 ? `Rezultati za "${searchValue}"` : "Sve firme"}
-                   </h3>
-                  <button
-                    onClick={() => setShowFullList(false)}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </button>
-                </div>
+              <div ref={fullListRef} className="absolute top-full left-0 right-0 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-lg shadow-theme-lg max-h-[600px] overflow-hidden">
                  {/* Company List */}
-                 <div className="overflow-y-auto" style={{ height: 'calc(600px - 60px)' }}>
+                 <div className="overflow-y-auto" style={{ height: '600px' }}>
                    {Object.keys(getAlphabeticalGroups()).length === 0 ? (
                      <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
                        <div className="text-center">

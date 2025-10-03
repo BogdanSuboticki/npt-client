@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { LightbulbIcon, EditButtonIcon, DeleteButtonIcon } from "../../icons";
+import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Checkbox from "../../components/form/input/Checkbox";
@@ -39,6 +39,8 @@ interface OsposobljavanjeData {
 interface DataTableTwoProps {
   data: OsposobljavanjeData[];
   columns: Column[];
+  onEditClick?: (item: OsposobljavanjeData) => void;
+  onDeleteClick?: (item: OsposobljavanjeData) => void;
 }
 
 const formatDate = (dateStr: string | null | undefined): string => {
@@ -56,7 +58,7 @@ const formatDate = (dateStr: string | null | undefined): string => {
   }
 };
 
-export default function OsposobljavanjeDataTable({ data: initialData, columns }: DataTableTwoProps) {
+export default function OsposobljavanjeDataTable({ data: initialData, columns, onEditClick, onDeleteClick }: DataTableTwoProps) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -417,13 +419,16 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns }:
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
-                          <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                            <LightbulbIcon className="size-5" />
-                          </button>
-                          <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                          <button 
+                            onClick={() => onEditClick?.(item)}
+                            className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          >
                             <EditButtonIcon className="size-4" />
                           </button>
-                          <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                          <button 
+                            onClick={() => onDeleteClick?.(item)}
+                            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                          >
                             <DeleteButtonIcon className="size-4" />
                           </button>
                         </div>

@@ -111,7 +111,7 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
       className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 "
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 pt-10">
+        <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
           <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Novi Pregled Opreme</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">

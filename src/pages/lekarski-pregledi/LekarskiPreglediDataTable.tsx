@@ -40,9 +40,10 @@ interface LekarskiPreglediData {
 interface DataTableProps {
   data: LekarskiPreglediData[];
   columns: Column[];
+  onDeleteClick?: (item: LekarskiPreglediData) => void;
 }
 
-export default function LekarskiPreglediDataTable({ data: initialData, columns }: DataTableProps) {
+export default function LekarskiPreglediDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -301,7 +302,10 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns }
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
                         <DeleteButtonIcon className="size-4" />
                       </button>
                     </div>

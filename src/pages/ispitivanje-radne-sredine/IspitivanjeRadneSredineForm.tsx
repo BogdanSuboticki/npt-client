@@ -171,8 +171,8 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
       className="max-w-[900px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
     >
       <div className="flex flex-col h-full">
-        <div className="p-5 lg:pb-5 lg:pt-10 pb-0">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Ispitivanje Radne Sredine</h2>
+        <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Novo Ispitivanje Radne Sredine</h2>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">

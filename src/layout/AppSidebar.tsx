@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <RadnaMestaIcon />,
-    name: "Radna mesta",
+    name: "Radna Mesta",
     path: "/radna-mesta?context=moja-firma",
   },
   {
@@ -84,17 +84,17 @@ const navItems: NavItem[] = [
   },
   {
     icon: <LekarskiPreglediIcon />,
-    name: "Lekarski pregledi",
+    name: "Lekarski Pregledi",
     path: "/lekarski-pregledi?context=moja-firma",
   },
   {
     icon: <PreglediOpremeIcon />,
-    name: "Pregledi opreme",
+    name: "Pregledi Opreme",
     path: "/pregledi-opreme?context=moja-firma",
   },
   {
     icon: <IspitivanjeSredineIcon />,
-    name: "Ispitivanje sredine",
+    name: "Ispitivanje Sredine",
     path: "/ispitivanje-radne-sredine?context=moja-firma",
   },
   {
@@ -104,7 +104,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <InspekcijskiNadzorIcon />,
-    name: "Inspekcijski nadzor",
+    name: "Inspekcijski Nadzor",
     path: "/inspekcijski-nadzor?context=moja-firma",
   },
   {
@@ -119,7 +119,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <DnevniIzvestajiIcon />,
-    name: "Dnevni izveštaji",
+    name: "Dnevni Izveštaji",
     path: "/dnevni-izvestaji?context=moja-firma",
   },
   {

@@ -3,6 +3,7 @@ import IspitivanjeRadneSredineDataTable from './IspitivanjeRadneSredineDataTable
 import IspitivanjeRadneSredineForm from './IspitivanjeRadneSredineForm';
 import Button from '../../components/ui/button/Button';
 import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
+import ConfirmModal from '../../components/ui/modal/ConfirmModal';
 
 // Sample data for the table
 const sampleData = [
@@ -325,6 +326,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 const IspitivanjeRadneSredine: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [data, setData] = useState(sampleData);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   const handleSave = (newData: any) => {
     setData(prev => [
@@ -336,6 +339,24 @@ const IspitivanjeRadneSredine: React.FC = () => {
       }
     ]);
     setIsFormOpen(false);
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setData(data.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
   };
 
   return (
@@ -417,6 +438,7 @@ const IspitivanjeRadneSredine: React.FC = () => {
           <IspitivanjeRadneSredineDataTable
             data={data}
             columns={columns}
+            onDeleteClick={handleDeleteClick}
           />
         </div>
 
@@ -424,6 +446,17 @@ const IspitivanjeRadneSredine: React.FC = () => {
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
           onSave={handleSave}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Potvrda brisanja"
+          message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+          confirmText="Obriši"
+          cancelText="Otkaži"
+          type="danger"
         />
       </div>
     </ErrorBoundary>

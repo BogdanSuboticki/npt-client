@@ -10,9 +10,10 @@ interface ZaposleniFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-export default function ZaposleniForm({ isOpen, onClose, onSave }: ZaposleniFormProps) {
+export default function ZaposleniForm({ isOpen, onClose, onSave, initialData }: ZaposleniFormProps) {
   const [formData, setFormData] = React.useState({
     imePrezime: "",
     prvaPomoc: "",
@@ -40,6 +41,22 @@ export default function ZaposleniForm({ isOpen, onClose, onSave }: ZaposleniForm
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Populate form with initialData when provided
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        imePrezime: initialData.imePrezime || "",
+        prvaPomoc: initialData.prvaPomoc || "",
+      });
+    } else {
+      // Reset form when no initial data
+      setFormData({
+        imePrezime: "",
+        prvaPomoc: "",
+      });
+    }
+  }, [initialData]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.imePrezime || !formData.prvaPomoc) {
@@ -56,7 +73,9 @@ export default function ZaposleniForm({ isOpen, onClose, onSave }: ZaposleniForm
       onClose={onClose}
       className="max-w-[600px] p-5 lg:p-10 dark:bg-gray-800"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Zaposleni</h2>
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
+        {initialData ? "Izmeni Zaposleni" : "Novi Zaposleni"}
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-4">
           <div className="col-span-1">

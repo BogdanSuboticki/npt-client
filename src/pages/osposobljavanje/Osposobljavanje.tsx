@@ -3,6 +3,7 @@ import OsposobljavanjeDataTable from './OsposobljavanjeDataTable';
 import OsposobljavanjeForm from './OsposobljavanjeForm';
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 
 // Sample data for the table
 const osposobljavanjeData = [
@@ -123,12 +124,75 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const Osposobljavanje: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState(osposobljavanjeData);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  const handleSave = (data: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', data);
-    // For now, we'll just close the form
+  const handleSave = (newData: any) => {
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
+    
+    if (editingItem) {
+      // Update existing item - only update the date fields
+      const updatedItem = {
+        ...editingItem,
+        osposobljavanjeBZR: newData.osposobljavanjeBZR?.toISOString().split('T')[0] || editingItem.osposobljavanjeBZR,
+        datumNarednogBZR: newData.datumNarednogBZR?.toISOString().split('T')[0] || editingItem.datumNarednogBZR,
+        osposobljavanjeZOP: newData.osposobljavanjeZOP?.toISOString().split('T')[0] || editingItem.osposobljavanjeZOP,
+        datumNarednogZOP: newData.datumNarednogZOP?.toISOString().split('T')[0] || editingItem.datumNarednogZOP,
+      };
+      
+      setData(data.map(item => 
+        item.id === editingItem.id ? updatedItem : item
+      ));
+      setEditingItem(null);
+    } else {
+      // Add new item
+      const newItem = {
+        id: data.length + 1,
+        redniBroj: data.length + 1,
+        zaposleni: newData.angazovani,
+        radnoMesto: newData.radnoMesto,
+        lokacija: newData.lokacija,
+        povecanRizik: newData.povecanRizik,
+        osposobljavanjeBZR: newData.osposobljavanjeBZR?.toISOString().split('T')[0],
+        datumNarednogBZR: newData.datumNarednogBZR?.toISOString().split('T')[0],
+        osposobljavanjeZOP: newData.osposobljavanjeZOP?.toISOString().split('T')[0],
+        datumNarednogZOP: newData.datumNarednogZOP?.toISOString().split('T')[0],
+        prikaziUPodsetniku: newData.prikaziUPodsetniku || false,
+        bzrOdradjeno: newData.bzrOdradjeno || false
+      };
+      setData([...data, newItem]);
+    }
     setShowForm(false);
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setData(data.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -142,7 +206,7 @@ const Osposobljavanje: React.FC = () => {
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton
-                data={osposobljavanjeData}
+                data={data}
                 columns={columns}
                 title="Osposobljavanje/Provera BZR"
                 filename="osposobljavanje"
@@ -174,7 +238,7 @@ const Osposobljavanje: React.FC = () => {
             <div className="flex gap-4 w-full">
               <div className="flex-1">
                 <ExportPopoverButton
-                  data={osposobljavanjeData}
+                  data={data}
                   columns={columns}
                   title="Osposobljavanje/Provera BZR"
                   filename="osposobljavanje"
@@ -209,15 +273,29 @@ const Osposobljavanje: React.FC = () => {
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <OsposobljavanjeDataTable 
-            data={osposobljavanjeData}
+            data={data}
             columns={columns}
+            onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
           />
         </div>
 
         <OsposobljavanjeForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Potvrda brisanja"
+          message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+          confirmText="Obriši"
+          cancelText="Otkaži"
+          type="danger"
         />
       </div>
     </ErrorBoundary>

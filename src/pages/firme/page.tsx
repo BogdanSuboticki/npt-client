@@ -6,6 +6,7 @@ import FirmeForm from "./FirmeForm";
 import Button from "../../components/ui/button/Button";
 import { usePageContext } from "../../hooks/usePageContext";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 
 // Sample data for Moja Firma context
 const mojaFirmaData = [
@@ -77,7 +78,7 @@ const komitentiData = [
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "naziv", label: "Naziv Firme", sortable: true },
+  { key: "naziv", label: "Naziv firme", sortable: true },
   { key: "adresa", label: "Adresa", sortable: true },
   { key: "mesto", label: "Mesto", sortable: true },
   { key: "pib", label: "PIB", sortable: true },
@@ -119,24 +120,90 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const Firme: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const context = usePageContext();
+
+  // State for data management
+  const [mojaFirmaState, setMojaFirmaState] = useState(mojaFirmaData);
+  const [komitentiState, setKomitentiState] = useState(komitentiData);
 
   // Get data based on context
   const getDataForContext = () => {
     switch (context) {
       case 'komitenti':
-        return komitentiData;
+        return komitentiState;
       case 'moja-firma':
       default:
-        return mojaFirmaData;
+        return mojaFirmaState;
+    }
+  };
+
+  const getDataSetter = () => {
+    switch (context) {
+      case 'komitenti':
+        return setKomitentiState;
+      case 'moja-firma':
+      default:
+        return setMojaFirmaState;
     }
   };
 
   const handleSave = (data: any) => {
     // Here you would typically save the data to your backend
-    console.log(`Saving new entry for ${context}:`, data);
-    // For now, we'll just close the form
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry for ${context}:`, data);
+    
+    const setter = getDataSetter();
+    
+    if (editingItem) {
+      // Update existing item
+      setter((prev: any[]) => 
+        prev.map(item => 
+          item.id === editingItem.id 
+            ? { ...item, ...data, id: editingItem.id }
+            : item
+        )
+      );
+      setEditingItem(null);
+    } else {
+      // Add new item to the appropriate data array
+      const newItem = {
+        id: getDataForContext().length + 1,
+        ...data,
+      };
+      setter((prev: any[]) => [...prev, newItem]);
+    }
     setShowForm(false);
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      const setter = getDataSetter();
+      setter((prev: any[]) => prev.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -218,13 +285,27 @@ const Firme: React.FC = () => {
           <FirmeDataTable 
             data={getDataForContext()}
             columns={columns}
+            onDeleteClick={handleDeleteClick}
+            onEditClick={handleEditClick}
           />
         </div>
 
         <FirmeForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Potvrda brisanja"
+          message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+          confirmText="Obriši"
+          cancelText="Otkaži"
+          type="danger"
         />
       </div>
     </ErrorBoundary>

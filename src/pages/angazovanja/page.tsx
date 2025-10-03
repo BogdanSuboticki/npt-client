@@ -42,7 +42,7 @@ const angazovanjaData = [
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "zaposleni", label: "Zaposleni", sortable: true },
+  { key: "imePrezime", label: "Zaposleni", sortable: true },
   { key: "radnoMesto", label: "Radno mesto", sortable: true },
   { key: "vrstaAngazovanja", label: "Vrsta angažovanja", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },
@@ -83,12 +83,48 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const AngazovanjaPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState(angazovanjaData);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  const handleSave = (data: any) => {
+  const handleSave = (newData: any) => {
     // Here you would typically save the data to your backend
-    console.log('Saving new entry:', data);
-    // For now, we'll just close the form
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
+    
+    if (editingItem) {
+      // Update existing item
+      setData(data.map(item => 
+        item.id === editingItem.id 
+          ? { ...item, ...newData, id: editingItem.id }
+          : item
+      ));
+      setEditingItem(null);
+    } else {
+      // Add new item to the data array
+      const newItem = {
+        id: data.length + 1,
+        redniBroj: data.length + 1,
+        ...newData,
+        imePrezime: newData.zaposleni, // Map zaposleni to imePrezime for table display
+        pocetakAngazovanja: newData.datumPocetka instanceof Date 
+          ? newData.datumPocetka.toISOString().split('T')[0]
+          : newData.datumPocetka,
+        prestanakAngazovanja: newData.datumPrestanka instanceof Date 
+          ? newData.datumPrestanka.toISOString().split('T')[0]
+          : newData.datumPrestanka || null,
+      };
+      setData([...data, newItem]);
+    }
     setShowForm(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -101,7 +137,7 @@ const AngazovanjaPage: React.FC = () => {
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton
-                data={angazovanjaData}
+                data={data}
                 columns={columns}
                 title="Angažovanja"
                 filename="angazovanja"
@@ -133,7 +169,7 @@ const AngazovanjaPage: React.FC = () => {
             <div className="flex gap-4 w-full">
               <div className="flex-1">
                 <ExportPopoverButton
-                  data={angazovanjaData}
+                  data={data}
                   columns={columns}
                   title="Angažovanja"
                   filename="angazovanja"
@@ -168,15 +204,17 @@ const AngazovanjaPage: React.FC = () => {
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <AngazovanjaDataTable 
-            data={angazovanjaData}
+            data={data}
             columns={columns}
+            onEditClick={handleEditClick}
           />
         </div>
 
         <AngazovanjaForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
         />
       </div>
     </ErrorBoundary>

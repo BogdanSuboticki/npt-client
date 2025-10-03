@@ -5,6 +5,7 @@ import LokacijeDataTable from "./LokacijeDataTable";
 import LokacijeForm from "./LokacijeForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 
 // Sample data
 const sampleData = [
@@ -26,7 +27,8 @@ const sampleData = [
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "nazivLokacije", label: "Naziv lokacije", sortable: true },
-  { key: "brojMernihMesta", label: "Broj mernih mesta", sortable: true }
+  { key: "brojMernihMesta", label: "Broj mernih mesta", sortable: true },
+  { key: "organizacionaJedinica", label: "Organizaciona jedinica", sortable: true }
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -62,10 +64,67 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 export default function Lokacije() {
   const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState(sampleData);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  const handleSave = (data: any) => {
-    console.log("Saving data:", data);
+  const handleSave = (newData: any) => {
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
+    
+    if (editingItem) {
+      // Update existing item
+      const updatedItem = {
+        ...editingItem,
+        nazivLokacije: newData.nazivLokacije,
+        brojMernihMesta: parseInt(newData.brojMernihMesta),
+        organizacionaJedinica: newData.organizacionaJedinica,
+      };
+      
+      setData(data.map(item => 
+        item.id === editingItem.id ? updatedItem : item
+      ));
+      setEditingItem(null);
+    } else {
+      // Add new item
+      const newItem = {
+        id: data.length + 1,
+        redniBroj: data.length + 1,
+        nazivLokacije: newData.nazivLokacije,
+        brojMernihMesta: parseInt(newData.brojMernihMesta),
+        organizacionaJedinica: newData.organizacionaJedinica,
+      };
+      setData([...data, newItem]);
+    }
     setShowForm(false);
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setData(data.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -78,7 +137,7 @@ export default function Lokacije() {
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton
-                data={sampleData}
+                data={data}
                 columns={columns}
                 title="Lokacije"
                 filename="lokacije"
@@ -110,7 +169,7 @@ export default function Lokacije() {
             <div className="flex gap-4 w-full">
               <div className="flex-1">
                 <ExportPopoverButton
-                  data={sampleData}
+                  data={data}
                   columns={columns}
                   title="Lokacije"
                   filename="lokacije"
@@ -144,13 +203,30 @@ export default function Lokacije() {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <LokacijeDataTable data={sampleData} columns={columns} />
+          <LokacijeDataTable 
+            data={data} 
+            columns={columns} 
+            onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
+          />
         </div>
 
         <LokacijeForm
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Potvrda brisanja"
+          message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+          confirmText="Obriši"
+          cancelText="Otkaži"
+          type="danger"
         />
       </div>
     </ErrorBoundary>

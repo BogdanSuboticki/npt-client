@@ -39,9 +39,10 @@ interface BezbednosneProvereData {
 interface DataTableProps {
   data: BezbednosneProvereData[];
   columns: Column[];
+  onDeleteClick?: (item: BezbednosneProvereData) => void;
 }
 
-export default function BezbednosneProvereDataTable({ data: initialData, columns }: DataTableProps) {
+export default function BezbednosneProvereDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -278,7 +279,10 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
                         <DeleteButtonIcon className="size-4" />
                       </button>
                     </div>

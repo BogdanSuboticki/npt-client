@@ -39,9 +39,11 @@ interface OpremaData {
 interface DataTableTwoProps {
   data: OpremaData[];
   columns: Column[];
+  onEditClick?: (item: OpremaData) => void;
+  onDeleteClick?: (item: OpremaData) => void;
 }
 
-export default function OpremaDataTable({ data: initialData, columns }: DataTableTwoProps) {
+export default function OpremaDataTable({ data: initialData, columns, onEditClick, onDeleteClick }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const effectiveColumns = useMemo(() => {
@@ -380,10 +382,16 @@ export default function OpremaDataTable({ data: initialData, columns }: DataTabl
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                      <button 
+                        onClick={() => onEditClick?.(item)}
+                        className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                      >
                         <EditButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
                         <DeleteButtonIcon className="size-4" />
                       </button>
                     </div>

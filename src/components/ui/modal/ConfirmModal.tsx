@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal } from './index';
 import Button from '../button/Button';
 

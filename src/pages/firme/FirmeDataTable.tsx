@@ -37,9 +37,11 @@ interface FirmeData {
 interface DataTableProps {
   data: FirmeData[];
   columns: Column[];
+  onDeleteClick?: (item: FirmeData) => void;
+  onEditClick?: (item: FirmeData) => void;
 }
 
-export default function FirmeDataTable({ data: initialData, columns }: DataTableProps) {
+export default function FirmeDataTable({ data: initialData, columns, onDeleteClick, onEditClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -213,20 +215,26 @@ export default function FirmeDataTable({ data: initialData, columns }: DataTable
                         <button className="text-gray-500 hover:text-[#10B981] dark:text-gray-400 dark:hover:text-[#10B981]">
                             <svg
                               className="size-4"
-                              width="16"
-                              height="20"
-                              viewBox="0 0 16 20"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 18 18"
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path d="M1.5847 5.80017C1.29009 3.9021 2.65824 2.19716 4.74825 1.57252C5.11915 1.46235 5.519 1.49427 5.86673 1.66182C6.21445 1.82937 6.48403 2.12 6.62078 2.47478L7.29175 4.22498C7.39976 4.50655 7.41929 4.81326 7.34783 5.10575C7.27638 5.39825 7.11719 5.66318 6.89071 5.86655L4.89479 7.65447C4.79628 7.7427 4.72288 7.85444 4.68179 7.97874C4.64069 8.10305 4.6333 8.23567 4.66034 8.36361L4.67884 8.44207L4.72666 8.63821C4.9755 9.59103 5.35368 10.507 5.8511 11.3616C6.39423 12.269 7.0674 13.0957 7.85011 13.8164L7.91181 13.8707C8.01145 13.9572 8.13231 14.017 8.2626 14.0442C8.3929 14.0715 8.52818 14.0652 8.65527 14.0261L11.2358 13.231C11.529 13.1409 11.8431 13.1386 12.1378 13.2244C12.4324 13.3101 12.6941 13.48 12.8893 13.7123L14.1109 15.1622C14.6199 15.7658 14.5582 16.6529 13.9736 17.1855C12.3741 18.6445 10.1746 18.9433 8.64447 17.7408C6.76811 16.2617 5.18686 14.4566 3.98012 12.4162C2.76157 10.3786 1.94982 8.13369 1.5847 5.80017ZM6.27682 8.46319L7.93032 6.97853C8.38355 6.57197 8.70221 6.04218 8.8454 5.45718C8.98859 4.87218 8.94978 4.25866 8.73393 3.6954L8.06451 1.9452C7.78988 1.23119 7.2477 0.646215 6.5481 0.309091C5.8485 -0.028033 5.04395 -0.0920244 4.29786 0.130115C1.70193 0.907144 -0.381919 3.18392 0.0592207 6.02799C0.36771 8.01357 1.07878 10.5393 2.64744 13.1767C3.94944 15.3767 5.65513 17.3229 7.6789 18.9176C9.97406 20.7206 13.0374 20.105 15.0271 18.2915C15.5964 17.7729 15.942 17.0614 15.9933 16.3021C16.0447 15.5428 15.7978 14.793 15.3032 14.2057L14.0816 12.7542C13.6908 12.2902 13.1672 11.951 12.578 11.78C11.9888 11.6091 11.3608 11.6141 10.7746 11.7946L8.63213 12.454C8.07892 11.8961 7.59438 11.2768 7.1884 10.6087C6.79665 9.93308 6.49102 9.21305 6.27836 8.4647" fill="currentColor"/>
+                              <path d="M10.3177 12.4723C10.4803 12.547 10.6636 12.5641 10.8372 12.5207C11.0108 12.4773 11.1645 12.3761 11.2729 12.2337L11.5525 11.8675C11.6992 11.6719 11.8894 11.5131 12.1081 11.4038C12.3268 11.2944 12.568 11.2375 12.8125 11.2375H15.175C15.5927 11.2375 15.9933 11.4034 16.2887 11.6988C16.5841 11.9942 16.75 12.3948 16.75 12.8125V15.175C16.75 15.5927 16.5841 15.9933 16.2887 16.2887C15.9933 16.5841 15.5927 16.75 15.175 16.75C11.4156 16.75 7.81009 15.2566 5.15176 12.5982C2.49343 9.93991 1 6.33444 1 2.575C1 2.15728 1.16594 1.75668 1.46131 1.46131C1.75668 1.16594 2.15728 1 2.575 1H4.9375C5.35522 1 5.75582 1.16594 6.05119 1.46131C6.34656 1.75668 6.5125 2.15728 6.5125 2.575V4.9375C6.5125 5.18201 6.45557 5.42316 6.34622 5.64186C6.23687 5.86056 6.07811 6.05079 5.8825 6.1975L5.51395 6.47391C5.36938 6.5843 5.26748 6.74134 5.22556 6.91834C5.18364 7.09534 5.20429 7.2814 5.284 7.4449C6.36026 9.63089 8.13036 11.3988 10.3177 12.4723Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </button>
-                          <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
+                          <button 
+                            onClick={() => onEditClick?.(item)}
+                            className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          >
                             <EditButtonIcon className="size-4" />
                           </button>
 
-                          <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                          <button 
+                            onClick={() => onDeleteClick?.(item)}
+                            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                          >
                             <DeleteButtonIcon className="size-4" />
                           </button>
                         </div>

@@ -162,7 +162,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
           </div>
 
           <div className="col-span-1">
-            <Label>Sledeća kontrola</Label>
+            <Label>Naredna kontrola</Label>
             <div className="relative w-full">
               <input
                 type="text"

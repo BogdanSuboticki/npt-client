@@ -9,16 +9,17 @@ interface RadnoMestoFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFormProps) {
+export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }: RadnoMestoFormProps) {
   const [formData, setFormData] = React.useState({
     nazivRadnogMesta: "",
     povecanRizik: false,
     obavezanOftamoloskiPregled: false,
     obavezanPregledPoDrugomOsnovu: false,
     lekarskiPregledPovecanRizik: "",
-    oprema: [] as string[]
+    oprema: [] as Array<{lzs: string, rok: number, standard: string}>
   });
 
   // Add state for dropdowns
@@ -29,25 +30,25 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
 
   // Equipment options
   const opremaOptions = [
-    "Viljuškara",
-    "Zaštitna kaciga", 
-    "Zaštitne rukavice",
-    "Sigurnosna obuća",
-    "Zaštitni pojas",
-    "Zaštitne naočare",
-    "Zaštitna odela",
-    "Multimetar",
-    "Alat za održavanje",
-    "Laboratorijski pribor",
-    "Mikroskop",
-    "Računar",
-    "Mobilni telefon",
-    "Stolica",
-    "Zavarivačka maska",
-    "Zavarivački aparat",
-    "Alat za električne radove",
-    "Alat za bravarske radove",
-    "Proizvodna mašina"
+    { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-001" },
+    { lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-002" },
+    { lzs: "Zaštitne rukavice", rok: 6, standard: "ISO-2023-003" },
+    { lzs: "Sigurnosna obuća", rok: 12, standard: "ISO-2023-004" },
+    { lzs: "Zaštitni pojas", rok: 6, standard: "ISO-2023-005" },
+    { lzs: "Zaštitne naočare", rok: 6, standard: "ISO-2023-006" },
+    { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-007" },
+    { lzs: "Multimetar", rok: 24, standard: "ISO-2023-008" },
+    { lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-009" },
+    { lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-010" },
+    { lzs: "Mikroskop", rok: 60, standard: "ISO-2023-011" },
+    { lzs: "Računar", rok: 36, standard: "ISO-2023-012" },
+    { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-013" },
+    { lzs: "Stolica", rok: 60, standard: "ISO-2023-014" },
+    { lzs: "Zavarivačka maska", rok: 12, standard: "ISO-2023-015" },
+    { lzs: "Zavarivački aparat", rok: 48, standard: "ISO-2023-016" },
+    { lzs: "Alat za električne radove", rok: 36, standard: "ISO-2023-017" },
+    { lzs: "Alat za bravarske radove", rok: 24, standard: "ISO-2023-018" },
+    { lzs: "Proizvodna mašina", rok: 48, standard: "ISO-2023-019" }
   ];
 
   // Add click outside handler for dropdowns
@@ -65,6 +66,30 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Populate form with initialData when provided
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        nazivRadnogMesta: initialData.nazivRadnogMesta || "",
+        povecanRizik: initialData.povecanRizik === "Da",
+        obavezanOftamoloskiPregled: initialData.obavezanOftamoloskiPregled === "Da",
+        obavezanPregledPoDrugomOsnovu: initialData.obavezanPregledPoDrugomOsnovu === "Da",
+        lekarskiPregledPovecanRizik: initialData.lekarskiPregledPovecanRizik || "",
+        oprema: initialData.oprema || []
+      });
+    } else {
+      // Reset form when no initial data
+      setFormData({
+        nazivRadnogMesta: "",
+        povecanRizik: false,
+        obavezanOftamoloskiPregled: false,
+        obavezanPregledPoDrugomOsnovu: false,
+        lekarskiPregledPovecanRizik: "",
+        oprema: []
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,10 +111,10 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
     }
   };
 
-  const handleOpremaOptionChange = (value: string) => {
-    const newSelection = formData.oprema.includes(value)
-      ? formData.oprema.filter(item => item !== value)
-      : [...formData.oprema, value];
+  const handleOpremaOptionChange = (option: {lzs: string, rok: number, standard: string}) => {
+    const newSelection = formData.oprema.some(item => item.lzs === option.lzs)
+      ? formData.oprema.filter(item => item.lzs !== option.lzs)
+      : [...formData.oprema, option];
     
     setFormData({...formData, oprema: newSelection});
   };
@@ -102,7 +127,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
     >
       <form onSubmit={handleSubmit}>
         <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
-          Novo Radno Mesto
+          {initialData ? "Izmeni Radno Mesto" : "Novo Radno Mesto"}
         </h4>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -128,7 +153,7 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
                   {formData.oprema.length === 0 
                     ? "Izaberi opremu" 
                     : formData.oprema.length === 1 
-                      ? formData.oprema[0]
+                      ? formData.oprema[0].lzs
                       : `${formData.oprema.length} stavki izabrano`
                   }
                 </span>
@@ -161,19 +186,19 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave }: RadnoMestoFo
                     <div className="pt-1">
                       {opremaOptions.map((option, index) => (
                         <div
-                          key={option}
+                          key={option.lzs}
                           className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
                             index === opremaOptions.length - 1 ? 'rounded-bl-lg' : ''
                           }`}
                           onClick={() => handleOpremaOptionChange(option)}
                         >
                           <Checkbox
-                            checked={formData.oprema.includes(option)}
+                            checked={formData.oprema.some(item => item.lzs === option.lzs)}
                             onChange={() => handleOpremaOptionChange(option)}
                             className="w-4 h-4 min-w-[16px] min-h-[16px] flex-shrink-0"
-                            id={`oprema-${option}`}
+                            id={`oprema-${option.lzs}`}
                           />
-                          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate">{option}</span>
+                          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 truncate">{option.lzs}</span>
                         </div>
                       ))}
                     </div>

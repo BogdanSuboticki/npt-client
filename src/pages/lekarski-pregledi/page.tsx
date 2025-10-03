@@ -5,6 +5,7 @@ import LekarskiPreglediDataTable from "./LekarskiPreglediDataTable";
 import LekarskiPreglediForm from "./LekarskiPreglediForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 
 // Sample data for the table
 const lekarskiPreglediData = [
@@ -113,12 +114,38 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const LekarskiPreglediPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState(lekarskiPreglediData);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
-  const handleSave = (data: any) => {
+  const handleSave = (newData: any) => {
     // Here you would typically save the data to your backend
-    console.log('Saving new entry:', data);
-    // For now, we'll just close the form
+    console.log('Saving new entry:', newData);
+    // Add new item to the data array
+    const newItem = {
+      id: data.length + 1,
+      ...newData,
+    };
+    setData([...data, newItem]);
     setShowForm(false);
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setData(data.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
   };
 
   return (
@@ -131,7 +158,7 @@ const LekarskiPreglediPage: React.FC = () => {
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton
-                data={lekarskiPreglediData}
+                data={data}
                 columns={columns}
                 title="Lekarski pregledi"
                 filename="lekarski-pregledi"
@@ -163,7 +190,7 @@ const LekarskiPreglediPage: React.FC = () => {
             <div className="flex gap-4 w-full">
               <div className="flex-1">
                 <ExportPopoverButton
-                  data={lekarskiPreglediData}
+                  data={data}
                   columns={columns}
                   title="Lekarski pregledi"
                   filename="lekarski-pregledi"
@@ -198,8 +225,9 @@ const LekarskiPreglediPage: React.FC = () => {
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <LekarskiPreglediDataTable 
-            data={lekarskiPreglediData}
+            data={data}
             columns={columns}
+            onDeleteClick={handleDeleteClick}
           />
         </div>
 
@@ -207,6 +235,17 @@ const LekarskiPreglediPage: React.FC = () => {
           isOpen={showForm}
           onClose={() => setShowForm(false)}
           onSave={handleSave}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Potvrda brisanja"
+          message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+          confirmText="Obriši"
+          cancelText="Otkaži"
+          type="danger"
         />
       </div>
     </ErrorBoundary>

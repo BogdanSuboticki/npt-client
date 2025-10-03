@@ -16,6 +16,9 @@ interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onSuggestionSelect?: (company: Company) => void;
   showSuggestions?: boolean;
   onInputChange?: (value: string) => void;
+  showClearButton?: boolean;
+  onClearClick?: () => void;
+  preventOnChange?: boolean;
 }
 
 const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
@@ -26,6 +29,9 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     onSuggestionSelect, 
     showSuggestions = false, 
     onInputChange,
+    showClearButton = false,
+    onClearClick,
+    preventOnChange = false,
     className = '', 
     ...props 
   }, ref) => {
@@ -33,6 +39,8 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+
 
     // Combine refs
     const combinedRef = (ref || inputRef) as React.RefObject<HTMLInputElement>;
@@ -50,9 +58,11 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      onInputChange?.(value);
-      setIsSuggestionsOpen(value.length > 0 && showSuggestions);
-      setSelectedIndex(-1);
+      if (!preventOnChange) {
+        onInputChange?.(value);
+        setIsSuggestionsOpen(value.length > 0 && showSuggestions);
+        setSelectedIndex(-1);
+      }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -116,11 +126,37 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         <input
           ref={combinedRef}
           type="text"
-          className={`dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ${className}`}
+          value={props.value || ''}
+          className={`dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 ${showClearButton ? 'pr-20' : 'pr-14'} text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ${className}`}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          {...props}
+          {...(Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'value')))}
         />
+
+        {showClearButton && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (combinedRef.current) {
+                combinedRef.current.value = '';
+              }
+              onClearClick?.();
+            }}
+            className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mr-2"
+            title="Obriši pretragu"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
 
         {buttonContent && (
           <button
@@ -133,7 +169,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
         {/* Suggestions Dropdown */}
         {isSuggestionsOpen && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-800 dark:bg-gray-900">
+          <div className="absolute top-full left-0 right-0 z-50 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-800 dark:bg-gray-900">
             {suggestions.map((company, index) => (
               <div
                 key={company.id}

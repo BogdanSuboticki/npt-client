@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { OpremaDugmevIcon, EditButtonIcon, DeleteButtonIcon } from "../../../../icons";
+import { EditButtonIcon, DeleteButtonIcon } from "../../../../icons";
 import PaginationWithTextAndIcon from "../../../ui/pagination/PaginationWithTextAndIcon";
 import FilterDropdown from "../../../ui/dropdown/FilterDropdown";
 import ItemsPerPageDropdown from "../../../ui/dropdown/ItemsPerPageDropdown";
@@ -22,7 +22,6 @@ interface Column {
 interface DataTableTwoProps {
   data: any[];
   columns: Column[];
-  onOpremaClick?: (item: any) => void;
   onEditClick?: (item: any) => void;
   onDeleteClick?: (item: any) => void;
   showFilters?: boolean;
@@ -33,7 +32,7 @@ interface DataTableTwoProps {
   showEditButton?: boolean;
 }
 
-export default function DataTableTwo({ data: initialData, columns, onOpremaClick, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showOpremaButton = true, showResultsText = true, showItemsPerPage = true, showEditButton = true }: DataTableTwoProps) {
+export default function DataTableTwo({ data: initialData, columns, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showResultsText = true, showItemsPerPage = true, showEditButton = true }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -52,8 +51,43 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
   const [selectedRadnaMesta, setSelectedRadnaMesta] = useState<string[]>(uniqueRadnaMesta);
   const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
 
+  // Flatten data to show each oprema as a separate row
+  const flattenedData = useMemo(() => {
+    const flattened: Array<any & { opremaIndex: number; isFirstRow: boolean; totalRows: number }> = [];
+    
+    initialData.forEach((item) => {
+      if (item.oprema && item.oprema.length > 0) {
+        item.oprema.forEach((oprema: any, index: number) => {
+          flattened.push({
+            ...item,
+            opremaIndex: index,
+            isFirstRow: index === 0,
+            totalRows: item.oprema.length,
+            // Override with oprema-specific data
+            opremaNaziv: oprema.lzs || oprema,
+            opremaRok: oprema.rok || '',
+            opremaStandard: oprema.standard || '',
+          });
+        });
+      } else {
+        // If no oprema, show as single row
+        flattened.push({
+          ...item,
+          opremaIndex: 0,
+          isFirstRow: true,
+          totalRows: 1,
+          opremaNaziv: 'Nema opreme',
+          opremaRok: '',
+          opremaStandard: '',
+        });
+      }
+    });
+    
+    return flattened;
+  }, [initialData]);
+
   const filteredAndSortedData = useMemo(() => {
-    return initialData
+    return flattenedData
       .filter((item) => {
         // If filters are disabled, show all items
         if (!showFilters) {
@@ -68,6 +102,11 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
         return matchesRadnaMesta && matchesLokacije;
       })
       .sort((a, b) => {
+        if (sortKey.includes('datum')) {
+          const aDate = a[sortKey] instanceof Date ? a[sortKey] : new Date(a[sortKey]);
+          const bDate = b[sortKey] instanceof Date ? b[sortKey] : new Date(b[sortKey]);
+          return sortOrder === "asc" ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
+        }
         if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
           return sortOrder === "asc" ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
         }
@@ -75,7 +114,7 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
           ? String(a[sortKey]).localeCompare(String(b[sortKey]))
           : String(b[sortKey]).localeCompare(String(a[sortKey]));
       });
-  }, [sortKey, sortOrder, selectedRadnaMesta, selectedLokacije, initialData, showFilters]);
+  }, [sortKey, sortOrder, selectedRadnaMesta, selectedLokacije, flattenedData, showFilters]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -206,68 +245,49 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentData.map((item) => (
+              {currentData.map((item, index) => (
                 <TableRow 
-                  key={item.id} 
+                  key={`${item.id}-${item.opremaIndex}`}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  {columns.map(({ key }, index) => (
-                    <TableCell
-                      key={key}
-                      className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
-                        key === 'nazivRadnogMesta' ? 'font-medium' : 'font-normal'
-                      } ${index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''}`}
-                    >
-                      {key === 'oprema' ? (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex flex-col gap-1">
-                            {item.oprema && item.oprema.length > 0 ? (
-                              item.oprema.slice(0, 2).map((oprema: string, idx: number) => (
-                                <span key={idx} className="text-sm text-gray-600 dark:text-gray-300">
-                                  {oprema}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-sm text-gray-400 dark:text-gray-500">
-                                Nema opreme
-                              </span>
-                            )}
-                          </div>
-                          {item.oprema && item.oprema.length > 2 && (
-                            <button
-                              onClick={() => onOpremaClick?.(item)}
-                              className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-left"
-                            >
-                              Pogledaj sve ({item.oprema.length})
-                            </button>
-                          )}
-                          {item.oprema && item.oprema.length <= 2 && item.oprema.length > 0 && (
-                            <button
-                              onClick={() => onOpremaClick?.(item)}
-                              className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-left"
-                            >
-                              Pogledaj sve
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        item[key]
-                      )}
-                    </TableCell>
-                  ))}
+                  {columns.map(({ key }, colIndex) => {
+                    // Only render spanning columns on the first row of each group
+                    if ((key === 'id' || key === 'nazivRadnogMesta' || key === 'povecanRizik' || key === 'obavezanOftamoloskiPregled' || key === 'obavezanPregledPoDrugomOsnovu') && !item.isFirstRow) {
+                      return null;
+                    }
+                    
+                    return (
+                      <TableCell
+                        key={key}
+                        className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 whitespace-nowrap ${
+                          key === 'nazivRadnogMesta' ? 'font-medium' : 'font-normal'
+                        } ${colIndex === 0 ? 'border-l-0' : colIndex === columns.length - 1 ? 'border-r-0' : ''}`}
+                        rowSpan={key === 'id' || key === 'nazivRadnogMesta' || key === 'povecanRizik' || key === 'obavezanOftamoloskiPregled' || key === 'obavezanPregledPoDrugomOsnovu' ? item.totalRows : undefined}
+                      >
+                        {key === 'id' ? (
+                          index + 1
+                        ) : key === 'nazivRadnogMesta' ? (
+                          item.nazivRadnogMesta
+                        ) : key === 'povecanRizik' ? (
+                          item.povecanRizik
+                        ) : key === 'obavezanOftamoloskiPregled' ? (
+                          item.obavezanOftamoloskiPregled
+                        ) : key === 'obavezanPregledPoDrugomOsnovu' ? (
+                          item.obavezanPregledPoDrugomOsnovu
+                        ) : key === 'opremaNaziv' ? (
+                          item.opremaNaziv
+                        ) : key === 'opremaRok' ? (
+                          item.opremaRok
+                        ) : key === 'opremaStandard' ? (
+                          item.opremaStandard
+                        ) : (
+                          item[key]
+                        )}
+                      </TableCell>
+                    );
+                  })}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      {showOpremaButton && (
-                        <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                          <OpremaDugmevIcon className="size-5" />
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
                       {showEditButton && (
                         <button 
                           onClick={() => onEditClick?.(item)}
@@ -276,6 +296,12 @@ export default function DataTableTwo({ data: initialData, columns, onOpremaClick
                           <EditButtonIcon className="size-4" />
                         </button>
                       )}
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
+                        <DeleteButtonIcon className="size-4" />
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>

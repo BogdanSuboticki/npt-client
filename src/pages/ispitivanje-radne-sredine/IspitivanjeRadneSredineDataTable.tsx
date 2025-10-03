@@ -33,6 +33,7 @@ interface IspitivanjeData {
 interface DataTableProps {
   data: IspitivanjeData[];
   columns: Column[];
+  onDeleteClick?: (item: IspitivanjeData) => void;
 }
 
 const formatDate = (dateStr: string | null | undefined): string => {
@@ -50,7 +51,7 @@ const formatDate = (dateStr: string | null | undefined): string => {
   }
 };
 
-export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns }: DataTableProps) {
+export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
@@ -344,7 +345,10 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                           <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                             <EditButtonIcon className="w-4 h-4" />
                           </button>
-                          <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                          <button 
+                            onClick={() => onDeleteClick?.(item)}
+                            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                          >
                             <DeleteButtonIcon className="w-4 h-4" />
                           </button>
                         </div>

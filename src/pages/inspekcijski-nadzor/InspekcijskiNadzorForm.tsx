@@ -153,7 +153,6 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
                         <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Rok izvršenja *</div>
                         <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum realizacije mere</div>
                         <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum obaveštavanja inspekcije</div>
-                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Akcija</div>
                       </div>
                     </div>
                     

@@ -11,9 +11,10 @@ interface FirmeFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
+export default function FirmeForm({ isOpen, onClose, onSave, initialData }: FirmeFormProps) {
   const [formData, setFormData] = React.useState({
     nazivFirme: "",
     adresaFirme: "",
@@ -55,6 +56,52 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Populate form with initialData when provided
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        nazivFirme: initialData.naziv || "",
+        adresaFirme: initialData.adresa || "",
+        drzava: initialData.drzava || "",
+        mesto: initialData.mesto || "",
+        pib: initialData.pib || "",
+        maticniBroj: initialData.maticniBroj || "",
+        sifraDelatnosti: initialData.delatnost || "",
+        emailFirme: initialData.emailFirme || "",
+        imePrezimeDirektora: initialData.imePrezimeDirektora || "",
+        telefonDirektora: initialData.telefonDirektora || "",
+        emailDirektora: initialData.emailDirektora || "",
+        imePrezimeOsobeZaSaradnju: initialData.imePrezimeOsobeZaSaradnju || "",
+        telefonOsobeZaSaradnju: initialData.telefonOsobeZaSaradnju || "",
+        emailOsobeZaSaradnju: initialData.emailOsobeZaSaradnju || "",
+        datumPocetkaUgovora: initialData.datumPocetkaUgovora || new Date(),
+        datumIstekaUgovora: initialData.datumIstekaUgovora || new Date(),
+        obaveznaObukaPrvePomoci: initialData.obaveznaObukaPrvePomoci || false,
+      });
+    } else {
+      // Reset form when no initial data
+      setFormData({
+        nazivFirme: "",
+        adresaFirme: "",
+        drzava: "",
+        mesto: "",
+        pib: "",
+        maticniBroj: "",
+        sifraDelatnosti: "",
+        emailFirme: "",
+        imePrezimeDirektora: "",
+        telefonDirektora: "",
+        emailDirektora: "",
+        imePrezimeOsobeZaSaradnju: "",
+        telefonOsobeZaSaradnju: "",
+        emailOsobeZaSaradnju: "",
+        datumPocetkaUgovora: new Date(),
+        datumIstekaUgovora: new Date(),
+        obaveznaObukaPrvePomoci: false,
+      });
+    }
+  }, [initialData]);
+
 
 
 
@@ -90,7 +137,9 @@ export default function FirmeForm({ isOpen, onClose, onSave }: FirmeFormProps) {
     >
           <div className="flex flex-col h-full">
             <div className="p-5 pt-10">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Nova Firma</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {initialData ? "Izmeni Firma" : "Nova Firma"}
+              </h2>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">

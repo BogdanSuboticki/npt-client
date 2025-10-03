@@ -10,15 +10,17 @@ interface AngazovanjaFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-export default function AngazovanjaForm({ isOpen, onClose, onSave }: AngazovanjaFormProps) {
+export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }: AngazovanjaFormProps) {
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",
     lokacija: "",
     vrstaAngazovanja: "Redovno angažovanje",
     datumPocetka: new Date(),
+    datumPrestanka: null as Date | null,
   });
 
   // Add state for dropdowns
@@ -57,6 +59,30 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave }: Angazovanja
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Populate form with initialData when provided
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        zaposleni: initialData.imePrezime || "",
+        radnoMesto: initialData.radnoMesto || "",
+        lokacija: initialData.lokacija || "",
+        vrstaAngazovanja: initialData.vrstaAngazovanja || "Redovno angažovanje",
+        datumPocetka: initialData.pocetakAngazovanja ? new Date(initialData.pocetakAngazovanja) : new Date(),
+        datumPrestanka: initialData.prestanakAngazovanja ? new Date(initialData.prestanakAngazovanja) : null,
+      });
+    } else {
+      // Reset form when no initial data
+      setFormData({
+        zaposleni: "",
+        radnoMesto: "",
+        lokacija: "",
+        vrstaAngazovanja: "Redovno angažovanje",
+        datumPocetka: new Date(),
+        datumPrestanka: null,
+      });
+    }
+  }, [initialData]);
+
   const handleDateChange = (value: Date | null) => {
     if (value) {
       setFormData(prev => ({ ...prev, datumPocetka: value }));
@@ -79,48 +105,56 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave }: Angazovanja
       onClose={onClose}
       className="max-w-[600px] p-5 lg:p-10 dark:bg-[#11181E]"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Angažovanje</h2>
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
+        {initialData ? "Izmeni Angažovanje" : "Novo Angažovanje"}
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-4">
           <div className="col-span-1">
             <Label>Zaposleni *</Label>
-            <div className="relative w-full" ref={zaposleniRef}>
-              <button
-                type="button"
-                onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
-                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-              >
-                <span>{formData.zaposleni || "Izaberite zaposlenog"}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            {initialData ? (
+              <div className="w-full h-11 px-4 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 flex items-center">
+                {formData.zaposleni}
+              </div>
+            ) : (
+              <div className="relative w-full" ref={zaposleniRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
+                  className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {isZaposleniOpen && (
-                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
-                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {zaposleniOptions.map((option: string, index: number) => (
-                      <div
-                        key={option}
-                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                          formData.zaposleni === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                        } ${index === zaposleniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                        onClick={() => {
-                          setFormData({ ...formData, zaposleni: option });
-                          setIsZaposleniOpen(false);
-                        }}
-                      >
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                      </div>
-                    ))}
+                  <span>{formData.zaposleni || "Izaberite zaposlenog"}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isZaposleniOpen && (
+                  <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
+                    <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                      {zaposleniOptions.map((option: string, index: number) => (
+                        <div
+                          key={option}
+                          className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                            formData.zaposleni === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                          } ${index === zaposleniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                          onClick={() => {
+                            setFormData({ ...formData, zaposleni: option });
+                            setIsZaposleniOpen(false);
+                          }}
+                        >
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="col-span-1">
@@ -229,6 +263,16 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave }: Angazovanja
             <CustomDatePicker
               value={formData.datumPocetka}
               onChange={(newValue) => handleDateChange(newValue)}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label>Datum prestanka angažovanja</Label>
+            <CustomDatePicker
+              value={formData.datumPrestanka}
+              onChange={(newValue) => {
+                setFormData(prev => ({ ...prev, datumPrestanka: newValue }));
+              }}
             />
           </div>
         </div>

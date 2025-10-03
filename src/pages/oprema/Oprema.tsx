@@ -3,6 +3,7 @@ import OpremaDataTable from './OpremaDataTable';
 import OpremaForm from './OpremaForm';
 import Button from '../../components/ui/button/Button';
 import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
+import ConfirmModal from '../../components/ui/modal/ConfirmModal';
 
 // Sample data for the table
 const opremaData = [
@@ -95,12 +96,80 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const Oprema: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const [data, setData] = useState(opremaData);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  const handleSave = (data: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', data);
-    // For now, we'll just close the form
+  const handleSave = (newData: any) => {
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
+    
+    if (editingItem) {
+      // Update existing item - exclude interval from updates
+      const updatedItem = {
+        ...editingItem,
+        nazivLZS: newData.nazivLZS,
+        vrstaOpreme: newData.vrstaOpreme,
+        standard: newData.standard,
+        fabrickBroj: newData.fabrickBroj,
+        inventarniBroj: newData.inventarniBroj,
+        lokacija: newData.lokacija,
+        godinaProizvodnje: newData.godinaProizvodnje,
+        napomena: newData.napomena,
+        // intervalPregleda remains unchanged
+      };
+      
+      setData(data.map(item => 
+        item.id === editingItem.id ? updatedItem : item
+      ));
+      setEditingItem(null);
+    } else {
+      // Add new item
+      const newItem = {
+        id: data.length + 1,
+        redniBroj: data.length + 1,
+        nazivLZS: newData.nazivLZS,
+        vrstaOpreme: newData.vrstaOpreme,
+        standard: newData.standard,
+        fabrickBroj: newData.fabrickBroj,
+        inventarniBroj: newData.inventarniBroj,
+        lokacija: newData.lokacija,
+        godinaProizvodnje: newData.godinaProizvodnje,
+        intervalPregleda: newData.intervalPregleda,
+        napomena: newData.napomena,
+        iskljucenaIzPracenja: false
+      };
+      setData([...data, newItem]);
+    }
     setShowForm(false);
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete) {
+      setData(data.filter(d => d.id !== itemToDelete.id));
+      setItemToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setItemToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -113,7 +182,7 @@ const Oprema: React.FC = () => {
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton
-                data={opremaData}
+                data={data}
                 columns={columns}
                 title="Oprema"
                 filename="oprema"
@@ -145,7 +214,7 @@ const Oprema: React.FC = () => {
             <div className="flex gap-4 w-full">
               <div className="flex-1">
                 <ExportPopoverButton
-                  data={opremaData}
+                  data={data}
                   columns={columns}
                   title="Oprema"
                   filename="oprema"
@@ -180,15 +249,29 @@ const Oprema: React.FC = () => {
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <OpremaDataTable 
-            data={opremaData}
+            data={data}
             columns={columns}
+            onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
           />
         </div>
 
         <OpremaForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Potvrda brisanja"
+          message="Da li ste sigurni da želite da obrišete ovaj zapis?"
+          confirmText="Obriši"
+          cancelText="Otkaži"
+          type="danger"
         />
       </div>
     </ErrorBoundary>

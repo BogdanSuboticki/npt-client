@@ -34,9 +34,11 @@ interface AngazovanjaData {
 interface DataTableProps {
   data: AngazovanjaData[];
   columns: Column[];
+  onDeleteClick?: (item: AngazovanjaData) => void;
+  onEditClick?: (item: AngazovanjaData) => void;
 }
 
-export default function AngazovanjaDataTable({ data: initialData, columns }: DataTableProps) {
+export default function AngazovanjaDataTable({ data: initialData, columns, onEditClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -105,24 +107,6 @@ export default function AngazovanjaDataTable({ data: initialData, columns }: Dat
     }
   };
 
-  const handleEdit = (item: AngazovanjaData) => {
-    // Here you would typically open an edit modal or navigate to edit page
-    console.log('Editing item:', item);
-    // For now, we'll just show an alert with edit options
-    const action = window.confirm(
-      `Želite li da:\n1. OK - Editujete angažovanje\n2. Cancel - Prekinete angažovanje (današnji datum)`
-    );
-    
-    if (action) {
-      // Edit functionality - open edit modal
-      alert('Edit modal would open here');
-    } else {
-      // Set prestanak to today's date
-      const today = new Date().toISOString().split('T')[0];
-      console.log(`Setting prestanak angažovanja to: ${today}`);
-      alert(`Angažovanje je prekinuto. Datum prestanka: ${today}`);
-    }
-  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Aktivan";
@@ -278,7 +262,7 @@ export default function AngazovanjaDataTable({ data: initialData, columns }: Dat
                     <div className="flex items-center w-full gap-2">
                       <button 
                         className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                        onClick={() => handleEdit(item)}
+                        onClick={() => onEditClick?.(item)}
                       >
                         <EditButtonIcon className="size-4" />
                       </button>

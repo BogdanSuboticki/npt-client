@@ -43,9 +43,10 @@ interface InspekcijskiNadzorItem {
 interface DataTableProps {
   data: InspekcijskiNadzorItem[];
   columns: Column[];
+  onDeleteClick?: (item: InspekcijskiNadzorItem) => void;
 }
 
-export default function InspekcijskiNadzorDataTable({ data: initialData, columns }: DataTableProps) {
+export default function InspekcijskiNadzorDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -388,7 +389,10 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
                         <DeleteButtonIcon className="size-4" />
                       </button>
                     </div>
@@ -423,10 +427,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
         <h4 className="font-semibold text-gray-800 mb-4 text-title-sm dark:text-white/90">
           Evidentiraj realizaciju mere
         </h4>
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Datum:</p>
-          <CustomDatePicker value={modalDate} onChange={(d) => d && setModalDate(d)} />
-        </div>
+
         <div className="mb-6">
           <Slider
             label="Status realizacije:"
@@ -438,6 +439,11 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
             name="realizacija-status"
           />
         </div>
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Datum:</p>
+          <CustomDatePicker value={modalDate} onChange={(d) => d && setModalDate(d)} />
+        </div>
+
         <div className="flex items-center justify-end w-full gap-3">
           <Button size="sm" variant="outline" onClick={closeModal}>
             Otkaži
@@ -446,6 +452,8 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
             Sačuvaj
           </Button>
         </div>
+
+        
       </Modal>
     </div>
   );

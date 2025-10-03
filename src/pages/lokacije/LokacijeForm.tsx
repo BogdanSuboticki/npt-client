@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
@@ -10,13 +10,33 @@ interface LokacijeFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  initialData?: any;
 }
 
-export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormProps) {
+export default function LokacijeForm({ isOpen, onClose, onSave, initialData }: LokacijeFormProps) {
   const [formData, setFormData] = useState({
     nazivLokacije: "",
     brojMernihMesta: "",
+    organizacionaJedinica: "",
   });
+
+  // Populate form with initialData when provided (for editing)
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        nazivLokacije: initialData.nazivLokacije || "",
+        brojMernihMesta: initialData.brojMernihMesta?.toString() || "",
+        organizacionaJedinica: initialData.organizacionaJedinica || "",
+      });
+    } else {
+      // Reset form when no initial data
+      setFormData({
+        nazivLokacije: "",
+        brojMernihMesta: "",
+        organizacionaJedinica: "",
+      });
+    }
+  }, [initialData]);
   
 
 
@@ -26,7 +46,7 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.nazivLokacije || !formData.brojMernihMesta) {
+    if (!formData.nazivLokacije || !formData.brojMernihMesta || !formData.organizacionaJedinica) {
       alert("Molimo popunite sva obavezna polja");
       return;
     }
@@ -39,10 +59,6 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
     }
 
     onSave(formData);
-    setFormData({
-      nazivLokacije: "",
-      brojMernihMesta: "",
-    });
   };
 
   return (
@@ -53,7 +69,7 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
     >
       <form onSubmit={handleSubmit}>
         <h4 className="mb-6 text-xl font-semibold text-gray-800 dark:text-white/90">
-          Nova Lokacija
+          {initialData ? "Izmeni Lokaciju" : "Nova Lokacija"}
         </h4>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -81,6 +97,18 @@ export default function LokacijeForm({ isOpen, onClose, onSave }: LokacijeFormPr
                   setFormData({ ...formData, brojMernihMesta: e.target.value });
                 }
               }}
+              className="bg-[#F9FAFB] dark:bg-[#101828]"
+              required
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label>Organizaciona jedinica *</Label>
+            <Input
+              value={formData.organizacionaJedinica}
+              onChange={(e) =>
+                setFormData({ ...formData, organizacionaJedinica: e.target.value })
+              }
               className="bg-[#F9FAFB] dark:bg-[#101828]"
               required
             />

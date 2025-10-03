@@ -39,9 +39,10 @@ interface PovredeData {
 interface DataTableProps {
   data: PovredeData[];
   columns: Column[];
+  onDeleteClick?: (item: PovredeData) => void;
 }
 
-export default function PovredeDataTable({ data: initialData, columns }: DataTableProps) {
+export default function PovredeDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -252,7 +253,10 @@ export default function PovredeDataTable({ data: initialData, columns }: DataTab
                       <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
                         <EditButtonIcon className="size-4" />
                       </button>
-                      <button className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500">
+                      <button 
+                        onClick={() => onDeleteClick?.(item)}
+                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                      >
                         <DeleteButtonIcon className="size-4" />
                       </button>
                     </div>

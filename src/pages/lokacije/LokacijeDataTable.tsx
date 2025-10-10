@@ -25,7 +25,6 @@ interface LokacijeData {
   redniBroj: number;
   nazivLokacije: string;
   brojMernihMesta: number;
-  organizacionaJedinica: string;
   [key: string]: any;
 }
 
@@ -34,58 +33,44 @@ interface DataTableTwoProps {
   columns: Column[];
   onEditClick?: (item: LokacijeData) => void;
   onDeleteClick?: (item: LokacijeData) => void;
+  onCheckboxChange?: (id: number) => void;
 }
 
-export default function LokacijeDataTable({ data: initialData, columns, onEditClick, onDeleteClick }: DataTableTwoProps) {
+export default function LokacijeDataTable({ data: initialData, columns, onEditClick, onDeleteClick, onCheckboxChange }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [data, setData] = useState<LokacijeData[]>(initialData);
   
   // Get unique values for dropdowns
   const uniqueNaziviLokacija = useMemo(() => {
     try {
-      return Array.from(new Set(data?.map(item => item.nazivLokacije) || []));
+      return Array.from(new Set(initialData?.map(item => item.nazivLokacije) || []));
     } catch (error) {
       console.error('Error getting unique location names:', error);
       return [];
     }
-  }, [data]);
-
-  const uniqueOrganizacioneJedinice = useMemo(() => {
-    try {
-      return Array.from(new Set(data?.map(item => item.organizacionaJedinica) || []));
-    } catch (error) {
-      console.error('Error getting unique organizational units:', error);
-      return [];
-    }
-  }, [data]);
+  }, [initialData]);
 
   // Set all as selected by default
   const [selectedNazivLokacije, setSelectedNazivLokacije] = useState<string[]>(uniqueNaziviLokacija);
-  const [selectedOrganizacionaJedinica, setSelectedOrganizacionaJedinica] = useState<string[]>(uniqueOrganizacioneJedinice);
 
   // Update selected options if unique values change
   useEffect(() => {
     setSelectedNazivLokacije(uniqueNaziviLokacija);
   }, [uniqueNaziviLokacija]);
-  useEffect(() => {
-    setSelectedOrganizacionaJedinica(uniqueOrganizacioneJedinice);
-  }, [uniqueOrganizacioneJedinice]);
 
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
     try {
-      if (!data) return [];
+      if (!initialData) return [];
 
-      return data
+      return initialData
         .filter((item) => {
           try {
             const matchesNaziv = selectedNazivLokacije.length === 0 || selectedNazivLokacije.includes(item.nazivLokacije);
-            const matchesJedinica = selectedOrganizacionaJedinica.length === 0 || selectedOrganizacionaJedinica.includes(item.organizacionaJedinica);
 
-            return matchesNaziv && matchesJedinica;
+            return matchesNaziv;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -112,7 +97,7 @@ export default function LokacijeDataTable({ data: initialData, columns, onEditCl
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, selectedNazivLokacije, selectedOrganizacionaJedinica]);
+  }, [initialData, sortKey, sortOrder, selectedNazivLokacije]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -133,16 +118,6 @@ export default function LokacijeDataTable({ data: initialData, columns, onEditCl
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const handleCheckboxChange = (id: number) => {
-    setData(prevData => 
-      prevData.map(item => 
-        item.id === id 
-          ? { ...item, iskljucenaIzPracenja: !item.iskljucenaIzPracenja }
-          : item
-      )
-    );
-  };
 
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
@@ -167,12 +142,6 @@ export default function LokacijeDataTable({ data: initialData, columns, onEditCl
                 options={uniqueNaziviLokacija}
                 selectedOptions={selectedNazivLokacije}
                 onSelectionChange={setSelectedNazivLokacije}
-              />
-              <FilterDropdown
-                label="Organizaciona jedinica"
-                options={uniqueOrganizacioneJedinice}
-                selectedOptions={selectedOrganizacionaJedinica}
-                onSelectionChange={setSelectedOrganizacionaJedinica}
               />
             </div>
           </div>
@@ -262,7 +231,7 @@ export default function LokacijeDataTable({ data: initialData, columns, onEditCl
                       {key === 'iskljucenaIzPracenja' ? (
                         <Checkbox
                           checked={item[key]}
-                          onChange={() => handleCheckboxChange(item.id)}
+                          onChange={() => onCheckboxChange?.(item.id)}
                           className="w-4 h-4"
                         />
                       ) : (
@@ -272,18 +241,38 @@ export default function LokacijeDataTable({ data: initialData, columns, onEditCl
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button 
-                        onClick={() => onEditClick?.(item)}
-                        className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                      >
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onEditClick?.(item)}
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onDeleteClick?.(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>

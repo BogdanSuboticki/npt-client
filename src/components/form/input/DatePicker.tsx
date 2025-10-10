@@ -93,15 +93,15 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         {/* Use the same custom UI for both mobile and desktop for consistency */}
         <div ref={containerRef} className="relative custom-date-picker-input">
           <div 
-            className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
+            className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs ${disabled ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed' : 'bg-[#F9FAFB] text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:bg-[#101828] dark:focus:border-brand-800 cursor-pointer'} ${className}`}
             onClick={toggleDatePicker}
           >
             <div className="flex items-center justify-between h-full">
-              <span className={`${value ? 'text-gray-800 dark:text-white/90' : 'text-gray-400 dark:text-gray-500'}`}>
+              <span className={`${disabled ? 'text-gray-600 dark:text-gray-400' : (value ? 'text-gray-800 dark:text-white/90' : 'text-gray-400 dark:text-gray-500')}`}>
                 {value ? value.toLocaleDateString('sr-RS') : placeholder || 'Izaberi datum'}
               </span>
               <div 
-                className={`text-gray-500 dark:text-gray-400 ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
+                className={`${disabled ? 'text-gray-500 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400 cursor-pointer'}`}
                 onClick={(e: React.MouseEvent) => {
                   if (!disabled) {
                     e.stopPropagation();

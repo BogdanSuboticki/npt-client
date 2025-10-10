@@ -42,6 +42,8 @@ export default function NovoIspitivanjeForm({ isOpen, onClose, onSave, title = "
               value={formData.ispravno}
               onChange={(value) => setFormData(prev => ({ ...prev, ispravno: value }))}
               size="full"
+              showRedWhenFalse={true}
+              name="slider-novo-ispitivanje"
             />
           </div>
 

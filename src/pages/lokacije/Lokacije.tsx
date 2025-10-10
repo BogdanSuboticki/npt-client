@@ -14,13 +14,13 @@ const sampleData = [
     redniBroj: 1,
     nazivLokacije: "Glavna zgrada",
     brojMernihMesta: 15,
-    organizacionaJedinica: "Proizvodnja"  },
+  },
   {
     id: 2,
     redniBroj: 2,
     nazivLokacije: "Skladište A",
     brojMernihMesta: 8,
-    organizacionaJedinica: "Logistika"  },
+  },
 ];
 
 // Column definitions
@@ -28,7 +28,6 @@ const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "nazivLokacije", label: "Naziv lokacije", sortable: true },
   { key: "brojMernihMesta", label: "Broj mernih mesta", sortable: true },
-  { key: "organizacionaJedinica", label: "Organizaciona jedinica", sortable: true }
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -78,7 +77,6 @@ export default function Lokacije() {
         ...editingItem,
         nazivLokacije: newData.nazivLokacije,
         brojMernihMesta: parseInt(newData.brojMernihMesta),
-        organizacionaJedinica: newData.organizacionaJedinica,
       };
       
       setData(data.map(item => 
@@ -92,7 +90,6 @@ export default function Lokacije() {
         redniBroj: data.length + 1,
         nazivLokacije: newData.nazivLokacije,
         brojMernihMesta: parseInt(newData.brojMernihMesta),
-        organizacionaJedinica: newData.organizacionaJedinica,
       };
       setData([...data, newItem]);
     }

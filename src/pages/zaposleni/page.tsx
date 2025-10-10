@@ -14,18 +14,21 @@ const zaposleniData = [
     redniBroj: 1,
     imePrezime: "Petar Petrović",
     prvaPomoc: "Da",
+    osiguranje: true,
   },
   {
     id: 2,
     redniBroj: 2,
     imePrezime: "Ana Anić",
     prvaPomoc: "Ne",
+    osiguranje: false,
   },
   {
     id: 3,
     redniBroj: 3,
     imePrezime: "Marko Marković",
     prvaPomoc: "Da",
+    osiguranje: true,
   },
 ];
 
@@ -33,6 +36,7 @@ const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
   { key: "imePrezime", label: "Ime i prezime zaposlenog", sortable: true },
   { key: "prvaPomoc", label: "Prva pomoć", sortable: true },
+  { key: "osiguranje", label: "Osiguranje od posledica povrede na radu i prof. bolesti", sortable: true },
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

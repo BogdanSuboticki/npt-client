@@ -24,6 +24,7 @@ interface DataTableTwoProps {
   columns: Column[];
   onEditClick?: (item: any) => void;
   onDeleteClick?: (item: any) => void;
+  onUpdateData?: (updatedData: any[]) => void;
   showFilters?: boolean;
   showPagination?: boolean;
   showOpremaButton?: boolean;
@@ -32,7 +33,7 @@ interface DataTableTwoProps {
   showEditButton?: boolean;
 }
 
-export default function DataTableTwo({ data: initialData, columns, onEditClick, onDeleteClick, showFilters = true, showPagination = true, showResultsText = true, showItemsPerPage = true, showEditButton = true }: DataTableTwoProps) {
+export default function DataTableTwo({ data: initialData, columns, onEditClick, onDeleteClick, onUpdateData, showFilters = true, showPagination = true, showResultsText = true, showItemsPerPage = true, showEditButton = true }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -129,6 +130,44 @@ export default function DataTableTwo({ data: initialData, columns, onEditClick, 
     } else {
       setSortKey(key);
       setSortOrder("asc");
+    }
+  };
+
+  const handleDeleteEquipment = (item: any) => {
+    // Find the original record
+    const recordId = item.id;
+    const equipmentIndex = item.opremaIndex;
+    
+    // Find the record and check how many equipment items it has
+    const record = initialData.find(rec => rec.id === recordId);
+    if (!record) return;
+    
+    // If no oprema array or only one item, delete the entire record
+    if (!record.oprema || record.oprema.length <= 1) {
+      if (onDeleteClick) {
+        onDeleteClick(record);
+      }
+      return;
+    }
+    
+    // Otherwise, just remove this equipment item
+    const updatedData = initialData.map(rec => {
+      if (rec.id === recordId) {
+        const updatedOprema = rec.oprema.filter((_: any, index: number) => index !== equipmentIndex);
+        return {
+          ...rec,
+          oprema: updatedOprema
+        };
+      }
+      return rec;
+    });
+    
+    // Update through parent
+    if (onUpdateData) {
+      onUpdateData(updatedData);
+    } else {
+      console.log("Delete equipment:", item.opremaNaziv, "from record:", item.nazivRadnogMesta);
+      console.log("Updated data:", updatedData);
     }
   };
 
@@ -248,7 +287,6 @@ export default function DataTableTwo({ data: initialData, columns, onEditClick, 
               {currentData.map((item, index) => (
                 <TableRow 
                   key={`${item.id}-${item.opremaIndex}`}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   {columns.map(({ key }, colIndex) => {
                     // Only render spanning columns on the first row of each group
@@ -297,7 +335,7 @@ export default function DataTableTwo({ data: initialData, columns, onEditClick, 
                         </button>
                       )}
                       <button 
-                        onClick={() => onDeleteClick?.(item)}
+                        onClick={() => handleDeleteEquipment(item)}
                         className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
                       >
                         <DeleteButtonIcon className="size-4" />

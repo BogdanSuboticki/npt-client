@@ -17,7 +17,6 @@ export default function LokacijeForm({ isOpen, onClose, onSave, initialData }: L
   const [formData, setFormData] = useState({
     nazivLokacije: "",
     brojMernihMesta: "",
-    organizacionaJedinica: "",
   });
 
   // Populate form with initialData when provided (for editing)
@@ -26,14 +25,12 @@ export default function LokacijeForm({ isOpen, onClose, onSave, initialData }: L
       setFormData({
         nazivLokacije: initialData.nazivLokacije || "",
         brojMernihMesta: initialData.brojMernihMesta?.toString() || "",
-        organizacionaJedinica: initialData.organizacionaJedinica || "",
       });
     } else {
       // Reset form when no initial data
       setFormData({
         nazivLokacije: "",
         brojMernihMesta: "",
-        organizacionaJedinica: "",
       });
     }
   }, [initialData]);
@@ -46,7 +43,7 @@ export default function LokacijeForm({ isOpen, onClose, onSave, initialData }: L
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.nazivLokacije || !formData.brojMernihMesta || !formData.organizacionaJedinica) {
+    if (!formData.nazivLokacije || !formData.brojMernihMesta) {
       alert("Molimo popunite sva obavezna polja");
       return;
     }
@@ -97,18 +94,6 @@ export default function LokacijeForm({ isOpen, onClose, onSave, initialData }: L
                   setFormData({ ...formData, brojMernihMesta: e.target.value });
                 }
               }}
-              className="bg-[#F9FAFB] dark:bg-[#101828]"
-              required
-            />
-          </div>
-
-          <div className="col-span-1">
-            <Label>Organizaciona jedinica *</Label>
-            <Input
-              value={formData.organizacionaJedinica}
-              onChange={(e) =>
-                setFormData({ ...formData, organizacionaJedinica: e.target.value })
-              }
               className="bg-[#F9FAFB] dark:bg-[#101828]"
               required
             />

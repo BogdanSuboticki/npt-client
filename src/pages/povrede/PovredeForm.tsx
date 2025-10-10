@@ -16,14 +16,32 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     datumPovrede: new Date(),
-    datumObaveštavanjaInspekcije: new Date(),
-    datumOtvaranjaListe: new Date(),
-    datumOvereLekara: new Date(),
-    datumPreuzimanjaIzFonda: new Date(),
-    datumPredavanjaPoslodavcu: new Date(),
     tezinaPovrede: "",
+    brojPovredneListe: "",
+    datumObavestenjaInspekcije: new Date(),
+    datumPredajeFondu: new Date(),
+    datumPreuzimanjaIzFonda: new Date(),
+    datumDostavjanjaUpravi: new Date(),
     napomena: "",
   });
+
+  const [brojListeNumber, setBrojListeNumber] = React.useState("");
+  const currentYear = new Date().getFullYear();
+
+  // Update brojPovredneListe when number changes
+  useEffect(() => {
+    if (brojListeNumber) {
+      setFormData(prev => ({
+        ...prev,
+        brojPovredneListe: `PL-${brojListeNumber}/${currentYear}`
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        brojPovredneListe: ""
+      }));
+    }
+  }, [brojListeNumber, currentYear]);
 
   // Add state for dropdowns
   const [isZaposleniOpen, setIsZaposleniOpen] = React.useState(false);
@@ -173,36 +191,40 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
           </div>
 
           <div className="w-full">
-            <Label>Datum obaveštavanja inspekcije</Label>
+            <Label>Broj povredne liste</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-800 dark:text-white/90 font-medium">PL-</span>
+              <input
+                type="number"
+                value={brojListeNumber}
+                onChange={(e) => setBrojListeNumber(e.target.value)}
+                className="flex-1 h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                placeholder="001"
+                min="1"
+              />
+              <span className="text-sm text-gray-800 dark:text-white/90 font-medium">/{currentYear}</span>
+            </div>
+          </div>
+
+          <div className="w-full">
+            <Label>Datum obaveštenja inspekcije</Label>
             <CustomDatePicker
-              value={formData.datumObaveštavanjaInspekcije}
+              value={formData.datumObavestenjaInspekcije}
               onChange={(date) => {
                 if (date) {
-                  setFormData(prev => ({ ...prev, datumObaveštavanjaInspekcije: date }));
+                  setFormData(prev => ({ ...prev, datumObavestenjaInspekcije: date }));
                 }
               }}
             />
           </div>
 
           <div className="w-full">
-            <Label>Datum otvaranja liste</Label>
+            <Label>Datum predaje fondu</Label>
             <CustomDatePicker
-              value={formData.datumOtvaranjaListe}
+              value={formData.datumPredajeFondu}
               onChange={(date) => {
                 if (date) {
-                  setFormData(prev => ({ ...prev, datumOtvaranjaListe: date }));
-                }
-              }}
-            />
-          </div>
-
-          <div className="w-full">
-            <Label>Datum overe lekara</Label>
-            <CustomDatePicker
-              value={formData.datumOvereLekara}
-              onChange={(date) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, datumOvereLekara: date }));
+                  setFormData(prev => ({ ...prev, datumPredajeFondu: date }));
                 }
               }}
             />
@@ -221,12 +243,12 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
           </div>
 
           <div className="w-full">
-            <Label>Datum predavanja poslodavcu</Label>
+            <Label>Datum dostavljanja upravi</Label>
             <CustomDatePicker
-              value={formData.datumPredavanjaPoslodavcu}
+              value={formData.datumDostavjanjaUpravi}
               onChange={(date) => {
                 if (date) {
-                  setFormData(prev => ({ ...prev, datumPredavanjaPoslodavcu: date }));
+                  setFormData(prev => ({ ...prev, datumDostavjanjaUpravi: date }));
                 }
               }}
             />

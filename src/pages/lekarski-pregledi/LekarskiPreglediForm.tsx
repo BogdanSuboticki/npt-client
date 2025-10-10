@@ -63,7 +63,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
   };
 
   const zaposleniOptions = Object.keys(zaposleniData);
-  const vrstaLekarskogOptions = ["Prethodni", "Periodični", "Vanredni"];
+  const vrstaLekarskogOptions = ["Prethodni", "Periodični", "Vanredni", "Oftamološki"];
   const intervalOptions = ["12", "36", "60"];
 
   // Add click outside handler for dropdowns

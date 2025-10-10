@@ -1,60 +1,40 @@
-"use client";
-
-import React, { useState } from "react";
-import ZaduzenjaLzoDataTable from "./ZaduzenjaLzoDataTable";
-import ZaduzenjaLzoForm from "./ZaduzenjaLzoForm";
-import Button from "../../components/ui/button/Button";
-import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
-import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import React, { useState } from 'react';
+import LZSDataTable from './LZSDataTable';
+import LZSForm from './LZSForm';
+import Button from '../../components/ui/button/Button';
+import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
+import ConfirmModal from '../../components/ui/modal/ConfirmModal';
 
 // Sample data for the table
-const zaduzenjaLzoData = [
+const lzsData = [
   {
     id: 1,
     redniBroj: 1,
-    zaposleni: "Petar Petrović",
-    radnoMesto: "Viljuškari",
-    povecanRizik: true,
-    zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") },
-      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") },
-      { naziv: "Zaštitne naočare", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") }
-    ],
+    nazivLZS: "Zaštitna kaciga",
+    standard: "EN 397",
+    napomena: "Redovno održavanje"
   },
   {
     id: 2,
     redniBroj: 2,
-    zaposleni: "Ana Anić",
-    radnoMesto: "Kranista",
-    povecanRizik: false,
-    zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-02-01"), datumDo: new Date("2024-11-30") },
-      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-02-01"), datumDo: new Date("2024-11-30") }
-    ],
+    nazivLZS: "Zaštitne rukavice",
+    standard: "EN 388",
+    napomena: ""
   },
   {
     id: 3,
     redniBroj: 3,
-    zaposleni: "Marko Marković",
-    radnoMesto: "Mehaničar",
-    povecanRizik: true,
-    zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
-      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
-      { naziv: "Zaštitne naočare", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
-      { naziv: "Zaštitna obuća", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") }
-    ],
-  },
+    nazivLZS: "Sigurnosna obuća",
+    standard: "EN ISO 20345",
+    napomena: "Godišnji pregled"
+  }
 ];
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "zaposleni", label: "Zaposleni", sortable: true },
-  { key: "radnoMesto", label: "Radno mesto", sortable: true },
-  { key: "povecanRizik", label: "Povećan rizik", sortable: true },
-  { key: "nazivLzs", label: "Naziv LZS", sortable: true },
-  { key: "datumZaduzenja", label: "Datum zaduženja", sortable: true },
-  { key: "narednoZaduzenje", label: "Naredno zaduženje", sortable: true },
+  { key: "nazivLZS", label: "Naziv LZS", sortable: true },
+  { key: "standard", label: "Standard", sortable: true },
+  { key: "napomena", label: "Napomena", sortable: true }
 ];
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -68,7 +48,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error in ZaduzenjaLzo component:', error);
+    console.error('Error in LZS component:', error);
     console.error('Error info:', errorInfo);
   }
 
@@ -88,21 +68,40 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const ZaduzenjaLzoPage: React.FC = () => {
+const LZS: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(zaduzenjaLzoData);
+  const [data, setData] = useState(lzsData);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
   const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
-    };
-    setData([...data, newItem]);
+    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
+    
+    if (editingItem) {
+      // Update existing item
+      const updatedItem = {
+        ...editingItem,
+        nazivLZS: newData.nazivLZS,
+        standard: newData.standard,
+        napomena: newData.napomena
+      };
+      
+      setData(data.map(item => 
+        item.id === editingItem.id ? updatedItem : item
+      ));
+      setEditingItem(null);
+    } else {
+      // Add new item
+      const newItem = {
+        id: data.length + 1,
+        redniBroj: data.length + 1,
+        nazivLZS: newData.nazivLZS,
+        standard: newData.standard,
+        napomena: newData.napomena
+      };
+      setData([...data, newItem]);
+    }
     setShowForm(false);
   };
 
@@ -124,8 +123,14 @@ const ZaduzenjaLzoPage: React.FC = () => {
     setShowDeleteModal(false);
   };
 
-  const handleUpdateData = (updatedData: any[]) => {
-    setData(updatedData);
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -134,14 +139,14 @@ const ZaduzenjaLzoPage: React.FC = () => {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-             Zaduženja LZS
+              LZS
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton
                 data={data}
                 columns={columns}
-                title="Zaduženja LZS"
-                filename="zaduzenja-lzo"
+                title="LZS"
+                filename="lzs"
               />
               <Button
                 onClick={() => setShowForm(true)}
@@ -172,8 +177,8 @@ const ZaduzenjaLzoPage: React.FC = () => {
                 <ExportPopoverButton
                   data={data}
                   columns={columns}
-                  title="Zaduženja LZS"
-                  filename="zaduzenja-lzo"
+                  title="LZS"
+                  filename="lzs"
                   className="w-full"
                 />
               </div>
@@ -204,18 +209,19 @@ const ZaduzenjaLzoPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <ZaduzenjaLzoDataTable 
+          <LZSDataTable 
             data={data}
             columns={columns}
+            onEditClick={handleEditClick}
             onDeleteClick={handleDeleteClick}
-            onUpdateData={handleUpdateData}
           />
         </div>
 
-        <ZaduzenjaLzoForm 
+        <LZSForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
         />
 
         <ConfirmModal
@@ -233,4 +239,5 @@ const ZaduzenjaLzoPage: React.FC = () => {
   );
 };
 
-export default ZaduzenjaLzoPage; 
+export default LZS;
+

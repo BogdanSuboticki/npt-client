@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -53,8 +53,15 @@ export default function PreglediOpremeDataTable({ data: initialData, columns, on
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [modalStatus, setModalStatus] = useState(true); // true for "Ispravno", false for "Neispravno"
+  const [editingItem, setEditingItem] = useState<PreglediOpremeData | null>(null);
+  const [editStatus, setEditStatus] = useState<string>("");
+  const [editDatum, setEditDatum] = useState<Date>(new Date());
+  const [editNapomena, setEditNapomena] = useState<string>("");
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
 
   
   // Get unique values for dropdowns
@@ -67,6 +74,23 @@ export default function PreglediOpremeDataTable({ data: initialData, columns, on
   }, [initialData]);
 
   const statusOptions = ["Ispravno", "Neispravno"];
+
+  // Add click outside handler for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      if (isStatusOpen && statusRef.current && !statusRef.current.contains(target)) {
+        setIsStatusOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isStatusOpen]);
 
   // Initialize with all items selected
   const [selectedOprema, setSelectedOprema] = useState<string[]>(uniqueOprema);
@@ -136,6 +160,25 @@ export default function PreglediOpremeDataTable({ data: initialData, columns, on
     if (value) {
       setModalDate(value);
     }
+  };
+
+  const handleEditClick = (item: PreglediOpremeData) => {
+    setEditingItem(item);
+    setEditStatus(item.status);
+    setEditDatum(item.datumPregleda);
+    setEditNapomena(item.napomena || "");
+    setIsStatusOpen(false);
+    openEditModal();
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem) {
+      // Handle save logic here
+      console.log("Updating item:", editingItem.id, "with status:", editStatus, "datum:", editDatum, "napomena:", editNapomena);
+      // You would typically update the data here
+    }
+    closeEditModal();
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -300,21 +343,54 @@ export default function PreglediOpremeDataTable({ data: initialData, columns, on
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button 
-                        className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={handleCheckboxClick}
-                      >
-                        <CheckmarkIcon className="size-4" />
-                      </button>
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
+                          onClick={handleCheckboxClick}
+                        >
+                          <CheckmarkIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Novi pregled opreme
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onDeleteClick?.(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -356,6 +432,8 @@ export default function PreglediOpremeDataTable({ data: initialData, columns, on
               value={modalStatus}
               onChange={setModalStatus}
               size="full"
+              showRedWhenFalse={true}
+              name="slider-novi-pregled-opreme"
             />
 
             <div>
@@ -376,6 +454,175 @@ export default function PreglediOpremeDataTable({ data: initialData, columns, on
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isEditOpen}
+        onClose={closeEditModal}
+        className="max-w-[800px] max-h-[90vh] dark:bg-gray-800"
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
+            <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Izmena Pregleda Opreme</h4>
+          </div>
+          {editingItem && (
+            <form onSubmit={handleEditSave} className="flex flex-col flex-1 min-h-0">
+              <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+                  <div className="w-full">
+                    <Label>Naziv opreme *</Label>
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        value={editingItem.nazivOpreme}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Vrsta opreme</Label>
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        value={editingItem.vrstaOpreme}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Lokacija</Label>
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        value={editingItem.lokacija}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Standard</Label>
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        value={editingItem.standard || ""}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Interval pregleda (meseci) *</Label>
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        value={`${editingItem.intervalPregleda} meseci`}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Status Pregleda *</Label>
+                    <div className="relative w-full" ref={statusRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsStatusOpen(!isStatusOpen)}
+                        className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                      >
+                        <span>{editStatus || "Izaberi status"}</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${isStatusOpen ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isStatusOpen && (
+                        <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                          <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                            {statusOptions.map((option, index) => (
+                              <div
+                                key={option}
+                                className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                                  editStatus === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                                } ${index === statusOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                                onClick={() => {
+                                  setEditStatus(option);
+                                  setIsStatusOpen(false);
+                                }}
+                              >
+                                <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="w-full">
+                    <Label>Datum pregleda opreme *</Label>
+                    <CustomDatePicker
+                      value={editDatum}
+                      onChange={(date) => {
+                        if (date) {
+                          setEditDatum(date);
+                        }
+                      }}
+                      required
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum narednog pregleda opreme</Label>
+                    <CustomDatePicker
+                      value={editingItem.datumNarednogPregleda}
+                      onChange={() => {}}
+                      disabled
+                    />
+                  </div>
+
+                  <div className="col-span-1 lg:col-span-2">
+                    <Label>Napomena</Label>
+                    <textarea
+                      value={editNapomena}
+                      onChange={(e) => setEditNapomena(e.target.value)}
+                      className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={closeEditModal}
+                    type="button"
+                  >
+                    Otkaži
+                  </Button>
+                  <Button
+                    type="submit"
+                  >
+                    Sačuvaj
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
       </Modal>
     </div>
   );

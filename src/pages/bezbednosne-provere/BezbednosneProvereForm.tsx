@@ -16,7 +16,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
   const [formData, setFormData] = React.useState({
     lokacija: "",
     datumProvere: new Date(),
-    periodProvere: "15",
+    periodProvere: "",
     sledecaProvera: new Date(),
     napomena: "",
   });
@@ -58,7 +58,7 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.lokacija || !formData.datumProvere) {
+    if (!formData.lokacija || !formData.datumProvere || !formData.periodProvere) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
@@ -138,11 +138,13 @@ export default function BezbednosneProvereForm({ isOpen, onClose, onSave }: Bezb
             <Label>Interval kontrole (u danima) *</Label>
             <div className="relative w-full">
               <input
-                type="text"
+                type="number"
                 value={formData.periodProvere}
-                placeholder="15 dana"
-                readOnly
-                className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                onChange={(e) => setFormData({ ...formData, periodProvere: e.target.value })}
+                placeholder="Unesite broj dana"
+                min="1"
+                className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                required
               />
             </div>
           </div>

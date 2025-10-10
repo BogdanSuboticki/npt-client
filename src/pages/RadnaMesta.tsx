@@ -442,6 +442,10 @@ const RadnaMesta: React.FC = () => {
     setEditingItem(null);
   };
 
+  const handleUpdateData = (updatedData: any[]) => {
+    setData(updatedData);
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
@@ -522,6 +526,7 @@ const RadnaMesta: React.FC = () => {
           columns={columns}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
+          onUpdateData={handleUpdateData}
         />
       </div>
 

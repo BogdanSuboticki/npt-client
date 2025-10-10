@@ -195,6 +195,16 @@ const Osposobljavanje: React.FC = () => {
     setEditingItem(null);
   };
 
+  const handleCheckboxChange = (id: number, field: 'prikaziUPodsetniku' | 'bzrOdradjeno') => {
+    setData(prevData => 
+      prevData.map(item => 
+        item.id === id 
+          ? { ...item, [field]: !item[field] }
+          : item
+      )
+    );
+  };
+
   return (
     <ErrorBoundary>
       <div className="container mx-auto py-8">
@@ -277,6 +287,7 @@ const Osposobljavanje: React.FC = () => {
             columns={columns}
             onEditClick={handleEditClick}
             onDeleteClick={handleDeleteClick}
+            onCheckboxChange={handleCheckboxChange}
           />
         </div>
 

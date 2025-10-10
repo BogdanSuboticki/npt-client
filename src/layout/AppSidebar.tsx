@@ -79,8 +79,13 @@ const navItems: NavItem[] = [
   },
   {
     icon: <OpremaIcon />,
-    name: "Oprema - LZS",
+    name: "Oprema",
     path: "/oprema?context=moja-firma",
+  },
+  {
+    icon: <OpremaIcon />,
+    name: "LZS",
+    path: "/lzs?context=moja-firma",
   },
   {
     icon: <LekarskiPreglediIcon />,
@@ -192,6 +197,11 @@ const supportItems: NavItem[] = [
     icon: <OpremaIcon />,
     name: "Oprema",
     path: "/oprema?context=komitenti",
+  },
+  {
+    icon: <OpremaIcon />,
+    name: "LZS",
+    path: "/lzs?context=komitenti",
   },
   {
     icon: <LekarskiPreglediIcon />,

@@ -41,6 +41,7 @@ interface DataTableTwoProps {
   columns: Column[];
   onEditClick?: (item: OsposobljavanjeData) => void;
   onDeleteClick?: (item: OsposobljavanjeData) => void;
+  onCheckboxChange?: (id: number, field: 'prikaziUPodsetniku' | 'bzrOdradjeno') => void;
 }
 
 const formatDate = (dateStr: string | null | undefined): string => {
@@ -58,24 +59,23 @@ const formatDate = (dateStr: string | null | undefined): string => {
   }
 };
 
-export default function OsposobljavanjeDataTable({ data: initialData, columns, onEditClick, onDeleteClick }: DataTableTwoProps) {
+export default function OsposobljavanjeDataTable({ data: initialData, columns, onEditClick, onDeleteClick, onCheckboxChange }: DataTableTwoProps) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [data, setData] = useState<OsposobljavanjeData[]>(initialData);
 
   
   // Get unique values for dropdowns with safe defaults
   const uniqueZaposleni = useMemo(() => {
     try {
-      return Array.from(new Set(data?.map(item => item.zaposleni) || []));
+      return Array.from(new Set(initialData?.map(item => item.zaposleni) || []));
     } catch (error) {
       console.error('Error getting unique zaposleni:', error);
       return [];
     }
-  }, [data]);
+  }, [initialData]);
 
   // Initialize filter states with safe defaults
   const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
@@ -102,9 +102,9 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns, o
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
     try {
-      if (!data) return [];
+      if (!initialData) return [];
 
-      return data
+      return initialData
         .filter((item) => {
           try {
             const matchesZaposleni = selectedZaposleni.includes(item.zaposleni);
@@ -148,7 +148,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns, o
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, selectedZaposleni, selectedOsposobljavanje, dateFrom, dateTo]);
+  }, [initialData, sortKey, sortOrder, selectedZaposleni, selectedOsposobljavanje, dateFrom, dateTo]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -186,16 +186,6 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns, o
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
-
-  const handleCheckboxChange = (id: number, field: 'prikaziUPodsetniku' | 'bzrOdradjeno') => {
-    setData(prevData => 
-      prevData.map(item => 
-        item.id === id 
-          ? { ...item, [field]: !item[field] }
-          : item
-      )
-    );
-  };
 
   return (
         <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
@@ -407,7 +397,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns, o
                           ) : key === 'bzrOdradjeno' ? (
                             <Checkbox
                               checked={item[key]}
-                              onChange={() => handleCheckboxChange(item.id, 'bzrOdradjeno')}
+                              onChange={() => onCheckboxChange?.(item.id, 'bzrOdradjeno')}
                               className="w-4 h-4"
                             />
                           ) : key === 'datumNarednogBZR' || key === 'osposobljavanjeBZR' || key === 'osposobljavanjeZOP' || key === 'datumNarednogZOP' ? (
@@ -419,18 +409,38 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns, o
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
-                          <button 
-                            onClick={() => onEditClick?.(item)}
-                            className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                          >
-                            <EditButtonIcon className="size-4" />
-                          </button>
-                          <button 
-                            onClick={() => onDeleteClick?.(item)}
-                            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                          >
-                            <DeleteButtonIcon className="size-4" />
-                          </button>
+                          <div className="relative inline-block group">
+                            <button 
+                              onClick={() => onEditClick?.(item)}
+                              className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                            >
+                              <EditButtonIcon className="size-4" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Izmeni
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="relative inline-block group">
+                            <button 
+                              onClick={() => onDeleteClick?.(item)}
+                              className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                            >
+                              <DeleteButtonIcon className="size-4" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Obriši
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -16,6 +16,10 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Slider from "../../components/ui/Slider";
+import Label from "../../components/form/Label";
+import Input from "../../components/form/input/InputField";
+import TextArea from "../../components/form/input/TextArea";
+import { DeleteButtonIcon as DeleteIcon } from "../../icons";
 
 interface Column {
   key: string;
@@ -52,8 +56,13 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [isRealizovanaMera, setIsRealizovanaMera] = useState<boolean>(true);
+  const [editingItem, setEditingItem] = useState<InspekcijskiNadzorItem | null>(null);
+  const [editDatumNadzora, setEditDatumNadzora] = useState<Date>(new Date());
+  const [editNapomena, setEditNapomena] = useState<string>("");
+  const [editMere, setEditMere] = useState<Mera[]>([]);
 
   // Filters
   const uniqueBrojResenja = useMemo(() => {
@@ -167,6 +176,43 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
     const status = isRealizovanaMera ? "Realizovana mera" : "Obavešten inspektor";
     console.log("Saving inspekcijski nadzor action with date:", modalDate, "and status:", status);
     closeModal();
+  };
+
+  const handleEditClick = (item: InspekcijskiNadzorItem) => {
+    setEditingItem(item);
+    setEditDatumNadzora(item.datumNadzora);
+    setEditNapomena(item.napomena || "");
+    setEditMere([...item.mere]);
+    openEditModal();
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem) {
+      console.log("Updating item:", editingItem.id, "with datum:", editDatumNadzora, "napomena:", editNapomena, "mere:", editMere);
+      // You would typically update the data here
+    }
+    closeEditModal();
+  };
+
+  const addEditMera = () => {
+    const newMera: Mera = {
+      id: Date.now(),
+      nazivMere: "",
+      rokIzvrsenja: new Date(),
+      datumRealizacije: null,
+    };
+    setEditMere(prev => [...prev, newMera]);
+  };
+
+  const removeEditMera = (id: number) => {
+    setEditMere(prev => prev.filter(mera => mera.id !== id));
+  };
+
+  const handleEditMeraChange = (id: number, field: keyof Mera, value: string | Date | null) => {
+    setEditMere(prev => prev.map(mera => 
+      mera.id === id ? { ...mera, [field]: value } : mera
+    ));
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -380,21 +426,54 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
                   })}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button 
-                        className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={handleActionClick}
-                      >
-                        <CheckmarkIcon className="size-4" />
-                      </button>
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
+                          onClick={handleActionClick}
+                        >
+                          <CheckmarkIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Potvrdi
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onDeleteClick?.(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -452,8 +531,150 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
             Sačuvaj
           </Button>
         </div>
+      </Modal>
 
-        
+      <Modal
+        isOpen={isEditOpen}
+        onClose={closeEditModal}
+        className="max-w-[800px] max-h-[90vh] dark:bg-[#11181E] overflow-hidden"
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-5 lg:p-10 pb-0">
+            <h4 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Izmena Inspekcijskog Nadzora</h4>
+          </div>
+          {editingItem && (
+            <form onSubmit={handleEditSave} className="flex flex-col flex-1 min-h-0">
+              <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+                  <div className="w-full">
+                    <Label>Broj rešenja *</Label>
+                    <input
+                      type="text"
+                      value={editingItem.brojResenja}
+                      readOnly
+                      className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum nadzora *</Label>
+                    <CustomDatePicker
+                      value={editDatumNadzora}
+                      onChange={(date) => date && setEditDatumNadzora(date)}
+                      required
+                    />
+                  </div>
+
+                  <div className="w-full lg:col-span-2">
+                    <Label>Napomena</Label>
+                    <TextArea
+                      value={editNapomena}
+                      onChange={(e: any) => setEditNapomena(e.target.value)}
+                      placeholder="Unesite napomenu"
+                      className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="w-full lg:col-span-2">
+                    <div className="flex items-center justify-between mb-4">
+                      <Label>Mere</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addEditMera}
+                        className="text-sm"
+                      >
+                        + Dodaj meru
+                      </Button>
+                    </div>
+                    
+                    {editMere.length > 0 && (
+                      <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
+                        {/* Header */}
+                        <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 min-w-[700px] w-full">
+                          <div className="grid grid-cols-[1fr_1fr_1fr_80px] gap-4 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Naziv mere *</div>
+                            <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Rok izvršenja *</div>
+                            <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum realizacije</div>
+                          </div>
+                        </div>
+                        
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                          {editMere.map((mera) => (
+                            <div key={mera.id} className="px-4 py-3">
+                              <div className="grid grid-cols-[1fr_1fr_1fr_80px] gap-4 min-w-[700px] items-start">
+                                {/* Naziv mere */}
+                                <div className="w-full">
+                                  <Input
+                                    type="text"
+                                    value={mera.nazivMere}
+                                    onChange={(e) => handleEditMeraChange(mera.id, 'nazivMere', e.target.value)}
+                                    placeholder="Unesite naziv mere"
+                                    className="h-11 text-sm w-full"
+                                    required
+                                  />
+                                </div>
+                              
+                                {/* Rok izvršenja */}
+                                <div className="w-full">
+                                  <CustomDatePicker
+                                    value={mera.rokIzvrsenja}
+                                    onChange={(date) => handleEditMeraChange(mera.id, 'rokIzvrsenja', date)}
+                                    placeholder="Izaberi datum"
+                                    className="h-11 text-sm w-full"
+                                    required
+                                  />
+                                </div>
+                              
+                                {/* Datum realizacije mere */}
+                                <div className="w-full">
+                                  <CustomDatePicker
+                                    value={mera.datumRealizacije}
+                                    onChange={(date) => handleEditMeraChange(mera.id, 'datumRealizacije', date)}
+                                    placeholder="Izaberi datum"
+                                    className="h-11 text-sm w-full"
+                                  />
+                                </div>
+                              
+                                {/* Delete button */}
+                                <div className="flex items-center justify-center h-11">
+                                  <button
+                                    type="button"
+                                    onClick={() => removeEditMera(mera.id)}
+                                    className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                                    title="Obriši meru"
+                                  >
+                                    <DeleteIcon className="size-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={closeEditModal}
+                    type="button"
+                  >
+                    Otkaži
+                  </Button>
+                  <Button type="submit">
+                    Sačuvaj
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
       </Modal>
     </div>
   );

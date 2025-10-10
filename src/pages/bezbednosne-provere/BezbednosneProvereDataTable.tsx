@@ -17,6 +17,7 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import TextArea from "../../components/form/input/TextArea";
+import Label from "../../components/form/Label";
 
 interface Column {
   key: string;
@@ -48,9 +49,13 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [modalNapomena, setModalNapomena] = useState<string>('');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [editingItem, setEditingItem] = useState<BezbednosneProvereData | null>(null);
+  const [editDatum, setEditDatum] = useState<Date>(new Date());
+  const [editNapomena, setEditNapomena] = useState<string>('');
 
   
   // Get unique values for dropdowns
@@ -118,6 +123,23 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
     // Handle save logic here
     console.log("Saving bezbednosna provera with date:", modalDate, "and napomena:", modalNapomena);
     closeModal();
+  };
+
+  const handleEditClick = (item: BezbednosneProvereData) => {
+    setEditingItem(item);
+    setEditDatum(item.datumObilaska);
+    setEditNapomena(item.napomena || "");
+    openEditModal();
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem) {
+      // Handle save logic here
+      console.log("Updating item:", editingItem.id, "with datum:", editDatum, "napomena:", editNapomena);
+      // You would typically update the data here
+    }
+    closeEditModal();
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -270,21 +292,54 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button 
-                        className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={() => handleCheckboxClick(item.lokacija)}
-                      >
-                        <CheckmarkIcon className="size-4" />
-                      </button>
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
+                          onClick={() => handleCheckboxClick(item.lokacija)}
+                        >
+                          <CheckmarkIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Potvrdi
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onDeleteClick?.(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -351,6 +406,84 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
             Sačuvaj
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={isEditOpen}
+        onClose={closeEditModal}
+        className="max-w-[800px] p-5 lg:p-10 dark:bg-gray-800"
+      >
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Izmena Bezbednosne Provere</h2>
+        {editingItem && (
+          <form onSubmit={handleEditSave}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="col-span-1">
+                <Label>Lokacija *</Label>
+                <input
+                  type="text"
+                  value={editingItem.lokacija}
+                  readOnly
+                  className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="col-span-1">
+                <Label>Interval kontrole (u danima) *</Label>
+                <input
+                  type="text"
+                  value={editingItem.periodObilaska}
+                  readOnly
+                  className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="col-span-1">
+                <Label>Datum kontrole *</Label>
+                <CustomDatePicker
+                  value={editDatum}
+                  onChange={(date) => {
+                    if (date) {
+                      setEditDatum(date);
+                    }
+                  }}
+                  required
+                />
+              </div>
+
+              <div className="col-span-1">
+                <Label>Naredna kontrola</Label>
+                <CustomDatePicker
+                  value={new Date(editingItem.sledeciObilazak)}
+                  onChange={() => {}}
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="col-span-1 lg:col-span-2 mt-4">
+              <Label>Napomena</Label>
+              <textarea
+                value={editNapomena}
+                onChange={(e) => setEditNapomena(e.target.value)}
+                className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
+                rows={4}
+              />
+            </div>
+
+            <div className="flex items-center justify-end w-full gap-3 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={closeEditModal}
+                type="button"
+              >
+                Otkaži
+              </Button>
+              <Button type="submit">
+                Sačuvaj
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
     </div>
   );

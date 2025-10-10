@@ -46,6 +46,7 @@ import Obrasci from "./pages/Obrasci";
 import PrethodniObrasci from "./pages/Prethodni_obrasci";
 import Osposobljavanje from "./pages/osposobljavanje/Osposobljavanje";
 import Oprema from "./pages/oprema/Oprema";
+import LZS from "./pages/lzs/LZS";
 import Lokacije from "./pages/lokacije/Lokacije";
 import LekarskiPreglediPage from "./pages/lekarski-pregledi/page";
 import InspekcijskiNadzorPage from "./pages/inspekcijski-nadzor/page";
@@ -127,6 +128,7 @@ export default function App() {
             <Route path="/prethodni-obrasci" element={<PrethodniObrasci />} />
             <Route path="/osposobljavanje" element={<Osposobljavanje />} />
             <Route path="/oprema" element={<Oprema />} />
+            <Route path="/lzs" element={<LZS />} />
             <Route path="/lokacije" element={<Lokacije />} />
 
             {/* Forms */}

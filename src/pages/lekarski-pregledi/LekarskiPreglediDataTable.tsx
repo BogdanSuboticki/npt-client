@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -17,6 +17,7 @@ import { Modal } from "../../components/ui/modal";
 import Button from "../../components/ui/button/Button";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Checkbox from "../../components/form/input/Checkbox";
+import Label from "../../components/form/Label";
 
 
 
@@ -50,8 +51,18 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns, 
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const [modalDate, setModalDate] = useState<Date>(new Date());
   const [showAktivni, setShowAktivni] = useState(false);
+  const [editingItem, setEditingItem] = useState<LekarskiPreglediData | null>(null);
+  const [editVrstaLekarskog, setEditVrstaLekarskog] = useState<string>("");
+  const [editDatumLekarskog, setEditDatumLekarskog] = useState<Date>(new Date());
+  const [editIntervalLekarskog, setEditIntervalLekarskog] = useState<string>("");
+  const [editDatumNarednogLekarskog, setEditDatumNarednogLekarskog] = useState<Date>(new Date());
+  const [isVrstaLekarskogOpen, setIsVrstaLekarskogOpen] = useState(false);
+  const [isIntervalOpen, setIsIntervalOpen] = useState(false);
+  const vrstaLekarskogRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<HTMLDivElement>(null);
   
   // Get unique values for dropdowns
   const uniqueZaposleni = useMemo(() => {
@@ -59,14 +70,46 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns, 
   }, [initialData]);
 
   const uniqueVrsteLekarskog = useMemo(() => {
-    return ["Predhodni", "Periodični", "Vanredni"];
+    return ["Predhodni", "Periodični", "Vanredni", "Oftamološki"];
   }, []);
+
+  const vrstaLekarskogOptions = ["Prethodni", "Periodični", "Vanredni", "Oftamološki"];
+  const intervalOptions = ["12", "36", "60"];
 
   // Initialize with all items selected
   const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
   const [selectedVrsteLekarskog, setSelectedVrsteLekarskog] = useState<string[]>(uniqueVrsteLekarskog);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
+
+  // Add click outside handler for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      if (isVrstaLekarskogOpen && vrstaLekarskogRef.current && !vrstaLekarskogRef.current.contains(target)) {
+        setIsVrstaLekarskogOpen(false);
+      }
+      if (isIntervalOpen && intervalRef.current && !intervalRef.current.contains(target)) {
+        setIsIntervalOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isVrstaLekarskogOpen, isIntervalOpen]);
+
+  // Auto-calculate next exam date when interval or exam date changes
+  useEffect(() => {
+    if (editIntervalLekarskog && editDatumLekarskog) {
+      const nextDate = new Date(editDatumLekarskog);
+      nextDate.setMonth(nextDate.getMonth() + parseInt(editIntervalLekarskog));
+      setEditDatumNarednogLekarskog(nextDate);
+    }
+  }, [editIntervalLekarskog, editDatumLekarskog]);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData
@@ -129,6 +172,32 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns, 
     if (value) {
       setModalDate(value);
     }
+  };
+
+  const handleEditClick = (item: LekarskiPreglediData) => {
+    setEditingItem(item);
+    setEditVrstaLekarskog(item.vrstaLekarskog);
+    setEditDatumLekarskog(item.datumLekarskog);
+    setEditIntervalLekarskog("12"); // Default or extract from item if stored
+    setEditDatumNarednogLekarskog(item.datumNarednogLekarskog);
+    setIsVrstaLekarskogOpen(false);
+    setIsIntervalOpen(false);
+    openEditModal();
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem) {
+      // Handle save logic here
+      console.log("Updating item:", editingItem.id, "with data:", {
+        vrstaLekarskog: editVrstaLekarskog,
+        datumLekarskog: editDatumLekarskog,
+        intervalLekarskog: editIntervalLekarskog,
+        datumNarednogLekarskog: editDatumNarednogLekarskog
+      });
+      // You would typically update the data here
+    }
+    closeEditModal();
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -293,21 +362,54 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns, 
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button 
-                        className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
-                        onClick={handleCheckboxClick}
-                      >
-                        <CheckmarkIcon className="size-4" />
-                      </button>
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-success-500 dark:text-gray-400 dark:hover:text-success-500"
+                          onClick={handleCheckboxClick}
+                        >
+                          <CheckmarkIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izvrši lekarski pregled
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onDeleteClick?.(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -357,6 +459,173 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns, 
             Sačuvaj
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={isEditOpen}
+        onClose={closeEditModal}
+        className="max-w-[800px] p-5 lg:p-10 dark:bg-[#11181E]"
+      >
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Izmena Lekarskog Pregleda</h2>
+        {editingItem && (
+          <form onSubmit={handleEditSave}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="w-full">
+                <Label>Zaposleni *</Label>
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={editingItem.zaposleni}
+                    readOnly
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
+                <Label>Radno mesto *</Label>
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    value={editingItem.radnoMesto}
+                    readOnly
+                    className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                  />
+                </div>
+                {editingItem.radnoMesto && (
+                  <span className={`text-xs font-medium mt-1 block ${
+                    editingItem.povecanRizik 
+                      ? 'text-red-600 dark:text-red-400' 
+                      : 'text-blue-600 dark:text-blue-400'
+                  }`}>
+                    {editingItem.povecanRizik ? 'Povećan rizik' : 'Nije povećan rizik'}
+                  </span>
+                )}
+              </div>
+
+              <div className="w-full">
+                <Label>Vrsta lekarskog *</Label>
+                <div className="relative w-full" ref={vrstaLekarskogRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsVrstaLekarskogOpen(!isVrstaLekarskogOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>{editVrstaLekarskog || "Izaberi vrstu lekarskog"}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform ${isVrstaLekarskogOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {isVrstaLekarskogOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                        {vrstaLekarskogOptions.map((option, index) => (
+                          <div
+                            key={option}
+                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                              editVrstaLekarskog === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === vrstaLekarskogOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => {
+                              setEditVrstaLekarskog(option);
+                              setIsVrstaLekarskogOpen(false);
+                            }}
+                          >
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="w-full">
+                <Label>Datum lekarskog pregleda *</Label>
+                <CustomDatePicker
+                  value={editDatumLekarskog}
+                  onChange={(date) => {
+                    if (date) {
+                      setEditDatumLekarskog(date);
+                    }
+                  }}
+                  required
+                />
+              </div>
+
+              <div className="w-full">
+                <Label>Interval lekarskog pregleda *</Label>
+                <div className="relative w-full" ref={intervalRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsIntervalOpen(!isIntervalOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>{editIntervalLekarskog ? `${editIntervalLekarskog} meseci` : "Izaberi interval"}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform ${isIntervalOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {isIntervalOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                        {intervalOptions.map((option, index) => (
+                          <div
+                            key={option}
+                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                              editIntervalLekarskog === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === intervalOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => {
+                              setEditIntervalLekarskog(option);
+                              setIsIntervalOpen(false);
+                            }}
+                          >
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{option} meseci</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="w-full">
+                <Label>Datum narednog lekarskog pregleda *</Label>
+                <CustomDatePicker
+                  value={editDatumNarednogLekarskog}
+                  onChange={() => {}}
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={closeEditModal}
+                type="button"
+              >
+                Otkaži
+              </Button>
+              <Button
+                type="submit"
+              >
+                Sačuvaj
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
     </div>
   );

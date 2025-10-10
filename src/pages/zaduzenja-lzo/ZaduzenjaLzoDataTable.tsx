@@ -11,6 +11,11 @@ import {
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
+import { useModal } from "../../hooks/useModal";
+import { Modal } from "../../components/ui/modal";
+import Label from "../../components/form/Label";
+import Button from "../../components/ui/button/Button";
+import DatePicker from "../../components/form/input/DatePicker";
 
 interface Column {
   key: string;
@@ -38,13 +43,26 @@ interface DataTableProps {
   data: ZaduzenjaLzoData[];
   columns: Column[];
   onDeleteClick?: (item: ZaduzenjaLzoData) => void;
+  onUpdateData?: (updatedData: ZaduzenjaLzoData[]) => void;
 }
 
-export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+interface EditOprema {
+  id: number;
+  vrstaLzs: string;
+  standard: string;
+  datumZaduzenja: Date | null;
+  rok: string;
+  narednoZaduzenje: Date | null;
+}
+
+export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDeleteClick, onUpdateData }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
+  const [editingItem, setEditingItem] = useState<ZaduzenjaLzoData | null>(null);
+  const [editOprema, setEditOprema] = useState<EditOprema[]>([]);
 
   // Flatten data to show each piece of equipment as a separate row
   const flattenedData = useMemo(() => {
@@ -119,6 +137,94 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDe
     } else {
       setSortKey(key);
       setSortOrder("asc");
+    }
+  };
+
+  const handleEditClick = (item: ZaduzenjaLzoData) => {
+    setEditingItem(item);
+    // Convert zaduzenaOprema to EditOprema format
+    const opremaToEdit: EditOprema[] = item.zaduzenaOprema.map((oprema, index) => ({
+      id: Date.now() + index,
+      vrstaLzs: oprema.naziv,
+      standard: "", // Default empty since not in original data
+      datumZaduzenja: oprema.datumOd || null,
+      rok: "12", // Default value
+      narednoZaduzenje: oprema.datumDo || null,
+    }));
+    setEditOprema(opremaToEdit);
+    openEditModal();
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem) {
+      console.log("Updating item:", editingItem.id, "with oprema:", editOprema);
+      // You would typically update the data here
+    }
+    closeEditModal();
+  };
+
+  const handleEditOpremaChange = (id: number, field: string, value: string | Date | null) => {
+    setEditOprema(prevOprema => {
+      return prevOprema.map(item => {
+        if (item.id === id) {
+          const updatedItem = { ...item, [field]: value };
+          
+          // Auto-calculate naredno zaduzenje when datum zaduzenja or rok changes
+          if (field === 'datumZaduzenja' || field === 'rok') {
+            if (updatedItem.datumZaduzenja && updatedItem.rok) {
+              const datumZaduzenja = new Date(updatedItem.datumZaduzenja);
+              const rokMonths = parseInt(updatedItem.rok) || 0;
+              const narednoZaduzenje = new Date(datumZaduzenja);
+              narednoZaduzenje.setMonth(narednoZaduzenje.getMonth() + rokMonths);
+              updatedItem.narednoZaduzenje = narednoZaduzenje;
+            } else {
+              updatedItem.narednoZaduzenje = null;
+            }
+          }
+          
+          return updatedItem;
+        }
+        return item;
+      });
+    });
+  };
+
+  const handleDeleteEquipment = (item: any) => {
+    // Find the original employee record
+    const employeeId = item.id;
+    const equipmentIndex = item.opremaIndex;
+    
+    // Find the employee and check how many equipment items they have
+    const employee = initialData.find(emp => emp.id === employeeId);
+    if (!employee) return;
+    
+    // If this is the last equipment item, delete the entire employee record
+    if (employee.zaduzenaOprema.length === 1) {
+      if (onDeleteClick) {
+        onDeleteClick(employee);
+      }
+      return;
+    }
+    
+    // Otherwise, just remove this equipment item
+    const updatedData = initialData.map(emp => {
+      if (emp.id === employeeId) {
+        const updatedOprema = emp.zaduzenaOprema.filter((_, index) => index !== equipmentIndex);
+        return {
+          ...emp,
+          zaduzenaOprema: updatedOprema
+        };
+      }
+      return emp;
+    });
+    
+    // Update through parent
+    if (onUpdateData) {
+      onUpdateData(updatedData);
+    } else {
+      console.log("Delete equipment:", item.nazivLzs, "from employee:", item.zaposleni);
+      console.log("Updated data:", updatedData);
     }
   };
 
@@ -257,15 +363,38 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDe
                   })}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => handleDeleteEquipment(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -289,6 +418,144 @@ export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDe
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isEditOpen}
+        onClose={closeEditModal}
+        className="max-w-[1200px] w-full mx-4 p-4 lg:p-10 dark:bg-gray-800"
+      >
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Izmena Zaduženja LZS</h2>
+        {editingItem && (
+          <form onSubmit={handleEditSave} className="max-h-[70vh] overflow-y-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="col-span-1">
+                <Label>Zaposleni *</Label>
+                <input
+                  type="text"
+                  value={editingItem.zaposleni}
+                  readOnly
+                  className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="col-span-1">
+                <div className="flex items-center gap-2">
+                  <Label>Radno mesto</Label>
+                  {editingItem.radnoMesto && (
+                    <span className={`text-sm font-medium ${
+                      editingItem.povecanRizik 
+                        ? 'text-red-600 dark:text-red-400 mb-1.5' 
+                        : 'text-blue-600 dark:text-blue-400 mb-1.5'
+                    }`}>
+                      {editingItem.povecanRizik ? 'Povećan rizik' : 'Nije povećan rizik'}
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={editingItem.radnoMesto}
+                  readOnly
+                  className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="col-span-1 lg:col-span-2">
+                <div className="flex items-center justify-between mb-4">
+                  <Label>Oprema</Label>
+                </div>
+                
+                {editOprema.length > 0 && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
+                    {/* Header */}
+                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                      <div className="grid grid-cols-5 gap-4 text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[800px]">
+                        <div>Naziv LZS *</div>
+                        <div>Standard</div>
+                        <div>Datum zaduženja *</div>
+                        <div>Rok (m) *</div>
+                        <div>Naredno zaduženje</div>
+                      </div>
+                    </div>
+                    
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {editOprema.map((item) => (
+                        <div key={item.id} className="px-4 py-3">
+                          <div className="grid grid-cols-5 gap-4 min-w-[800px] items-start">
+                            {/* Naziv LZS */}
+                            <div>
+                              <input
+                                type="text"
+                                value={item.vrstaLzs}
+                                readOnly
+                                className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                              />
+                            </div>
+                          
+                            {/* Standard */}
+                            <div>
+                              <input
+                                type="text"
+                                value={item.standard}
+                                readOnly
+                                className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                              />
+                            </div>
+                          
+                            {/* Datum zaduženja */}
+                            <div>
+                              <DatePicker
+                                value={item.datumZaduzenja}
+                                onChange={(date) => handleEditOpremaChange(item.id, 'datumZaduzenja', date)}
+                                placeholder="Izaberi datum"
+                                className="h-11 text-sm"
+                              />
+                            </div>
+                          
+                            {/* Rok */}
+                            <div>
+                              <input
+                                type="number"
+                                value={item.rok}
+                                onChange={(e) => handleEditOpremaChange(item.id, 'rok', e.target.value)}
+                                min="1"
+                                className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                              />
+                            </div>
+                          
+                            {/* Naredno zaduženje */}
+                            <div>
+                              <DatePicker
+                                value={item.narednoZaduzenje}
+                                onChange={() => {}} // No-op function since it's disabled
+                                placeholder=""
+                                disabled={true}
+                                className="h-11 text-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <Button
+                variant="outline"
+                onClick={closeEditModal}
+                type="button"
+              >
+                Otkaži
+              </Button>
+              <Button type="submit">
+                Sačuvaj
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 } 

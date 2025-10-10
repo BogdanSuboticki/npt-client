@@ -81,15 +81,19 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Automatically calculate next BZR date when BZR training date changes
+  // Automatically calculate next BZR date when BZR training date or povecanRizik changes
   useEffect(() => {
     if (formData.osposobljavanjeBZR) {
       const nextBZRDate = new Date(formData.osposobljavanjeBZR);
-      // BZR is always 36 months (3 years) from training date
-      nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
+      // If increased risk: 1 year (12 months), otherwise: 36 months (3 years)
+      if (formData.povecanRizik) {
+        nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 1);
+      } else {
+        nextBZRDate.setMonth(nextBZRDate.getMonth() + 36);
+      }
       setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
     }
-  }, [formData.osposobljavanjeBZR]);
+  }, [formData.osposobljavanjeBZR, formData.povecanRizik]);
 
   // Automatically calculate next ZOP date when ZOP training date changes
   useEffect(() => {
@@ -116,18 +120,6 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
         prikaziUPodsetniku: initialData.prikaziUPodsetniku || false,
         bzrOdradjeno: initialData.bzrOdradjeno || false
       });
-    } else {
-      // Initialize next BZR date on component mount (for new entries)
-      const nextBZRDate = new Date(formData.osposobljavanjeBZR);
-      // BZR is always 36 months (3 years) from training date
-      nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
-      setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
-
-      // Initialize next ZOP date on component mount (for new entries)
-      const nextZOPDate = new Date(formData.osposobljavanjeZOP);
-      // ZOP is always 36 months (3 years) from training date
-      nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
-      setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
     }
   }, [initialData]); // Depend on initialData
 
@@ -146,11 +138,9 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
       setFormData(prev => ({ ...prev, [field]: value }));
       
       // If BZR training date changes, automatically calculate next BZR date
+      // Note: this will be recalculated by the useEffect when povecanRizik is considered
       if (field === 'osposobljavanjeBZR') {
-        const nextBZRDate = new Date(value);
-        // BZR is always 36 months (3 years) from training date
-        nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
-        setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
+        // The calculation is handled by the useEffect above
       }
       
       // If ZOP training date changes, automatically calculate next ZOP date
@@ -221,11 +211,15 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
                                  lokacija: selectedEmployeeData.lokacija,
                                };
                                
-                               // Automatically calculate next BZR date
+                               // Automatically calculate next BZR date based on risk level
                                if (formData.osposobljavanjeBZR) {
                                  const nextBZRDate = new Date(formData.osposobljavanjeBZR);
-                                 // BZR is always 36 months (3 years) from training date
-                                 nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 3);
+                                 // If increased risk: 1 year (12 months), otherwise: 36 months (3 years)
+                                 if (selectedEmployeeData.povecanRizik) {
+                                   nextBZRDate.setFullYear(nextBZRDate.getFullYear() + 1);
+                                 } else {
+                                   nextBZRDate.setMonth(nextBZRDate.getMonth() + 36);
+                                 }
                                  newFormData.datumNarednogBZR = nextBZRDate;
                                }
                                
@@ -289,7 +283,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
                </div>
 
                              <div className="w-full">
-                 <Label>Datum Naredne Provere BZR</Label>
+                 <Label>Datum narednog BZR-a</Label>
                  <div className="relative">
                    <input
                      type="text"
@@ -307,7 +301,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
                </div>
 
               <div className="w-full">
-                <Label>Datum Provere ZOP</Label>
+                <Label>Datum Osposobljavanja ZOP</Label>
                 <CustomDatePicker
                   value={formData.osposobljavanjeZOP}
                   onChange={(newValue) => handleDateChange('osposobljavanjeZOP', newValue)}
@@ -315,7 +309,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
               </div>
 
               <div className="w-full">
-                <Label>Datum Naredne Provere ZOP</Label>
+                <Label>Datum narednog ZOP-a</Label>
                 <div className="relative">
                   <input
                     type="text"

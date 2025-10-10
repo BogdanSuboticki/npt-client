@@ -212,31 +212,60 @@ export default function FirmeDataTable({ data: initialData, columns, onDeleteCli
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
-                        <button className="text-gray-500 hover:text-[#10B981] dark:text-gray-400 dark:hover:text-[#10B981]">
-                            <svg
-                              className="size-4"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 18 18"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
+                          <div className="relative inline-block group">
+                            <button className="text-gray-500 hover:text-[#10B981] dark:text-gray-400 dark:hover:text-[#10B981]">
+                              <svg
+                                className="size-4"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 18 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M10.3177 12.4723C10.4803 12.547 10.6636 12.5641 10.8372 12.5207C11.0108 12.4773 11.1645 12.3761 11.2729 12.2337L11.5525 11.8675C11.6992 11.6719 11.8894 11.5131 12.1081 11.4038C12.3268 11.2944 12.568 11.2375 12.8125 11.2375H15.175C15.5927 11.2375 15.9933 11.4034 16.2887 11.6988C16.5841 11.9942 16.75 12.3948 16.75 12.8125V15.175C16.75 15.5927 16.5841 15.9933 16.2887 16.2887C15.9933 16.5841 15.5927 16.75 15.175 16.75C11.4156 16.75 7.81009 15.2566 5.15176 12.5982C2.49343 9.93991 1 6.33444 1 2.575C1 2.15728 1.16594 1.75668 1.46131 1.46131C1.75668 1.16594 2.15728 1 2.575 1H4.9375C5.35522 1 5.75582 1.16594 6.05119 1.46131C6.34656 1.75668 6.5125 2.15728 6.5125 2.575V4.9375C6.5125 5.18201 6.45557 5.42316 6.34622 5.64186C6.23687 5.86056 6.07811 6.05079 5.8825 6.1975L5.51395 6.47391C5.36938 6.5843 5.26748 6.74134 5.22556 6.91834C5.18364 7.09534 5.20429 7.2814 5.284 7.4449C6.36026 9.63089 8.13036 11.3988 10.3177 12.4723Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Kontakt podaci
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="relative inline-block group">
+                            <button 
+                              onClick={() => onEditClick?.(item)}
+                              className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
                             >
-                              <path d="M10.3177 12.4723C10.4803 12.547 10.6636 12.5641 10.8372 12.5207C11.0108 12.4773 11.1645 12.3761 11.2729 12.2337L11.5525 11.8675C11.6992 11.6719 11.8894 11.5131 12.1081 11.4038C12.3268 11.2944 12.568 11.2375 12.8125 11.2375H15.175C15.5927 11.2375 15.9933 11.4034 16.2887 11.6988C16.5841 11.9942 16.75 12.3948 16.75 12.8125V15.175C16.75 15.5927 16.5841 15.9933 16.2887 16.2887C15.9933 16.5841 15.5927 16.75 15.175 16.75C11.4156 16.75 7.81009 15.2566 5.15176 12.5982C2.49343 9.93991 1 6.33444 1 2.575C1 2.15728 1.16594 1.75668 1.46131 1.46131C1.75668 1.16594 2.15728 1 2.575 1H4.9375C5.35522 1 5.75582 1.16594 6.05119 1.46131C6.34656 1.75668 6.5125 2.15728 6.5125 2.575V4.9375C6.5125 5.18201 6.45557 5.42316 6.34622 5.64186C6.23687 5.86056 6.07811 6.05079 5.8825 6.1975L5.51395 6.47391C5.36938 6.5843 5.26748 6.74134 5.22556 6.91834C5.18364 7.09534 5.20429 7.2814 5.284 7.4449C6.36026 9.63089 8.13036 11.3988 10.3177 12.4723Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          <button 
-                            onClick={() => onEditClick?.(item)}
-                            className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                          >
-                            <EditButtonIcon className="size-4" />
-                          </button>
-
-                          <button 
-                            onClick={() => onDeleteClick?.(item)}
-                            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                          >
-                            <DeleteButtonIcon className="size-4" />
-                          </button>
+                              <EditButtonIcon className="size-4" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Izmeni
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="relative inline-block group">
+                            <button 
+                              onClick={() => onDeleteClick?.(item)}
+                              className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                            >
+                              <DeleteButtonIcon className="size-4" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Obriši
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

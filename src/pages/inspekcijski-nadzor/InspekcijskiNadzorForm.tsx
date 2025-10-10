@@ -147,19 +147,20 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
                 {formData.mere.length > 0 && (
                   <div className="border border-gray-200 rounded-lg overflow-hidden dark:border-gray-700 overflow-x-auto">
                     {/* Header */}
-                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 min-w-[900px] w-full">
-                      <div className="grid grid-cols-[1fr_1fr_1fr_1fr_80px] gap-4 text-xs font-medium text-gray-700 dark:text-gray-300">
-                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Naziv mere *</div>
-                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Rok izvršenja *</div>
-                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum realizacije mere</div>
-                        <div className="bg-gray-50 dark:bg-gray-800 -mx-1 px-1">Datum obaveštavanja inspekcije</div>
+                    <div className="bg-gray-50 dark:bg-gray-800 px-2 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 !w-full">
+                      <div className="grid grid-cols-[180px_160px_160px_160px_60px] gap-3 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
+                        <div>Naziv mere *</div>
+                        <div>Rok izvršenja *</div>
+                        <div>Datum realizacije mere</div>
+                        <div>Datum obaveštavanja inspekcije</div>
+                        <div className="text-center"></div>
                       </div>
                     </div>
                     
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
                       {formData.mere.map((mera) => (
-                        <div key={mera.id} className="px-4 py-3">
-                          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_80px] gap-4 min-w-[900px] items-start">
+                        <div key={mera.id} className="px-2 py-3">
+                          <div className="grid grid-cols-[180px_160px_160px_160px_60px] gap-3 min-w-[700px] items-start">
                             {/* Naziv mere */}
                             <div className="w-full">
                               <Input

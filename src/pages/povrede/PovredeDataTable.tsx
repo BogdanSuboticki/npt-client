@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -14,6 +14,10 @@ import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import { useSidebar } from "../../context/SidebarContext";
+import { useModal } from "../../hooks/useModal";
+import { Modal } from "../../components/ui/modal";
+import Label from "../../components/form/Label";
+import Button from "../../components/ui/button/Button";
 
 interface Column {
   key: string;
@@ -48,16 +52,58 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
+  const [editingItem, setEditingItem] = useState<PovredeData | null>(null);
+  const [editTezinaPovrede, setEditTezinaPovrede] = useState<string>("");
+  const [editDatumPovrede, setEditDatumPovrede] = useState<Date>(new Date());
+  const [editBrojPovredneListe, setEditBrojPovredneListe] = useState<string>("");
+  const [editDatumObavestenjaInspekcije, setEditDatumObavestenjaInspekcije] = useState<Date>(new Date());
+  const [editDatumPredajeFondu, setEditDatumPredajeFondu] = useState<Date>(new Date());
+  const [editDatumPreuzimanjaIzFonda, setEditDatumPreuzimanjaIzFonda] = useState<Date>(new Date());
+  const [editDatumDostavjanjaUpravi, setEditDatumDostavjanjaUpravi] = useState<Date>(new Date());
+  const [editNapomena, setEditNapomena] = useState<string>("");
+  const [isTezinaPovredeOpen, setIsTezinaPovredeOpen] = useState(false);
+  const tezinaPovredeRef = useRef<HTMLDivElement>(null);
+  const [editBrojListeNumber, setEditBrojListeNumber] = useState<string>("");
+  const currentYear = new Date().getFullYear();
 
   // Get unique values for dropdowns
   const uniqueZaposleni = useMemo(() => {
     return Array.from(new Set(initialData.map(item => item.zaposleni)));
   }, [initialData]);
 
+  const tezinaPovredeOptions = ["Laka", "Srednja", "Teška", "Smrtna", "Kolektivna"];
+
+  // Update editBrojPovredneListe when number changes
+  useEffect(() => {
+    if (editBrojListeNumber) {
+      setEditBrojPovredneListe(`PL-${editBrojListeNumber}/${currentYear}`);
+    } else {
+      setEditBrojPovredneListe("");
+    }
+  }, [editBrojListeNumber, currentYear]);
+
   // Initialize with all items selected
   const [selectedZaposleni, setSelectedZaposleni] = useState<string[]>(uniqueZaposleni);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
+
+  // Click outside handler for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      if (isTezinaPovredeOpen && tezinaPovredeRef.current && !tezinaPovredeRef.current.contains(target)) {
+        setIsTezinaPovredeOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTezinaPovredeOpen]);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData
@@ -101,6 +147,43 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
       setSortKey(key);
       setSortOrder("asc");
     }
+  };
+
+  const handleEditClick = (item: PovredeData) => {
+    setEditingItem(item);
+    setEditTezinaPovrede(item.tezinaPovrede);
+    setEditDatumPovrede(item.datumPovrede);
+    setEditBrojPovredneListe(item.brojPovredneListe || "");
+    
+    // Extract number from format PL-XXX/YYYY
+    const match = item.brojPovredneListe?.match(/PL-(\d+)\/\d+/);
+    setEditBrojListeNumber(match ? match[1] : "");
+    
+    setEditDatumObavestenjaInspekcije(item.datumObavestenjaInspekcije);
+    setEditDatumPredajeFondu(item.datumPredajeFondu);
+    setEditDatumPreuzimanjaIzFonda(item.datumPreuzimanjaIzFonda);
+    setEditDatumDostavjanjaUpravi(item.datumDostavjanjaUpravi);
+    setEditNapomena(item.napomena || "");
+    setIsTezinaPovredeOpen(false);
+    openEditModal();
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingItem) {
+      console.log("Updating item:", editingItem.id, "with data:", {
+        tezinaPovrede: editTezinaPovrede,
+        datumPovrede: editDatumPovrede,
+        brojPovredneListe: editBrojPovredneListe,
+        datumObavestenjaInspekcije: editDatumObavestenjaInspekcije,
+        datumPredajeFondu: editDatumPredajeFondu,
+        datumPreuzimanjaIzFonda: editDatumPreuzimanjaIzFonda,
+        datumDostavjanjaUpravi: editDatumDostavjanjaUpravi,
+        napomena: editNapomena
+      });
+      // You would typically update the data here
+    }
+    closeEditModal();
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -250,15 +333,38 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                     <div className="flex items-center w-full gap-2">
-                      <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                        <EditButtonIcon className="size-4" />
-                      </button>
-                      <button 
-                        onClick={() => onDeleteClick?.(item)}
-                        className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                      >
-                        <DeleteButtonIcon className="size-4" />
-                      </button>
+                      <div className="relative inline-block group">
+                        <button 
+                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <EditButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Izmeni
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative inline-block group">
+                        <button 
+                          onClick={() => onDeleteClick?.(item)}
+                          className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                        >
+                          <DeleteButtonIcon className="size-4" />
+                        </button>
+                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                          <div className="relative">
+                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                              Obriši
+                            </div>
+                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -282,6 +388,178 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isEditOpen}
+        onClose={closeEditModal}
+        className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-5 pt-10">
+            <h4 className="text-xl font-semibold text-gray-800 dark:text-white">Izmena Povrede</h4>
+          </div>
+          {editingItem && (
+            <form onSubmit={handleEditSave} className="flex flex-col flex-1 min-h-0">
+              <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 pb-4">
+                  <div className="w-full">
+                    <Label>Zaposleni *</Label>
+                    <input
+                      type="text"
+                      value={editingItem.zaposleni}
+                      readOnly
+                      className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Težina povrede *</Label>
+                    <div className="relative w-full" ref={tezinaPovredeRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsTezinaPovredeOpen(!isTezinaPovredeOpen)}
+                        className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                      >
+                        <span>{editTezinaPovrede || "Izaberi težinu povrede"}</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${isTezinaPovredeOpen ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isTezinaPovredeOpen && (
+                        <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                          <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                            {tezinaPovredeOptions.map((option: string, index: number) => (
+                              <div
+                                key={option}
+                                className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                                  editTezinaPovrede === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                                } ${index === tezinaPovredeOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                                onClick={() => {
+                                  setEditTezinaPovrede(option);
+                                  setIsTezinaPovredeOpen(false);
+                                }}
+                              >
+                                <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum povrede *</Label>
+                    <CustomDatePicker
+                      value={editDatumPovrede}
+                      onChange={(date) => {
+                        if (date) {
+                          setEditDatumPovrede(date);
+                        }
+                      }}
+                      required
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Broj povredne liste</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-800 dark:text-white/90 font-medium">PL-</span>
+                      <input
+                        type="number"
+                        value={editBrojListeNumber}
+                        onChange={(e) => setEditBrojListeNumber(e.target.value)}
+                        className="flex-1 h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        placeholder="001"
+                        min="1"
+                      />
+                      <span className="text-sm text-gray-800 dark:text-white/90 font-medium">/{currentYear}</span>
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum obaveštenja inspekcije</Label>
+                    <CustomDatePicker
+                      value={editDatumObavestenjaInspekcije}
+                      onChange={(date) => {
+                        if (date) {
+                          setEditDatumObavestenjaInspekcije(date);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum predaje fondu</Label>
+                    <CustomDatePicker
+                      value={editDatumPredajeFondu}
+                      onChange={(date) => {
+                        if (date) {
+                          setEditDatumPredajeFondu(date);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum preuzimanja iz fonda</Label>
+                    <CustomDatePicker
+                      value={editDatumPreuzimanjaIzFonda}
+                      onChange={(date) => {
+                        if (date) {
+                          setEditDatumPreuzimanjaIzFonda(date);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <Label>Datum dostavljanja upravi</Label>
+                    <CustomDatePicker
+                      value={editDatumDostavjanjaUpravi}
+                      onChange={(date) => {
+                        if (date) {
+                          setEditDatumDostavjanjaUpravi(date);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div className="col-span-1 lg:col-span-2">
+                    <Label>Napomena</Label>
+                    <textarea
+                      value={editNapomena}
+                      onChange={(e) => setEditNapomena(e.target.value)}
+                      className="w-full rounded border-[1.5px] border-gray-300 bg-[#F9FAFB] py-2 px-5 font-medium outline-none transition focus:border-brand-300 active:border-brand-300 disabled:cursor-default disabled:bg-whiter dark:border-gray-700 dark:bg-[#101828] dark:text-white/90 dark:focus:border-brand-800"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={closeEditModal}
+                    type="button"
+                  >
+                    Otkaži
+                  </Button>
+                  <Button type="submit">
+                    Sačuvaj
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 } 

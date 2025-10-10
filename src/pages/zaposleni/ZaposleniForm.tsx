@@ -5,6 +5,7 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
+import Checkbox from "../../components/form/input/Checkbox";
 
 interface ZaposleniFormProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function ZaposleniForm({ isOpen, onClose, onSave, initialData }: 
   const [formData, setFormData] = React.useState({
     imePrezime: "",
     prvaPomoc: "",
+    osiguranje: false,
   });
 
   // Add state for dropdowns
@@ -47,12 +49,14 @@ export default function ZaposleniForm({ isOpen, onClose, onSave, initialData }: 
       setFormData({
         imePrezime: initialData.imePrezime || "",
         prvaPomoc: initialData.prvaPomoc || "",
+        osiguranje: initialData.osiguranje || false,
       });
     } else {
       // Reset form when no initial data
       setFormData({
         imePrezime: "",
         prvaPomoc: "",
+        osiguranje: false,
       });
     }
   }, [initialData]);
@@ -129,6 +133,20 @@ export default function ZaposleniForm({ isOpen, onClose, onSave, initialData }: 
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          <div className="col-span-1">
+            <div className="flex items-center gap-2 mt-2">
+              <Checkbox
+                checked={formData.osiguranje}
+                onChange={(checked) => setFormData({ ...formData, osiguranje: checked })}
+                className="w-4 h-4"
+                id="osiguranje"
+              />
+              <label className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer" htmlFor="osiguranje">
+                Osiguranje od posledica povrede na radu i prof. bolesti
+              </label>
             </div>
           </div>
         </div>

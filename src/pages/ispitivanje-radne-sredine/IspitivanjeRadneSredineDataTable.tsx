@@ -14,6 +14,12 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import NovoIspitivanjeForm from "./NovoIspitivanjeForm";
 import FilterDropdown from "../../components/ui/dropdown/FilterDropdown";
 import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
+import { useModal } from "../../hooks/useModal";
+import { Modal } from "../../components/ui/modal";
+import Button from "../../components/ui/button/Button";
+import Label from "../../components/form/Label";
+import Slider from "../../components/ui/Slider";
+import Checkbox from "../../components/form/input/Checkbox";
 
 interface Column {
   key: string;
@@ -34,6 +40,14 @@ interface DataTableProps {
   data: IspitivanjeData[];
   columns: Column[];
   onDeleteClick?: (item: IspitivanjeData) => void;
+}
+
+interface TipIspitivanjaData {
+  key: string;
+  naziv: string;
+  selected: boolean;
+  ispravno: boolean;
+  datumIspitivanja: Date | null;
 }
 
 const formatDate = (dateStr: string | null | undefined): string => {
@@ -61,6 +75,9 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [isNovoFormOpen, setIsNovoFormOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<string>("");
+  const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
+  const [editingItem, setEditingItem] = useState<IspitivanjeData | null>(null);
+  const [editTipoviIspitivanja, setEditTipoviIspitivanja] = useState<TipIspitivanjaData[]>([]);
   
   // Get unique values for dropdowns
   const uniqueLokacije = useMemo(() => {
@@ -190,6 +207,94 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
     console.log('Novo ispitivanje data:', formData, 'for column:', selectedColumn);
     // Handle the form data here
     setIsNovoFormOpen(false);
+  };
+
+  const handleEditClick = (item: IspitivanjeData) => {
+    setEditingItem(item);
+    
+    // Initialize the testing types based on the item data
+    const tipoviIspitivanjaOptions = [
+      {
+        key: 'mikroklimaLetnja',
+        naziv: 'Ispitivanje Mikroklime letnje',
+      },
+      {
+        key: 'mikroklimaZimska',
+        naziv: 'Ispitivanje Mikroklime zimske',
+      },
+      {
+        key: 'fizickeStetnosti',
+        naziv: 'Ispitivanje Fizičkih štetnosti',
+      },
+      {
+        key: 'hemijskeStetnosti',
+        naziv: 'Ispitivanje Hemijskih štetnosti',
+      },
+      {
+        key: 'osvetljenje',
+        naziv: 'Ispitivanje Osvetljenja',
+      }
+    ];
+
+    const initializedTipovi = tipoviIspitivanjaOptions.map(tipOption => {
+      const tipData = item[tipOption.key];
+      if (tipData && typeof tipData === 'object' && tipData.prethodnoIspitivanje) {
+        return {
+          key: tipOption.key,
+          naziv: tipOption.naziv,
+          selected: true,
+          ispravno: true, // Default to true, can be adjusted based on your data structure
+          datumIspitivanja: tipData.prethodnoIspitivanje ? new Date(tipData.prethodnoIspitivanje) : null
+        };
+      }
+      return {
+        key: tipOption.key,
+        naziv: tipOption.naziv,
+        selected: false,
+        ispravno: true,
+        datumIspitivanja: null
+      };
+    });
+
+    setEditTipoviIspitivanja(initializedTipovi);
+    openEditModal();
+  };
+
+  const handleEditTipToggle = (key: string) => {
+    setEditTipoviIspitivanja(prev => prev.map(tip => 
+      tip.key === key ? { ...tip, selected: !tip.selected } : tip
+    ));
+  };
+
+  const handleEditTipStatusChange = (key: string, ispravno: boolean) => {
+    setEditTipoviIspitivanja(prev => prev.map(tip => 
+      tip.key === key ? { ...tip, ispravno } : tip
+    ));
+  };
+
+  const handleEditTipDateChange = (key: string, datum: Date | null) => {
+    setEditTipoviIspitivanja(prev => prev.map(tip => 
+      tip.key === key ? { ...tip, datumIspitivanja: datum } : tip
+    ));
+  };
+
+  const handleEditSelectAll = () => {
+    setEditTipoviIspitivanja(prev => prev.map(tip => ({ ...tip, selected: true })));
+  };
+
+  const handleEditSelectNone = () => {
+    setEditTipoviIspitivanja(prev => prev.map(tip => ({ ...tip, selected: false })));
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingItem) {
+      const selectedTipovi = editTipoviIspitivanja.filter(tip => tip.selected);
+      console.log("Updating item:", editingItem.id, "with tipovi:", selectedTipovi);
+      // You would typically update the data here
+    }
+    closeEditModal();
   };
 
   const getFormTitle = (columnKey: string) => {
@@ -339,18 +444,51 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
-                          <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
-                            <LightbulbIcon className="w-5 h-5" />
-                          </button>
-                          <button className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]">
-                            <EditButtonIcon className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => onDeleteClick?.(item)}
-                            className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                          >
-                            <DeleteButtonIcon className="w-4 h-4" />
-                          </button>
+                          <div className="relative inline-block group">
+                            <button className="text-gray-500 hover:text-[#FF9D00] dark:text-gray-400 dark:hover:text-[#FF9D00]">
+                              <LightbulbIcon className="w-5 h-5" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Preporuke
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="relative inline-block group">
+                            <button 
+                              className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                              onClick={() => handleEditClick(item)}
+                            >
+                              <EditButtonIcon className="w-4 h-4" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Izmeni
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="relative inline-block group">
+                            <button 
+                              onClick={() => onDeleteClick?.(item)}
+                              className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                            >
+                              <DeleteButtonIcon className="w-4 h-4" />
+                            </button>
+                            <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
+                              <div className="relative">
+                                <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
+                                  Obriši
+                                </div>
+                                <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -382,6 +520,172 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
           onSave={handleNovoIspitivanjeSave}
           title={getFormTitle(selectedColumn)}
         />
+
+        <Modal
+          isOpen={isEditOpen}
+          onClose={closeEditModal}
+          className="max-w-[900px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+        >
+          <div className="flex flex-col h-full">
+            <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Izmena Ispitivanja Radne Sredine</h2>
+            </div>
+            {editingItem && (
+              <form onSubmit={handleEditSave} className="flex flex-col flex-1 min-h-0">
+                <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="col-span-1">
+                      <Label>Lokacija *</Label>
+                      <input
+                        type="text"
+                        value={editingItem.nazivLokacije}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div className="col-span-1">
+                      <Label>Broj mernih mesta *</Label>
+                      <input
+                        type="text"
+                        value={editingItem.brojMernihMesta}
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div className="col-span-1">
+                      <Label>Interval ispitivanja (meseci)</Label>
+                      <input
+                        type="text"
+                        value="36"
+                        readOnly
+                        className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tipovi ispitivanja selection */}
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h5 className="text-lg font-medium text-gray-800 dark:text-white">
+                        Tipovi ispitivanja *
+                      </h5>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleEditSelectAll}
+                          className="text-[13px] px-3 py-1"
+                        >
+                          Izaberi sve
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleEditSelectNone}
+                          className="text-[13px] px-3 py-1"
+                        >
+                          Poništi sve
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {editTipoviIspitivanja.map((tip) => (
+                        <div
+                          key={tip.key}
+                          className={`flex items-center p-3 border rounded-lg transition-colors cursor-pointer ${
+                            tip.selected
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                          }`}
+                          onClick={() => handleEditTipToggle(tip.key)}
+                        >
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={tip.selected}
+                              onChange={() => handleEditTipToggle(tip.key)}
+                              className="mr-10"
+                            />
+                          </div>
+                          <div className="flex-1 ml-2">
+                            <div className="text-sm font-medium text-gray-800 dark:text-white">
+                              {tip.naziv}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Individual testing type configurations */}
+                  {editTipoviIspitivanja.filter(tip => tip.selected).length > 0 && (
+                    <div className="mt-6">
+                      <h5 className="text-lg font-medium text-gray-800 dark:text-white mb-4">
+                        Rezultati ispitivanja
+                      </h5>
+                      <div className="space-y-4">
+                        {editTipoviIspitivanja.filter(tip => tip.selected).map((tip) => (
+                          <div
+                            key={tip.key}
+                            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                          >
+                            <h6 className="font-medium text-gray-800 dark:text-white mb-3">
+                              {tip.naziv}
+                            </h6>
+                            <div className="space-y-4">
+                              <div>
+                                <Slider
+                                  label="Status ispitivanja"
+                                  optionOne="Ispravno"
+                                  optionTwo="Neispravno"
+                                  value={tip.ispravno}
+                                  onChange={(value) => handleEditTipStatusChange(tip.key, value)}
+                                  size="full"
+                                  name={`slider-edit-${tip.key.replace(/[^a-zA-Z0-9]/g, '')}`}
+                                  showRedWhenFalse={true}
+                                />
+                              </div>
+
+                              <div>
+                                <Label>Datum ispitivanja *</Label>
+                                <CustomDatePicker
+                                  value={tip.datumIspitivanja}
+                                  onChange={(date) => handleEditTipDateChange(tip.key, date)}
+                                  placeholder="Izaberi datum ispitivanja"
+                                  required
+                                  className="!bg-white dark:!bg-white"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-3 pb-5 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={closeEditModal}
+                      type="button"
+                    >
+                      Otkaži
+                    </Button>
+                    <Button type="submit">
+                      Sačuvaj
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        </Modal>
       </>
     );
 }

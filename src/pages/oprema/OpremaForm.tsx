@@ -13,9 +13,8 @@ interface OpremaFormProps {
 
 export default function OpremaForm({ isOpen, onClose, onSave, initialData }: OpremaFormProps) {
   const [formData, setFormData] = React.useState({
-    nazivLZS: "",
+    nazivOpreme: "",
     vrstaOpreme: "",
-    standard: "",
     fabrickBroj: "",
     inventarniBroj: "",
     lokacija: "",
@@ -28,22 +27,20 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
   useEffect(() => {
     if (initialData) {
       setFormData({
-        nazivLZS: initialData.nazivLZS || "",
+        nazivOpreme: initialData.nazivOpreme || "",
         vrstaOpreme: initialData.vrstaOpreme || "",
-        standard: initialData.standard || "",
         fabrickBroj: initialData.fabrickBroj || "",
         inventarniBroj: initialData.inventarniBroj || "",
         lokacija: initialData.lokacija || "",
         godinaProizvodnje: initialData.godinaProizvodnje || new Date().getFullYear(),
-        intervalPregleda: initialData.intervalPregleda || 36,
+        intervalPregleda: 36,
         napomena: initialData.napomena || ""
       });
     } else {
       // Reset form when no initial data
       setFormData({
-        nazivLZS: "",
+        nazivOpreme: "",
         vrstaOpreme: "",
-        standard: "",
         fabrickBroj: "",
         inventarniBroj: "",
         lokacija: "",
@@ -105,7 +102,7 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nazivLZS || !formData.vrstaOpreme || !formData.standard || !formData.lokacija || !formData.intervalPregleda) {
+    if (!formData.nazivOpreme || !formData.vrstaOpreme || !formData.lokacija) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
@@ -129,11 +126,11 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
               <div className="col-span-1">
-                <Label>Naziv LZS *</Label>
+                <Label>Naziv opreme *</Label>
                 <Input 
                   type="text" 
-                  value={formData.nazivLZS}
-                  onChange={(e) => setFormData({...formData, nazivLZS: e.target.value})}
+                  value={formData.nazivOpreme}
+                  onChange={(e) => setFormData({...formData, nazivOpreme: e.target.value})}
                   className="bg-[#F9FAFB] dark:bg-[#101828]"
                   required
                 />
@@ -178,17 +175,6 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
                     </div>
                   )}
                 </div>
-              </div>
-
-              <div className="col-span-1">
-                <Label>Standard *</Label>
-                <Input 
-                  type="text" 
-                  value={formData.standard}
-                  onChange={(e) => setFormData({...formData, standard: e.target.value})}
-                  className="bg-[#F9FAFB] dark:bg-[#101828]"
-                  required
-                />
               </div>
 
               <div className="col-span-1">

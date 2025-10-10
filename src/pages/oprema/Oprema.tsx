@@ -10,52 +10,45 @@ const opremaData = [
   {
     id: 1,
     redniBroj: 1,
-    nazivLZS: "Viljuškar",
+    nazivOpreme: "Viljuškar",
     vrstaOpreme: "Oprema za rad",
     fabrickBroj: "FB123456",
     inventarniBroj: "INV789",
     lokacija: "Skladište A",
     godinaProizvodnje: 2020,
-    intervalPregleda: 6,
-    napomena: "Redovno održavanje",
-    iskljucenaIzPracenja: false,
-    standard: "EN ISO 3691-1"
+    intervalPregleda: 36,
+    napomena: "Redovno održavanje"
   },
   {
     id: 2,
     redniBroj: 2,
-    nazivLZS: "Kran",
+    nazivOpreme: "Kran",
     vrstaOpreme: "Oprema za rad",
     fabrickBroj: "FB789012",
     inventarniBroj: "INV456",
     lokacija: "Proizvodna hala 1",
     godinaProizvodnje: 2019,
-    intervalPregleda: 12,
-    napomena: "Potrebno zamena delova",
-    iskljucenaIzPracenja: false,
-    standard: "EN 13001"
+    intervalPregleda: 36,
+    napomena: "Potrebno zamena delova"
   },
   {
     id: 3,
     redniBroj: 3,
-    nazivLZS: "Transformator",
+    nazivOpreme: "Transformator",
     vrstaOpreme: "Elektro i gromobranska instalacija",
     fabrickBroj: "FB345678",
     inventarniBroj: "INV123",
     lokacija: "Lokacija 1",
     godinaProizvodnje: 2021,
-    intervalPregleda: 24,
-    napomena: "Godišnji pregled",
-    iskljucenaIzPracenja: false,
-    standard: "IEC 60076"
+    intervalPregleda: 36,
+    napomena: "Godišnji pregled"
   }
 ];
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "nazivLZS", label: "Naziv LZS", sortable: true },
+  { key: "nazivOpreme", label: "Naziv opreme", sortable: true },
   { key: "vrstaOpreme", label: "Vrsta opreme", sortable: true },
-  { key: "standard", label: "Standard", sortable: true },
   { key: "lokacija", label: "Lokacija", sortable: true },
   { key: "fabrickInventarniBroj", label: "Fabrički/Inventarni broj", sortable: true },
   { key: "godinaProizvodnje", label: "Godina proizvodnje", sortable: true },
@@ -105,18 +98,16 @@ const Oprema: React.FC = () => {
     console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
     
     if (editingItem) {
-      // Update existing item - exclude interval from updates
+      // Update existing item
       const updatedItem = {
         ...editingItem,
-        nazivLZS: newData.nazivLZS,
+        nazivOpreme: newData.nazivOpreme,
         vrstaOpreme: newData.vrstaOpreme,
-        standard: newData.standard,
         fabrickBroj: newData.fabrickBroj,
         inventarniBroj: newData.inventarniBroj,
         lokacija: newData.lokacija,
         godinaProizvodnje: newData.godinaProizvodnje,
-        napomena: newData.napomena,
-        // intervalPregleda remains unchanged
+        napomena: newData.napomena
       };
       
       setData(data.map(item => 
@@ -128,16 +119,14 @@ const Oprema: React.FC = () => {
       const newItem = {
         id: data.length + 1,
         redniBroj: data.length + 1,
-        nazivLZS: newData.nazivLZS,
+        nazivOpreme: newData.nazivOpreme,
         vrstaOpreme: newData.vrstaOpreme,
-        standard: newData.standard,
         fabrickBroj: newData.fabrickBroj,
         inventarniBroj: newData.inventarniBroj,
         lokacija: newData.lokacija,
         godinaProizvodnje: newData.godinaProizvodnje,
-        intervalPregleda: newData.intervalPregleda,
-        napomena: newData.napomena,
-        iskljucenaIzPracenja: false
+        intervalPregleda: 36,
+        napomena: newData.napomena
       };
       setData([...data, newItem]);
     }
@@ -178,7 +167,7 @@ const Oprema: React.FC = () => {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Oprema - LZS
+              Oprema
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton

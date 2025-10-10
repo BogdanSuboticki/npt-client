@@ -19,33 +19,28 @@ interface Column {
   sortable: boolean;
 }
 
-interface OpremaData {
+interface LZSData {
   id: number;
   redniBroj: number;
-  nazivOpreme: string;
-  vrstaOpreme: string;
-  fabrickBroj: string;
-  inventarniBroj: string;
-  lokacija: string;
-  godinaProizvodnje: number;
-  intervalPregleda: number;
+  nazivLZS: string;
+  standard: string;
   napomena: string;
   [key: string]: any;
 }
 
 interface DataTableTwoProps {
-  data: OpremaData[];
+  data: LZSData[];
   columns: Column[];
-  onEditClick?: (item: OpremaData) => void;
-  onDeleteClick?: (item: OpremaData) => void;
+  onEditClick?: (item: LZSData) => void;
+  onDeleteClick?: (item: LZSData) => void;
 }
 
-export default function OpremaDataTable({ data: initialData, columns, onEditClick, onDeleteClick }: DataTableTwoProps) {
+export default function LZSDataTable({ data: initialData, columns, onEditClick, onDeleteClick }: DataTableTwoProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [data, setData] = useState<OpremaData[]>(initialData);
+  const [data, setData] = useState<LZSData[]>(initialData);
   
   // Update local data when parent data changes
   useEffect(() => {
@@ -53,61 +48,36 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
   }, [initialData]);
   
   // Get unique values for dropdowns
-  const uniqueNaziviOpreme = useMemo(() => {
+  const uniqueNaziviLZS = useMemo(() => {
     try {
-      return Array.from(new Set(data?.map(item => item.nazivOpreme) || []));
+      return Array.from(new Set(data?.map(item => item.nazivLZS) || []));
     } catch (error) {
-      console.error('Error getting unique equipment names:', error);
+      console.error('Error getting unique LZS names:', error);
       return [];
     }
   }, [data]);
 
-  const uniqueVrsteOpreme = useMemo(() => {
+  const uniqueStandards = useMemo(() => {
     try {
-      return Array.from(new Set(data?.map(item => item.vrstaOpreme) || []));
+      return Array.from(new Set(data?.map(item => item.standard) || []));
     } catch (error) {
-      console.error('Error getting unique equipment types:', error);
-      return [];
-    }
-  }, [data]);
-
-  const uniqueLokacije = useMemo(() => {
-    try {
-      return Array.from(new Set(data?.map(item => item.lokacija) || []));
-    } catch (error) {
-      console.error('Error getting unique locations:', error);
-      return [];
-    }
-  }, [data]);
-
-  const uniqueYears = useMemo(() => {
-    try {
-      return Array.from(new Set(data?.map(item => item.godinaProizvodnje) || [])).map(String);
-    } catch (error) {
-      console.error('Error getting unique years:', error);
+      console.error('Error getting unique standards:', error);
       return [];
     }
   }, [data]);
 
   // Set all as selected by default
-  const [selectedNazivOpreme, setSelectedNazivOpreme] = useState<string[]>(uniqueNaziviOpreme);
-  const [selectedVrstaOpreme, setSelectedVrstaOpreme] = useState<string[]>(uniqueVrsteOpreme);
-  const [selectedLokacije, setSelectedLokacije] = useState<string[]>(uniqueLokacije);
-  const [selectedYears, setSelectedYears] = useState<string[]>(uniqueYears);
+  const [selectedNaziviLZS, setSelectedNaziviLZS] = useState<string[]>(uniqueNaziviLZS);
+  const [selectedStandards, setSelectedStandards] = useState<string[]>(uniqueStandards);
 
   // Update selected options if unique values change
   useEffect(() => {
-    setSelectedNazivOpreme(uniqueNaziviOpreme);
-  }, [uniqueNaziviOpreme]);
+    setSelectedNaziviLZS(uniqueNaziviLZS);
+  }, [uniqueNaziviLZS]);
+  
   useEffect(() => {
-    setSelectedVrstaOpreme(uniqueVrsteOpreme);
-  }, [uniqueVrsteOpreme]);
-  useEffect(() => {
-    setSelectedLokacije(uniqueLokacije);
-  }, [uniqueLokacije]);
-  useEffect(() => {
-    setSelectedYears(uniqueYears);
-  }, [uniqueYears]);
+    setSelectedStandards(uniqueStandards);
+  }, [uniqueStandards]);
 
   // Safe data processing
   const filteredAndSortedData = useMemo(() => {
@@ -117,12 +87,10 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
       return data
         .filter((item) => {
           try {
-            const matchesNaziv = selectedNazivOpreme.length === 0 || selectedNazivOpreme.includes(item.nazivOpreme);
-            const matchesVrsta = selectedVrstaOpreme.length === 0 || selectedVrstaOpreme.includes(item.vrstaOpreme);
-            const matchesLokacija = selectedLokacije.length === 0 || selectedLokacije.includes(item.lokacija);
-            const matchesGodina = selectedYears.length === 0 || selectedYears.includes(String(item.godinaProizvodnje));
+            const matchesNaziv = selectedNaziviLZS.length === 0 || selectedNaziviLZS.includes(item.nazivLZS);
+            const matchesStandard = selectedStandards.length === 0 || selectedStandards.includes(item.standard);
 
-            return matchesNaziv && matchesVrsta && matchesLokacija && matchesGodina;
+            return matchesNaziv && matchesStandard;
           } catch (error) {
             console.error('Error filtering item:', error);
             return false;
@@ -149,7 +117,7 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
       console.error('Error processing data:', error);
       return [];
     }
-  }, [data, sortKey, sortOrder, selectedNazivOpreme, selectedVrstaOpreme, selectedLokacije, selectedYears]);
+  }, [data, sortKey, sortOrder, selectedNaziviLZS, selectedStandards]);
 
   const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -171,7 +139,6 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentData = filteredAndSortedData.slice(startIndex, endIndex);
 
-
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939]">
       <div className="flex flex-col gap-4 px-4 py-4">
@@ -191,28 +158,16 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
             {/* Filters */}
             <div className="flex flex-col lg:flex-row gap-2">
               <FilterDropdown
-                label="Naziv opreme"
-                options={uniqueNaziviOpreme}
-                selectedOptions={selectedNazivOpreme}
-                onSelectionChange={setSelectedNazivOpreme}
+                label="Naziv LZS"
+                options={uniqueNaziviLZS}
+                selectedOptions={selectedNaziviLZS}
+                onSelectionChange={setSelectedNaziviLZS}
               />
               <FilterDropdown
-                label="Vrsta opreme"
-                options={uniqueVrsteOpreme}
-                selectedOptions={selectedVrstaOpreme}
-                onSelectionChange={setSelectedVrstaOpreme}
-              />
-              <FilterDropdown
-                label="Lokacija"
-                options={uniqueLokacije}
-                selectedOptions={selectedLokacije}
-                onSelectionChange={setSelectedLokacije}
-              />
-              <FilterDropdown
-                label="Godina proizvodnje"
-                options={uniqueYears}
-                selectedOptions={selectedYears}
-                onSelectionChange={setSelectedYears}
+                label="Standard"
+                options={uniqueStandards}
+                selectedOptions={selectedStandards}
+                onSelectionChange={setSelectedStandards}
               />
             </div>
           </div>
@@ -299,11 +254,7 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
                         index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                       }`}
                     >
-                      {key === 'fabrickInventarniBroj' ? (
-                        <span>{item.fabrickBroj}<strong className="font-bold">/</strong>{item.inventarniBroj}</span>
-                      ) : (
-                        item[key]
-                      )}
+                      {item[key]}
                     </TableCell>
                   ))}
                   <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
@@ -365,4 +316,5 @@ export default function OpremaDataTable({ data: initialData, columns, onEditClic
       </div>
     </div>
   );
-} 
+}
+

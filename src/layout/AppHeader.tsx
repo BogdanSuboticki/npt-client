@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
+import { useCompanySelection } from "../context/CompanyContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
@@ -16,6 +17,7 @@ const AppHeader: React.FC = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { selectCompany, selectedCompany } = useCompanySelection();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -44,10 +46,12 @@ const AppHeader: React.FC = () => {
   const handleSearchInputChange = (value: string) => {
     setSearchValue(value);
     setShowFullList(true); // Always show the full list when typing
+    selectCompany(null);
   };
 
   const handleClearSearch = () => {
     setSearchValue('');
+    selectCompany(null);
     // Don't change showFullList state - keep dropdown open
   };
 
@@ -70,8 +74,19 @@ const AppHeader: React.FC = () => {
       // When closing mobile search, clear search and hide list
       setShowMobileSearch(false);
       setShowFullList(false);
-      setSearchValue('');
+      if (selectedCompany) {
+        setSearchValue(selectedCompany.naziv);
+      } else {
+        setSearchValue('');
+      }
     }
+  };
+
+  const handleCompanySelect = (company: Company) => {
+    setSearchValue(company.naziv);
+    selectCompany(company);
+    setShowFullList(false);
+    setShowMobileSearch(false);
   };
 
 
@@ -261,11 +276,7 @@ const AppHeader: React.FC = () => {
                             <div
                               key={company.id}
                               className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                              onClick={() => {
-                                setSearchValue(company.naziv);
-                                setShowFullList(false);
-                                setShowMobileSearch(false);
-                              }}
+                              onClick={() => handleCompanySelect(company)}
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium text-gray-900 dark:text-white">
@@ -390,10 +401,7 @@ const AppHeader: React.FC = () => {
                               <div
                                 key={company.id}
                                 className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                                 onClick={() => {
-                                   setSearchValue(company.naziv);
-                                   setShowFullList(false);
-                                 }}
+                                 onClick={() => handleCompanySelect(company)}
                               >
                                 <div className="flex flex-col">
                                   <span className="font-medium text-gray-900 dark:text-white">

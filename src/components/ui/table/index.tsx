@@ -31,6 +31,7 @@ interface TableCellProps {
   isHeader?: boolean; // If true, renders as <th>, otherwise <td>
   className?: string; // Optional className for styling
   rowSpan?: number; // Optional rowSpan attribute
+  colSpan?: number; // Optional colSpan attribute
 }
 
 // Table Component
@@ -59,9 +60,14 @@ const TableCell: React.FC<TableCellProps> = ({
   isHeader = false,
   className,
   rowSpan,
+  colSpan,
 }) => {
   const CellTag = isHeader ? "th" : "td";
-  return <CellTag className={` ${className}`} rowSpan={rowSpan}>{children}</CellTag>;
+  return (
+    <CellTag className={` ${className}`} rowSpan={rowSpan} colSpan={colSpan}>
+      {children}
+    </CellTag>
+  );
 };
 
 export { Table, TableHeader, TableBody, TableRow, TableCell };

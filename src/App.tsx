@@ -3,6 +3,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { srLatn } from "date-fns/locale";
 import { UserProvider } from "./context/UserContext";
+import { CompanyProvider } from "./context/CompanyContext";
 import Ecommerce from "./pages/Dashboard/Ecommerce";
 import Stocks from "./pages/Dashboard/Stocks";
 import Crm from "./pages/Dashboard/Crm";
@@ -91,12 +92,14 @@ import Firme from "./pages/firme/page";
 import ZaposleniPage from "./pages/zaposleni/page";
 import AngazovanjaPage from "./pages/angazovanja/page";
 import ZaduzenjaLzoPage from "./pages/zaduzenja-lzo/page";
+import RokoviPage from "./pages/rokovi/page";
 
 export default function App() {
   return (
     <UserProvider>
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={srLatn}>
-        <Router>
+      <CompanyProvider>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={srLatn}>
+          <Router>
           <ScrollToTop />
           <Routes>
           {/* Dashboard Layout */}
@@ -113,6 +116,7 @@ export default function App() {
             <Route path="/bezbednosne-provere" element={<BezbednosneProverePage />} />
             <Route path="/povrede" element={<PovredePage />} />
             <Route path="/pregledi-opreme" element={<PreglediOpremePage />} />
+            <Route path="/rokovi" element={<RokoviPage />} />
             <Route path="/firme" element={<Firme />} />
             <Route path="/zaposleni" element={<ZaposleniPage />} />
             <Route path="/angazovanja" element={<AngazovanjaPage />} />
@@ -213,6 +217,7 @@ export default function App() {
         </Routes>
       </Router>
     </LocalizationProvider>
+      </CompanyProvider>
     </UserProvider>
   );
 }

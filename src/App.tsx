@@ -93,6 +93,7 @@ import ZaposleniPage from "./pages/zaposleni/page";
 import AngazovanjaPage from "./pages/angazovanja/page";
 import ZaduzenjaLzoPage from "./pages/zaduzenja-lzo/page";
 import RokoviPage from "./pages/rokovi/page";
+import DnevniIzvestajiPage from "./pages/dnevni-izvestaji/page";
 
 export default function App() {
   return (
@@ -121,6 +122,7 @@ export default function App() {
             <Route path="/zaposleni" element={<ZaposleniPage />} />
             <Route path="/angazovanja" element={<AngazovanjaPage />} />
             <Route path="/zaduzenja-lzo" element={<ZaduzenjaLzoPage />} />
+            <Route path="/dnevni-izvestaji" element={<DnevniIzvestajiPage />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />

@@ -155,6 +155,11 @@ const AppHeader: React.FC = () => {
         return;
       }
       
+      // Don't close if clicking on a company item in the dropdown
+      if (target.closest('[data-company-item]')) {
+        return;
+      }
+      
       if (fullListRef.current && !fullListRef.current.contains(event.target as Node)) {
         setShowFullList(false);
       }
@@ -165,11 +170,11 @@ const AppHeader: React.FC = () => {
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [showFullList, showMobileSearch]);
 
@@ -275,8 +280,16 @@ const AppHeader: React.FC = () => {
                           {companies.map((company) => (
                             <div
                               key={company.id}
+                              data-company-item
                               className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                              onClick={() => handleCompanySelect(company)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleCompanySelect(company);
+                              }}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                              }}
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium text-gray-900 dark:text-white">
@@ -400,8 +413,16 @@ const AppHeader: React.FC = () => {
                             {companies.map((company) => (
                               <div
                                 key={company.id}
+                                data-company-item
                                 className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                                 onClick={() => handleCompanySelect(company)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleCompanySelect(company);
+                                }}
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                }}
                               >
                                 <div className="flex flex-col">
                                   <span className="font-medium text-gray-900 dark:text-white">

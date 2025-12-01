@@ -150,11 +150,6 @@ const DnevniIzvestajiPage: React.FC = () => {
     null
   );
 
-  const handleDeleteClick = (item: DnevniIzvestajiData) => {
-    setItemToDelete(item);
-    setShowDeleteModal(true);
-  };
-
   const handleDeleteConfirm = () => {
     if (itemToDelete) {
       setData(data.filter((record) => record.id !== itemToDelete.id));

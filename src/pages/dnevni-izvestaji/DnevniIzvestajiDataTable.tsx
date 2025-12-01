@@ -60,14 +60,9 @@ interface DataTableProps {
 
 export default function DnevniIzvestajiDataTable({
   data: initialData,
-  columns,
+  columns: _columns,
   selectedCompany,
 }: DataTableProps) {
-  const [sortKey, setSortKey] = useState<string>(
-    columns.find((col) => col.sortable)?.key || columns[0].key
-  );
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  
   // State to track answers for each question
   const [answers, setAnswers] = useState<Record<string, boolean | null>>({});
   // State to track napomena values
@@ -117,44 +112,8 @@ export default function DnevniIzvestajiDataTable({
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const filteredAndSortedData = useMemo(() => {
-    return initialData
-      .sort((a, b) => {
-        if (sortKey === "datum") {
-          const aDate =
-            a[sortKey] instanceof Date ? a[sortKey] : new Date(a[sortKey]);
-          const bDate =
-            b[sortKey] instanceof Date ? b[sortKey] : new Date(b[sortKey]);
-          return sortOrder === "asc"
-            ? aDate.getTime() - bDate.getTime()
-            : bDate.getTime() - aDate.getTime();
-        }
-
-        if (typeof a[sortKey] === "boolean" && typeof b[sortKey] === "boolean") {
-          return sortOrder === "asc"
-            ? Number(a[sortKey]) - Number(b[sortKey])
-            : Number(b[sortKey]) - Number(a[sortKey]);
-        }
-
-        if (typeof a[sortKey] === "number" && typeof b[sortKey] === "number") {
-          return sortOrder === "asc"
-            ? a[sortKey] - b[sortKey]
-            : b[sortKey] - a[sortKey];
-        }
-
-        return sortOrder === "asc"
-          ? String(a[sortKey]).localeCompare(String(b[sortKey]))
-          :           String(b[sortKey]).localeCompare(String(a[sortKey]));
-      });
-  }, [sortKey, sortOrder, initialData]);
-
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortOrder("asc");
-    }
-  };
+    return initialData;
+  }, [initialData]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -197,7 +156,7 @@ export default function DnevniIzvestajiDataTable({
     setOpenDropdowns(prev => ({ ...prev, [questionKey]: false }));
   };
 
-  const handleFormSave = (questionKey: string, data: any) => {
+  const handleFormSave = (questionKey: string, _data: any) => {
     // Mark form as saved
     setSavedForms(prev => ({ ...prev, [questionKey]: true }));
     setOpenForm({ questionKey: "", isOpen: false });
@@ -212,10 +171,6 @@ export default function DnevniIzvestajiDataTable({
       ...prev,
       [questionKey]: value
     }));
-  };
-
-  const handlePersonNameChange = (value: string) => {
-    setPersonName(value);
   };
 
   const questions = [
@@ -289,7 +244,7 @@ export default function DnevniIzvestajiDataTable({
       firma: string;
       datum: Date;
       pitanje: string;
-      odgovor: boolean | null;
+      odgovor: boolean | null | string;
       napomena: string;
       napomenaBZR: string;
       isQuestion: boolean;

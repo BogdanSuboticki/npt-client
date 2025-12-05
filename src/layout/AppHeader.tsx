@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { useCompanySelection } from "../context/CompanyContext";
+import { useUser } from "../context/UserContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
@@ -18,6 +19,10 @@ const AppHeader: React.FC = () => {
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const { selectCompany, selectedCompany } = useCompanySelection();
+  const { userType } = useUser();
+  
+  const isAdmin = userType === 'admin' || userType === 'super-admin';
+  const searchPlaceholder = isAdmin ? "Unesite naziv preduzeća..." : "Unesite naziv firme...";
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -231,7 +236,7 @@ const AppHeader: React.FC = () => {
                  <input
                    id="mobile-search-input"
                    type="text"
-                   placeholder="Unesite naziv firme..."
+                   placeholder={searchPlaceholder}
                    value={searchValue}
                    onChange={(e) => handleSearchInputChange(e.target.value)}
                    onClick={() => setShowFullList(true)}
@@ -373,7 +378,7 @@ const AppHeader: React.FC = () => {
             <form>
                <SearchInput
                  ref={inputRef}
-                 placeholder="Unesite naziv firme..."
+                 placeholder={searchPlaceholder}
                  className="xl:w-[430px] !bg-[#F9FAFB] dark:!bg-[#101828]"
                  buttonContent={
                    <>

@@ -1,20 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DnevniIzvestajiDataTable, {
   DnevniIzvestajiData,
+  DataTableHandle,
 } from "./DnevniIzvestajiDataTable";
+import DnevniIzvestajiList from "./DnevniIzvestajiList";
 import Button from "../../components/ui/button/Button";
-import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { useCompanySelection } from "../../context/CompanyContext";
+import { useUser } from "../../context/UserContext";
+import { ReactComponent as PrintIcon } from '../../icons/Print.svg?react';
+import { ReactComponent as DownloadIcon } from '../../icons/download.svg?react';
 
 // Sample data for the table
 const dnevniIzvestajiData: DnevniIzvestajiData[] = [
   {
     id: 1,
-    firma: "MR ENGINES BEOGRAD",
-    datum: new Date("2025-09-29"),
+    firma: "Universal Logistics",
+    datum: new Date("2025-01-15"),
     svakodnevnaKontrolaBZR: true,
     osobaZaSaradnju: "Marko Petrović",
     promeneAPR: false,
@@ -41,6 +45,41 @@ const dnevniIzvestajiData: DnevniIzvestajiData[] = [
     napomenaPotencijalniRizici: "",
     napomena: "",
     napomenaBZR: "",
+    pregledan: false,
+    napomenaAdmin: "",
+  },
+  {
+    id: 2,
+    firma: "Universal Logistics",
+    datum: new Date("2025-01-16"),
+    svakodnevnaKontrolaBZR: true,
+    osobaZaSaradnju: "Marko Petrović",
+    promeneAPR: true,
+    napomenaPromeneAPR: "Izmena u APR-u za novi projekat.",
+    promenaPoslovaRadnihZadataka: false,
+    napomenaPromenaPoslova: "",
+    promenaRadnihMestaZaposlenih: false,
+    formaPromenaRadnihMesta: null,
+    promenaRadneSnage: false,
+    formaPromenaRadneSnage: null,
+    novaSredstvaZaRad: false,
+    formaNovaSredstvaZaRad: null,
+    stazeZaKomunikacijuBezbedne: true,
+    napomenaStazeZaKomunikaciju: "",
+    planiranePopravkeRemont: false,
+    napomenaPlaniranePopravke: "",
+    koriscenjeLZS: false,
+    napomenaKoriscenjeLZS: "",
+    novaGradilistaNoviPogoni: false,
+    napomenaNovaGradilista: "",
+    povredaNaRadu: false,
+    formaPovredaNaRadu: null,
+    potencijalniRizici: false,
+    napomenaPotencijalniRizici: "",
+    napomena: "",
+    napomenaBZR: "",
+    pregledan: true,
+    napomenaAdmin: "Sve u redu.",
   },
 ];
 
@@ -144,11 +183,24 @@ class ErrorBoundary extends React.Component<
 
 const DnevniIzvestajiPage: React.FC = () => {
   const { selectedCompany } = useCompanySelection();
+  const { userType } = useUser();
   const [data, setData] = useState<DnevniIzvestajiData[]>(dnevniIzvestajiData);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<DnevniIzvestajiData | null>(
     null
   );
+  const [selectedReport, setSelectedReport] = useState<DnevniIzvestajiData | null>(null);
+  const dataTableRef = useRef<DataTableHandle>(null);
+
+  const isAdmin = userType === 'admin' || userType === 'super-admin';
+
+  const handlePrint = () => {
+    dataTableRef.current?.handlePrint();
+  };
+
+  const handleDownloadPDF = async () => {
+    await dataTableRef.current?.handleDownloadPDF();
+  };
 
   const handleDeleteConfirm = () => {
     if (itemToDelete) {
@@ -163,6 +215,130 @@ const DnevniIzvestajiPage: React.FC = () => {
     setShowDeleteModal(false);
   };
 
+  const handleReportSelect = (report: DnevniIzvestajiData) => {
+    setSelectedReport(report);
+  };
+
+  const handleBackToList = () => {
+    setSelectedReport(null);
+  };
+
+  const handlePregledanChange = (reportId: number, pregledan: boolean) => {
+    setData(data.map(report => 
+      report.id === reportId ? { ...report, pregledan } : report
+    ));
+    if (selectedReport && selectedReport.id === reportId) {
+      setSelectedReport({ ...selectedReport, pregledan });
+    }
+  };
+
+  const handleNapomenaAdminChange = (reportId: number, napomena: string) => {
+    setData(data.map(report => 
+      report.id === reportId ? { ...report, napomenaAdmin: napomena } : report
+    ));
+    if (selectedReport && selectedReport.id === reportId) {
+      setSelectedReport({ ...selectedReport, napomenaAdmin: napomena });
+    }
+  };
+
+  // Admin view: Show list or selected report
+  if (isAdmin) {
+    return (
+      <ErrorBoundary>
+        <div className="container mx-auto py-8">
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  Dnevni izveštaji
+                </h1>
+                {selectedCompany && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Prikaz izveštaja za{" "}
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {selectedCompany.naziv}
+                    </span>
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                {selectedReport && (
+                  <Button
+                    size="sm"
+                    onClick={handleBackToList}
+                    className="bg-gray-600 hover:bg-gray-700"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                      />
+                    </svg>
+                    Nazad na listu
+                  </Button>
+                )}
+                {selectedReport && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handlePrint}
+                      className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
+                    >
+                      <PrintIcon className="w-5 h-5" />
+                      Štampaj
+                    </button>
+                    <button
+                      onClick={handleDownloadPDF}
+                      className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
+                    >
+                      <DownloadIcon className="w-5 h-5" />
+                      Preuzmi PDF
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {!selectedCompany && (
+            <div className="mb-4 rounded-lg border border-dashed border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 p-6 text-center text-gray-600 dark:text-gray-300">
+              Odaberite Preduzeće preko pretrage u zaglavlju kako bi se prikazali
+              izveštaji.
+            </div>
+          )}
+
+          {selectedReport ? (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] overflow-hidden">
+              <DnevniIzvestajiDataTable
+                ref={dataTableRef}
+                data={data}
+                columns={columns}
+                selectedCompany={selectedCompany}
+                readOnly={true}
+                selectedReport={selectedReport}
+                onPregledanChange={handlePregledanChange}
+                onNapomenaAdminChange={handleNapomenaAdminChange}
+              />
+            </div>
+          ) : (
+            <DnevniIzvestajiList
+              reports={data}
+              selectedCompany={selectedCompany}
+              onReportSelect={handleReportSelect}
+            />
+          )}
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
+  // Komitent/User view: Show form for creating/editing
   return (
     <ErrorBoundary>
       <div className="container mx-auto py-8">
@@ -182,66 +358,21 @@ const DnevniIzvestajiPage: React.FC = () => {
               )}
             </div>
             <div className="hidden sm:flex items-center gap-4">
-              <ExportPopoverButton
-                data={data}
-                columns={columns}
-                title="Dnevni izveštaji"
-                filename="dnevni-izvestaji"
-              />
-              <Button
-                size="sm"
-                onClick={() => console.log("Open Dnevni izveštaji form")}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePrint}
+                  className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Novi unos
-              </Button>
-            </div>
-          </div>
-
-          <div className="sm:hidden mt-4">
-            <div className="flex gap-4 w-full">
-              <div className="flex-1">
-                <ExportPopoverButton
-                  data={data}
-                  columns={columns}
-                  title="Dnevni izveštaji"
-                  filename="dnevni-izvestaji"
-                  className="w-full"
-                />
-              </div>
-              <div className="flex-1">
-                <Button
-                  onClick={() => console.log("Open Dnevni izveštaji form")}
-                  size="sm"
-                  className="w-full"
+                  <PrintIcon className="w-5 h-5" />
+                  Štampaj
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="px-4 py-2 bg-[#F9FAFB] dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 flex items-center gap-2 border border-gray-200"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Novi unos
-                </Button>
+                  <DownloadIcon className="w-5 h-5" />
+                  Preuzmi PDF
+                </button>
               </div>
             </div>
           </div>
@@ -256,6 +387,7 @@ const DnevniIzvestajiPage: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)] overflow-hidden">
           <DnevniIzvestajiDataTable
+            ref={dataTableRef}
             data={data}
             columns={columns}
             selectedCompany={selectedCompany}

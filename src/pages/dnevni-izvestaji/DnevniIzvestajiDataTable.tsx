@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import {
   Table,
   TableBody,
@@ -12,6 +12,7 @@ import { Company } from "../../data/companies";
 import AngazovanjaForm from "../angazovanja/AngazovanjaForm";
 import PovredeForm from "../povrede/PovredeForm";
 import OpremaForm from "../oprema/OpremaForm";
+import html2pdf from 'html2pdf.js';
 
 interface Column {
   key: string;
@@ -49,20 +50,38 @@ export interface DnevniIzvestajiData {
   napomenaPotencijalniRizici: string;
   napomena: string;
   napomenaBZR: string;
+  pregledan?: boolean; // Admin review status
+  napomenaAdmin?: string; // Admin's note/remark
   [key: string]: any;
+}
+
+export interface DataTableHandle {
+  handlePrint: () => void;
+  handleDownloadPDF: () => Promise<void>;
 }
 
 interface DataTableProps {
   data: DnevniIzvestajiData[];
   columns: Column[];
   selectedCompany: Company | null;
+  readOnly?: boolean; // If true, show as read-only (for admin viewing)
+  selectedReport?: DnevniIzvestajiData | null; // The specific report to display (for admin)
+  onPregledanChange?: (reportId: number, pregledan: boolean) => void;
+  onNapomenaAdminChange?: (reportId: number, napomena: string) => void;
 }
 
-export default function DnevniIzvestajiDataTable({
+const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
   data: initialData,
   columns: _columns,
   selectedCompany,
-}: DataTableProps) {
+  readOnly = false,
+  selectedReport = null,
+  onPregledanChange,
+  onNapomenaAdminChange,
+}, ref) => {
+  // Nadležno preduzeće - sample data (same for all companies)
+  const nadleznoPreduzece = 'Sistem Administracija d.o.o.';
+  
   // State to track answers for each question
   const [answers, setAnswers] = useState<Record<string, boolean | null>>({});
   // State to track napomena values
@@ -71,6 +90,12 @@ export default function DnevniIzvestajiDataTable({
   const [personName, setPersonName] = useState<string>("");
   // State for form modals
   const [openForm, setOpenForm] = useState<{ questionKey: string; isOpen: boolean }>({ questionKey: "", isOpen: false });
+  // State for general notes
+  const [napomena, setNapomena] = useState<string>("");
+  const [napomenaBZR, setNapomenaBZR] = useState<string>("");
+  // State for admin review
+  const [pregledan, setPregledan] = useState<boolean>(false);
+  const [napomenaAdmin, setNapomenaAdmin] = useState<string>("");
   
   // Hardcoded mapping of company to person name
   const companyPersonMap: Record<string, string> = {
@@ -105,11 +130,62 @@ export default function DnevniIzvestajiDataTable({
       setPersonName("");
     }
   }, [selectedCompany]);
+
+  // Load data from selectedReport when in read-only mode
+  useEffect(() => {
+    if (readOnly && selectedReport) {
+      // Load answers from the report
+      const reportAnswers: Record<string, boolean | null> = {};
+      const reportNapomena: Record<string, string> = {};
+      
+      reportAnswers["svakodnevnaKontrolaBZR"] = selectedReport.svakodnevnaKontrolaBZR;
+      reportAnswers["promeneAPR"] = selectedReport.promeneAPR;
+      reportNapomena["promeneAPR"] = selectedReport.napomenaPromeneAPR || "";
+      reportAnswers["promenaPoslovaRadnihZadataka"] = selectedReport.promenaPoslovaRadnihZadataka;
+      reportNapomena["promenaPoslovaRadnihZadataka"] = selectedReport.napomenaPromenaPoslova || "";
+      reportAnswers["promenaRadnihMestaZaposlenih"] = selectedReport.promenaRadnihMestaZaposlenih;
+      reportAnswers["promenaRadneSnage"] = selectedReport.promenaRadneSnage;
+      reportAnswers["novaSredstvaZaRad"] = selectedReport.novaSredstvaZaRad;
+      reportAnswers["stazeZaKomunikacijuBezbedne"] = selectedReport.stazeZaKomunikacijuBezbedne;
+      reportNapomena["stazeZaKomunikacijuBezbedne"] = selectedReport.napomenaStazeZaKomunikaciju || "";
+      reportAnswers["planiranePopravkeRemont"] = selectedReport.planiranePopravkeRemont;
+      reportNapomena["planiranePopravkeRemont"] = selectedReport.napomenaPlaniranePopravke || "";
+      reportAnswers["koriscenjeLZS"] = selectedReport.koriscenjeLZS;
+      reportNapomena["koriscenjeLZS"] = selectedReport.napomenaKoriscenjeLZS || "";
+      reportAnswers["novaGradilistaNoviPogoni"] = selectedReport.novaGradilistaNoviPogoni;
+      reportNapomena["novaGradilistaNoviPogoni"] = selectedReport.napomenaNovaGradilista || "";
+      reportAnswers["povredaNaRadu"] = selectedReport.povredaNaRadu;
+      reportAnswers["potencijalniRizici"] = selectedReport.potencijalniRizici;
+      reportNapomena["potencijalniRizici"] = selectedReport.napomenaPotencijalniRizici || "";
+      
+      setAnswers(reportAnswers);
+      setNapomenaValues(reportNapomena);
+      setPersonName(selectedReport.osobaZaSaradnju || "");
+      
+      // Mark forms as saved if they exist
+      const saved: Record<string, boolean> = {};
+      if (selectedReport.formaPromenaRadnihMesta) saved["promenaRadnihMestaZaposlenih"] = true;
+      if (selectedReport.formaPromenaRadneSnage) saved["promenaRadneSnage"] = true;
+      if (selectedReport.formaNovaSredstvaZaRad) saved["novaSredstvaZaRad"] = true;
+      if (selectedReport.formaPovredaNaRadu) saved["povredaNaRadu"] = true;
+      setSavedForms(saved);
+      
+      // Load general notes
+      setNapomena(selectedReport.napomena || "");
+      setNapomenaBZR(selectedReport.napomenaBZR || "");
+      
+      // Load admin review data
+      setPregledan(selectedReport.pregledan || false);
+      setNapomenaAdmin(selectedReport.napomenaAdmin || "");
+    }
+  }, [readOnly, selectedReport]);
   // State to track which forms have been saved
   const [savedForms, setSavedForms] = useState<Record<string, boolean>>({});
   // State for dropdowns
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // Ref for the table container for print/PDF
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData;
@@ -173,12 +249,15 @@ export default function DnevniIzvestajiDataTable({
     }));
   };
 
+  const handleGeneralNapomenaChange = (key: string, value: string) => {
+    if (key === "napomena") {
+      setNapomena(value);
+    } else if (key === "napomenaBZR") {
+      setNapomenaBZR(value);
+    }
+  };
+
   const questions = [
-    { 
-      key: "svakodnevnaKontrolaBZR", 
-      label: "Svakodnevna kontrola stanja BZR i komunikacija sa: -osoba za saradnju-",
-      type: "personInput" // Direct input field, no yes/no
-    },
     { 
       key: "promeneAPR", 
       label: "Promene u APR-u",
@@ -252,8 +331,10 @@ export default function DnevniIzvestajiDataTable({
       questionKey: string;
     }> = [];
 
-    // Get the first item (or create a default one if no data)
-    const item = filteredAndSortedData[0] || { id: 1, firma: "", datum: new Date() };
+    // Get the item - use selectedReport if in read-only mode, otherwise use first item from data
+    const item = readOnly && selectedReport 
+      ? selectedReport 
+      : (filteredAndSortedData[0] || { id: 1, firma: "", datum: new Date() });
 
     // Add rows for each question
     questions.forEach((question) => {
@@ -310,8 +391,37 @@ export default function DnevniIzvestajiDataTable({
       
     });
 
+    // Add general notes rows after all questions
+    rows.push({
+      id: 'napomena-general',
+      reportId: item.id,
+      firma: "",
+      datum: new Date(0),
+      pitanje: "Napomena",
+      odgovor: null,
+      napomena: napomena,
+      napomenaBZR: "",
+      isQuestion: false,
+      questionType: "generalNote",
+      questionKey: "napomena",
+    });
+
+    rows.push({
+      id: 'napomena-bzr',
+      reportId: item.id,
+      firma: "",
+      datum: new Date(0),
+      pitanje: "Napomena za BZR",
+      odgovor: null,
+      napomena: "",
+      napomenaBZR: napomenaBZR,
+      isQuestion: false,
+      questionType: "generalNote",
+      questionKey: "napomenaBZR",
+    });
+
     return rows;
-  }, [filteredAndSortedData, answers, napomenaValues, personName, questions, savedForms]);
+  }, [filteredAndSortedData, answers, napomenaValues, personName, questions, savedForms, readOnly, selectedReport, napomena, napomenaBZR]);
 
   // Display all data without pagination
   const currentTransformedData = transformedData;
@@ -327,20 +437,370 @@ export default function DnevniIzvestajiDataTable({
     });
   };
 
+  // Expose print and PDF functions via ref
+  useImperativeHandle(ref, () => ({
+    handlePrint,
+    handleDownloadPDF,
+  }));
+
+  // Validate that all questions have been answered
+  const validateAllAnswers = (): { isValid: boolean; missingAnswers: string[] } => {
+    const missingAnswers: string[] = [];
+    
+    // Check if person name is provided (for BZR kontrola)
+    if (!personName || personName.trim() === "") {
+      missingAnswers.push("Svakodnevna kontrola stanja BZR i komunikacija sa");
+    }
+    
+    questions.forEach((question) => {
+      // All questions need an answer (DA or NE)
+      const answer = answers[question.key];
+      if (answer === null || answer === undefined) {
+        missingAnswers.push(question.label);
+      } else if (answer === true) {
+        // If answer is DA, check additional requirements
+        if (question.type === "form") {
+          // Form questions need the form to be saved
+          if (!savedForms[question.key]) {
+            missingAnswers.push(`${question.label} (forma nije popunjena)`);
+          }
+        } else if (question.type === "napomena") {
+          // Napomena questions need napomena text when DA
+          const napomenaValue = napomenaValues[question.key] || "";
+          if (!napomenaValue || napomenaValue.trim() === "") {
+            missingAnswers.push(`${question.label} (napomena nije uneta)`);
+          }
+        }
+      }
+    });
+    
+    return {
+      isValid: missingAnswers.length === 0,
+      missingAnswers
+    };
+  };
+
+  // Get answer display text for a question
+  const getAnswerDisplayText = (row: typeof currentTransformedData[0]): string => {
+    if (!row.isQuestion) {
+      // For napomena rows, show the napomena text
+      if (row.pitanje.startsWith("Napomena:")) {
+        return row.napomena || "-";
+      }
+      // For general notes
+      if (row.questionType === "generalNote") {
+        return row.questionKey === "napomena" ? (row.napomena || "-") : (row.napomenaBZR || "-");
+      }
+      // For form rows, show the form indicator
+      if (row.pitanje.startsWith("Forma:")) {
+        return row.odgovor as string || "Forma je popunjena";
+      }
+      return "";
+    }
+    
+    if (row.odgovor === true) {
+      return "DA";
+    } else if (row.odgovor === false) {
+      return "NE";
+    }
+    
+    return "-";
+  };
+
+  const handlePrint = () => {
+    // Validate all answers
+    const validation = validateAllAnswers();
+    if (!validation.isValid) {
+      alert(`Molimo popunite sva polja pre štampanja:\n\n${validation.missingAnswers.join('\n')}`);
+      return;
+    }
+
+    // Build table rows HTML
+    let tableRowsHtml = '';
+    currentTransformedData.forEach((row) => {
+      const answerText = getAnswerDisplayText(row);
+      const isNapomenaRow = row.pitanje.startsWith("Napomena:");
+      
+      tableRowsHtml += `
+        <tr>
+          <td style="border: 1px solid #000; padding: ${isNapomenaRow ? '4px 6px' : '3px 6px'}; font-size: ${isNapomenaRow ? '9px' : '10px'}; vertical-align: top; ${isNapomenaRow ? 'font-style: italic;' : ''} width: 60%; line-height: 1.2;">
+            ${row.pitanje}
+          </td>
+          <td style="border: 1px solid #000; padding: ${isNapomenaRow ? '4px 6px' : '3px 6px'}; font-size: ${isNapomenaRow ? '9px' : '10px'}; text-align: ${isNapomenaRow ? 'left' : 'center'}; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; width: 40%; line-height: 1.2;">
+            ${answerText}
+          </td>
+        </tr>
+      `;
+    });
+
+    // Create full HTML document for printing
+    const printHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Dnevni Izveštaj</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 8px;
+            color: #000;
+            font-size: 10px;
+          }
+          .header {
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #000;
+          }
+          .header-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            page-break-inside: avoid;
+          }
+          thead {
+            display: table-header-group;
+          }
+          tbody {
+            display: table-row-group;
+          }
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          th {
+            border: 1px solid #000;
+            padding: 6px;
+            background-color: #f5f5f5;
+            font-weight: bold;
+            font-size: 11px;
+          }
+          th:first-child {
+            text-align: left;
+            width: 60%;
+          }
+          th:last-child {
+            text-align: center;
+            width: 40%;
+          }
+          @page {
+            size: A4 landscape;
+            margin: 0.3in;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="header-row">
+            <div>
+              <div><strong>Nadležno preduzeće:</strong> ${nadleznoPreduzece}</div>
+              <div><strong>Preduzeće:</strong> ${selectedCompany?.naziv || ''}</div>
+              <div><strong>Svakodnevna kontrola stanja BZR i komunikacija sa:</strong> ${readOnly && selectedReport ? (selectedReport.osobaZaSaradnju || personName || '-') : (personName || '-')}</div>
+            </div>
+            <div><strong>Datum:</strong> ${readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}</div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Pitanje</th>
+              <th>Odgovor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Create iframe for printing
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position: absolute; width: 0; height: 0; border: none;';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentWindow?.document;
+    if (iframeDoc) {
+      iframeDoc.open();
+      iframeDoc.write(printHtml);
+      iframeDoc.close();
+
+      // Wait for content to load then print
+      iframe.onload = () => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        
+        // Clean up after printing
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+      };
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    // Validate all answers
+    const validation = validateAllAnswers();
+    if (!validation.isValid) {
+      alert(`Molimo popunite sva polja pre preuzimanja PDF-a:\n\n${validation.missingAnswers.join('\n')}`);
+      return;
+    }
+
+    // Build table rows HTML (same as print)
+    let tableRowsHtml = '';
+    currentTransformedData.forEach((row) => {
+      const answerText = getAnswerDisplayText(row);
+      const isNapomenaRow = row.pitanje.startsWith("Napomena:");
+      const isGeneralNote = row.questionType === "generalNote";
+      
+      tableRowsHtml += `
+        <tr>
+          <td style="border: 1px solid #000; padding: ${isNapomenaRow || isGeneralNote ? '4px 6px' : '3px 6px'}; font-size: ${isNapomenaRow || isGeneralNote ? '9px' : '10px'}; vertical-align: top; ${isNapomenaRow ? 'font-style: italic;' : ''} width: 60%; line-height: 1.2;">
+            ${row.pitanje}
+          </td>
+          <td style="border: 1px solid #000; padding: ${isNapomenaRow || isGeneralNote ? '4px 6px' : '3px 6px'}; font-size: ${isNapomenaRow || isGeneralNote ? '9px' : '10px'}; text-align: ${isNapomenaRow || isGeneralNote ? 'left' : 'center'}; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; width: 40%; line-height: 1.2;">
+            ${answerText}
+          </td>
+        </tr>
+      `;
+    });
+
+    // Calculate proper width for A4 landscape (11.69in - 0.6in margins = 11.09in = ~1055px at 96dpi)
+    const a4LandscapeWidth = 1055;
+    
+    // Create PDF container as a visible div element, centered
+    const pdfContainer = document.createElement('div');
+    pdfContainer.id = 'pdf-export-container';
+    pdfContainer.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: ${a4LandscapeWidth}px;
+      min-height: 800px;
+      background: white;
+      padding: 8px;
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      color: #000;
+      z-index: 99999;
+      visibility: visible;
+      opacity: 1;
+      box-sizing: border-box;
+    `;
+    pdfContainer.innerHTML = `
+      <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #000;">
+        <div style="display: flex; justify-content: space-between; font-size: 10px;">
+          <div>
+            <div><strong>Nadležno preduzeće:</strong> ${nadleznoPreduzece}</div>
+            <div><strong>Preduzeće:</strong> ${selectedCompany?.naziv || ''}</div>
+            <div><strong>Svakodnevna kontrola stanja BZR i komunikacija sa:</strong> ${readOnly && selectedReport ? (selectedReport.osobaZaSaradnju || personName || '-') : (personName || '-')}</div>
+          </div>
+          <div><strong>Datum:</strong> ${readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}</div>
+        </div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 0; table-layout: fixed;">
+        <colgroup>
+          <col style="width: 60%;">
+          <col style="width: 40%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="border: 1px solid #000; padding: 6px; text-align: left; background-color: #f5f5f5; font-weight: bold; font-size: 11px;">Pitanje</th>
+            <th style="border: 1px solid #000; padding: 6px; text-align: center; background-color: #f5f5f5; font-weight: bold; font-size: 11px;">Odgovor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRowsHtml}
+        </tbody>
+      </table>
+    `;
+
+    document.body.appendChild(pdfContainer);
+
+    // Wait for DOM to fully render
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    try {
+      const opt = {
+        margin: 0.3,
+        filename: `dnevni-izvestaj-${formatDate(today).replace(/\./g, '-')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: a4LandscapeWidth,
+          height: pdfContainer.scrollHeight,
+          x: 0,
+          y: 0
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'a4', 
+          orientation: 'landscape' 
+        }
+      };
+
+      await html2pdf().set(opt).from(pdfContainer).save();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Greška pri generisanju PDF-a. Molimo pokušajte ponovo.');
+    } finally {
+      // Clean up
+      if (pdfContainer.parentNode) {
+        document.body.removeChild(pdfContainer);
+      }
+    }
+  };
+
   return (
-    <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
+    <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm" ref={tableRef}>
       <div className="flex flex-col gap-4 px-4 py-4">
-        {/* Display Firma and Datum */}
+        {/* Display Nadležno preduzeće, Preduzeće, BZR kontrola, and Datum with Print/PDF buttons */}
         {selectedCompany && (
           <div className="flex flex-col gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">Firma:</span>
-                <span className="text-gray-600 dark:text-gray-400">{selectedCompany.naziv}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">Datum:</span>
-                <span className="text-gray-600 dark:text-gray-400">{formatDate(today)}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Nadležno preduzeće:</span>
+                  <span className="text-gray-600 dark:text-gray-400">{nadleznoPreduzece}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Preduzeće:</span>
+                  <span className="text-gray-600 dark:text-gray-400">{selectedCompany.naziv}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    Svakodnevna kontrola stanja BZR i komunikacija sa:
+                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {readOnly && selectedReport 
+                      ? (selectedReport.osobaZaSaradnju || personName || "-")
+                      : (personName || "-")
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Datum:</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -380,56 +840,83 @@ export default function DnevniIzvestajiDataTable({
                     </TableCell>
                     <TableCell className="px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 text-center font-medium border-r-0">
                       {row.isQuestion ? (
-                        row.questionType === "personInput" ? (
-                          <span className="text-gray-800 dark:text-gray-200 text-sm">
-                            {personName || "-"}
-                          </span>
-                        ) : (
-                          <div className="relative flex items-center justify-center" ref={(el) => {
-                            if (el) dropdownRefs.current[row.questionKey] = el;
-                          }}>
-                            <button
-                              type="button"
-                              onClick={() => setOpenDropdowns(prev => ({ ...prev, [row.questionKey]: !prev[row.questionKey] }))}
-                              className="flex items-center justify-between w-32 px-4 py-2 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                            >
-                              <span>
-                                {row.odgovor === true ? "DA" : row.odgovor === false ? "NE" : "Izaberi"}
-                              </span>
-                              <svg
-                                className={`w-4 h-4 transition-transform ${openDropdowns[row.questionKey] ? 'rotate-180' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                            {openDropdowns[row.questionKey] && (
-                              <div className="absolute z-[100] w-32 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700 top-full">
-                                <div
-                                  className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none rounded-t-lg"
-                                  onClick={() => handleAnswerChange(row.questionKey, true)}
+                        <div className="relative flex items-center justify-center">
+                          {readOnly ? (
+                            <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">
+                              {row.odgovor === true ? "DA" : row.odgovor === false ? "NE" : "-"}
+                            </span>
+                          ) : (
+                            <>
+                              <div ref={(el) => {
+                                if (el) dropdownRefs.current[row.questionKey] = el;
+                              }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setOpenDropdowns(prev => ({ ...prev, [row.questionKey]: !prev[row.questionKey] }))}
+                                  className="flex items-center justify-between w-32 px-4 py-2 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
                                 >
-                                  <span className="text-sm text-gray-700 dark:text-gray-300">DA</span>
-                                </div>
-                                <div
-                                  className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none rounded-b-lg border-t border-gray-200 dark:border-gray-700"
-                                  onClick={() => handleAnswerChange(row.questionKey, false)}
-                                >
-                                  <span className="text-sm text-gray-700 dark:text-gray-300">NE</span>
-                                </div>
+                                  <span>
+                                    {row.odgovor === true ? "DA" : row.odgovor === false ? "NE" : "Izaberi"}
+                                  </span>
+                                  <svg
+                                    className={`w-4 h-4 transition-transform ${openDropdowns[row.questionKey] ? 'rotate-180' : ''}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </button>
+                                {openDropdowns[row.questionKey] && (
+                                  <div className="absolute z-[100] w-32 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700 top-full">
+                                    <div
+                                      className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none rounded-t-lg"
+                                      onClick={() => handleAnswerChange(row.questionKey, true)}
+                                    >
+                                      <span className="text-sm text-gray-700 dark:text-gray-300">DA</span>
+                                    </div>
+                                    <div
+                                      className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none rounded-b-lg border-t border-gray-200 dark:border-gray-700"
+                                      onClick={() => handleAnswerChange(row.questionKey, false)}
+                                    >
+                                      <span className="text-sm text-gray-700 dark:text-gray-300">NE</span>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        )
+                            </>
+                          )}
+                        </div>
                       ) : row.pitanje.startsWith("Napomena:") ? (
-                        <textarea
-                          value={row.napomena}
-                          onChange={(e) => handleNapomenaChange(row.questionKey, e.target.value)}
-                          placeholder="Unesite napomenu..."
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm min-h-[80px] resize-y"
-                        />
+                        readOnly ? (
+                          <div className="text-left">
+                            <span className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
+                              {row.napomena || "-"}
+                            </span>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={row.napomena}
+                            onChange={(e) => handleNapomenaChange(row.questionKey, e.target.value)}
+                            placeholder="Unesite napomenu..."
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm min-h-[80px] resize-y"
+                          />
+                        )
+                      ) : row.questionType === "generalNote" ? (
+                        readOnly ? (
+                          <div className="text-left">
+                            <span className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
+                              {row.questionKey === "napomena" ? (row.napomena || "-") : (row.napomenaBZR || "-")}
+                            </span>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={row.questionKey === "napomena" ? row.napomena : row.napomenaBZR}
+                            onChange={(e) => handleGeneralNapomenaChange(row.questionKey, e.target.value)}
+                            placeholder="Unesite napomenu..."
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm min-h-[80px] resize-y"
+                          />
+                        )
                       ) : row.pitanje.startsWith("Forma:") ? (
                         <div className="text-left">
                           <span className="text-blue-600 dark:text-blue-400 font-medium">Forma je popunjena</span>
@@ -455,6 +942,56 @@ export default function DnevniIzvestajiDataTable({
           </Table>
         </div>
       </div>
+
+      {/* Admin Review Section */}
+      {readOnly && selectedReport && (
+        <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#11181E]">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="pregledan-checkbox"
+                checked={pregledan}
+                onChange={(e) => {
+                  const newValue = e.target.checked;
+                  setPregledan(newValue);
+                  if (onPregledanChange && selectedReport) {
+                    onPregledanChange(selectedReport.id, newValue);
+                  }
+                }}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+              <label
+                htmlFor="pregledan-checkbox"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer"
+              >
+                Pregledan
+              </label>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="napomena-admin"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
+                Napomena
+              </label>
+              <textarea
+                id="napomena-admin"
+                value={napomenaAdmin}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setNapomenaAdmin(newValue);
+                  if (onNapomenaAdminChange && selectedReport) {
+                    onNapomenaAdminChange(selectedReport.id, newValue);
+                  }
+                }}
+                placeholder="Unesite napomenu..."
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm min-h-[100px] resize-y"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form Modals */}
       {openForm.isOpen && openForm.questionKey === "promenaRadnihMestaZaposlenih" && (
@@ -487,5 +1024,9 @@ export default function DnevniIzvestajiDataTable({
       )}
     </div>
   );
-}
+});
+
+DnevniIzvestajiDataTable.displayName = 'DnevniIzvestajiDataTable';
+
+export default DnevniIzvestajiDataTable;
 

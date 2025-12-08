@@ -12,6 +12,9 @@ import { Company } from "../../data/companies";
 import AngazovanjaForm from "../angazovanja/AngazovanjaForm";
 import PovredeForm from "../povrede/PovredeForm";
 import OpremaForm from "../oprema/OpremaForm";
+import { useUser } from "../../context/UserContext";
+import Checkbox from "../../components/form/input/Checkbox";
+import Button from "../../components/ui/button/Button";
 import html2pdf from 'html2pdf.js';
 
 interface Column {
@@ -67,7 +70,8 @@ interface DataTableProps {
   readOnly?: boolean; // If true, show as read-only (for admin viewing)
   selectedReport?: DnevniIzvestajiData | null; // The specific report to display (for admin)
   onPregledanChange?: (reportId: number, pregledan: boolean) => void;
-  onNapomenaAdminChange?: (reportId: number, napomena: string) => void;
+  onNapomenaBZRChange?: (reportId: number, napomena: string) => void;
+  onSave?: (reportData: DnevniIzvestajiData) => void; // Callback to save new report
 }
 
 const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
@@ -77,8 +81,12 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
   readOnly = false,
   selectedReport = null,
   onPregledanChange,
-  onNapomenaAdminChange,
+  onNapomenaBZRChange,
+  onSave,
 }, ref) => {
+  const { userType } = useUser();
+  const isKomitent = userType === 'komitent';
+  
   // Nadležno preduzeće - sample data (same for all companies)
   const nadleznoPreduzece = 'Sistem Administracija d.o.o.';
   
@@ -95,7 +103,8 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
   const [napomenaBZR, setNapomenaBZR] = useState<string>("");
   // State for admin review
   const [pregledan, setPregledan] = useState<boolean>(false);
-  const [napomenaAdmin, setNapomenaAdmin] = useState<string>("");
+  // State to store form data
+  const [formData, setFormData] = useState<Record<string, any>>({});
   
   // Hardcoded mapping of company to person name
   const companyPersonMap: Record<string, string> = {
@@ -162,13 +171,27 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       setNapomenaValues(reportNapomena);
       setPersonName(selectedReport.osobaZaSaradnju || "");
       
-      // Mark forms as saved if they exist
+      // Mark forms as saved if they exist and load form data
       const saved: Record<string, boolean> = {};
-      if (selectedReport.formaPromenaRadnihMesta) saved["promenaRadnihMestaZaposlenih"] = true;
-      if (selectedReport.formaPromenaRadneSnage) saved["promenaRadneSnage"] = true;
-      if (selectedReport.formaNovaSredstvaZaRad) saved["novaSredstvaZaRad"] = true;
-      if (selectedReport.formaPovredaNaRadu) saved["povredaNaRadu"] = true;
+      const loadedFormData: Record<string, any> = {};
+      if (selectedReport.formaPromenaRadnihMesta) {
+        saved["promenaRadnihMestaZaposlenih"] = true;
+        loadedFormData["promenaRadnihMestaZaposlenih"] = selectedReport.formaPromenaRadnihMesta;
+      }
+      if (selectedReport.formaPromenaRadneSnage) {
+        saved["promenaRadneSnage"] = true;
+        loadedFormData["promenaRadneSnage"] = selectedReport.formaPromenaRadneSnage;
+      }
+      if (selectedReport.formaNovaSredstvaZaRad) {
+        saved["novaSredstvaZaRad"] = true;
+        loadedFormData["novaSredstvaZaRad"] = selectedReport.formaNovaSredstvaZaRad;
+      }
+      if (selectedReport.formaPovredaNaRadu) {
+        saved["povredaNaRadu"] = true;
+        loadedFormData["povredaNaRadu"] = selectedReport.formaPovredaNaRadu;
+      }
       setSavedForms(saved);
+      setFormData(loadedFormData);
       
       // Load general notes
       setNapomena(selectedReport.napomena || "");
@@ -176,7 +199,6 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       
       // Load admin review data
       setPregledan(selectedReport.pregledan || false);
-      setNapomenaAdmin(selectedReport.napomenaAdmin || "");
     }
   }, [readOnly, selectedReport]);
   // State to track which forms have been saved
@@ -232,9 +254,10 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
     setOpenDropdowns(prev => ({ ...prev, [questionKey]: false }));
   };
 
-  const handleFormSave = (questionKey: string, _data: any) => {
-    // Mark form as saved
+  const handleFormSave = (questionKey: string, data: any) => {
+    // Mark form as saved and store form data
     setSavedForms(prev => ({ ...prev, [questionKey]: true }));
+    setFormData(prev => ({ ...prev, [questionKey]: data }));
     setOpenForm({ questionKey: "", isOpen: false });
   };
 
@@ -315,6 +338,80 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
     },
   ];
 
+  // Format date helper function
+  const formatDate = (date: Date): string => {
+    return date.toLocaleDateString("sr-Latn-RS", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  // Function to format form data for display
+  const formatFormData = (questionKey: string, data: any): string => {
+    if (!data) return "";
+    
+    if (questionKey === "promenaRadnihMestaZaposlenih" || questionKey === "promenaRadneSnage") {
+      // AngazovanjaForm data
+      const parts: string[] = [];
+      if (data.zaposleni) parts.push(`Zaposleni: ${data.zaposleni}`);
+      if (data.radnoMesto) parts.push(`Radno mesto: ${data.radnoMesto}`);
+      if (data.lokacija) parts.push(`Lokacija: ${data.lokacija}`);
+      if (data.vrstaAngazovanja) parts.push(`Vrsta angažovanja: ${data.vrstaAngazovanja}`);
+      if (data.datumPocetka) {
+        const date = data.datumPocetka instanceof Date ? data.datumPocetka : new Date(data.datumPocetka);
+        parts.push(`Datum početka: ${formatDate(date)}`);
+      }
+      if (data.datumPrestanka) {
+        const date = data.datumPrestanka instanceof Date ? data.datumPrestanka : new Date(data.datumPrestanka);
+        parts.push(`Datum prestanka: ${formatDate(date)}`);
+      }
+      return parts.join("\n");
+    } else if (questionKey === "novaSredstvaZaRad") {
+      // OpremaForm data
+      const parts: string[] = [];
+      if (data.nazivOpreme) parts.push(`Naziv opreme: ${data.nazivOpreme}`);
+      if (data.vrstaOpreme) parts.push(`Vrsta opreme: ${data.vrstaOpreme}`);
+      if (data.fabrickBroj) parts.push(`Fabrički broj: ${data.fabrickBroj}`);
+      if (data.inventarniBroj) parts.push(`Inventarni broj: ${data.inventarniBroj}`);
+      if (data.lokacija) parts.push(`Lokacija: ${data.lokacija}`);
+      if (data.godinaProizvodnje) parts.push(`Godina proizvodnje: ${data.godinaProizvodnje}`);
+      if (data.intervalPregleda) parts.push(`Interval pregleda: ${data.intervalPregleda} meseci`);
+      if (data.napomena) parts.push(`Napomena: ${data.napomena}`);
+      return parts.join("\n");
+    } else if (questionKey === "povredaNaRadu") {
+      // PovredeForm data
+      const parts: string[] = [];
+      if (data.zaposleni) parts.push(`Zaposleni: ${data.zaposleni}`);
+      if (data.datumPovrede) {
+        const date = data.datumPovrede instanceof Date ? data.datumPovrede : new Date(data.datumPovrede);
+        parts.push(`Datum povrede: ${formatDate(date)}`);
+      }
+      if (data.tezinaPovrede) parts.push(`Težina povrede: ${data.tezinaPovrede}`);
+      if (data.brojPovredneListe) parts.push(`Broj povredne liste: ${data.brojPovredneListe}`);
+      if (data.datumObavestenjaInspekcije) {
+        const date = data.datumObavestenjaInspekcije instanceof Date ? data.datumObavestenjaInspekcije : new Date(data.datumObavestenjaInspekcije);
+        parts.push(`Datum obaveštenja inspekcije: ${formatDate(date)}`);
+      }
+      if (data.datumPredajeFondu) {
+        const date = data.datumPredajeFondu instanceof Date ? data.datumPredajeFondu : new Date(data.datumPredajeFondu);
+        parts.push(`Datum predaje fondu: ${formatDate(date)}`);
+      }
+      if (data.datumPreuzimanjaIzFonda) {
+        const date = data.datumPreuzimanjaIzFonda instanceof Date ? data.datumPreuzimanjaIzFonda : new Date(data.datumPreuzimanjaIzFonda);
+        parts.push(`Datum preuzimanja iz fonda: ${formatDate(date)}`);
+      }
+      if (data.datumDostavjanjaUpravi) {
+        const date = data.datumDostavjanjaUpravi instanceof Date ? data.datumDostavjanjaUpravi : new Date(data.datumDostavjanjaUpravi);
+        parts.push(`Datum dostavljanja upravi: ${formatDate(date)}`);
+      }
+      if (data.napomena) parts.push(`Napomena: ${data.napomena}`);
+      return parts.join("\n");
+    }
+    
+    return "";
+  };
+
   // Transform data to have one row per question - using state for answers
   const transformedData = useMemo(() => {
     const rows: Array<{
@@ -329,6 +426,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       isQuestion: boolean;
       questionType?: string;
       questionKey: string;
+      formData?: any;
     }> = [];
 
     // Get the item - use selectedReport if in read-only mode, otherwise use first item from data
@@ -374,18 +472,25 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       
       // If answer is Da and type is form, add a form indicator row (only if form is saved)
       if (question.type === "form" && currentAnswer === true && savedForms[question.key]) {
+        const currentFormData = formData[question.key] || (readOnly && selectedReport ? 
+          (question.key === "promenaRadnihMestaZaposlenih" ? selectedReport.formaPromenaRadnihMesta :
+           question.key === "promenaRadneSnage" ? selectedReport.formaPromenaRadneSnage :
+           question.key === "novaSredstvaZaRad" ? selectedReport.formaNovaSredstvaZaRad :
+           question.key === "povredaNaRadu" ? selectedReport.formaPovredaNaRadu : null) : null);
+        
         rows.push({
           id: `form-${question.key}`,
           reportId: item.id,
           firma: "",
           datum: new Date(0),
           pitanje: `Forma: ${question.label}`,
-          odgovor: "Forma je popunjena",
+          odgovor: isKomitent && currentFormData ? formatFormData(question.key, currentFormData) : "Forma je popunjena",
           napomena: "",
           napomenaBZR: "",
           isQuestion: false,
           questionType: "form",
           questionKey: question.key,
+          formData: currentFormData,
         });
       }
       
@@ -406,6 +511,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       questionKey: "napomena",
     });
 
+    // Add "Napomena za BZR" for all users
     rows.push({
       id: 'napomena-bzr',
       reportId: item.id,
@@ -421,21 +527,13 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
     });
 
     return rows;
-  }, [filteredAndSortedData, answers, napomenaValues, personName, questions, savedForms, readOnly, selectedReport, napomena, napomenaBZR]);
+  }, [filteredAndSortedData, answers, napomenaValues, personName, questions, savedForms, readOnly, selectedReport, napomena, napomenaBZR, isKomitent, formData]);
 
   // Display all data without pagination
   const currentTransformedData = transformedData;
 
   // Get today's date
   const today = useMemo(() => new Date(), []);
-
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString("sr-Latn-RS", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
 
   // Expose print and PDF functions via ref
   useImperativeHandle(ref, () => ({
@@ -478,6 +576,60 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       isValid: missingAnswers.length === 0,
       missingAnswers
     };
+  };
+
+  // Handle save button click
+  const handleSave = () => {
+    // Validate all answers
+    const validation = validateAllAnswers();
+    if (!validation.isValid) {
+      alert(`Molimo popunite sva polja pre čuvanja:\n\n${validation.missingAnswers.join('\n')}`);
+      return;
+    }
+
+    if (!onSave || !selectedCompany) {
+      return;
+    }
+
+    // Get today's date
+    const today = new Date();
+
+    // Build the report data object
+    const reportData: DnevniIzvestajiData = {
+      id: initialData.length > 0 ? Math.max(...initialData.map(r => r.id)) + 1 : 1,
+      firma: selectedCompany.naziv,
+      datum: today,
+      svakodnevnaKontrolaBZR: true,
+      osobaZaSaradnju: personName,
+      promeneAPR: answers["promeneAPR"] || false,
+      napomenaPromeneAPR: napomenaValues["promeneAPR"] || "",
+      promenaPoslovaRadnihZadataka: answers["promenaPoslovaRadnihZadataka"] || false,
+      napomenaPromenaPoslova: napomenaValues["promenaPoslovaRadnihZadataka"] || "",
+      promenaRadnihMestaZaposlenih: answers["promenaRadnihMestaZaposlenih"] || false,
+      formaPromenaRadnihMesta: formData["promenaRadnihMestaZaposlenih"] || null,
+      promenaRadneSnage: answers["promenaRadneSnage"] || false,
+      formaPromenaRadneSnage: formData["promenaRadneSnage"] || null,
+      novaSredstvaZaRad: answers["novaSredstvaZaRad"] || false,
+      formaNovaSredstvaZaRad: formData["novaSredstvaZaRad"] || null,
+      stazeZaKomunikacijuBezbedne: answers["stazeZaKomunikacijuBezbedne"] || false,
+      napomenaStazeZaKomunikaciju: napomenaValues["stazeZaKomunikacijuBezbedne"] || "",
+      planiranePopravkeRemont: answers["planiranePopravkeRemont"] || false,
+      napomenaPlaniranePopravke: napomenaValues["planiranePopravkeRemont"] || "",
+      koriscenjeLZS: answers["koriscenjeLZS"] || false,
+      napomenaKoriscenjeLZS: napomenaValues["koriscenjeLZS"] || "",
+      novaGradilistaNoviPogoni: answers["novaGradilistaNoviPogoni"] || false,
+      napomenaNovaGradilista: napomenaValues["novaGradilistaNoviPogoni"] || "",
+      povredaNaRadu: answers["povredaNaRadu"] || false,
+      formaPovredaNaRadu: formData["povredaNaRadu"] || null,
+      potencijalniRizici: answers["potencijalniRizici"] || false,
+      napomenaPotencijalniRizici: napomenaValues["potencijalniRizici"] || "",
+      napomena: napomena,
+      napomenaBZR: napomenaBZR,
+      pregledan: false,
+      napomenaAdmin: "",
+    };
+
+    onSave(reportData);
   };
 
   // Get answer display text for a question
@@ -903,7 +1055,23 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                           />
                         )
                       ) : row.questionType === "generalNote" ? (
-                        readOnly ? (
+                        // For "Napomena za BZR" in readOnly mode (admin viewing, not Komitent), make it editable
+                        // For regular "Napomena", show read-only in readOnly mode
+                        // For Komitent, always show read-only
+                        readOnly && row.questionKey === "napomenaBZR" && !isKomitent ? (
+                          <textarea
+                            value={row.napomenaBZR}
+                            onChange={(e) => {
+                              const newValue = e.target.value;
+                              setNapomenaBZR(newValue);
+                              if (onNapomenaBZRChange && selectedReport) {
+                                onNapomenaBZRChange(selectedReport.id, newValue);
+                              }
+                            }}
+                            placeholder="Unesite napomenu za BZR..."
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm min-h-[100px] resize-y"
+                          />
+                        ) : readOnly || isKomitent ? (
                           <div className="text-left">
                             <span className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
                               {row.questionKey === "napomena" ? (row.napomena || "-") : (row.napomenaBZR || "-")}
@@ -919,7 +1087,13 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                         )
                       ) : row.pitanje.startsWith("Forma:") ? (
                         <div className="text-left">
-                          <span className="text-blue-600 dark:text-blue-400 font-medium">Forma je popunjena</span>
+                          {isKomitent && row.odgovor && typeof row.odgovor === "string" && row.odgovor !== "Forma je popunjena" ? (
+                            <div className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
+                              {row.odgovor}
+                            </div>
+                          ) : (
+                            <span className="text-blue-600 dark:text-blue-400 font-medium">Forma je popunjena</span>
+                          )}
                         </div>
                       ) : (
                         ""
@@ -943,53 +1117,29 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
         </div>
       </div>
 
-      {/* Admin Review Section */}
-      {readOnly && selectedReport && (
+      {/* Admin Review Section - Only Pregledan checkbox (only for admins) */}
+      {readOnly && selectedReport && !isKomitent && (
         <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#11181E]">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="pregledan-checkbox"
-                checked={pregledan}
-                onChange={(e) => {
-                  const newValue = e.target.checked;
-                  setPregledan(newValue);
-                  if (onPregledanChange && selectedReport) {
-                    onPregledanChange(selectedReport.id, newValue);
-                  }
-                }}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-              />
-              <label
-                htmlFor="pregledan-checkbox"
-                className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer"
-              >
-                Pregledan
-              </label>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="napomena-admin"
-                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-              >
-                Napomena
-              </label>
-              <textarea
-                id="napomena-admin"
-                value={napomenaAdmin}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setNapomenaAdmin(newValue);
-                  if (onNapomenaAdminChange && selectedReport) {
-                    onNapomenaAdminChange(selectedReport.id, newValue);
-                  }
-                }}
-                placeholder="Unesite napomenu..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm min-h-[100px] resize-y"
-              />
-            </div>
-          </div>
+          <Checkbox
+            id="pregledan-checkbox"
+            label="Pregledan"
+            checked={pregledan}
+            onChange={(checked) => {
+              setPregledan(checked);
+              if (onPregledanChange && selectedReport) {
+                onPregledanChange(selectedReport.id, checked);
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {/* Save Button Section - Only for komitent when creating new report */}
+      {!readOnly && isKomitent && onSave && (
+        <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#11181E] flex justify-end">
+          <Button onClick={handleSave}>
+            Sačuvaj izveštaj
+          </Button>
         </div>
       )}
 

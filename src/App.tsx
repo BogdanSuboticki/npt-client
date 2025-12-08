@@ -73,6 +73,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import TaskList from "./pages/Task/TaskList";
 import Saas from "./pages/Dashboard/Saas";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 import RadnaMesta from "./pages/RadnaMesta";
 import EvidencijaRizicnaRadnaMesta from "./pages/Evidencija_rizicna_radna_mesta";
 import EvidencijaPovredaRad from "./pages/Evidencija_povreda_rad";
@@ -106,98 +107,98 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Ecommerce />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/marketing" element={<Marketing />} />
-            <Route path="/crm" element={<Crm />} />
-            <Route path="/stocks" element={<Stocks />} />
-            <Route path="/saas" element={<Saas />} />
-            <Route path="/lekarski-pregledi" element={<LekarskiPreglediPage />} />
-            <Route path="/inspekcijski-nadzor" element={<InspekcijskiNadzorPage />} />
-            <Route path="/ispitivanje-radne-sredine" element={<IspitivanjeRadneSredine />} />
-            <Route path="/bezbednosne-provere" element={<BezbednosneProverePage />} />
-            <Route path="/povrede" element={<PovredePage />} />
-            <Route path="/pregledi-opreme" element={<PreglediOpremePage />} />
-            <Route path="/rokovi" element={<RokoviPage />} />
-            <Route path="/firme" element={<Firme />} />
-            <Route path="/zaposleni" element={<ZaposleniPage />} />
-            <Route path="/angazovanja" element={<AngazovanjaPage />} />
-            <Route path="/zaduzenja-lzo" element={<ZaduzenjaLzoPage />} />
             <Route path="/dnevni-izvestaji" element={<DnevniIzvestajiPage />} />
+            <Route path="/analytics" element={<ProtectedRoute excludedRoles={['komitent']}><Analytics /></ProtectedRoute>} />
+            <Route path="/marketing" element={<ProtectedRoute excludedRoles={['komitent']}><Marketing /></ProtectedRoute>} />
+            <Route path="/crm" element={<ProtectedRoute excludedRoles={['komitent']}><Crm /></ProtectedRoute>} />
+            <Route path="/stocks" element={<ProtectedRoute excludedRoles={['komitent']}><Stocks /></ProtectedRoute>} />
+            <Route path="/saas" element={<ProtectedRoute excludedRoles={['komitent']}><Saas /></ProtectedRoute>} />
+            <Route path="/lekarski-pregledi" element={<ProtectedRoute excludedRoles={['komitent']}><LekarskiPreglediPage /></ProtectedRoute>} />
+            <Route path="/inspekcijski-nadzor" element={<ProtectedRoute excludedRoles={['komitent']}><InspekcijskiNadzorPage /></ProtectedRoute>} />
+            <Route path="/ispitivanje-radne-sredine" element={<ProtectedRoute excludedRoles={['komitent']}><IspitivanjeRadneSredine /></ProtectedRoute>} />
+            <Route path="/bezbednosne-provere" element={<ProtectedRoute excludedRoles={['komitent']}><BezbednosneProverePage /></ProtectedRoute>} />
+            <Route path="/povrede" element={<ProtectedRoute excludedRoles={['komitent']}><PovredePage /></ProtectedRoute>} />
+            <Route path="/pregledi-opreme" element={<ProtectedRoute excludedRoles={['komitent']}><PreglediOpremePage /></ProtectedRoute>} />
+            <Route path="/rokovi" element={<ProtectedRoute excludedRoles={['komitent']}><RokoviPage /></ProtectedRoute>} />
+            <Route path="/firme" element={<ProtectedRoute excludedRoles={['komitent']}><Firme /></ProtectedRoute>} />
+            <Route path="/zaposleni" element={<ProtectedRoute excludedRoles={['komitent']}><ZaposleniPage /></ProtectedRoute>} />
+            <Route path="/angazovanja" element={<ProtectedRoute excludedRoles={['komitent']}><AngazovanjaPage /></ProtectedRoute>} />
+            <Route path="/zaduzenja-lzo" element={<ProtectedRoute excludedRoles={['komitent']}><ZaduzenjaLzoPage /></ProtectedRoute>} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/invoice" element={<Invoices />} />
-            <Route path="/faq" element={<Faqs />} />
-            <Route path="/pricing-tables" element={<PricingTables />} />
-            <Route path="/blank" element={<Blank />} />
-            <Route path="/obrasci" element={<Obrasci />} />
-            <Route path="/prethodni-obrasci" element={<PrethodniObrasci />} />
-            <Route path="/osposobljavanje" element={<Osposobljavanje />} />
-            <Route path="/oprema" element={<Oprema />} />
-            <Route path="/lzs" element={<LZS />} />
-            <Route path="/lokacije" element={<Lokacije />} />
+            <Route path="/calendar" element={<ProtectedRoute excludedRoles={['komitent']}><Calendar /></ProtectedRoute>} />
+            <Route path="/invoice" element={<ProtectedRoute excludedRoles={['komitent']}><Invoices /></ProtectedRoute>} />
+            <Route path="/faq" element={<ProtectedRoute excludedRoles={['komitent']}><Faqs /></ProtectedRoute>} />
+            <Route path="/pricing-tables" element={<ProtectedRoute excludedRoles={['komitent']}><PricingTables /></ProtectedRoute>} />
+            <Route path="/blank" element={<ProtectedRoute excludedRoles={['komitent']}><Blank /></ProtectedRoute>} />
+            <Route path="/obrasci" element={<ProtectedRoute excludedRoles={['komitent']}><Obrasci /></ProtectedRoute>} />
+            <Route path="/prethodni-obrasci" element={<ProtectedRoute excludedRoles={['komitent']}><PrethodniObrasci /></ProtectedRoute>} />
+            <Route path="/osposobljavanje" element={<ProtectedRoute excludedRoles={['komitent']}><Osposobljavanje /></ProtectedRoute>} />
+            <Route path="/oprema" element={<ProtectedRoute excludedRoles={['komitent']}><Oprema /></ProtectedRoute>} />
+            <Route path="/lzs" element={<ProtectedRoute excludedRoles={['komitent']}><LZS /></ProtectedRoute>} />
+            <Route path="/lokacije" element={<ProtectedRoute excludedRoles={['komitent']}><Lokacije /></ProtectedRoute>} />
 
             {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
-            <Route path="/form-layout" element={<FormLayout />} />
+            <Route path="/form-elements" element={<ProtectedRoute excludedRoles={['komitent']}><FormElements /></ProtectedRoute>} />
+            <Route path="/form-layout" element={<ProtectedRoute excludedRoles={['komitent']}><FormLayout /></ProtectedRoute>} />
 
             {/* Applications */}
-            <Route path="/chat" element={<Chats />} />
+            <Route path="/chat" element={<ProtectedRoute excludedRoles={['komitent']}><Chats /></ProtectedRoute>} />
 
-            <Route path="/task-list" element={<TaskList />} />
-            <Route path="/task-kanban" element={<TaskKanban />} />
-            <Route path="/file-manager" element={<FileManager />} />
+            <Route path="/task-list" element={<ProtectedRoute excludedRoles={['komitent']}><TaskList /></ProtectedRoute>} />
+            <Route path="/task-kanban" element={<ProtectedRoute excludedRoles={['komitent']}><TaskKanban /></ProtectedRoute>} />
+            <Route path="/file-manager" element={<ProtectedRoute excludedRoles={['komitent']}><FileManager /></ProtectedRoute>} />
 
             {/* Email */}
 
-            <Route path="/inbox" element={<EmailInbox />} />
-            <Route path="/inbox-details" element={<EmailDetails />} />
+            <Route path="/inbox" element={<ProtectedRoute excludedRoles={['komitent']}><EmailInbox /></ProtectedRoute>} />
+            <Route path="/inbox-details" element={<ProtectedRoute excludedRoles={['komitent']}><EmailDetails /></ProtectedRoute>} />
 
             {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
-            <Route path="/data-tables" element={<DataTables />} />
+            <Route path="/basic-tables" element={<ProtectedRoute excludedRoles={['komitent']}><BasicTables /></ProtectedRoute>} />
+            <Route path="/data-tables" element={<ProtectedRoute excludedRoles={['komitent']}><DataTables /></ProtectedRoute>} />
 
             {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/breadcrumb" element={<BreadCrumb />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/buttons-group" element={<ButtonsGroup />} />
-            <Route path="/cards" element={<Cards />} />
-            <Route path="/carousel" element={<Carousel />} />
-            <Route path="/dropdowns" element={<Dropdowns />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/links" element={<Links />} />
-            <Route path="/list" element={<Lists />} />
-            <Route path="/modals" element={<Modals />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/pagination" element={<Pagination />} />
-            <Route path="/popovers" element={<Popovers />} />
-            <Route path="/progress-bar" element={<Progressbar />} />
-            <Route path="/ribbons" element={<Ribbons />} />
-            <Route path="/spinners" element={<Spinners />} />
-            <Route path="/tabs" element={<Tabs />} />
-            <Route path="/tooltips" element={<Tooltips />} />
-            <Route path="/videos" element={<Videos />} />
+            <Route path="/alerts" element={<ProtectedRoute excludedRoles={['komitent']}><Alerts /></ProtectedRoute>} />
+            <Route path="/avatars" element={<ProtectedRoute excludedRoles={['komitent']}><Avatars /></ProtectedRoute>} />
+            <Route path="/badge" element={<ProtectedRoute excludedRoles={['komitent']}><Badges /></ProtectedRoute>} />
+            <Route path="/breadcrumb" element={<ProtectedRoute excludedRoles={['komitent']}><BreadCrumb /></ProtectedRoute>} />
+            <Route path="/buttons" element={<ProtectedRoute excludedRoles={['komitent']}><Buttons /></ProtectedRoute>} />
+            <Route path="/buttons-group" element={<ProtectedRoute excludedRoles={['komitent']}><ButtonsGroup /></ProtectedRoute>} />
+            <Route path="/cards" element={<ProtectedRoute excludedRoles={['komitent']}><Cards /></ProtectedRoute>} />
+            <Route path="/carousel" element={<ProtectedRoute excludedRoles={['komitent']}><Carousel /></ProtectedRoute>} />
+            <Route path="/dropdowns" element={<ProtectedRoute excludedRoles={['komitent']}><Dropdowns /></ProtectedRoute>} />
+            <Route path="/images" element={<ProtectedRoute excludedRoles={['komitent']}><Images /></ProtectedRoute>} />
+            <Route path="/links" element={<ProtectedRoute excludedRoles={['komitent']}><Links /></ProtectedRoute>} />
+            <Route path="/list" element={<ProtectedRoute excludedRoles={['komitent']}><Lists /></ProtectedRoute>} />
+            <Route path="/modals" element={<ProtectedRoute excludedRoles={['komitent']}><Modals /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute excludedRoles={['komitent']}><Notifications /></ProtectedRoute>} />
+            <Route path="/pagination" element={<ProtectedRoute excludedRoles={['komitent']}><Pagination /></ProtectedRoute>} />
+            <Route path="/popovers" element={<ProtectedRoute excludedRoles={['komitent']}><Popovers /></ProtectedRoute>} />
+            <Route path="/progress-bar" element={<ProtectedRoute excludedRoles={['komitent']}><Progressbar /></ProtectedRoute>} />
+            <Route path="/ribbons" element={<ProtectedRoute excludedRoles={['komitent']}><Ribbons /></ProtectedRoute>} />
+            <Route path="/spinners" element={<ProtectedRoute excludedRoles={['komitent']}><Spinners /></ProtectedRoute>} />
+            <Route path="/tabs" element={<ProtectedRoute excludedRoles={['komitent']}><Tabs /></ProtectedRoute>} />
+            <Route path="/tooltips" element={<ProtectedRoute excludedRoles={['komitent']}><Tooltips /></ProtectedRoute>} />
+            <Route path="/videos" element={<ProtectedRoute excludedRoles={['komitent']}><Videos /></ProtectedRoute>} />
 
             {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
-            <Route path="/pie-chart" element={<PieChart />} />
+            <Route path="/line-chart" element={<ProtectedRoute excludedRoles={['komitent']}><LineChart /></ProtectedRoute>} />
+            <Route path="/bar-chart" element={<ProtectedRoute excludedRoles={['komitent']}><BarChart /></ProtectedRoute>} />
+            <Route path="/pie-chart" element={<ProtectedRoute excludedRoles={['komitent']}><PieChart /></ProtectedRoute>} />
 
-            <Route path="/radna-mesta" element={<RadnaMesta />} />
-            <Route path="/evidencija-rizicna-radna-mesta" element={<EvidencijaRizicnaRadnaMesta />} />
-            <Route path="/evidencija-povreda-rad" element={<EvidencijaPovredaRad />} />
-            <Route path="/evidencija-profesionalne-bolesti" element={<EvidencijaProfesionalneBolesti />} />
-            <Route path="/evidencija-biloske-stetnosti" element={<EvidencijaBiloskeStetnosti />} />
-            <Route path="/evidencija-kancerogeni-mutageni" element={<EvidencijaKancerogeniMutageni />} />
-            <Route path="/evidencija-obuceni-bezbedan" element={<EvidencijaObuceniBezbedan />} />
-            <Route path="/evidencija-primena-mera" element={<EvidencijaPrimenaMera />} />
-            <Route path="/evidencija-pregledi-opreme" element={<EvidencijaPreglediOpreme />} />
-            <Route path="/elektricne-instalacije" element={<EvidencijaElektricneInstalacije />} />
-            <Route path="/ispitivanja-sredine" element={<EvidencijaIspitivanjaSredine />} />
-            <Route path="/zastitna-oprema" element={<EvidencijaZastitnaOprema />} />
+            <Route path="/radna-mesta" element={<ProtectedRoute excludedRoles={['komitent']}><RadnaMesta /></ProtectedRoute>} />
+            <Route path="/evidencija-rizicna-radna-mesta" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaRizicnaRadnaMesta /></ProtectedRoute>} />
+            <Route path="/evidencija-povreda-rad" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaPovredaRad /></ProtectedRoute>} />
+            <Route path="/evidencija-profesionalne-bolesti" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaProfesionalneBolesti /></ProtectedRoute>} />
+            <Route path="/evidencija-biloske-stetnosti" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaBiloskeStetnosti /></ProtectedRoute>} />
+            <Route path="/evidencija-kancerogeni-mutageni" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaKancerogeniMutageni /></ProtectedRoute>} />
+            <Route path="/evidencija-obuceni-bezbedan" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaObuceniBezbedan /></ProtectedRoute>} />
+            <Route path="/evidencija-primena-mera" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaPrimenaMera /></ProtectedRoute>} />
+            <Route path="/evidencija-pregledi-opreme" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaPreglediOpreme /></ProtectedRoute>} />
+            <Route path="/elektricne-instalacije" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaElektricneInstalacije /></ProtectedRoute>} />
+            <Route path="/ispitivanja-sredine" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaIspitivanjaSredine /></ProtectedRoute>} />
+            <Route path="/zastitna-oprema" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaZastitnaOprema /></ProtectedRoute>} />
           </Route>
 
           {/* Auth Layout */}

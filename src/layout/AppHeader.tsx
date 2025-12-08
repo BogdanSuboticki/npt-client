@@ -22,6 +22,7 @@ const AppHeader: React.FC = () => {
   const { userType } = useUser();
   
   const isAdmin = userType === 'admin' || userType === 'super-admin';
+  const isKomitent = userType === 'komitent';
   const searchPlaceholder = isAdmin ? "Unesite naziv preduzeća..." : "Unesite naziv firme...";
 
   const handleToggle = () => {
@@ -262,7 +263,7 @@ const AppHeader: React.FC = () => {
            )}
 
           {/* Mobile Search Results */}
-          {showMobileSearch && showFullList && (
+          {!isKomitent && showMobileSearch && showFullList && (
             <div className="absolute top-full left-0 right-0 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-lg shadow-theme-lg max-h-[400px] overflow-hidden lg:hidden" data-mobile-search>
               {/* Company List */}
               <div className="overflow-y-auto" style={{ height: '400px' }}>
@@ -314,11 +315,12 @@ const AppHeader: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-2 lg:hidden" data-mobile-search>
-            <button
-              onClick={handleMobileSearchToggle}
-              className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-            >
+          {!isKomitent && (
+            <div className="flex items-center gap-2 lg:hidden" data-mobile-search>
+              <button
+                onClick={handleMobileSearchToggle}
+                className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              >
               {showMobileSearch ? (
                 <svg
                   width="20"
@@ -372,30 +374,32 @@ const AppHeader: React.FC = () => {
               />
             </svg>
             </button>
-          </div>
+            </div>
+          )}
 
-          <div className="hidden lg:block relative">
-            <form>
-               <SearchInput
-                 ref={inputRef}
-                 placeholder={searchPlaceholder}
-                 className="xl:w-[430px] !bg-[#F9FAFB] dark:!bg-[#101828]"
-                 buttonContent={
-                   <>
-                     <span>Pretraži</span>
-                   </>
-                 }
-                 onButtonClick={handleSearchButtonClick}
-                 onClick={handleSearchInputClick}
-                 onInputChange={handleSearchInputChange}
-                 value={searchValue}
-                 showClearButton={showFullList}
-                 onClearClick={handleClearSearch}
-               />
-            </form>
-            
-            {/* Full Company List Modal */}
-            {showFullList && (
+          {!isKomitent && (
+            <div className="hidden lg:block relative">
+              <form>
+                 <SearchInput
+                   ref={inputRef}
+                   placeholder={searchPlaceholder}
+                   className="xl:w-[430px] !bg-[#F9FAFB] dark:!bg-[#101828]"
+                   buttonContent={
+                     <>
+                       <span>Pretraži</span>
+                     </>
+                   }
+                   onButtonClick={handleSearchButtonClick}
+                   onClick={handleSearchInputClick}
+                   onInputChange={handleSearchInputChange}
+                   value={searchValue}
+                   showClearButton={showFullList}
+                   onClearClick={handleClearSearch}
+                 />
+              </form>
+              
+              {/* Full Company List Modal */}
+              {showFullList && (
               <div ref={fullListRef} className="absolute top-full left-0 right-0 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-lg shadow-theme-lg max-h-[600px] overflow-hidden">
                  {/* Company List */}
                  <div className="overflow-y-auto" style={{ height: '600px' }}>
@@ -446,7 +450,8 @@ const AppHeader: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
+            </div>
+          )}
         </div>
         <div
           className={`${

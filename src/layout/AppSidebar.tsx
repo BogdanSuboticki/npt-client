@@ -411,7 +411,7 @@ const AppSidebar: React.FC = () => {
                                {/* Moja Firma Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showMojaFirma) || 
-                     ((userType === 'user' || userType === 'komitent') && organizationSettings.usersCanSeeMojaFirma)) && (
+                     (userType === 'user' && organizationSettings.usersCanSeeMojaFirma)) && (
               <div>
                 <button
                   onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
@@ -449,7 +449,7 @@ const AppSidebar: React.FC = () => {
                                {/* Komitenti Section - Show for Super Admin, or Admin if showKomitenti is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showKomitenti) || 
-                     ((userType === 'user' || userType === 'komitent') && organizationSettings.usersCanSeeKomitenti)) && (
+                     (userType === 'user' && organizationSettings.usersCanSeeKomitenti)) && (
               <div className="">
                 <button
                   onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
@@ -483,10 +483,11 @@ const AppSidebar: React.FC = () => {
                 </div>
               </div>
             )}
-                                                               {/* Ostalo Section - Show for Super Admin and Admin, or User if allowed by organization */}
+                                                               {/* Ostalo Section - Show for Super Admin and Admin, or User if allowed by organization, or Komitent (only for profile access) */}
                     {(userType === 'super-admin' || 
                       userType === 'admin' || 
-                      ((userType === 'user' || userType === 'komitent') && organizationSettings.usersCanSeeOstalo)) && (
+                      (userType === 'user' && organizationSettings.usersCanSeeOstalo) ||
+                      userType === 'komitent') && (
                       <div className="">
                         <button
                           onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}
@@ -516,7 +517,11 @@ const AppSidebar: React.FC = () => {
                    height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
                  }}
                >
-                 {renderMenuItems(othersItems)}
+                 {renderMenuItems(
+                   userType === 'komitent' 
+                     ? othersItems.filter(item => item.path === "/profile")
+                     : othersItems
+                 )}
                </div>
              </div>
            )}

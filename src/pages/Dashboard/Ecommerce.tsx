@@ -4,9 +4,14 @@ import StatisticsChart from "../../components/ecommerce/StatisticsChart";
 import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import RecentOrders from "../../components/ecommerce/RecentOrders";
 import DemographicCard from "../../components/ecommerce/DemographicCard";
+import DnevniIzvestajiWidget from "../../components/dashboard/DnevniIzvestajiWidget";
 import PageMeta from "../../components/common/PageMeta";
+import { useUser } from "../../context/UserContext";
 
 export default function Ecommerce() {
+  const { userType } = useUser();
+  const isKomitent = userType === 'komitent';
+
   return (
     <>
       <PageMeta
@@ -14,27 +19,41 @@ export default function Ecommerce() {
         description="This is React.js Ecommerce Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
-        <div className="col-span-12 space-y-6 xl:col-span-7">
-          <EcommerceMetrics />
+        {isKomitent ? (
+          // Komitent view - only show Dnevni Izvestaji widget
+          <div className="col-span-12">
+            <DnevniIzvestajiWidget />
+          </div>
+        ) : (
+          // Regular view for other roles
+          <>
+            <div className="col-span-12 space-y-6 xl:col-span-7">
+              <EcommerceMetrics />
 
-          <MonthlySalesChart />
-        </div>
+              <MonthlySalesChart />
+            </div>
 
-        <div className="col-span-12 xl:col-span-5">
-          <MonthlyTarget />
-        </div>
+            <div className="col-span-12 xl:col-span-5">
+              <MonthlyTarget />
+            </div>
 
-        <div className="col-span-12">
-          <StatisticsChart />
-        </div>
+            <div className="col-span-12">
+              <StatisticsChart />
+            </div>
 
-        <div className="col-span-12 xl:col-span-5">
-          <DemographicCard />
-        </div>
+            <div className="col-span-12 xl:col-span-5">
+              <DemographicCard />
+            </div>
 
-        <div className="col-span-12 xl:col-span-7">
-          <RecentOrders />
-        </div>
+            <div className="col-span-12 xl:col-span-7">
+              <RecentOrders />
+            </div>
+
+            <div className="col-span-12 xl:col-span-4">
+              <DnevniIzvestajiWidget />
+            </div>
+          </>
+        )}
       </div>
     </>
   );

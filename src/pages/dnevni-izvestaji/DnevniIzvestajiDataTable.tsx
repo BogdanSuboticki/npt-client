@@ -926,30 +926,30 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
         {/* Display Nadležno preduzeće, Preduzeće, BZR kontrola, and Datum with Print/PDF buttons */}
         {selectedCompany && (
           <div className="flex flex-col gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 text-sm">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   <span className="font-semibold text-gray-700 dark:text-gray-300">Nadležno preduzeće:</span>
-                  <span className="text-gray-600 dark:text-gray-400">{nadleznoPreduzece}</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{nadleznoPreduzece}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-1">
                   <span className="font-semibold text-gray-700 dark:text-gray-300">Preduzeće:</span>
-                  <span className="text-gray-600 dark:text-gray-400">{selectedCompany.naziv}</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedCompany.naziv}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-1">
                   <span className="font-semibold text-gray-700 dark:text-gray-300">
                     Svakodnevna kontrola stanja BZR i komunikacija sa:
                   </span>
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">
                     {readOnly && selectedReport 
                       ? (selectedReport.osobaZaSaradnju || personName || "-")
                       : (personName || "-")
                     }
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-1">
                   <span className="font-semibold text-gray-700 dark:text-gray-300">Datum:</span>
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">
                     {readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}
                   </span>
                 </div>

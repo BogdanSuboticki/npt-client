@@ -72,6 +72,10 @@ export interface RokoviData {
   rok: Date;
   status: string;
   napomena: string;
+  preduzece?: string;
+  companyId?: string;
+  povredaId?: number;
+  isCompleted?: boolean;
   [key: string]: any;
 }
 
@@ -420,7 +424,7 @@ export default function RokoviDataTable({
                           {getStatusLabel(item.rok)}
                         </span>
                       ) : (
-                        item[key]
+                        item[key] || "-"
                       )}
                     </TableCell>
                   ))}

@@ -18,6 +18,7 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
+import { completePovredaInspekcijaRok } from "../../data/rokovi";
 
 interface Column {
   key: string;
@@ -32,10 +33,10 @@ interface PovredeData {
   datumPovrede: Date;
   tezinaPovrede: string;
   brojPovredneListe: string;
-  datumObavestenjaInspekcije: Date;
-  datumPredajeFondu: Date;
-  datumPreuzimanjaIzFonda: Date;
-  datumDostavjanjaUpravi: Date;
+  datumObavestenjaInspekcije: Date | null;
+  datumPredajeFondu: Date | null;
+  datumPreuzimanjaIzFonda: Date | null;
+  datumDostavjanjaUpravi: Date | null;
   napomena: string;
   [key: string]: any;
 }
@@ -44,9 +45,10 @@ interface DataTableProps {
   data: PovredeData[];
   columns: Column[];
   onDeleteClick?: (item: PovredeData) => void;
+  onUpdateData?: (updatedData: PovredeData[]) => void;
 }
 
-export default function PovredeDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+export default function PovredeDataTable({ data: initialData, columns, onDeleteClick, onUpdateData }: DataTableProps) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -57,10 +59,10 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
   const [editTezinaPovrede, setEditTezinaPovrede] = useState<string>("");
   const [editDatumPovrede, setEditDatumPovrede] = useState<Date>(new Date());
   const [editBrojPovredneListe, setEditBrojPovredneListe] = useState<string>("");
-  const [editDatumObavestenjaInspekcije, setEditDatumObavestenjaInspekcije] = useState<Date>(new Date());
-  const [editDatumPredajeFondu, setEditDatumPredajeFondu] = useState<Date>(new Date());
-  const [editDatumPreuzimanjaIzFonda, setEditDatumPreuzimanjaIzFonda] = useState<Date>(new Date());
-  const [editDatumDostavjanjaUpravi, setEditDatumDostavjanjaUpravi] = useState<Date>(new Date());
+  const [editDatumObavestenjaInspekcije, setEditDatumObavestenjaInspekcije] = useState<Date | null>(null);
+  const [editDatumPredajeFondu, setEditDatumPredajeFondu] = useState<Date | null>(null);
+  const [editDatumPreuzimanjaIzFonda, setEditDatumPreuzimanjaIzFonda] = useState<Date | null>(null);
+  const [editDatumDostavjanjaUpravi, setEditDatumDostavjanjaUpravi] = useState<Date | null>(null);
   const [editNapomena, setEditNapomena] = useState<string>("");
   const [isTezinaPovredeOpen, setIsTezinaPovredeOpen] = useState(false);
   const tezinaPovredeRef = useRef<HTMLDivElement>(null);
@@ -159,10 +161,10 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
     const match = item.brojPovredneListe?.match(/PL-(\d+)\/\d+/);
     setEditBrojListeNumber(match ? match[1] : "");
     
-    setEditDatumObavestenjaInspekcije(item.datumObavestenjaInspekcije);
-    setEditDatumPredajeFondu(item.datumPredajeFondu);
-    setEditDatumPreuzimanjaIzFonda(item.datumPreuzimanjaIzFonda);
-    setEditDatumDostavjanjaUpravi(item.datumDostavjanjaUpravi);
+    setEditDatumObavestenjaInspekcije(item.datumObavestenjaInspekcije || null);
+    setEditDatumPredajeFondu(item.datumPredajeFondu || null);
+    setEditDatumPreuzimanjaIzFonda(item.datumPreuzimanjaIzFonda || null);
+    setEditDatumDostavjanjaUpravi(item.datumDostavjanjaUpravi || null);
     setEditNapomena(item.napomena || "");
     setIsTezinaPovredeOpen(false);
     openEditModal();
@@ -171,6 +173,38 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
   const handleEditSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingItem) {
+      const wasInspekcijaSet = !!editingItem.datumObavestenjaInspekcije;
+      const isInspekcijaNowSet = !!editDatumObavestenjaInspekcije;
+      
+      // Check if datumObavestenjaInspekcije was just set (completed)
+      if (!wasInspekcijaSet && isInspekcijaNowSet) {
+        // Complete the related rok
+        completePovredaInspekcijaRok(editingItem.id);
+      }
+      
+      // Update the data
+      const updatedData = initialData.map(item => {
+        if (item.id === editingItem.id) {
+          return {
+            ...item,
+            tezinaPovrede: editTezinaPovrede,
+            datumPovrede: editDatumPovrede,
+            brojPovredneListe: editBrojPovredneListe,
+            datumObavestenjaInspekcije: editDatumObavestenjaInspekcije,
+            datumPredajeFondu: editDatumPredajeFondu,
+            datumPreuzimanjaIzFonda: editDatumPreuzimanjaIzFonda,
+            datumDostavjanjaUpravi: editDatumDostavjanjaUpravi,
+            napomena: editNapomena
+          };
+        }
+        return item;
+      });
+      
+      // Notify parent component of the update
+      if (onUpdateData) {
+        onUpdateData(updatedData);
+      }
+      
       console.log("Updating item:", editingItem.id, "with data:", {
         tezinaPovrede: editTezinaPovrede,
         datumPovrede: editDatumPovrede,
@@ -181,7 +215,6 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
         datumDostavjanjaUpravi: editDatumDostavjanjaUpravi,
         napomena: editNapomena
       });
-      // You would typically update the data here
     }
     closeEditModal();
   };
@@ -325,7 +358,7 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
                       ) : key === 'povecanRizik' || key === 'nocniRad' ? (
                         item[key] ? 'DA' : 'NE'
                       ) : key === 'datumPovrede' || key === 'datumObavestenjaInspekcije' || key === 'datumPredajeFondu' || key === 'datumPreuzimanjaIzFonda' || key === 'datumDostavjanjaUpravi' ? (
-                        formatDate(item[key])
+                        item[key] ? formatDate(item[key]) : '-'
                       ) : (
                         item[key]
                       )}
@@ -487,9 +520,7 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
                     <CustomDatePicker
                       value={editDatumObavestenjaInspekcije}
                       onChange={(date) => {
-                        if (date) {
-                          setEditDatumObavestenjaInspekcije(date);
-                        }
+                        setEditDatumObavestenjaInspekcije(date || null);
                       }}
                     />
                   </div>
@@ -499,9 +530,7 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
                     <CustomDatePicker
                       value={editDatumPredajeFondu}
                       onChange={(date) => {
-                        if (date) {
-                          setEditDatumPredajeFondu(date);
-                        }
+                        setEditDatumPredajeFondu(date || null);
                       }}
                     />
                   </div>
@@ -511,9 +540,7 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
                     <CustomDatePicker
                       value={editDatumPreuzimanjaIzFonda}
                       onChange={(date) => {
-                        if (date) {
-                          setEditDatumPreuzimanjaIzFonda(date);
-                        }
+                        setEditDatumPreuzimanjaIzFonda(date || null);
                       }}
                     />
                   </div>
@@ -523,9 +550,7 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
                     <CustomDatePicker
                       value={editDatumDostavjanjaUpravi}
                       onChange={(date) => {
-                        if (date) {
-                          setEditDatumDostavjanjaUpravi(date);
-                        }
+                        setEditDatumDostavjanjaUpravi(date || null);
                       }}
                     />
                   </div>

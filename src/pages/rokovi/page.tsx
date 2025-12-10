@@ -6,9 +6,10 @@ import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { useCompanySelection } from "../../context/CompanyContext";
-import { getRokoviByCompany } from "../../data/rokovi";
+import { getRokoviByCompanyWithDynamic } from "../../data/rokovi";
 
 const columns = [
+  { key: "preduzece", label: "Preduzeće", sortable: true },
   { key: "oblast", label: "Oblast", sortable: true },
   { key: "vrstaObaveze", label: "Vrsta obaveze", sortable: true },
   { key: "rok", label: "Rok", sortable: true },
@@ -60,7 +61,7 @@ const RokoviPage: React.FC = () => {
 
   useEffect(() => {
     if (selectedCompany) {
-      setData(getRokoviByCompany(selectedCompany));
+      setData(getRokoviByCompanyWithDynamic(selectedCompany));
     } else {
       setData([]);
     }

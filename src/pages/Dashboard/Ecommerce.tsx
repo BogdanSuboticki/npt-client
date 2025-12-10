@@ -5,12 +5,14 @@ import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import RecentOrders from "../../components/ecommerce/RecentOrders";
 import DemographicCard from "../../components/ecommerce/DemographicCard";
 import DnevniIzvestajiWidget from "../../components/dashboard/DnevniIzvestajiWidget";
+import RokoviWidget from "../../components/dashboard/RokoviWidget";
 import PageMeta from "../../components/common/PageMeta";
 import { useUser } from "../../context/UserContext";
 
 export default function Ecommerce() {
   const { userType } = useUser();
   const isKomitent = userType === 'komitent';
+  const isAdmin = userType === 'admin' || userType === 'super-admin';
 
   return (
     <>
@@ -27,6 +29,22 @@ export default function Ecommerce() {
         ) : (
           // Regular view for other roles
           <>
+            {/* Widgets at the top */}
+            {isAdmin ? (
+              <>
+                <div className="col-span-12 xl:col-span-6">
+                  <DnevniIzvestajiWidget />
+                </div>
+                <div className="col-span-12 xl:col-span-6">
+                  <RokoviWidget />
+                </div>
+              </>
+            ) : (
+              <div className="col-span-12 xl:col-span-4">
+                <DnevniIzvestajiWidget />
+              </div>
+            )}
+
             <div className="col-span-12 space-y-6 xl:col-span-7">
               <EcommerceMetrics />
 
@@ -47,10 +65,6 @@ export default function Ecommerce() {
 
             <div className="col-span-12 xl:col-span-7">
               <RecentOrders />
-            </div>
-
-            <div className="col-span-12 xl:col-span-4">
-              <DnevniIzvestajiWidget />
             </div>
           </>
         )}

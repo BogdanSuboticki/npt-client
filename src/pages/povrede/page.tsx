@@ -6,6 +6,8 @@ import React, { useState } from "react";
     import Button from "../../components/ui/button/Button";
     import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
     import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+    import { useCompanySelection } from "../../context/CompanyContext";
+    import { createPovredaInspekcijaRok } from "../../data/rokovi";
 
 // Sample data for the table
 const povredeData = [
@@ -42,10 +44,10 @@ const povredeData = [
     datumPovrede: new Date("2024-03-05"),
     tezinaPovrede: "Teška",
     brojPovredneListe: "PL-003/2024",
-    datumObavestenjaInspekcije: new Date("2024-03-06"),
-    datumPredajeFondu: new Date("2024-03-10"),
-    datumPreuzimanjaIzFonda: new Date("2024-03-25"),
-    datumDostavjanjaUpravi: new Date("2024-03-30"),
+    datumObavestenjaInspekcije: null as Date | null, // Not yet set - this will create a deadline
+    datumPredajeFondu: null as Date | null,
+    datumPreuzimanjaIzFonda: null as Date | null,
+    datumDostavjanjaUpravi: null as Date | null,
     napomena: "Povreda na radu - opekotine",
   },
 ];
@@ -95,6 +97,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const LekarskiPreglediPage: React.FC = () => {
+  const { selectedCompany } = useCompanySelection();
   const [showForm, setShowForm] = useState(false);
   const [data, setData] = useState(povredeData);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -109,6 +112,21 @@ const LekarskiPreglediPage: React.FC = () => {
       ...newData,
     };
     setData([...data, newItem]);
+    
+    // Create a 24-hour deadline in Rokovi if datumPovrede is set and company is selected
+    if (newData.datumPovrede && selectedCompany && !newData.datumObavestenjaInspekcije) {
+      try {
+        createPovredaInspekcijaRok(
+          newItem.id,
+          newData.datumPovrede,
+          newData.zaposleni || 'Nepoznato',
+          selectedCompany
+        );
+      } catch (error) {
+        console.error('Error creating rok for povreda:', error);
+      }
+    }
+    
     setShowForm(false);
   };
 
@@ -210,6 +228,7 @@ const LekarskiPreglediPage: React.FC = () => {
              data={data}
              columns={columns}
              onDeleteClick={handleDeleteClick}
+             onUpdateData={setData}
            />
         </div>
 

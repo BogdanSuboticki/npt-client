@@ -18,10 +18,10 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
     datumPovrede: new Date(),
     tezinaPovrede: "",
     brojPovredneListe: "",
-    datumObavestenjaInspekcije: new Date(),
-    datumPredajeFondu: new Date(),
-    datumPreuzimanjaIzFonda: new Date(),
-    datumDostavjanjaUpravi: new Date(),
+    datumObavestenjaInspekcije: null as Date | null,
+    datumPredajeFondu: null as Date | null,
+    datumPreuzimanjaIzFonda: null as Date | null,
+    datumDostavjanjaUpravi: null as Date | null,
     napomena: "",
   });
 
@@ -70,6 +70,24 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        zaposleni: "",
+        datumPovrede: new Date(),
+        tezinaPovrede: "",
+        brojPovredneListe: "",
+        datumObavestenjaInspekcije: null,
+        datumPredajeFondu: null,
+        datumPreuzimanjaIzFonda: null,
+        datumDostavjanjaUpravi: null,
+        napomena: "",
+      });
+      setBrojListeNumber("");
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,9 +229,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             <CustomDatePicker
               value={formData.datumObavestenjaInspekcije}
               onChange={(date) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, datumObavestenjaInspekcije: date }));
-                }
+                setFormData(prev => ({ ...prev, datumObavestenjaInspekcije: date || null }));
               }}
             />
           </div>
@@ -223,9 +239,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             <CustomDatePicker
               value={formData.datumPredajeFondu}
               onChange={(date) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, datumPredajeFondu: date }));
-                }
+                setFormData(prev => ({ ...prev, datumPredajeFondu: date || null }));
               }}
             />
           </div>
@@ -235,9 +249,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             <CustomDatePicker
               value={formData.datumPreuzimanjaIzFonda}
               onChange={(date) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, datumPreuzimanjaIzFonda: date }));
-                }
+                setFormData(prev => ({ ...prev, datumPreuzimanjaIzFonda: date || null }));
               }}
             />
           </div>
@@ -247,9 +259,7 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
             <CustomDatePicker
               value={formData.datumDostavjanjaUpravi}
               onChange={(date) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, datumDostavjanjaUpravi: date }));
-                }
+                setFormData(prev => ({ ...prev, datumDostavjanjaUpravi: date || null }));
               }}
             />
           </div>

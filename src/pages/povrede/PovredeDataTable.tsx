@@ -19,7 +19,6 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import { completePovredaInspekcijaRok } from "../../data/rokovi";
-import { useCompanySelection } from "../../context/CompanyContext";
 
 interface Column {
   key: string;

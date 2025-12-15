@@ -169,8 +169,11 @@ export default function DnevniIzvestajiList({
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0"
+                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0 text-center"
                 >
+                  <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
+                    Akcije
+                  </p>
                 </TableCell>
               </TableRow>
             </TableHeader>

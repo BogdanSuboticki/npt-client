@@ -95,6 +95,8 @@ import AngazovanjaPage from "./pages/angazovanja/page";
 import ZaduzenjaLzoPage from "./pages/zaduzenja-lzo/page";
 import RokoviPage from "./pages/rokovi/page";
 import DnevniIzvestajiPage from "./pages/dnevni-izvestaji/page";
+import NotesPage from "./pages/notes/page";
+import TehnickaPodrska from "./pages/TehnickaPodrska";
 
 export default function App() {
   return (
@@ -128,11 +130,13 @@ export default function App() {
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<ProtectedRoute excludedRoles={['komitent']}><Calendar /></ProtectedRoute>} />
             <Route path="/invoice" element={<ProtectedRoute excludedRoles={['komitent']}><Invoices /></ProtectedRoute>} />
-            <Route path="/faq" element={<ProtectedRoute excludedRoles={['komitent']}><Faqs /></ProtectedRoute>} />
+            <Route path="/faq" element={<Faqs />} />
             <Route path="/pricing-tables" element={<ProtectedRoute excludedRoles={['komitent']}><PricingTables /></ProtectedRoute>} />
             <Route path="/blank" element={<ProtectedRoute excludedRoles={['komitent']}><Blank /></ProtectedRoute>} />
-            <Route path="/obrasci" element={<ProtectedRoute excludedRoles={['komitent']}><Obrasci /></ProtectedRoute>} />
+            <Route path="/obrasci" element={<Obrasci />} />
             <Route path="/prethodni-obrasci" element={<ProtectedRoute excludedRoles={['komitent']}><PrethodniObrasci /></ProtectedRoute>} />
+            <Route path="/notes" element={<NotesPage />} />
+            <Route path="/tehnicka-podrska" element={<TehnickaPodrska />} />
             <Route path="/osposobljavanje" element={<ProtectedRoute excludedRoles={['komitent']}><Osposobljavanje /></ProtectedRoute>} />
             <Route path="/oprema" element={<ProtectedRoute excludedRoles={['komitent']}><Oprema /></ProtectedRoute>} />
             <Route path="/lzs" element={<ProtectedRoute excludedRoles={['komitent']}><LZS /></ProtectedRoute>} />

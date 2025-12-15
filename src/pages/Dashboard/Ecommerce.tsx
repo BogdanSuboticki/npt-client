@@ -1,4 +1,4 @@
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
+import SystemMetrics from "../../components/ecommerce/SystemMetrics";
 import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
 import StatisticsChart from "../../components/ecommerce/StatisticsChart";
 import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
@@ -6,6 +6,9 @@ import RecentOrders from "../../components/ecommerce/RecentOrders";
 import DemographicCard from "../../components/ecommerce/DemographicCard";
 import DnevniIzvestajiWidget from "../../components/dashboard/DnevniIzvestajiWidget";
 import RokoviWidget from "../../components/dashboard/RokoviWidget";
+import PovredeWidget from "../../components/dashboard/PovredeWidget";
+import LekarskiPreglediWidget from "../../components/dashboard/LekarskiPreglediWidget";
+import PreglediOpremeWidget from "../../components/dashboard/PreglediOpremeWidget";
 import PageMeta from "../../components/common/PageMeta";
 import { useUser } from "../../context/UserContext";
 
@@ -29,6 +32,11 @@ export default function Ecommerce() {
         ) : (
           // Regular view for other roles
           <>
+            {/* System Metrics - Full width row */}
+            <div className="col-span-12">
+              <SystemMetrics />
+            </div>
+
             {/* Widgets at the top */}
             {isAdmin ? (
               <>
@@ -45,9 +53,18 @@ export default function Ecommerce() {
               </div>
             )}
 
-            <div className="col-span-12 space-y-6 xl:col-span-7">
-              <EcommerceMetrics />
+            {/* Safety & Compliance Widgets */}
+            <div className="col-span-12 xl:col-span-4">
+              <PovredeWidget />
+            </div>
+            <div className="col-span-12 xl:col-span-4">
+              <LekarskiPreglediWidget />
+            </div>
+            <div className="col-span-12 xl:col-span-4">
+              <PreglediOpremeWidget />
+            </div>
 
+            <div className="col-span-12 space-y-6 xl:col-span-7">
               <MonthlySalesChart />
             </div>
 

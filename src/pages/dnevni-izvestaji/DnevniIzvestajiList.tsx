@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -10,6 +11,9 @@ import {
 import { DnevniIzvestajiData } from "./DnevniIzvestajiDataTable";
 import { Company } from "../../data/companies";
 import { ReactComponent as EyeIcon } from '../../icons/eye.svg?react';
+import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
+import CustomDatePicker from "../../components/form/input/DatePicker";
+import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 
 interface DnevniIzvestajiListProps {
   reports: DnevniIzvestajiData[];
@@ -22,6 +26,11 @@ export default function DnevniIzvestajiList({
   selectedCompany,
   onReportSelect,
 }: DnevniIzvestajiListProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [dateFrom, setDateFrom] = useState<Date | null>(null);
+  const [dateTo, setDateTo] = useState<Date | null>(null);
+
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString("sr-Latn-RS", {
       day: "2-digit",
@@ -30,9 +39,54 @@ export default function DnevniIzvestajiList({
     });
   };
 
-  const filteredReports = selectedCompany
-    ? reports.filter((report) => report.firma === selectedCompany.naziv)
-    : [];
+  const filteredReports = useMemo(() => {
+    let filtered = selectedCompany
+      ? reports.filter((report) => report.firma === selectedCompany.naziv)
+      : [];
+
+    // Apply date filters
+    if (dateFrom || dateTo) {
+      filtered = filtered.filter((report) => {
+        const reportDate = new Date(report.datum);
+        reportDate.setHours(0, 0, 0, 0);
+        
+        if (dateFrom) {
+          const fromDate = new Date(dateFrom);
+          fromDate.setHours(0, 0, 0, 0);
+          if (reportDate < fromDate) return false;
+        }
+        
+        if (dateTo) {
+          const toDate = new Date(dateTo);
+          toDate.setHours(23, 59, 59, 999);
+          if (reportDate > toDate) return false;
+        }
+        
+        return true;
+      });
+    }
+
+    // Sort by date (newest first)
+    return filtered.sort((a, b) => b.datum.getTime() - a.datum.getTime());
+  }, [reports, selectedCompany, dateFrom, dateTo]);
+
+  const totalItems = filteredReports.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  // Reset to first page if current page is out of bounds after filtering
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const currentData = filteredReports.slice(startIndex, endIndex);
 
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
@@ -49,6 +103,47 @@ export default function DnevniIzvestajiList({
             </div>
           </div>
         )}
+
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>
+            <ItemsPerPageDropdown
+              value={itemsPerPage}
+              onChange={(value) => {
+                setItemsPerPage(value);
+                setCurrentPage(1); // Reset to first page when changing items per page
+              }}
+              options={[10, 20, 50, 100]}
+              className="w-[80px]"
+            />
+            <span className="text-gray-500 dark:text-gray-400"> rezultata </span>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-2">
+            <div className="relative w-full lg:w-42">
+              <CustomDatePicker
+                value={dateFrom}
+                onChange={(date) => {
+                  setDateFrom(date);
+                  setCurrentPage(1); // Reset to first page when changing filters
+                }}
+                placeholder="Datum od"
+                className="bg-[#F9FAFB] dark:bg-[#101828]"
+              />
+            </div>
+            <div className="relative w-full lg:w-42">
+              <CustomDatePicker
+                value={dateTo}
+                onChange={(date) => {
+                  setDateTo(date);
+                  setCurrentPage(1); // Reset to first page when changing filters
+                }}
+                placeholder="Datum do"
+                className="bg-[#F9FAFB] dark:bg-[#101828]"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="w-full overflow-x-auto custom-scrollbar">
@@ -66,7 +161,7 @@ export default function DnevniIzvestajiList({
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] text-center"
+                  className="px-4 py-3 border border-gray-100 dark:border-white/[0.05] border-r-0 text-center"
                 >
                   <p className="font-bold text-gray-700 text-theme-xs dark:text-gray-400">
                     Status
@@ -84,7 +179,7 @@ export default function DnevniIzvestajiList({
             </TableHeader>
 
             <TableBody>
-              {filteredReports.length === 0 ? (
+              {currentData.length === 0 ? (
                 <TableRow>
                   <td
                     colSpan={3}
@@ -96,7 +191,7 @@ export default function DnevniIzvestajiList({
                   </td>
                 </TableRow>
               ) : (
-                filteredReports.map((report) => (
+                currentData.map((report) => (
                   <TableRow
                     key={report.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
@@ -115,27 +210,18 @@ export default function DnevniIzvestajiList({
                         {report.pregledan ? "Pregledan" : "Nije Pregledan"}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 border-r-0 text-center">
-                      <div className="relative inline-block group">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onReportSelect(report);
-                          }}
-                          className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                        >
-                          <EyeIcon className="size-5" />
-                        </button>
-                        <div className="invisible absolute top-full left-1/2 mt-2.5 -translate-x-1/2 opacity-0 transition-opacity duration-300 group-hover:visible group-hover:opacity-100 z-50">
-                          <div className="relative">
-                            <div className="drop-shadow-4xl whitespace-nowrap rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white">
-                              Pregledaj
-                            </div>
-                            <div className="absolute -top-1 left-1/2 h-3 w-4 -translate-x-1/2 rotate-45 bg-brand-600"></div>
-                          </div>
-                        </div>
-                      </div>
+                    <TableCell className="px-4 py-4 border border-gray-100 dark:border-white/[0.05] border-r-0">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onReportSelect(report);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-colors font-medium text-sm"
+                      >
+                        <EyeIcon className="size-4" />
+                        <span>Pregledaj</span>
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -144,6 +230,23 @@ export default function DnevniIzvestajiList({
           </Table>
         </div>
       </div>
+
+      {totalItems > 0 && (
+        <div className="rounded-b-xl border-gray-100 dark:border-white/[0.05] pb-4">
+          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between">
+            <PaginationWithTextAndIcon 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+            <div className="pt-3 xl:pt-0 px-6">
+              <p className="pt-3 text-sm font-medium text-center text-gray-500 border-t border-gray-100 dark:border-gray-800 dark:text-gray-400 xl:border-t-0 xl:pt-0 xl:text-left">
+                Prikaz {startIndex + 1} - {endIndex} od {totalItems} zapisa
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

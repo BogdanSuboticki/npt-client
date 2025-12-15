@@ -519,7 +519,13 @@ const AppSidebar: React.FC = () => {
                >
                  {renderMenuItems(
                    userType === 'komitent' 
-                     ? othersItems.filter(item => item.path === "/profile")
+                     ? othersItems.filter(item => 
+                         item.path === "/profile" || 
+                         item.path === "/notes" || 
+                         item.path === "/faq" || 
+                         item.path === "/obrasci" || 
+                         item.path === "/tehnicka-podrska"
+                       )
                      : othersItems
                  )}
                </div>

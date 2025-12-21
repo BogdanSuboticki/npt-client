@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import RokoviDataTable, { RokoviData } from "./RokoviDataTable";
-import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { useCompanySelection } from "../../context/CompanyContext";
@@ -107,59 +106,17 @@ const RokoviPage: React.FC = () => {
                 title="Rokovi"
                 filename="rokovi"
               />
-              <Button size="sm" onClick={() => console.log("Open Rokovi form")}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Novi unos
-              </Button>
             </div>
           </div>
 
           <div className="sm:hidden mt-4">
-            <div className="flex gap-4 w-full">
-              <div className="flex-1">
-                <ExportPopoverButton
-                  data={data}
-                  columns={columns}
-                  title="Rokovi"
-                  filename="rokovi"
-                  className="w-full"
-                />
-              </div>
-              <div className="flex-1">
-                <Button
-                  onClick={() => console.log("Open Rokovi form")}
-                  size="sm"
-                  className="w-full"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Novi unos
-                </Button>
-              </div>
-            </div>
+            <ExportPopoverButton
+              data={data}
+              columns={columns}
+              title="Rokovi"
+              filename="rokovi"
+              className="w-full"
+            />
           </div>
         </div>
 

@@ -49,7 +49,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     icon: <FirmeIcon />,
-    name: "Firme",
+    name: "Preduzeća",
     path: "/firme?context=moja-firma",
   },
   {
@@ -165,7 +165,7 @@ const othersItems: NavItem[] = [
 const supportItems: NavItem[] = [
   {
     icon: <FirmeIcon />,
-    name: "Firme",
+    name: "Preduzeća",
     path: "/firme?context=komitenti",
   },
   {

@@ -384,7 +384,7 @@ export default function OsposobljavanjeDataTable({ data: initialData, columns, o
                 </TableHeader>
                 <TableBody>
                   {currentData.map((item) => (
-                    <TableRow key={item.id}>
+                    <TableRow key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       {columns.map(({ key }, index) => (
                         <TableCell
                           key={key}

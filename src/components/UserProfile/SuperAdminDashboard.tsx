@@ -33,8 +33,18 @@ interface User {
   };
 }
 
+interface Komitent {
+  id: string;
+  name: string;
+  email: string;
+  organization: string;
+  status: 'active' | 'inactive' | 'suspended';
+  lastLogin: string;
+  createdAt: string;
+}
+
 export default function SuperAdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'organizations' | 'users'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'organizations' | 'users' | 'komitenti'>('overview');
   
   // Refs for dropdowns
   const firmaRef = useRef<HTMLDivElement>(null);
@@ -68,6 +78,7 @@ export default function SuperAdminDashboard() {
   // State for add forms
   const [showAddFirmaModal, setShowAddFirmaModal] = useState(false);
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
+  const [showAddKomitentModal, setShowAddKomitentModal] = useState(false);
   
   // State for dropdowns
   const [isFirmaOpen, setIsFirmaOpen] = useState(false);
@@ -78,6 +89,8 @@ export default function SuperAdminDashboard() {
   const [editingFirmaId, setEditingFirmaId] = useState<string | null>(null);
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [isEditingKomitent, setIsEditingKomitent] = useState(false);
+  const [editingKomitentId, setEditingKomitentId] = useState<string | null>(null);
   
   // State for access change confirmation modal
   const [showAccessChangeModal, setShowAccessChangeModal] = useState(false);
@@ -95,12 +108,21 @@ export default function SuperAdminDashboard() {
   const [firmaToDelete, setFirmaToDelete] = useState<Firma | null>(null);
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [showDeleteKomitentModal, setShowDeleteKomitentModal] = useState(false);
+  const [komitentToDelete, setKomitentToDelete] = useState<Komitent | null>(null);
   const [newFirma, setNewFirma] = useState({
     naziv: '',
     email: '',
     sifra: ''
   });
   const [newKorisnik, setNewKorisnik] = useState({
+    ime: '',
+    prezime: '',
+    email: '',
+    firma: '',
+    sifra: ''
+  });
+  const [newKomitent, setNewKomitent] = useState({
     ime: '',
     prezime: '',
     email: '',
@@ -200,6 +222,36 @@ export default function SuperAdminDashboard() {
         canAccessAllData: false,
         canManageSystem: false
       }
+    }
+  ];
+
+  const komitenti: Komitent[] = [
+    {
+      id: "1",
+      name: "Petar Stojanović",
+      email: "petar.stojanovic@komitent.rs",
+      organization: "Tech Solutions d.o.o.",
+      status: "active",
+      lastLogin: "2024-01-15 10:30",
+      createdAt: "2023-12-01"
+    },
+    {
+      id: "2",
+      name: "Milica Đorđević",
+      email: "milica.djordjevic@komitent.rs",
+      organization: "Client Company A",
+      status: "active",
+      lastLogin: "2024-01-14 16:20",
+      createdAt: "2023-11-15"
+    },
+    {
+      id: "3",
+      name: "Stefan Marković",
+      email: "stefan.markovic@komitent.rs",
+      organization: "Client Company B",
+      status: "inactive",
+      lastLogin: "2024-01-10 09:15",
+      createdAt: "2023-10-20"
     }
   ];
 
@@ -447,10 +499,86 @@ export default function SuperAdminDashboard() {
     setUserToDelete(null);
   };
 
+  const handleAddKomitent = () => {
+    if (newKomitent.ime && newKomitent.prezime && newKomitent.email && newKomitent.firma) {
+      if (isEditingKomitent && editingKomitentId) {
+        // Update existing komitent
+        console.log('Updating komitent:', editingKomitentId, newKomitent);
+        // In a real app, you would update in backend here
+      } else {
+        // Add new komitent
+        const newKomitentObj: Komitent = {
+          id: (komitenti.length + 1).toString(),
+          name: `${newKomitent.ime} ${newKomitent.prezime}`,
+          email: newKomitent.email,
+          organization: newKomitent.firma,
+          status: 'active',
+          lastLogin: 'N/A',
+          createdAt: new Date().toISOString().split('T')[0]
+        };
+        
+        // In a real app, you would save to backend here
+        console.log('Adding new komitent:', newKomitentObj);
+      }
+      
+      // Reset form and close modal
+      setNewKomitent({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+      setIsEditingKomitent(false);
+      setEditingKomitentId(null);
+      setShowAddKomitentModal(false);
+      setIsFirmaOpen(false);
+      setDropdownPosition({ left: 0, top: 0 });
+    }
+  };
+
+  const handleCloseAddKomitentModal = () => {
+    setShowAddKomitentModal(false);
+    setIsEditingKomitent(false);
+    setEditingKomitentId(null);
+    setNewKomitent({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+    setIsFirmaOpen(false);
+    setDropdownPosition({ left: 0, top: 0 });
+  };
+
+  const handleEditKomitent = (komitent: Komitent) => {
+    // Set the form data for editing
+    setNewKomitent({
+      ime: komitent.name.split(' ')[0] || '',
+      prezime: komitent.name.split(' ').slice(1).join(' ') || '',
+      email: komitent.email,
+      firma: komitent.organization,
+      sifra: '' // Password field is empty for editing
+    });
+    setIsEditingKomitent(true);
+    setEditingKomitentId(komitent.id);
+    setShowAddKomitentModal(true);
+    console.log('Editing komitent:', komitent);
+  };
+
+  const handleDeleteKomitent = (komitent: Komitent) => {
+    setKomitentToDelete(komitent);
+    setShowDeleteKomitentModal(true);
+  };
+
+  const confirmDeleteKomitent = () => {
+    if (komitentToDelete) {
+      // In a real app, you would delete from backend here
+      console.log('Deleted komitent:', komitentToDelete);
+      setShowDeleteKomitentModal(false);
+      setKomitentToDelete(null);
+    }
+  };
+
+  const cancelDeleteKomitent = () => {
+    setShowDeleteKomitentModal(false);
+    setKomitentToDelete(null);
+  };
+
   const totalFirme = firme.length;
   const totalUsers = users.length;
   const activeUsers = users.filter(user => user.status === 'active').length;
   const totalAdmins = users.filter(user => user.role === 'admin').length;
+  const totalKomitenti = komitenti.length;
 
   // Add click outside handler for dropdowns
   useEffect(() => {
@@ -521,7 +649,7 @@ export default function SuperAdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
-            Firme ({totalFirme})
+            Admin ({totalFirme})
           </button>
           <button
             onClick={() => setActiveTab('users')}
@@ -532,6 +660,16 @@ export default function SuperAdminDashboard() {
             }`}
           >
             Korisnici ({totalUsers})
+          </button>
+          <button
+            onClick={() => setActiveTab('komitenti')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+              activeTab === 'komitenti'
+                ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            Komitenti ({totalKomitenti})
           </button>
         </div>
 
@@ -594,7 +732,7 @@ export default function SuperAdminDashboard() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h5 className="text-lg font-medium text-gray-800 dark:text-white/90">
-                  Upravljanje firmama
+                  Upravljanje Adminima
                 </h5>
                 <Button size="sm" onClick={() => {
                   setIsEditingFirma(false);
@@ -623,7 +761,7 @@ export default function SuperAdminDashboard() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                      <th className="px-4 py-3">Korisnik</th>
+                      <th className="px-4 py-3">Ime i prezime</th>
                       <th className="px-4 py-3">Email</th>
                       <th className="px-4 py-3 text-center">Moja Firma</th>
                       <th className="px-4 py-3 text-center">Komitenti</th>
@@ -745,7 +883,7 @@ export default function SuperAdminDashboard() {
                        <table className="w-full text-sm text-left">
                          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                            <tr>
-                             <th className="px-4 py-3">Korisnik</th>
+                             <th className="px-4 py-3">Ime i prezime</th>
                              <th className="px-4 py-3">Email</th>
                              <th className="px-4 py-3 text-center">Moja Firma</th>
                              <th className="px-4 py-3 text-center">Komitenti</th>
@@ -815,6 +953,117 @@ export default function SuperAdminDashboard() {
                })()}
              </div>
            )}
+
+          {activeTab === 'komitenti' && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h5 className="text-lg font-medium text-gray-800 dark:text-white/90">
+                  Upravljanje Komitentima
+                </h5>
+                <Button size="sm" onClick={() => {
+                  setIsEditingKomitent(false);
+                  setEditingKomitentId(null);
+                  setNewKomitent({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+                  setShowAddKomitentModal(true);
+                }}>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Dodaj komitenta
+                </Button>
+              </div>
+              
+              {/* Group komitenti by organization */}
+              {(() => {
+                const groupedKomitenti = komitenti.reduce((acc, komitent) => {
+                  const org = komitent.organization;
+                  if (!acc[org]) {
+                    acc[org] = [];
+                  }
+                  acc[org].push(komitent);
+                  return acc;
+                }, {} as { [key: string]: Komitent[] });
+
+                return Object.entries(groupedKomitenti).map(([organization, orgKomitenti]) => (
+                  <div key={organization} className="space-y-3">
+                    {/* Organization Header */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-l-4 border-blue-500 px-6 py-4 rounded-lg shadow-sm">
+                      <h6 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                        {organization}
+                      </h6>
+                    </div>
+                    
+                    {/* Komitenti Table for this Organization */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                          <tr>
+                            <th className="px-4 py-3">Ime i prezime</th>
+                            <th className="px-4 py-3">Email</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3">Poslednja prijava</th>
+                            <th className="px-4 py-3 text-center">Akcije</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orgKomitenti.map((komitent) => (
+                            <tr key={komitent.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                              <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
+                                {komitent.name}
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.email}
+                              </td>
+                              <td className="px-4 py-4">
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  komitent.status === 'active'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                    : komitent.status === 'inactive'
+                                    ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                  {komitent.status === 'active' ? 'Aktivan' : komitent.status === 'inactive' ? 'Neaktivan' : 'Suspendovan'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.lastLogin}
+                              </td>
+                              <td className="px-4 py-4">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button 
+                                    onClick={() => handleEditKomitent(komitent)}
+                                    className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                                  >
+                                    <EditButtonIcon className="size-4" />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteKomitent(komitent)}
+                                    className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                                  >
+                                    <DeleteButtonIcon className="size-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1250,6 +1499,163 @@ export default function SuperAdminDashboard() {
                 className="bg-error-500 hover:bg-error-600 text-white"
               >
                 Obriši korisnika
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Add Komitent Modal */}
+        <Modal
+          isOpen={showAddKomitentModal}
+          onClose={handleCloseAddKomitentModal}
+          className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+        >
+          <div className="flex flex-col h-full">
+            <div className="p-5 pt-10">
+              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {isEditingKomitent ? 'Izmeni komitenta' : 'Dodaj novog komitenta'}
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {isEditingKomitent ? 'Izmenite podatke o komitentu' : 'Unesite podatke o novom komitentu'}
+              </p>
+            </div>
+            
+            <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+                <div className="w-full">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Ime
+                  </Label>
+                  <input
+                    type="text"
+                    value={newKomitent.ime}
+                    onChange={(e) => setNewKomitent({ ...newKomitent, ime: e.target.value })}
+                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Unesite ime"
+                  />
+                </div>
+                
+                <div className="w-full">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Prezime
+                  </Label>
+                  <input
+                    type="text"
+                    value={newKomitent.prezime}
+                    onChange={(e) => setNewKomitent({ ...newKomitent, prezime: e.target.value })}
+                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Unesite prezime"
+                  />
+                </div>
+                
+                <div className="w-full">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Email
+                  </Label>
+                  <input
+                    type="email"
+                    value={newKomitent.email}
+                    onChange={(e) => setNewKomitent({ ...newKomitent, email: e.target.value })}
+                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Unesite email adresu"
+                  />
+                </div>
+                
+                <div className="w-full">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Firma
+                  </Label>
+                  <div className="relative w-full" ref={firmaRef}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isFirmaOpen && firmaRef.current) {
+                          const rect = firmaRef.current.getBoundingClientRect();
+                          setDropdownPosition({
+                            left: rect.left,
+                            top: rect.bottom + 4
+                          });
+                        }
+                        setIsFirmaOpen(!isFirmaOpen);
+                      }}
+                      className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                    >
+                      <span>{newKomitent.firma || "Izaberi firmu"}</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${isFirmaOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isFirmaOpen && (
+                      <div className="fixed z-[100] bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700" style={{ left: dropdownPosition.left, top: dropdownPosition.top, width: firmaRef.current?.offsetWidth || 'auto' }}>
+                        <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                          {firme.map((firma, index) => (
+                            <div
+                              key={firma.id}
+                              className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                                newKomitent.firma === firma.name ? 'bg-gray-100 dark:bg-gray-700' : ''
+                              } ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
+                              onClick={() => {
+                                setNewKomitent({ ...newKomitent, firma: firma.name });
+                                setIsFirmaOpen(false);
+                              }}
+                            >
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{firma.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={handleCloseAddKomitentModal}>
+                  Otkaži
+                </Button>
+                <Button onClick={handleAddKomitent}>
+                  {isEditingKomitent ? 'Izmeni komitenta' : 'Dodaj komitenta'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Delete Komitent Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteKomitentModal}
+          onClose={cancelDeleteKomitent}
+          className="max-w-[450px] dark:bg-gray-800"
+        >
+          <div className="p-6">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+              Da li ste sigurni?
+            </h4>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Da li ste sigurni da želite da obrišete komitenta "{komitentToDelete?.name}"?
+            </p>
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+              Ova akcija se ne može poništiti.
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={cancelDeleteKomitent}>
+                Otkaži
+              </Button>
+              <Button 
+                onClick={confirmDeleteKomitent}
+                className="bg-error-500 hover:bg-error-600 text-white"
+              >
+                Obriši komitenta
               </Button>
             </div>
           </div>

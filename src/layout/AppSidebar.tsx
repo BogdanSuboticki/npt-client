@@ -408,7 +408,7 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pb-32 lg:pb-0">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
-                               {/* Moja Firma Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
+                               {/* Moje Preduzeće Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showMojaFirma) || 
                      (userType === 'user' && organizationSettings.usersCanSeeMojaFirma)) && (
@@ -423,7 +423,7 @@ const AppSidebar: React.FC = () => {
                 >
                   {isExpanded || isHovered || isMobileOpen ? (
                     <div className="flex items-center gap-2">
-                      <span>MOJA FIRMA</span>
+                      <span>MOJE PREDUZEĆE</span>
                       <ChevronDownIcon
                         className={`w-4 h-4 transition-transform duration-200 ${
                           !isMojaFirmaCollapsed ? "rotate-180" : ""

@@ -5,6 +5,8 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import CustomDatePicker from "../../components/form/input/DatePicker";
+import Slider from "../../components/ui/Slider";
+import { useUser } from "../../context/UserContext";
 
 interface AngazovanjaFormProps {
   isOpen: boolean;
@@ -14,6 +16,9 @@ interface AngazovanjaFormProps {
 }
 
 export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }: AngazovanjaFormProps) {
+  const { userType } = useUser();
+  const isAdmin = userType === 'admin';
+  
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     radnoMesto: "",
@@ -21,6 +26,13 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
     vrstaAngazovanja: "Redovno angažovanje",
     datumPocetka: new Date(),
     datumPrestanka: null as Date | null,
+  });
+
+  // State for creating new korisnik
+  const [createKorisnik, setCreateKorisnik] = React.useState(false);
+  const [korisnikData, setKorisnikData] = React.useState({
+    email: "",
+    sifra: "",
   });
 
   // Add state for dropdowns
@@ -70,6 +82,8 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
         datumPocetka: initialData.pocetakAngazovanja ? new Date(initialData.pocetakAngazovanja) : new Date(),
         datumPrestanka: initialData.prestanakAngazovanja ? new Date(initialData.prestanakAngazovanja) : null,
       });
+      setCreateKorisnik(false);
+      setKorisnikData({ email: "", sifra: "" });
     } else {
       // Reset form when no initial data
       setFormData({
@@ -80,6 +94,8 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
         datumPocetka: new Date(),
         datumPrestanka: null,
       });
+      setCreateKorisnik(false);
+      setKorisnikData({ email: "", sifra: "" });
     }
   }, [initialData]);
 
@@ -91,11 +107,33 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form fields
     if (!formData.zaposleni || !formData.radnoMesto || !formData.lokacija || !formData.datumPocetka) {
       alert('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
+    
+    // Additional validation when creating new korisnik user
+    if (createKorisnik) {
+      if (!korisnikData.email || !korisnikData.sifra) {
+        alert('Molimo popunite email i šifru za kreiranje korisnika');
+        return;
+      }
+    }
+    
+    const submitData = {
+      ...formData,
+      ...(createKorisnik ? { 
+        createKorisnik: true,
+        korisnikData: {
+          email: korisnikData.email,
+          sifra: korisnikData.sifra,
+        },
+      } : {}),
+    };
+    
+    onSave(submitData);
     onClose();
   };
 
@@ -103,13 +141,36 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-[600px] p-5 lg:p-10 dark:bg-[#11181E]"
+      className="max-w-[600px] max-h-[90vh] dark:bg-[#11181E] overflow-hidden"
     >
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
-        {initialData ? "Izmeni Angažovanje" : "Novo Angažovanje"}
-      </h2>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 gap-4">
+      <div className="flex flex-col h-full">
+        <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            {initialData ? "Izmeni Angažovanje" : "Novo Angažovanje"}
+          </h2>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            <div className="grid grid-cols-1 gap-4 pb-4">
+          {isAdmin && !initialData && (
+            <div className="col-span-1">
+              <Slider
+                label="Kreiranje korisnika"
+                optionOne="Kreiraj korisnika"
+                optionTwo="Ne kreiraj korisnika"
+                value={createKorisnik}
+                onChange={(value) => {
+                  setCreateKorisnik(value);
+                  if (!value) {
+                    setKorisnikData({ email: "", sifra: "" });
+                  }
+                }}
+                size="full"
+                name="slider-create-korisnik"
+              />
+            </div>
+          )}
+
           <div className="col-span-1">
             <Label>Zaposleni *</Label>
             {initialData ? (
@@ -156,6 +217,31 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
               </div>
             )}
           </div>
+
+          {createKorisnik && isAdmin && !initialData && (
+            <>
+              <div className="col-span-1">
+                <Label>Email *</Label>
+                <input
+                  type="email"
+                  value={korisnikData.email}
+                  onChange={(e) => setKorisnikData({ ...korisnikData, email: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Unesite email adresu"
+                />
+              </div>
+              <div className="col-span-1">
+                <Label>Šifra *</Label>
+                <input
+                  type="password"
+                  value={korisnikData.sifra}
+                  onChange={(e) => setKorisnikData({ ...korisnikData, sifra: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Unesite šifru"
+                />
+              </div>
+            </>
+          )}
 
           <div className="col-span-1">
             <Label>Radno mesto *</Label>
@@ -275,22 +361,26 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
               }}
             />
           </div>
-        </div>
+          </div>
+          </div>
 
-        <div className="flex justify-end gap-2 mt-6">
-          <Button
-            variant="outline"
-            onClick={onClose}
-          >
-            Otkaži
-          </Button>
-          <Button
-            type="submit"
-          >
-            Sačuvaj
-          </Button>
-        </div>
-      </form>
+          <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 flex-shrink-0">
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={onClose}
+              >
+                Otkaži
+              </Button>
+              <Button
+                type="submit"
+              >
+                Sačuvaj
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
     </Modal>
   );
 }

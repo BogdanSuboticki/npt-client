@@ -429,7 +429,7 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                 </TableHeader>
                 <TableBody>
                   {currentData.map((item) => (
-                    <TableRow key={item.id}>
+                    <TableRow key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       {columns.map(({ key }, index) => (
                         <TableCell
                           key={key}

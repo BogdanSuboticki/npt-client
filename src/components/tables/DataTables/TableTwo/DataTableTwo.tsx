@@ -287,6 +287,7 @@ export default function DataTableTwo({ data: initialData, columns, onEditClick, 
               {currentData.map((item, index) => (
                 <TableRow 
                   key={`${item.id}-${item.opremaIndex}`}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
                   {columns.map(({ key }, colIndex) => {
                     // Only render spanning columns on the first row of each group

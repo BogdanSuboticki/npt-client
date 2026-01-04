@@ -507,27 +507,33 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       questionKey: "napomena",
     });
 
-    // Add "Napomena za BZR" for all users
-    rows.push({
-      id: 'napomena-bzr',
-      reportId: item.id,
-      firma: "",
-      datum: new Date(0),
-      pitanje: "Napomena za BZR",
-      odgovor: null,
-      napomena: "",
-      napomenaBZR: napomenaBZR,
-      isQuestion: false,
-      questionType: "generalNote",
-      questionKey: "napomenaBZR",
-    });
+    // Add "Napomena za BZR" for all users except komitent
+    if (!isKomitent) {
+      rows.push({
+        id: 'napomena-bzr',
+        reportId: item.id,
+        firma: "",
+        datum: new Date(0),
+        pitanje: "Napomena za BZR",
+        odgovor: null,
+        napomena: "",
+        napomenaBZR: napomenaBZR,
+        isQuestion: false,
+        questionType: "generalNote",
+        questionKey: "napomenaBZR",
+      });
+    }
 
     return rows;
   }, [filteredAndSortedData, answers, napomenaValues, personName, questions, savedForms, readOnly, selectedReport, napomena, napomenaBZR, isKomitent, formData]);
 
   // Display all data without pagination
   // For admin view, filter out "Napomena za BZR" from table (it will be shown separately)
+  // For komitent, always filter out "Napomena za BZR"
   const currentTransformedData = useMemo(() => {
+    if (isKomitent) {
+      return transformedData.filter(row => row.questionKey !== "napomenaBZR");
+    }
     if (readOnly && !isKomitent) {
       return transformedData.filter(row => row.questionKey !== "napomenaBZR");
     }
@@ -690,10 +696,15 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
     }
 
     // Build table rows HTML (use transformedData to include all rows including napomenaBZR)
+    // Filter out "Napomena za BZR" for komitent
     let tableRowsHtml = '';
     transformedData.forEach((row) => {
       // Skip napomena rows (they're now integrated into question rows)
       if (row.pitanje.startsWith("Napomena:")) {
+        return;
+      }
+      // Skip "Napomena za BZR" for komitent
+      if (isKomitent && row.questionKey === "napomenaBZR") {
         return;
       }
       
@@ -842,10 +853,15 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
     }
 
     // Build table rows HTML (use transformedData to include all rows including napomenaBZR)
+    // Filter out "Napomena za BZR" for komitent
     let tableRowsHtml = '';
     transformedData.forEach((row) => {
       // Skip napomena rows (they're now integrated into question rows)
       if (row.pitanje.startsWith("Napomena:")) {
+        return;
+      }
+      // Skip "Napomena za BZR" for komitent
+      if (isKomitent && row.questionKey === "napomenaBZR") {
         return;
       }
       
@@ -982,18 +998,18 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                 <div className="flex flex-col gap-2 text-sm">
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">Preduzeće:</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedCompany.naziv}</span>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Preduzeće:</span>
+                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">{selectedCompany.naziv}</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">Nadležno preduzeće:</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">{nadleznoPreduzece}</span>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nadležno preduzeće:</span>
+                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">{nadleznoPreduzece}</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                         Svakodnevna kontrola stanja BZR i komunikacija sa:
                       </span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">
                         {readOnly && selectedReport 
                           ? (selectedReport.osobaZaSaradnju || personName || "-")
                           : (personName || "-")
@@ -1001,8 +1017,8 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                       </span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">Datum:</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Datum:</span>
+                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">
                         {readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}
                       </span>
                     </div>
@@ -1017,7 +1033,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
             {readOnly && selectedReport && (
               <Badge 
                 variant="light" 
-                color={currentPregledanStatus ? "success" : "warning"}
+                color={currentPregledanStatus ? "success" : "error"}
                 size="md"
               >
                 {currentPregledanStatus ? "Pregledan" : "Nije pregledan"}
@@ -1052,23 +1068,37 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
             </TableHeader>
 
             <TableBody>
-              {currentTransformedData.map((row) => {
+              {currentTransformedData.map((row, index) => {
+                // Check if next row is a form response for this question (for komitent editing)
+                const nextRow = currentTransformedData[index + 1];
+                const hasFormResponse = !readOnly && isKomitent && row.isQuestion && 
+                  nextRow && nextRow.pitanje.startsWith("Forma:") && nextRow.questionKey === row.questionKey;
+                
+                // Skip rendering form rows that are already shown in the question row
+                if (row.pitanje.startsWith("Forma:") && !readOnly && isKomitent && 
+                    currentTransformedData[index - 1]?.isQuestion && 
+                    currentTransformedData[index - 1]?.questionKey === row.questionKey) {
+                  return null;
+                }
+                
                 return (
-                  <TableRow key={row.id}>
-                    <TableCell className="px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 border-l-0">
-                      {row.pitanje}
+                  <TableRow key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <TableCell className="px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] border-l-0">
+                      <span className="text-sm font-normal text-gray-700 dark:text-gray-300">
+                        {row.pitanje}
+                      </span>
                     </TableCell>
                     <TableCell className={`px-4 py-4 text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-gray-400 border-r-0 ${
                       row.isQuestion && row.questionType === "napomena" && row.odgovor === true ? "" : "text-center"
                     }`}>
                       {row.isQuestion ? (
                         <div className={`flex flex-col gap-3 ${
-                          row.questionType === "napomena" && row.odgovor === true ? "" : "items-center"
+                          row.questionType === "napomena" && row.odgovor === true ? "" : !hasFormResponse ? "items-center" : ""
                         }`}>
                           {/* Answer Selection */}
-                          <div className="relative flex items-center justify-center w-full">
+                          <div className={`relative flex items-center ${hasFormResponse ? 'justify-start' : 'justify-center'} w-full`}>
                             {readOnly ? (
-                              <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">
+                              <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold">
                                 {row.odgovor === true ? "DA" : row.odgovor === false ? "NE" : "-"}
                               </span>
                             ) : (
@@ -1139,15 +1169,35 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                             )}
                           </div>
                           
+                          {/* Form Response - shown below dropdown for komitent when editing */}
+                          {hasFormResponse && (
+                            <div className="w-full text-left">
+                              <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                                {typeof nextRow.odgovor === "string" && nextRow.odgovor.split("\n").map((line, idx) => {
+                                  const colonIndex = line.indexOf(":");
+                                  if (colonIndex === -1) return <div key={idx}>{line}</div>;
+                                  const label = line.substring(0, colonIndex + 1);
+                                  const value = line.substring(colonIndex + 1).trim();
+                                  return (
+                                    <div key={idx}>
+                                      <span className="font-normal">{label}</span>{" "}
+                                      <span className="font-semibold">{value}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          
                           {/* Napomena field - shown when answer is DA and question type is napomena */}
-                          {row.questionType === "napomena" && row.odgovor === true && (
+                          {row.questionType === "napomena" && row.odgovor === true && !hasFormResponse && (
                             <div className="w-full">
-                              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+                              <label className="block text-sm font-normal text-gray-700 dark:text-gray-300 mb-1.5">
                                 Napomena:
                               </label>
                               {readOnly ? (
                                 <div className="text-left">
-                                  <span className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
+                                  <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold whitespace-pre-wrap">
                                     {row.napomena || "-"}
                                   </span>
                                 </div>
@@ -1197,10 +1247,21 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                         <div className="text-left">
                           {isKomitent && row.odgovor && typeof row.odgovor === "string" && row.odgovor !== "Forma je popunjena" ? (
                             <div className="text-gray-800 dark:text-gray-200 text-sm whitespace-pre-wrap">
-                              {row.odgovor}
+                              {row.odgovor.split("\n").map((line, idx) => {
+                                const colonIndex = line.indexOf(":");
+                                if (colonIndex === -1) return <div key={idx}>{line}</div>;
+                                const label = line.substring(0, colonIndex + 1);
+                                const value = line.substring(colonIndex + 1).trim();
+                                return (
+                                  <div key={idx}>
+                                    <span className="font-normal">{label}</span>{" "}
+                                    <span className="font-semibold">{value}</span>
+                                  </div>
+                                );
+                              })}
                             </div>
                           ) : (
-                            <span className="text-blue-600 dark:text-blue-400 font-medium">Forma je popunjena</span>
+                            <span className="text-blue-600 dark:text-blue-400 font-semibold text-sm">Forma je popunjena</span>
                           )}
                         </div>
                       ) : (

@@ -6,6 +6,8 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
+import Slider from "../../components/ui/Slider";
+import { useUser } from "../../context/UserContext";
 
 interface FirmeFormProps {
   isOpen: boolean;
@@ -15,6 +17,9 @@ interface FirmeFormProps {
 }
 
 export default function FirmeForm({ isOpen, onClose, onSave, initialData }: FirmeFormProps) {
+  const { userType } = useUser();
+  const isAdmin = userType === 'admin';
+  
   const [formData, setFormData] = React.useState({
     nazivFirme: "",
     adresaFirme: "",
@@ -33,6 +38,13 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
     datumPocetkaUgovora: new Date(),
     datumIstekaUgovora: new Date(),
     obaveznaObukaPrvePomoci: false,
+  });
+
+  // State for creating new komitent
+  const [createKomitent, setCreateKomitent] = React.useState(false);
+  const [komitentData, setKomitentData] = React.useState({
+    email: "",
+    sifra: "",
   });
 
   // Add state for dropdowns
@@ -78,6 +90,8 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
         datumIstekaUgovora: initialData.datumIstekaUgovora || new Date(),
         obaveznaObukaPrvePomoci: initialData.obaveznaObukaPrvePomoci || false,
       });
+      setCreateKomitent(false);
+      setKomitentData({ email: "", sifra: "" });
     } else {
       // Reset form when no initial data
       setFormData({
@@ -99,6 +113,8 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
         datumIstekaUgovora: new Date(),
         obaveznaObukaPrvePomoci: false,
       });
+      setCreateKomitent(false);
+      setKomitentData({ email: "", sifra: "" });
     }
   }, [initialData]);
 
@@ -115,7 +131,27 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
       alert('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
+    
+    // Additional validation when creating new komitent user
+    if (createKomitent) {
+      if (!komitentData.email || !komitentData.sifra) {
+        alert('Molimo popunite email i šifru za kreiranje komitenta');
+        return;
+      }
+    }
+    
+    const submitData = {
+      ...formData,
+      ...(createKomitent ? { 
+        createKomitent: true,
+        komitentData: {
+          email: komitentData.email,
+          sifra: komitentData.sifra,
+        },
+      } : {}),
+    };
+    
+    onSave(submitData);
     onClose();
   };
 
@@ -133,7 +169,7 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
         <Modal
           isOpen={isOpen}
           onClose={onClose}
-      className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
+      className="max-w-[800px] max-h-[90vh] dark:bg-[#11181E] overflow-hidden"
     >
           <div className="flex flex-col h-full">
             <div className="p-5 pt-10">
@@ -144,6 +180,25 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+          {isAdmin && !initialData && (
+            <div className="col-span-1 lg:col-span-2">
+              <Slider
+                label="Kreiranje komitenta"
+                optionOne="Kreiraj komitenta"
+                optionTwo="Ne kreiraj komitenta"
+                value={createKomitent}
+                onChange={(value) => {
+                  setCreateKomitent(value);
+                  if (!value) {
+                    setKomitentData({ email: "", sifra: "" });
+                  }
+                }}
+                size="full"
+                name="slider-create-komitent"
+              />
+            </div>
+          )}
+
               <div className="col-span-1">
                 <Label>Naziv firme *</Label>
                 <Input
@@ -263,6 +318,31 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
                   onChange={handleInputChange}
                 />
               </div>
+
+          {createKomitent && isAdmin && !initialData && (
+            <>
+              <div className="col-span-1">
+                <Label>Email komitenta *</Label>
+                <input
+                  type="email"
+                  value={komitentData.email}
+                  onChange={(e) => setKomitentData({ ...komitentData, email: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Unesite email adresu"
+                />
+              </div>
+              <div className="col-span-1">
+                <Label>Šifra komitenta *</Label>
+                <input
+                  type="password"
+                  value={komitentData.sifra}
+                  onChange={(e) => setKomitentData({ ...komitentData, sifra: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Unesite šifru"
+                />
+              </div>
+            </>
+          )}
 
               <div className="col-span-1">
                 <Label>Ime i prezime direktora firme</Label>

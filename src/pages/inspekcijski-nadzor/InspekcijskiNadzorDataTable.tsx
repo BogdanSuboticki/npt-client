@@ -387,7 +387,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
             </TableHeader>
             <TableBody>
               {currentData.map((item, index) => (
-                <TableRow key={`${item.id}-${item.meraIndex}`}>
+                <TableRow key={`${item.id}-${item.meraIndex}`} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   {columns.map(({ key }, colIndex) => {
                     // Only render spanning columns on the first row of each group
                     if ((key === 'brojResenja' || key === 'datumNadzora' || key === 'napomena' || key === 'redniBroj') && !item.isFirstRow) {

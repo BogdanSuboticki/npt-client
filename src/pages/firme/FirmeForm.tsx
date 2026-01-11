@@ -14,9 +14,11 @@ interface FirmeFormProps {
   onClose: () => void;
   onSave: (data: any) => void;
   initialData?: any;
+  fromAdminDashboard?: boolean; // When true, hide slider but show email/šifra fields
+  userLabel?: string; // Label for user type (default: "komitenta", can be "administratora" for super admin)
 }
 
-export default function FirmeForm({ isOpen, onClose, onSave, initialData }: FirmeFormProps) {
+export default function FirmeForm({ isOpen, onClose, onSave, initialData, fromAdminDashboard = false, userLabel = "komitenta" }: FirmeFormProps) {
   const { userType } = useUser();
   const isAdmin = userType === 'admin';
   
@@ -41,7 +43,8 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
   });
 
   // State for creating new komitent
-  const [createKomitent, setCreateKomitent] = React.useState(false);
+  // If fromAdminDashboard, default to true (show email/šifra fields)
+  const [createKomitent, setCreateKomitent] = React.useState(fromAdminDashboard);
   const [komitentData, setKomitentData] = React.useState({
     email: "",
     sifra: "",
@@ -68,8 +71,13 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Populate form with initialData when provided
+  // Populate form with initialData when provided or reset when modal opens
   useEffect(() => {
+    if (!isOpen) {
+      // Reset form when modal is closed
+      return;
+    }
+
     if (initialData) {
       setFormData({
         nazivFirme: initialData.naziv || "",
@@ -90,7 +98,7 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
         datumIstekaUgovora: initialData.datumIstekaUgovora || new Date(),
         obaveznaObukaPrvePomoci: initialData.obaveznaObukaPrvePomoci || false,
       });
-      setCreateKomitent(false);
+      setCreateKomitent(fromAdminDashboard);
       setKomitentData({ email: "", sifra: "" });
     } else {
       // Reset form when no initial data
@@ -113,10 +121,10 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
         datumIstekaUgovora: new Date(),
         obaveznaObukaPrvePomoci: false,
       });
-      setCreateKomitent(false);
+      setCreateKomitent(fromAdminDashboard);
       setKomitentData({ email: "", sifra: "" });
     }
-  }, [initialData]);
+  }, [initialData, fromAdminDashboard, isOpen]);
 
 
 
@@ -132,8 +140,8 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
       return;
     }
     
-    // Additional validation when creating new komitent user
-    if (createKomitent) {
+    // Additional validation when creating new komitent user (or from admin dashboard)
+    if (createKomitent || fromAdminDashboard) {
       if (!komitentData.email || !komitentData.sifra) {
         alert('Molimo popunite email i šifru za kreiranje komitenta');
         return;
@@ -142,7 +150,7 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
     
     const submitData = {
       ...formData,
-      ...(createKomitent ? { 
+      ...((createKomitent || fromAdminDashboard) ? { 
         createKomitent: true,
         komitentData: {
           email: komitentData.email,
@@ -174,18 +182,19 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
           <div className="flex flex-col h-full">
             <div className="p-5 pt-10">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {initialData ? "Izmeni Firma" : "Nova Firma"}
+                {fromAdminDashboard ? "Dodaj komitenta" : initialData ? "Izmeni Preduzeće" : "Novo Preduzeće"}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
-          {isAdmin && !initialData && (
+          {/* Show slider only if not from admin dashboard and is admin and no initial data */}
+          {isAdmin && !initialData && !fromAdminDashboard && (
             <div className="col-span-1 lg:col-span-2">
               <Slider
                 label="Kreiranje komitenta"
-                optionOne="Kreiraj komitenta"
-                optionTwo="Ne kreiraj komitenta"
+                optionOne="Kreiraj Profil Komitenta"
+                optionTwo="Ne kreiraj profil Komitenta"
                 value={createKomitent}
                 onChange={(value) => {
                   setCreateKomitent(value);
@@ -195,12 +204,37 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
                 }}
                 size="full"
                 name="slider-create-komitent"
+                showRedWhenFalse={true}
               />
             </div>
           )}
 
+          {/* Show email and šifra fields at the top if fromAdminDashboard OR if createKomitent is true (when slider is enabled) */}
+          {(fromAdminDashboard || (createKomitent && isAdmin && !initialData)) && (
+            <>
               <div className="col-span-1">
-                <Label>Naziv firme *</Label>
+                <Label className="text-brand-500 dark:text-[#60a5fa]">Email {userLabel} *</Label>
+                <input
+                  type="email"
+                  value={komitentData.email}
+                  onChange={(e) => setKomitentData({ ...komitentData, email: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-[#60a5fa] focus:border-transparent"
+                />
+              </div>
+              <div className="col-span-1">
+                <Label className="text-brand-500 dark:text-[#60a5fa]">Šifra {userLabel} *</Label>
+                <input
+                  type="password"
+                  value={komitentData.sifra}
+                  onChange={(e) => setKomitentData({ ...komitentData, sifra: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-[#60a5fa] focus:border-transparent"
+                />
+              </div>
+            </>
+          )}
+
+              <div className="col-span-1">
+                <Label>Naziv preduzeća *</Label>
                 <Input
                   type="text"
                   name="nazivFirme"
@@ -211,7 +245,7 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
               </div>
 
               <div className="col-span-1">
-                <Label>Adresa firme *</Label>
+                <Label>Adresa preduzeća *</Label>
                 <Input
                   type="text"
                   name="adresaFirme"
@@ -288,7 +322,7 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
                           </div>
 
               <div className="col-span-1">
-                <Label>Matični broj firme *</Label>
+                <Label>Matični broj preduzeća *</Label>
                 <Input
                   type="text"
                   name="maticniBroj"
@@ -310,7 +344,7 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
               </div>
 
               <div className="col-span-1">
-                <Label>Email adresa firme *</Label>
+                <Label>Email adresa preduzeća *</Label>
                 <Input
                   type="email"
                   name="emailFirme"
@@ -319,33 +353,8 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData }: Firm
                 />
               </div>
 
-          {createKomitent && isAdmin && !initialData && (
-            <>
               <div className="col-span-1">
-                <Label>Email komitenta *</Label>
-                <input
-                  type="email"
-                  value={komitentData.email}
-                  onChange={(e) => setKomitentData({ ...komitentData, email: e.target.value })}
-                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Unesite email adresu"
-                />
-              </div>
-              <div className="col-span-1">
-                <Label>Šifra komitenta *</Label>
-                <input
-                  type="password"
-                  value={komitentData.sifra}
-                  onChange={(e) => setKomitentData({ ...komitentData, sifra: e.target.value })}
-                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Unesite šifru"
-                />
-              </div>
-            </>
-          )}
-
-              <div className="col-span-1">
-                <Label>Ime i prezime direktora firme</Label>
+                <Label>Ime i prezime direktora preduzeća</Label>
                 <Input
                   type="text"
                   name="imePrezimeDirektora"

@@ -1,19 +1,41 @@
 import { useUser } from "../../context/UserContext";
-import Badge from "../ui/badge/Badge";
+import Checkbox from "../form/input/Checkbox";
 
 export default function SidebarSettingsCard() {
-  const { userType, sidebarMode, setSidebarMode } = useUser();
+  const { userType, showMojaFirma, showKomitenti, setSidebarMode } = useUser();
 
-  const getModeBadge = (mode: string) => {
-    switch (mode) {
-      case 'both':
-        return <Badge color="info" variant="light">Oba dela</Badge>;
-      case 'moja-firma':
-        return <Badge color="success" variant="light">Moja Firma</Badge>;
-      case 'komitenti':
-        return <Badge color="warning" variant="light">Komitenti</Badge>;
-      default:
-        return null;
+  // Update sidebarMode when checkboxes change
+  const handleMojaFirmaChange = (checked: boolean) => {
+    // Calculate new sidebarMode based on new checkbox state
+    const newShowMojaFirma = checked;
+    const newShowKomitenti = showKomitenti;
+    
+    if (newShowMojaFirma && newShowKomitenti) {
+      setSidebarMode('both');
+    } else if (newShowMojaFirma) {
+      setSidebarMode('moja-firma');
+    } else if (newShowKomitenti) {
+      setSidebarMode('komitenti');
+    } else {
+      // If both would be unchecked, default to moja-firma
+      setSidebarMode('moja-firma');
+    }
+  };
+
+  const handleKomitentiChange = (checked: boolean) => {
+    // Calculate new sidebarMode based on new checkbox state
+    const newShowMojaFirma = showMojaFirma;
+    const newShowKomitenti = checked;
+    
+    if (newShowMojaFirma && newShowKomitenti) {
+      setSidebarMode('both');
+    } else if (newShowMojaFirma) {
+      setSidebarMode('moja-firma');
+    } else if (newShowKomitenti) {
+      setSidebarMode('komitenti');
+    } else {
+      // If both would be unchecked, default to komitenti
+      setSidebarMode('komitenti');
     }
   };
 
@@ -30,93 +52,48 @@ export default function SidebarSettingsCard() {
             Podešavanje menija
           </h4>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Trenutni režim
-              </p>
-              <div className="flex items-center gap-2">
-                {getModeBadge(sidebarMode)}
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {sidebarMode === 'both' && 'Prikazuje i "Moja Firma" i "Komitenti" sekcije u meniju'}
-                  {sidebarMode === 'moja-firma' && 'Prikazuje samo "Moja Firma" sekciju u meniju'}
-                  {sidebarMode === 'komitenti' && 'Prikazuje samo "Komitenti" sekciju u meniju'}
-                </p>
+          <div className="mt-6">
+            <h5 className="mb-4 text-lg font-medium text-gray-800 dark:text-white/90">
+              Izaberite šta može biti prikazano
+            </h5>
+            <div className="space-y-4">
+              <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                <div className="flex items-start gap-3">
+                  <div className="flex justify-center pt-0.5">
+                    <Checkbox
+                      checked={showMojaFirma}
+                      onChange={handleMojaFirmaChange}
+                      className="w-4 h-4"
+                      id="moja-firma-checkbox"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-medium text-gray-800 dark:text-white/90">Moja Firma</span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Prikazuje "Moja Firma" sekciju u meniju
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Sidebar Settings Options */}
-        <div className="mt-6">
-          <h5 className="mb-4 text-lg font-medium text-gray-800 dark:text-white/90">
-            Izaberite režim sidebara
-          </h5>
-          <div className="space-y-4">
-            <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="sidebarMode"
-                  value="both"
-                  checked={sidebarMode === 'both'}
-                  onChange={(e) => setSidebarMode(e.target.value as 'both' | 'moja-firma' | 'komitenti')}
-                  className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-0 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge color="info" variant="light">Oba dela</Badge>
-                    <span className="font-medium text-gray-800 dark:text-white/90">Prikazuj oba dela</span>
+              <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                <div className="flex items-start gap-3">
+                  <div className="flex justify-center pt-0.5">
+                    <Checkbox
+                      checked={showKomitenti}
+                      onChange={handleKomitentiChange}
+                      className="w-4 h-4"
+                      id="komitenti-checkbox"
+                    />
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Prikazuje i "Moja Firma" i "Komitenti" sekcije u meniju
-                  </p>
-                </div>
-              </label>
-            </div>
-
-            <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="sidebarMode"
-                  value="moja-firma"
-                  checked={sidebarMode === 'moja-firma'}
-                  onChange={(e) => setSidebarMode(e.target.value as 'both' | 'moja-firma' | 'komitenti')}
-                  className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-0 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge color="success" variant="light">Moja Firma</Badge>
-                    <span className="font-medium text-gray-800 dark:text-white/90">Samo Moja Firma</span>
+                  <div className="flex-1">
+                    <span className="font-medium text-gray-800 dark:text-white/90">Komitenti</span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Prikazuje "Komitenti" sekciju u meniju
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Prikazuje samo "Moja Firma" sekciju u meniju
-                  </p>
                 </div>
-              </label>
-            </div>
-
-            <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="sidebarMode"
-                  value="komitenti"
-                  checked={sidebarMode === 'komitenti'}
-                  onChange={(e) => setSidebarMode(e.target.value as 'both' | 'moja-firma' | 'komitenti')}
-                  className="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-0 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge color="warning" variant="light">Komitenti</Badge>
-                    <span className="font-medium text-gray-800 dark:text-white/90">Samo Komitenti</span>
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Prikazuje samo "Komitenti" sekciju u meniju
-                  </p>
-                </div>
-              </label>
+              </div>
             </div>
           </div>
         </div>

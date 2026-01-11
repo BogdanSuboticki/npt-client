@@ -8,13 +8,13 @@ import { usePageContext } from "../../hooks/usePageContext";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 
-// Sample data for Moja Firma context
+// Sample data for Moje Preduzeće context
 const mojaFirmaData = [
   {
     id: 1,
     redniBroj: 1,
-    naziv: "Moja Firma 1",
-    adresa: "Adresa Moja Firma 1",
+    naziv: "Moje Preduzeće 1",
+    adresa: "Adresa Moje Preduzeće 1",
     mesto: "Beograd",
     pib: "1234567890",
     maticniBroj: "1234567890",
@@ -25,8 +25,8 @@ const mojaFirmaData = [
   {
     id: 2,
     redniBroj: 2,
-    naziv: "Moja Firma 2",
-    adresa: "Adresa Moja Firma 2",
+    naziv: "Moje Preduzeće 2",
+    adresa: "Adresa Moje Preduzeće 2",
     mesto: "Novi Sad",
     pib: "0987654321",
     maticniBroj: "0987654321",
@@ -41,7 +41,7 @@ const komitentiData = [
   {
     id: 1,
     redniBroj: 1,
-    naziv: "Komitent Firma 1",
+    naziv: "Komitent Preduzeće 1",
     adresa: "Adresa Komitent 1",
     mesto: "Niš",
     pib: "1122334455",
@@ -53,7 +53,7 @@ const komitentiData = [
   {
     id: 2,
     redniBroj: 2,
-    naziv: "Komitent Firma 2",
+    naziv: "Komitent Preduzeće 2",
     adresa: "Adresa Komitent 2",
     mesto: "Kragujevac",
     pib: "5566778899",
@@ -65,7 +65,7 @@ const komitentiData = [
   {
     id: 3,
     redniBroj: 3,
-    naziv: "Komitent Firma 3",
+    naziv: "Komitent Preduzeće 3",
     adresa: "Adresa Komitent 3",
     mesto: "Subotica",
     pib: "9988776655",
@@ -98,7 +98,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error in Firma component:', error);
+    console.error('Error in Preduzeće component:', error);
     console.error('Error info:', errorInfo);
   }
 
@@ -218,8 +218,8 @@ const Firme: React.FC = () => {
               <ExportPopoverButton
                 data={getDataForContext()}
                 columns={columns}
-                title="Firme"
-                filename={`firme-${context}`}
+                title="Preduzeća"
+                filename={`preduzeca-${context}`}
               />
               <Button
                 onClick={() => setShowForm(true)}
@@ -250,8 +250,8 @@ const Firme: React.FC = () => {
                 <ExportPopoverButton
                   data={getDataForContext()}
                   columns={columns}
-                  title="Firme"
-                  filename={`firme-${context}`}
+                  title="Preduzeća"
+                  filename={`preduzeca-${context}`}
                   className="w-full"
                 />
               </div>

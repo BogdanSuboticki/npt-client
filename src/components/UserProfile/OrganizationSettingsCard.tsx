@@ -5,6 +5,8 @@ import Button from "../ui/button/Button";
 import { Modal } from "../ui/modal";
 import Label from "../form/Label";
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
+import AngazovanjaForm from "../../pages/angazovanja/AngazovanjaForm";
+import FirmeForm from "../../pages/firme/FirmeForm";
 
 interface User {
   id: string;
@@ -28,6 +30,16 @@ interface Organization {
   name: string;
   type: 'admin' | 'client';
   users: User[];
+  // FirmeForm fields
+  naziv?: string;
+  adresa?: string;
+  mesto?: string;
+  pib?: string;
+  maticniBroj?: string;
+  delatnost?: string;
+  emailFirme?: string;
+  datumIstekaUgovora?: Date | string;
+  [key: string]: any;
 }
 
 export default function OrganizationSettingsCard() {
@@ -38,6 +50,8 @@ export default function OrganizationSettingsCard() {
   
   // State for add user modal
   const [showAddKorisnikModal, setShowAddKorisnikModal] = useState(false);
+  const [showAngazovanjaFormModal, setShowAngazovanjaFormModal] = useState(false);
+  const [showFirmeFormModal, setShowFirmeFormModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [newKorisnik, setNewKorisnik] = useState({
@@ -427,10 +441,13 @@ export default function OrganizationSettingsCard() {
             
             {/* Add Button */}
             <Button size="sm" onClick={() => {
-              setIsEditing(false);
-              setEditingUserId(null);
-              setNewKorisnik({ ime: '', prezime: '', email: '' });
-              setShowAddKorisnikModal(true);
+              if (activeTab === 'korisnici') {
+                // For korisnici tab, open AngazovanjaForm
+                setShowAngazovanjaFormModal(true);
+              } else {
+                // For komitenti tab, open FirmeForm
+                setShowFirmeFormModal(true);
+              }
             }}>
               <svg
                 className="w-4 h-4"
@@ -533,38 +550,75 @@ export default function OrganizationSettingsCard() {
                <table className="w-full text-sm text-left">
                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                    <tr>
-                     <th className="px-4 py-3">Naziv firme</th>
+                     <th className="px-4 py-3">Naziv preduzeća</th>
+                     <th className="px-4 py-3">Adresa</th>
+                     <th className="px-4 py-3">Mesto</th>
+                     <th className="px-4 py-3">PIB</th>
+                     <th className="px-4 py-3">Matični broj</th>
+                     <th className="px-4 py-3">Delatnost</th>
                      <th className="px-4 py-3">Email</th>
+                     <th className="px-4 py-3">Datum isteka ugovora</th>
                      <th className="px-4 py-3 text-center">Akcije</th>
                    </tr>
                  </thead>
                  <tbody>
-                   {clientOrganizations.map((organization) => (
-                     <tr key={organization.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                       <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
-                         {organization.name}
-                       </td>
-                       <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
-                         {organization.users[0]?.email || 'N/A'}
-                       </td>
-                       <td className="px-4 py-4">
-                         <div className="flex items-center justify-center gap-2">
-                                                            <button 
-                                   onClick={() => handleEditCompany(organization)}
-                                   className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                                 >
-                                   <EditButtonIcon className="size-4" />
-                                 </button>
-                           <button 
-                             onClick={() => handleDeleteUser(organization.users[0])}
-                             className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                           >
-                             <DeleteButtonIcon className="size-4" />
-                           </button>
-                         </div>
-                       </td>
-                     </tr>
-                   ))}
+                   {clientOrganizations.map((organization) => {
+                     const formatDate = (date: Date | string): string => {
+                       if (!date) return '-';
+                       const dateObj = date instanceof Date ? date : new Date(date);
+                       if (isNaN(dateObj.getTime())) return '-';
+                       return dateObj.toLocaleDateString('sr-Latn-RS', {
+                         day: '2-digit',
+                         month: '2-digit',
+                         year: 'numeric'
+                       });
+                     };
+                     
+                     return (
+                       <tr key={organization.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                         <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
+                           {organization.naziv || organization.name}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.adresa || '-'}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.mesto || '-'}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.pib || '-'}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.maticniBroj || '-'}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.delatnost || '-'}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.emailFirme || organization.users[0]?.email || '-'}
+                         </td>
+                         <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                           {organization.datumIstekaUgovora ? formatDate(organization.datumIstekaUgovora) : '-'}
+                         </td>
+                         <td className="px-4 py-4">
+                           <div className="flex items-center justify-center gap-2">
+                             <button 
+                               onClick={() => handleEditCompany(organization)}
+                               className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                             >
+                               <EditButtonIcon className="size-4" />
+                             </button>
+                             <button 
+                               onClick={() => handleDeleteUser(organization.users[0])}
+                               className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                             >
+                               <DeleteButtonIcon className="size-4" />
+                             </button>
+                           </div>
+                         </td>
+                       </tr>
+                     );
+                   })}
                  </tbody>
                </table>
              </div>
@@ -743,6 +797,32 @@ export default function OrganizationSettingsCard() {
             </div>
           </div>
         </Modal>
+
+        {/* AngazovanjaForm Modal for adding users from admin dashboard */}
+        <AngazovanjaForm
+          isOpen={showAngazovanjaFormModal}
+          onClose={() => setShowAngazovanjaFormModal(false)}
+          onSave={(data: any) => {
+            // Handle save logic here
+            console.log('Saving user data from admin dashboard:', data);
+            // In a real app, you would save to backend here
+            setShowAngazovanjaFormModal(false);
+          }}
+          fromAdminDashboard={true}
+        />
+
+        {/* FirmeForm Modal for adding komitenti from admin dashboard */}
+        <FirmeForm
+          isOpen={showFirmeFormModal}
+          onClose={() => setShowFirmeFormModal(false)}
+          onSave={(data: any) => {
+            // Handle save logic here
+            console.log('Saving komitent data from admin dashboard:', data);
+            // In a real app, you would save to backend here
+            setShowFirmeFormModal(false);
+          }}
+          fromAdminDashboard={true}
+        />
       </div>
     );
   } 

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router";
 import ZaposleniDataTable from "./ZaposleniDataTable";
 import ZaposleniForm from "./ZaposleniForm";
 import Button from "../../components/ui/button/Button";
@@ -15,6 +16,7 @@ const zaposleniData = [
     imePrezime: "Petar Petrović",
     prvaPomoc: "Da",
     osiguranje: true,
+    preduzece: "Tech Solutions d.o.o.",
   },
   {
     id: 2,
@@ -22,6 +24,7 @@ const zaposleniData = [
     imePrezime: "Ana Anić",
     prvaPomoc: "Ne",
     osiguranje: false,
+    preduzece: "Tech Solutions d.o.o.",
   },
   {
     id: 3,
@@ -29,6 +32,23 @@ const zaposleniData = [
     imePrezime: "Marko Marković",
     prvaPomoc: "Da",
     osiguranje: true,
+    preduzece: "Client Company A",
+  },
+  {
+    id: 4,
+    redniBroj: 4,
+    imePrezime: "Jovana Stojanović",
+    prvaPomoc: "Da",
+    osiguranje: true,
+    preduzece: "Client Company A",
+  },
+  {
+    id: 5,
+    redniBroj: 5,
+    imePrezime: "Stefan Đorđević",
+    prvaPomoc: "Ne",
+    osiguranje: false,
+    preduzece: "Client Company B",
   },
 ];
 
@@ -71,11 +91,23 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const ZaposleniPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [data, setData] = useState(zaposleniData);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [filteredPreduzece, setFilteredPreduzece] = useState<string | null>(null);
+
+  // Read preduzece from URL params and filter data
+  useEffect(() => {
+    const preduzeceParam = searchParams.get('preduzece');
+    if (preduzeceParam) {
+      setFilteredPreduzece(decodeURIComponent(preduzeceParam));
+    } else {
+      setFilteredPreduzece(null);
+    }
+  }, [searchParams]);
 
   const handleSave = (newData: any) => {
     // Here you would typically save the data to your backend
@@ -205,10 +237,11 @@ const ZaposleniPage: React.FC = () => {
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
           <ZaposleniDataTable 
-            data={data}
+            data={filteredPreduzece ? data.filter(item => item.preduzece === filteredPreduzece) : data}
             columns={columns}
             onDeleteClick={handleDeleteClick}
             onEditClick={handleEditClick}
+            preduzeceFilter={filteredPreduzece}
           />
         </div>
 

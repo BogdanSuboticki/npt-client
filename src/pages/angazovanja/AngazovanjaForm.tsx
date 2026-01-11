@@ -13,9 +13,10 @@ interface AngazovanjaFormProps {
   onClose: () => void;
   onSave: (data: any) => void;
   initialData?: any;
+  fromAdminDashboard?: boolean; // When true, hide slider but show email/šifra fields
 }
 
-export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }: AngazovanjaFormProps) {
+export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, fromAdminDashboard = false }: AngazovanjaFormProps) {
   const { userType } = useUser();
   const isAdmin = userType === 'admin';
   
@@ -29,7 +30,8 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
   });
 
   // State for creating new korisnik
-  const [createKorisnik, setCreateKorisnik] = React.useState(false);
+  // If fromAdminDashboard, default to true (show email/šifra fields)
+  const [createKorisnik, setCreateKorisnik] = React.useState(fromAdminDashboard);
   const [korisnikData, setKorisnikData] = React.useState({
     email: "",
     sifra: "",
@@ -71,8 +73,13 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Populate form with initialData when provided
+  // Populate form with initialData when provided or reset when modal opens
   useEffect(() => {
+    if (!isOpen) {
+      // Reset form when modal is closed
+      return;
+    }
+    
     if (initialData) {
       setFormData({
         zaposleni: initialData.imePrezime || "",
@@ -82,7 +89,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
         datumPocetka: initialData.pocetakAngazovanja ? new Date(initialData.pocetakAngazovanja) : new Date(),
         datumPrestanka: initialData.prestanakAngazovanja ? new Date(initialData.prestanakAngazovanja) : null,
       });
-      setCreateKorisnik(false);
+      setCreateKorisnik(fromAdminDashboard);
       setKorisnikData({ email: "", sifra: "" });
     } else {
       // Reset form when no initial data
@@ -94,10 +101,10 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
         datumPocetka: new Date(),
         datumPrestanka: null,
       });
-      setCreateKorisnik(false);
+      setCreateKorisnik(fromAdminDashboard);
       setKorisnikData({ email: "", sifra: "" });
     }
-  }, [initialData]);
+  }, [initialData, fromAdminDashboard, isOpen]);
 
   const handleDateChange = (value: Date | null) => {
     if (value) {
@@ -114,8 +121,8 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
       return;
     }
     
-    // Additional validation when creating new korisnik user
-    if (createKorisnik) {
+    // Additional validation when creating new korisnik user (or from admin dashboard)
+    if (createKorisnik || fromAdminDashboard) {
       if (!korisnikData.email || !korisnikData.sifra) {
         alert('Molimo popunite email i šifru za kreiranje korisnika');
         return;
@@ -124,7 +131,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
     
     const submitData = {
       ...formData,
-      ...(createKorisnik ? { 
+      ...((createKorisnik || fromAdminDashboard) ? { 
         createKorisnik: true,
         korisnikData: {
           email: korisnikData.email,
@@ -146,18 +153,19 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
       <div className="flex flex-col h-full">
         <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            {initialData ? "Izmeni Angažovanje" : "Novo Angažovanje"}
+            {fromAdminDashboard ? "Dodaj korisnika" : initialData ? "Izmeni Angažovanje" : "Novo Angažovanje"}
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
             <div className="grid grid-cols-1 gap-4 pb-4">
-          {isAdmin && !initialData && (
+          {/* Show slider only if not from admin dashboard and is admin and no initial data */}
+          {isAdmin && !initialData && !fromAdminDashboard && (
             <div className="col-span-1">
               <Slider
                 label="Kreiranje korisnika"
-                optionOne="Kreiraj korisnika"
-                optionTwo="Ne kreiraj korisnika"
+                optionOne="Kreiraj Profil Korisnika"
+                optionTwo="Ne kreiraj profil Korisnika"
                 value={createKorisnik}
                 onChange={(value) => {
                   setCreateKorisnik(value);
@@ -167,8 +175,33 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
                 }}
                 size="full"
                 name="slider-create-korisnik"
+                showRedWhenFalse={true}
               />
             </div>
+          )}
+
+          {/* Show email and šifra fields at the top if fromAdminDashboard OR if createKorisnik is true (when slider is enabled) */}
+          {(fromAdminDashboard || (createKorisnik && isAdmin && !initialData)) && (
+            <>
+              <div className="col-span-1">
+                <Label className="text-brand-500 dark:text-[#60a5fa]">Email korisnika *</Label>
+                <input
+                  type="email"
+                  value={korisnikData.email}
+                  onChange={(e) => setKorisnikData({ ...korisnikData, email: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-[#60a5fa] focus:border-transparent"
+                />
+              </div>
+              <div className="col-span-1">
+                <Label className="text-brand-500 dark:text-[#60a5fa]">Šifra korisnika *</Label>
+                <input
+                  type="password"
+                  value={korisnikData.sifra}
+                  onChange={(e) => setKorisnikData({ ...korisnikData, sifra: e.target.value })}
+                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-[#60a5fa] focus:border-transparent"
+                />
+              </div>
+            </>
           )}
 
           <div className="col-span-1">
@@ -217,31 +250,6 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData }
               </div>
             )}
           </div>
-
-          {createKorisnik && isAdmin && !initialData && (
-            <>
-              <div className="col-span-1">
-                <Label>Email *</Label>
-                <input
-                  type="email"
-                  value={korisnikData.email}
-                  onChange={(e) => setKorisnikData({ ...korisnikData, email: e.target.value })}
-                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Unesite email adresu"
-                />
-              </div>
-              <div className="col-span-1">
-                <Label>Šifra *</Label>
-                <input
-                  type="password"
-                  value={korisnikData.sifra}
-                  onChange={(e) => setKorisnikData({ ...korisnikData, sifra: e.target.value })}
-                  className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Unesite šifru"
-                />
-              </div>
-            </>
-          )}
 
           <div className="col-span-1">
             <Label>Radno mesto *</Label>

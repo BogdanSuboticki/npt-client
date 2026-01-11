@@ -4,6 +4,8 @@ import { Modal } from "../ui/modal";
 import Label from "../form/Label";
 import Checkbox from "../form/input/Checkbox";
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
+import FirmeForm from "../../pages/firme/FirmeForm";
+import AngazovanjaForm from "../../pages/angazovanja/AngazovanjaForm";
 
 interface Firma {
   id: string;
@@ -15,6 +17,15 @@ interface Firma {
   adminCount: number;
   createdAt: string;
   lastActivity: string;
+  // Additional fields for table display
+  naziv?: string;
+  adresa?: string;
+  mesto?: string;
+  pib?: string;
+  maticniBroj?: string;
+  delatnost?: string;
+  datumIstekaUgovora?: Date | string;
+  [key: string]: any;
 }
 
 interface User {
@@ -31,6 +42,12 @@ interface User {
     canAccessAllData: boolean;
     canManageSystem: boolean;
   };
+  // Angazovanja fields
+  radnoMesto?: string;
+  lokacija?: string;
+  vrstaAngazovanja?: string;
+  datumPocetka?: Date | string;
+  datumPrestanka?: Date | string | null;
 }
 
 interface Komitent {
@@ -41,6 +58,18 @@ interface Komitent {
   status: 'active' | 'inactive' | 'suspended';
   lastLogin: string;
   createdAt: string;
+  // FirmeForm fields
+  naziv?: string;
+  adresa?: string;
+  drzava?: string;
+  mesto?: string;
+  pib?: string;
+  maticniBroj?: string;
+  delatnost?: string;
+  emailFirme?: string;
+  datumPocetkaUgovora?: Date | string;
+  datumIstekaUgovora?: Date | string;
+  [key: string]: any;
 }
 
 export default function SuperAdminDashboard() {
@@ -82,7 +111,6 @@ export default function SuperAdminDashboard() {
   
   // State for dropdowns
   const [isFirmaOpen, setIsFirmaOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   
   // State for edit forms
   const [isEditingFirma, setIsEditingFirma] = useState(false);
@@ -110,70 +138,87 @@ export default function SuperAdminDashboard() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [showDeleteKomitentModal, setShowDeleteKomitentModal] = useState(false);
   const [komitentToDelete, setKomitentToDelete] = useState<Komitent | null>(null);
-  const [newFirma, setNewFirma] = useState({
-    naziv: '',
-    email: '',
-    sifra: ''
-  });
-  const [newKorisnik, setNewKorisnik] = useState({
-    ime: '',
-    prezime: '',
-    email: '',
-    firma: '',
-    sifra: ''
-  });
-  const [newKomitent, setNewKomitent] = useState({
-    ime: '',
-    prezime: '',
-    email: '',
-    firma: '',
-    sifra: ''
-  });
+  
+  
+  // Editing firma state - stores the firma being edited
+  const [editingFirmaData, setEditingFirmaData] = useState<Firma | null>(null);
+  // Editing user state - stores the user being edited
+  const [editingUserData, setEditingUserData] = useState<User | null>(null);
+  // Editing komitent state - stores the komitent being edited
+  const [editingKomitentData, setEditingKomitentData] = useState<Komitent | null>(null);
 
   const firme: Firma[] = [
     {
       id: "1",
       name: "Tech Solutions d.o.o.",
+      naziv: "Tech Solutions d.o.o.",
       email: "info@techsolutions.rs",
       type: "admin",
       status: "active",
       userCount: 45,
       adminCount: 3,
       createdAt: "2023-06-15",
-      lastActivity: "2024-01-15 14:30"
+      lastActivity: "2024-01-15 14:30",
+      adresa: "Bulevar Kralja Aleksandra 1",
+      mesto: "Beograd",
+      pib: "123456789",
+      maticniBroj: "987654321",
+      delatnost: "IT delatnost",
+      datumIstekaUgovora: new Date("2024-12-31")
     },
     {
       id: "2",
       name: "Client Company A",
+      naziv: "Client Company A",
       email: "contact@clienta.rs",
       type: "client",
       status: "active",
       userCount: 12,
       adminCount: 1,
       createdAt: "2023-08-22",
-      lastActivity: "2024-01-15 12:15"
+      lastActivity: "2024-01-15 12:15",
+      adresa: "Ulica Kralja Petra 10",
+      mesto: "Novi Sad",
+      pib: "987654321",
+      maticniBroj: "123456789",
+      delatnost: "Uslužne delatnosti",
+      datumIstekaUgovora: new Date("2024-06-30")
     },
     {
       id: "3",
       name: "Client Company B",
+      naziv: "Client Company B",
       email: "info@clientb.rs",
       type: "client",
       status: "active",
       userCount: 8,
       adminCount: 1,
       createdAt: "2023-09-10",
-      lastActivity: "2024-01-14 16:45"
+      lastActivity: "2024-01-14 16:45",
+      adresa: "Ulica Nikole Pašića 5",
+      mesto: "Niš",
+      pib: "456789123",
+      maticniBroj: "789123456",
+      delatnost: "Trgovina",
+      datumIstekaUgovora: new Date("2024-09-20")
     },
     {
       id: "4",
       name: "New Organization",
+      naziv: "New Organization",
       email: "admin@neworg.rs",
       type: "admin",
       status: "pending",
       userCount: 0,
       adminCount: 0,
       createdAt: "2024-01-15",
-      lastActivity: "N/A"
+      lastActivity: "N/A",
+      adresa: "Ulica Maršala Tita 15",
+      mesto: "Kragujevac",
+      pib: "789123456",
+      maticniBroj: "456789123",
+      delatnost: "Proizvodnja",
+      datumIstekaUgovora: new Date("2024-11-10")
     }
   ];
 
@@ -347,99 +392,102 @@ export default function SuperAdminDashboard() {
     setPendingAccessChange(null);
   };
 
-  const handleAddFirma = () => {
-    if (newFirma.naziv && newFirma.email) {
-      if (isEditingFirma && editingFirmaId) {
-        // Update existing firma
-        console.log('Updating firma:', editingFirmaId, newFirma);
-        // In a real app, you would update in backend here
-      } else {
-        // Add new firma
-        const newFirmaObj: Firma = {
-          id: (firme.length + 1).toString(),
-          name: newFirma.naziv,
-          email: newFirma.email,
-          type: 'client',
-          status: 'active',
-          userCount: 0,
-          adminCount: 0,
-          createdAt: new Date().toISOString().split('T')[0],
-          lastActivity: 'N/A'
-        };
-        
-        // In a real app, you would save to backend here
-        console.log('Adding new firma:', newFirmaObj);
-      }
+  const handleSaveFirma = (data: any) => {
+    if (isEditingFirma && editingFirmaId) {
+      // Update existing firma
+      console.log('Updating firma:', editingFirmaId, data);
+      // In a real app, you would update in backend here
+    } else {
+      // Add new firma (admin organization)
+      const newFirmaObj: Firma = {
+        id: (firme.length + 1).toString(),
+        name: data.nazivFirme,
+        naziv: data.nazivFirme,
+        email: data.emailFirme || '',
+        adresa: data.adresaFirme,
+        drzava: data.drzava,
+        mesto: data.mesto,
+        pib: data.pib,
+        maticniBroj: data.maticniBroj,
+        delatnost: data.sifraDelatnosti,
+        type: 'admin',
+        status: 'active',
+        userCount: 0,
+        adminCount: 0,
+        createdAt: new Date().toISOString().split('T')[0],
+        lastActivity: 'N/A',
+        datumIstekaUgovora: data.datumIstekaUgovora,
+        // Include komitent data if fromAdminDashboard
+        ...(data.createKomitent && data.komitentData ? { komitentEmail: data.komitentData.email } : {})
+      };
       
-      // Reset form and close modal
-      setNewFirma({ naziv: '', email: '', sifra: '' });
-      setIsEditingFirma(false);
-      setEditingFirmaId(null);
-      setShowAddFirmaModal(false);
+      // In a real app, you would save to backend here
+      console.log('Adding new admin firma:', newFirmaObj);
     }
+    
+    // Reset form and close modal
+    setIsEditingFirma(false);
+    setEditingFirmaId(null);
+    setEditingFirmaData(null);
+    setShowAddFirmaModal(false);
   };
 
-  const handleAddKorisnik = () => {
-    if (newKorisnik.ime && newKorisnik.prezime && newKorisnik.email && newKorisnik.firma) {
-      if (isEditingUser && editingUserId) {
-        // Update existing user
-        console.log('Updating user:', editingUserId, newKorisnik);
-        // In a real app, you would update in backend here
-      } else {
-        // Add new user
-        const newKorisnikObj: User = {
-          id: (users.length + 1).toString(),
-          name: `${newKorisnik.ime} ${newKorisnik.prezime}`,
-          email: newKorisnik.email,
-          role: 'user',
-          organization: newKorisnik.firma,
-          status: 'active',
-          lastLogin: 'N/A',
-          permissions: {
-            canCreateUsers: false,
-            canManageOrganizations: false,
-            canAccessAllData: false,
-            canManageSystem: false
-          }
-        };
-        
-        // In a real app, you would save to backend here
-        console.log('Adding new korisnik:', newKorisnikObj);
-      }
+  const handleSaveKorisnik = (data: any) => {
+    if (isEditingUser && editingUserId) {
+      // Update existing user
+      console.log('Updating user:', editingUserId, data);
+      // In a real app, you would update in backend here
+    } else {
+      // Add new user
+      const newKorisnikObj: User = {
+        id: (users.length + 1).toString(),
+        name: data.zaposleni || '',
+        email: data.korisnikData?.email || '',
+        role: 'user',
+        organization: '', // Will be set based on context
+        status: 'active',
+        lastLogin: 'N/A',
+        permissions: {
+          canCreateUsers: false,
+          canManageOrganizations: false,
+          canAccessAllData: false,
+          canManageSystem: false
+        },
+        radnoMesto: data.radnoMesto || '',
+        lokacija: data.lokacija || '',
+        vrstaAngazovanja: data.vrstaAngazovanja || '',
+        datumPocetka: data.datumPocetka || new Date(),
+        datumPrestanka: data.datumPrestanka || null,
+      };
       
-      // Reset form and close modal
-      setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
-      setIsEditingUser(false);
-      setEditingUserId(null);
-      setShowAddKorisnikModal(false);
-      setIsFirmaOpen(false);
-      setDropdownPosition({ left: 0, top: 0 });
+      // In a real app, you would save to backend here
+      console.log('Adding new korisnik:', newKorisnikObj, data);
     }
+    
+    // Reset form and close modal
+    setIsEditingUser(false);
+    setEditingUserId(null);
+    setEditingUserData(null);
+    setShowAddKorisnikModal(false);
   };
 
   const handleCloseAddFirmaModal = () => {
     setShowAddFirmaModal(false);
     setIsEditingFirma(false);
     setEditingFirmaId(null);
-    setNewFirma({ naziv: '', email: '', sifra: '' });
+    setEditingFirmaData(null);
   };
 
   const handleCloseAddKorisnikModal = () => {
     setShowAddKorisnikModal(false);
     setIsEditingUser(false);
     setEditingUserId(null);
-    setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
-    setIsFirmaOpen(false);
-    setDropdownPosition({ left: 0, top: 0 });
+    setEditingUserData(null);
   };
 
   const handleEditFirma = (firma: Firma) => {
     // Set the form data for editing
-    setNewFirma({
-      naziv: firma.name,
-      email: firma.email,
-      sifra: '' // Password field is empty for editing
-    });
+    setEditingFirmaData(firma);
     setIsEditingFirma(true);
     setEditingFirmaId(firma.id);
     setShowAddFirmaModal(true);
@@ -467,13 +515,7 @@ export default function SuperAdminDashboard() {
 
   const handleEditUser = (user: User) => {
     // Set the form data for editing
-    setNewKorisnik({
-      ime: user.name.split(' ')[0] || '',
-      prezime: user.name.split(' ').slice(1).join(' ') || '',
-      email: user.email,
-      firma: user.organization,
-      sifra: '' // Password field is empty for editing
-    });
+    setEditingUserData(user);
     setIsEditingUser(true);
     setEditingUserId(user.id);
     setShowAddKorisnikModal(true);
@@ -499,56 +541,54 @@ export default function SuperAdminDashboard() {
     setUserToDelete(null);
   };
 
-  const handleAddKomitent = () => {
-    if (newKomitent.ime && newKomitent.prezime && newKomitent.email && newKomitent.firma) {
-      if (isEditingKomitent && editingKomitentId) {
-        // Update existing komitent
-        console.log('Updating komitent:', editingKomitentId, newKomitent);
-        // In a real app, you would update in backend here
-      } else {
-        // Add new komitent
-        const newKomitentObj: Komitent = {
-          id: (komitenti.length + 1).toString(),
-          name: `${newKomitent.ime} ${newKomitent.prezime}`,
-          email: newKomitent.email,
-          organization: newKomitent.firma,
-          status: 'active',
-          lastLogin: 'N/A',
-          createdAt: new Date().toISOString().split('T')[0]
-        };
-        
-        // In a real app, you would save to backend here
-        console.log('Adding new komitent:', newKomitentObj);
-      }
+  const handleSaveKomitent = (data: any) => {
+    if (isEditingKomitent && editingKomitentId) {
+      // Update existing komitent
+      console.log('Updating komitent:', editingKomitentId, data);
+      // In a real app, you would update in backend here
+    } else {
+      // Add new komitent
+      const newKomitentObj: Komitent = {
+        id: (komitenti.length + 1).toString(),
+        name: data.nazivFirme || '',
+        email: data.komitentData?.email || data.emailFirme || '',
+        organization: '', // Will be set based on context
+        status: 'active',
+        lastLogin: 'N/A',
+        createdAt: new Date().toISOString().split('T')[0],
+        naziv: data.nazivFirme || '',
+        adresa: data.adresaFirme || '',
+        drzava: data.drzava || '',
+        mesto: data.mesto || '',
+        pib: data.pib || '',
+        maticniBroj: data.maticniBroj || '',
+        delatnost: data.sifraDelatnosti || '',
+        emailFirme: data.emailFirme || '',
+        datumPocetkaUgovora: data.datumPocetkaUgovora || new Date(),
+        datumIstekaUgovora: data.datumIstekaUgovora || new Date(),
+      };
       
-      // Reset form and close modal
-      setNewKomitent({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
-      setIsEditingKomitent(false);
-      setEditingKomitentId(null);
-      setShowAddKomitentModal(false);
-      setIsFirmaOpen(false);
-      setDropdownPosition({ left: 0, top: 0 });
+      // In a real app, you would save to backend here
+      console.log('Adding new komitent:', newKomitentObj, data);
     }
+    
+    // Reset form and close modal
+    setIsEditingKomitent(false);
+    setEditingKomitentId(null);
+    setEditingKomitentData(null);
+    setShowAddKomitentModal(false);
   };
 
   const handleCloseAddKomitentModal = () => {
     setShowAddKomitentModal(false);
     setIsEditingKomitent(false);
     setEditingKomitentId(null);
-    setNewKomitent({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
-    setIsFirmaOpen(false);
-    setDropdownPosition({ left: 0, top: 0 });
+    setEditingKomitentData(null);
   };
 
   const handleEditKomitent = (komitent: Komitent) => {
     // Set the form data for editing
-    setNewKomitent({
-      ime: komitent.name.split(' ')[0] || '',
-      prezime: komitent.name.split(' ').slice(1).join(' ') || '',
-      email: komitent.email,
-      firma: komitent.organization,
-      sifra: '' // Password field is empty for editing
-    });
+    setEditingKomitentData(komitent);
     setIsEditingKomitent(true);
     setEditingKomitentId(komitent.id);
     setShowAddKomitentModal(true);
@@ -575,11 +615,39 @@ export default function SuperAdminDashboard() {
   };
 
   const totalFirme = firme.length;
-  const totalUsers = users.length;
-  const activeUsers = users.filter(user => user.status === 'active').length;
-  const totalAdmins = users.filter(user => user.role === 'admin').length;
+  const totalAdministratori = firme.filter(firma => firma.type === 'admin').length;
+  const totalKorisnici = users.length;
   const totalKomitenti = komitenti.length;
 
+  // Filter only admin organizations for the organizations tab
+  const adminOrganizations = firme.filter(firma => firma.type === 'admin');
+
+  // Columns for admin table
+  const adminColumns = [
+    { key: "redniBroj", label: "Redni broj", sortable: true },
+    { key: "naziv", label: "Naziv preduzeća/radnje", sortable: true },
+    { key: "adresa", label: "Adresa", sortable: true },
+    { key: "mesto", label: "Mesto", sortable: true },
+    { key: "pib", label: "PIB", sortable: true },
+    { key: "maticniBroj", label: "Matični broj", sortable: true },
+    { key: "delatnost", label: "Delatnost", sortable: true },
+    { key: "datumIstekaUgovora", label: "Datum isteka ugovora", sortable: true },
+  ];
+
+  // Sorting and pagination for admin table
+
+
+  const formatDate = (date: Date | string): string => {
+    if (!date) return '';
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleDateString('sr-Latn-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  // Reset page to 1 when items per page changes
   // Add click outside handler for dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -621,11 +689,8 @@ export default function SuperAdminDashboard() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Super Administrator Dashboard
+              Pregled Sistema
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Pregled celokupnog sistema, firmi i korisnika
-            </p>
           </div>
         </div>
 
@@ -633,7 +698,7 @@ export default function SuperAdminDashboard() {
         <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
               activeTab === 'overview'
                 ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -643,7 +708,7 @@ export default function SuperAdminDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('organizations')}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
               activeTab === 'organizations'
                 ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -653,49 +718,49 @@ export default function SuperAdminDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
               activeTab === 'users'
                 ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
-            Korisnici ({totalUsers})
+            Korisnik ({totalKorisnici})
           </button>
           <button
             onClick={() => setActiveTab('komitenti')}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
               activeTab === 'komitenti'
                 ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
-            Komitenti ({totalKomitenti})
+            Komitent ({totalKomitenti})
           </button>
         </div>
 
         {/* Tab Content */}
         <div className="mt-6">
           {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* System Statistics */}
               <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                 <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                  Ukupno firmi
+                  Administratori
                 </h5>
                 <p className="text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {totalFirme}
+                  {totalAdministratori}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Admin firmi
+                  Admin organizacije
                 </p>
               </div>
 
               <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                 <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                  Ukupno korisnika
+                  Korisnici
                 </h5>
                 <p className="text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {totalUsers}
+                  {totalKorisnici}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Registrovani korisnici
@@ -704,25 +769,13 @@ export default function SuperAdminDashboard() {
 
               <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
                 <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                  Aktivnih korisnika
+                  Komitenti
                 </h5>
                 <p className="text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {activeUsers}
+                  {totalKomitenti}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Trenutno aktivni
-                </p>
-              </div>
-
-              <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
-                <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                  Administratora
-                </h5>
-                <p className="text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {totalAdmins}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Admin korisnika
+                  Registrovani komitenti
                 </p>
               </div>
             </div>
@@ -737,7 +790,7 @@ export default function SuperAdminDashboard() {
                 <Button size="sm" onClick={() => {
                   setIsEditingFirma(false);
                   setEditingFirmaId(null);
-                  setNewFirma({ naziv: '', email: '', sifra: '' });
+                  setEditingFirmaData(null);
                   setShowAddFirmaModal(true);
                 }}>
                   <svg
@@ -753,7 +806,7 @@ export default function SuperAdminDashboard() {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  Dodaj firmu
+                  Dodaj Administratora
                 </Button>
               </div>
               
@@ -761,8 +814,11 @@ export default function SuperAdminDashboard() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                      <th className="px-4 py-3">Ime i prezime</th>
-                      <th className="px-4 py-3">Email</th>
+                      {adminColumns.map(({ key, label }) => (
+                        <th key={key} className="px-4 py-3">
+                          {key === 'redniBroj' ? '' : label}
+                        </th>
+                      ))}
                       <th className="px-4 py-3 text-center">Moja Firma</th>
                       <th className="px-4 py-3 text-center">Komitenti</th>
                       <th className="px-4 py-3 text-center">Ostalo</th>
@@ -770,57 +826,62 @@ export default function SuperAdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {firme.map((org) => (
+                    {adminOrganizations.map((org, index) => (
                       <tr key={org.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
-                          {org.name}
+                        {adminColumns.map(({ key }) => (
+                          <td key={key} className={key === 'naziv' ? "px-4 py-4 font-medium text-gray-900 dark:text-white" : "px-4 py-4 text-gray-500 dark:text-gray-400"}>
+                            {key === 'redniBroj' ? (
+                              index + 1
+                            ) : key === 'datumIstekaUgovora' ? (
+                              formatDate((org[key as keyof Firma] as Date | string) || '')
+                            ) : (
+                              (org[key as keyof Firma] as string) || '-'
+                            )}
+                          </td>
+                        ))}
+                        <td className="px-4 py-4">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={organizationAccess[org.id]?.mojaFirma || false}
+                              onChange={(checked) => handleOrganizationAccessChange(org.id, 'mojaFirma', checked, false)}
+                              className="w-4 h-4"
+                            />
+                          </div>
                         </td>
-                        <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
-                          {org.email}
+                        <td className="px-4 py-4">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={organizationAccess[org.id]?.komitenti || false}
+                              onChange={(checked) => handleOrganizationAccessChange(org.id, 'komitenti', checked, false)}
+                              className="w-4 h-4"
+                            />
+                          </div>
                         </td>
-                                                 <td className="px-4 py-4">
-                           <div className="flex justify-center">
-                                                           <Checkbox
-                                checked={organizationAccess[org.id]?.mojaFirma || false}
-                                onChange={(checked) => handleOrganizationAccessChange(org.id, 'mojaFirma', checked, false)}
-                                className="w-4 h-4"
-                              />
-                           </div>
-                         </td>
-                         <td className="px-4 py-4">
-                           <div className="flex justify-center">
-                                                           <Checkbox
-                                checked={organizationAccess[org.id]?.komitenti || false}
-                                onChange={(checked) => handleOrganizationAccessChange(org.id, 'komitenti', checked, false)}
-                                className="w-4 h-4"
-                              />
-                           </div>
-                         </td>
-                         <td className="px-4 py-4">
-                           <div className="flex justify-center">
-                                                           <Checkbox
-                                checked={organizationAccess[org.id]?.ostalo || false}
-                                onChange={(checked) => handleOrganizationAccessChange(org.id, 'ostalo', checked, false)}
-                                className="w-4 h-4"
-                              />
-                           </div>
-                         </td>
-                         <td className="px-4 py-4">
-                           <div className="flex items-center justify-center gap-2">
-                             <button 
-                               onClick={() => handleEditFirma(org)}
-                               className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
-                             >
-                               <EditButtonIcon className="size-4" />
-                             </button>
-                             <button 
-                               onClick={() => handleDeleteFirma(org)}
-                               className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
-                             >
-                               <DeleteButtonIcon className="size-4" />
-                             </button>
-                           </div>
-                         </td>
+                        <td className="px-4 py-4">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={organizationAccess[org.id]?.ostalo || false}
+                              onChange={(checked) => handleOrganizationAccessChange(org.id, 'ostalo', checked, false)}
+                              className="w-4 h-4"
+                            />
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button 
+                              onClick={() => handleEditFirma(org)}
+                              className="text-gray-500 hover:text-[#465FFF] dark:text-gray-400 dark:hover:text-[#465FFF]"
+                            >
+                              <EditButtonIcon className="size-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteFirma(org)}
+                              className="text-gray-500 hover:text-error-500 dark:text-gray-400 dark:hover:text-error-500"
+                            >
+                              <DeleteButtonIcon className="size-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -838,7 +899,7 @@ export default function SuperAdminDashboard() {
                                    <Button size="sm" onClick={() => {
                     setIsEditingUser(false);
                     setEditingUserId(null);
-                    setNewKorisnik({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+                    setEditingUserData(null);
                     setShowAddKorisnikModal(true);
                   }}>
                     <svg
@@ -885,6 +946,11 @@ export default function SuperAdminDashboard() {
                            <tr>
                              <th className="px-4 py-3">Ime i prezime</th>
                              <th className="px-4 py-3">Email</th>
+                             <th className="px-4 py-3">Radno mesto</th>
+                             <th className="px-4 py-3">Lokacija</th>
+                             <th className="px-4 py-3">Vrsta angažovanja</th>
+                             <th className="px-4 py-3">Datum početka</th>
+                             <th className="px-4 py-3">Datum prestanka</th>
                              <th className="px-4 py-3 text-center">Moja Firma</th>
                              <th className="px-4 py-3 text-center">Komitenti</th>
                              <th className="px-4 py-3 text-center">Ostalo</th>
@@ -900,31 +966,46 @@ export default function SuperAdminDashboard() {
                                <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
                                  {user.email}
                                </td>
+                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                 {user.radnoMesto || '-'}
+                               </td>
+                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                 {user.lokacija || '-'}
+                               </td>
+                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                 {user.vrstaAngazovanja || '-'}
+                               </td>
+                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                 {user.datumPocetka ? formatDate(user.datumPocetka) : '-'}
+                               </td>
+                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                 {user.datumPrestanka ? formatDate(user.datumPrestanka) : '-'}
+                               </td>
                                <td className="px-4 py-4">
                                  <div className="flex justify-center">
-                                                                       <Checkbox
-                                      checked={userAccess[user.id]?.mojaFirma || false}
-                                      onChange={(checked) => handleOrganizationAccessChange(user.id, 'mojaFirma', checked, true)}
-                                      className="w-4 h-4"
-                                    />
+                                   <Checkbox
+                                     checked={userAccess[user.id]?.mojaFirma || false}
+                                     onChange={(checked) => handleOrganizationAccessChange(user.id, 'mojaFirma', checked, true)}
+                                     className="w-4 h-4"
+                                   />
                                  </div>
                                </td>
                                <td className="px-4 py-4">
                                  <div className="flex justify-center">
-                                                                       <Checkbox
-                                      checked={userAccess[user.id]?.komitenti || false}
-                                      onChange={(checked) => handleOrganizationAccessChange(user.id, 'komitenti', checked, true)}
-                                      className="w-4 h-4"
-                                    />
+                                   <Checkbox
+                                     checked={userAccess[user.id]?.komitenti || false}
+                                     onChange={(checked) => handleOrganizationAccessChange(user.id, 'komitenti', checked, true)}
+                                     className="w-4 h-4"
+                                   />
                                  </div>
                                </td>
                                <td className="px-4 py-4">
                                  <div className="flex justify-center">
-                                                                       <Checkbox
-                                      checked={userAccess[user.id]?.ostalo || false}
-                                      onChange={(checked) => handleOrganizationAccessChange(user.id, 'ostalo', checked, true)}
-                                      className="w-4 h-4"
-                                    />
+                                   <Checkbox
+                                     checked={userAccess[user.id]?.ostalo || false}
+                                     onChange={(checked) => handleOrganizationAccessChange(user.id, 'ostalo', checked, true)}
+                                     className="w-4 h-4"
+                                   />
                                  </div>
                                </td>
                                <td className="px-4 py-4">
@@ -963,7 +1044,7 @@ export default function SuperAdminDashboard() {
                 <Button size="sm" onClick={() => {
                   setIsEditingKomitent(false);
                   setEditingKomitentId(null);
-                  setNewKomitent({ ime: '', prezime: '', email: '', firma: '', sifra: '' });
+                  setEditingKomitentData(null);
                   setShowAddKomitentModal(true);
                 }}>
                   <svg
@@ -1008,10 +1089,14 @@ export default function SuperAdminDashboard() {
                       <table className="w-full text-sm text-left">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                           <tr>
-                            <th className="px-4 py-3">Ime i prezime</th>
+                            <th className="px-4 py-3">Naziv preduzeća</th>
+                            <th className="px-4 py-3">Adresa</th>
+                            <th className="px-4 py-3">Mesto</th>
+                            <th className="px-4 py-3">PIB</th>
+                            <th className="px-4 py-3">Matični broj</th>
+                            <th className="px-4 py-3">Delatnost</th>
                             <th className="px-4 py-3">Email</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Poslednja prijava</th>
+                            <th className="px-4 py-3">Datum isteka ugovora</th>
                             <th className="px-4 py-3 text-center">Akcije</th>
                           </tr>
                         </thead>
@@ -1019,24 +1104,28 @@ export default function SuperAdminDashboard() {
                           {orgKomitenti.map((komitent) => (
                             <tr key={komitent.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                               <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
-                                {komitent.name}
+                                {komitent.naziv || komitent.name}
                               </td>
                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
-                                {komitent.email}
-                              </td>
-                              <td className="px-4 py-4">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  komitent.status === 'active'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                    : komitent.status === 'inactive'
-                                    ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                }`}>
-                                  {komitent.status === 'active' ? 'Aktivan' : komitent.status === 'inactive' ? 'Neaktivan' : 'Suspendovan'}
-                                </span>
+                                {komitent.adresa || '-'}
                               </td>
                               <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
-                                {komitent.lastLogin}
+                                {komitent.mesto || '-'}
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.pib || '-'}
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.maticniBroj || '-'}
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.delatnost || '-'}
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.emailFirme || komitent.email || '-'}
+                              </td>
+                              <td className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                                {komitent.datumIstekaUgovora ? formatDate(komitent.datumIstekaUgovora) : '-'}
                               </td>
                               <td className="px-4 py-4">
                                 <div className="flex items-center justify-center gap-2">
@@ -1229,188 +1318,47 @@ export default function SuperAdminDashboard() {
                  </div>
        </Modal>
 
-       {/* Add Firma Modal */}
-       <Modal
+       {/* Add Firma Modal - Using FirmeForm */}
+       <FirmeForm
          isOpen={showAddFirmaModal}
          onClose={handleCloseAddFirmaModal}
-         className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
-       >
-         <div className="flex flex-col h-full">
-                       <div className="p-5 pt-10">
-              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {isEditingFirma ? 'Izmeni firmu' : 'Dodaj novu firmu'}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {isEditingFirma ? 'Izmenite podatke o firmi' : 'Unesite podatke o novoj firmi'}
-              </p>
-            </div>
-           
-           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
-               <div className="w-full">
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Naziv firme
-                 </Label>
-                 <input
-                   type="text"
-                   value={newFirma.naziv}
-                   onChange={(e) => setNewFirma({ ...newFirma, naziv: e.target.value })}
-                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   placeholder="Unesite naziv firme"
-                 />
-               </div>
-               
-                               <div className="w-full">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email
-                  </Label>
-                  <input
-                    type="email"
-                    value={newFirma.email}
-                    onChange={(e) => setNewFirma({ ...newFirma, email: e.target.value })}
-                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Unesite email adresu"
-                  />
-                </div>
-             </div>
-           </div>
+         onSave={handleSaveFirma}
+         initialData={editingFirmaData ? {
+           naziv: editingFirmaData.naziv || editingFirmaData.name,
+           adresa: editingFirmaData.adresa || '',
+           drzava: editingFirmaData.drzava || '',
+           mesto: editingFirmaData.mesto || '',
+           pib: editingFirmaData.pib || '',
+           maticniBroj: editingFirmaData.maticniBroj || '',
+           delatnost: editingFirmaData.delatnost || '',
+           emailFirme: editingFirmaData.email || '',
+           datumIstekaUgovora: editingFirmaData.datumIstekaUgovora || new Date(),
+           datumPocetkaUgovora: editingFirmaData.datumPocetkaUgovora || new Date(),
+           // Include any other fields that might exist on the firma object
+           ...(editingFirmaData as any)
+         } : undefined}
+         fromAdminDashboard={true}
+         userLabel="administratora"
+       />
 
-           <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
-             <div className="flex justify-end gap-2">
-               <Button variant="outline" onClick={handleCloseAddFirmaModal}>
-                 Otkaži
-               </Button>
-               <Button onClick={handleAddFirma}>
-                 {isEditingFirma ? 'Izmeni firmu' : 'Dodaj firmu'}
-               </Button>
-             </div>
-           </div>
-         </div>
-       </Modal>
-
-       {/* Add Korisnik Modal */}
-       <Modal
+       {/* Add Korisnik Modal - Using AngazovanjaForm */}
+       <AngazovanjaForm
          isOpen={showAddKorisnikModal}
          onClose={handleCloseAddKorisnikModal}
-         className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
-       >
-         <div className="flex flex-col h-full">
-                       <div className="p-5 pt-10">
-              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {isEditingUser ? 'Izmeni korisnika' : 'Dodaj novog korisnika'}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {isEditingUser ? 'Izmenite podatke o korisniku' : 'Unesite podatke o novom korisniku'}
-              </p>
-            </div>
-           
-           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
-               <div className="w-full">
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Ime
-                 </Label>
-                 <input
-                   type="text"
-                   value={newKorisnik.ime}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, ime: e.target.value })}
-                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   placeholder="Unesite ime"
-                 />
-               </div>
-               
-               <div className="w-full">
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Prezime
-                 </Label>
-                 <input
-                   type="text"
-                   value={newKorisnik.prezime}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, prezime: e.target.value })}
-                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   placeholder="Unesite prezime"
-                 />
-               </div>
-               
-               <div className="w-full">
-                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                   Email
-                 </Label>
-                 <input
-                   type="email"
-                   value={newKorisnik.email}
-                   onChange={(e) => setNewKorisnik({ ...newKorisnik, email: e.target.value })}
-                   className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   placeholder="Unesite email adresu"
-                 />
-               </div>
-               
-                               <div className="w-full">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Firma
-                  </Label>
-                  <div className="relative w-full" ref={firmaRef}>
-                                         <button
-                       type="button"
-                       onClick={() => {
-                         if (!isFirmaOpen && firmaRef.current) {
-                           const rect = firmaRef.current.getBoundingClientRect();
-                           setDropdownPosition({
-                             left: rect.left,
-                             top: rect.bottom + 4
-                           });
-                         }
-                         setIsFirmaOpen(!isFirmaOpen);
-                       }}
-                       className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                     >
-                      <span>{newKorisnik.firma || "Izaberi firmu"}</span>
-                      <svg
-                        className={`w-4 h-4 transition-transform ${isFirmaOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                                                              {isFirmaOpen && (
-                        <div className="fixed z-[100] bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700" style={{ left: dropdownPosition.left, top: dropdownPosition.top, width: firmaRef.current?.offsetWidth || 'auto' }}>
-                         <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                           {firme.map((firma, index) => (
-                             <div
-                               key={firma.id}
-                               className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                                 newKorisnik.firma === firma.name ? 'bg-gray-100 dark:bg-gray-700' : ''
-                               } ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
-                               onClick={() => {
-                                 setNewKorisnik({ ...newKorisnik, firma: firma.name });
-                                 setIsFirmaOpen(false);
-                               }}
-                             >
-                               <span className="text-sm text-gray-700 dark:text-gray-300">{firma.name}</span>
-                             </div>
-                           ))}
-                         </div>
-                       </div>
-                     )}
-                  </div>
-                </div>
-             </div>
-           </div>
-
-           <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
-             <div className="flex justify-end gap-2">
-               <Button variant="outline" onClick={handleCloseAddKorisnikModal}>
-                 Otkaži
-               </Button>
-               <Button onClick={handleAddKorisnik}>
-                 {isEditingUser ? 'Izmeni korisnika' : 'Dodaj korisnika'}
-               </Button>
-               </div>
-           </div>
-         </div>
-               </Modal>
+         onSave={handleSaveKorisnik}
+         initialData={editingUserData ? {
+           imePrezime: editingUserData.name,
+           email: editingUserData.email,
+           radnoMesto: editingUserData.radnoMesto || '',
+           lokacija: editingUserData.lokacija || '',
+           vrstaAngazovanja: editingUserData.vrstaAngazovanja || '',
+           pocetakAngazovanja: editingUserData.datumPocetka || new Date(),
+           prestanakAngazovanja: editingUserData.datumPrestanka || null,
+           // Include any other fields that might exist on the user object
+           ...(editingUserData as any)
+         } : undefined}
+         fromAdminDashboard={true}
+       />
 
         {/* Access Change Confirmation Modal */}
         <Modal
@@ -1504,129 +1452,27 @@ export default function SuperAdminDashboard() {
           </div>
         </Modal>
 
-        {/* Add Komitent Modal */}
-        <Modal
+        {/* Add Komitent Modal - Using FirmeForm */}
+        <FirmeForm
           isOpen={showAddKomitentModal}
           onClose={handleCloseAddKomitentModal}
-          className="max-w-[800px] max-h-[90vh] dark:bg-gray-800 overflow-hidden"
-        >
-          <div className="flex flex-col h-full">
-            <div className="p-5 pt-10">
-              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {isEditingKomitent ? 'Izmeni komitenta' : 'Dodaj novog komitenta'}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {isEditingKomitent ? 'Izmenite podatke o komitentu' : 'Unesite podatke o novom komitentu'}
-              </p>
-            </div>
-            
-            <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
-                <div className="w-full">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Ime
-                  </Label>
-                  <input
-                    type="text"
-                    value={newKomitent.ime}
-                    onChange={(e) => setNewKomitent({ ...newKomitent, ime: e.target.value })}
-                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Unesite ime"
-                  />
-                </div>
-                
-                <div className="w-full">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Prezime
-                  </Label>
-                  <input
-                    type="text"
-                    value={newKomitent.prezime}
-                    onChange={(e) => setNewKomitent({ ...newKomitent, prezime: e.target.value })}
-                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Unesite prezime"
-                  />
-                </div>
-                
-                <div className="w-full">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email
-                  </Label>
-                  <input
-                    type="email"
-                    value={newKomitent.email}
-                    onChange={(e) => setNewKomitent({ ...newKomitent, email: e.target.value })}
-                    className="w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Unesite email adresu"
-                  />
-                </div>
-                
-                <div className="w-full">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Firma
-                  </Label>
-                  <div className="relative w-full" ref={firmaRef}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!isFirmaOpen && firmaRef.current) {
-                          const rect = firmaRef.current.getBoundingClientRect();
-                          setDropdownPosition({
-                            left: rect.left,
-                            top: rect.bottom + 4
-                          });
-                        }
-                        setIsFirmaOpen(!isFirmaOpen);
-                      }}
-                      className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                    >
-                      <span>{newKomitent.firma || "Izaberi firmu"}</span>
-                      <svg
-                        className={`w-4 h-4 transition-transform ${isFirmaOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {isFirmaOpen && (
-                      <div className="fixed z-[100] bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700" style={{ left: dropdownPosition.left, top: dropdownPosition.top, width: firmaRef.current?.offsetWidth || 'auto' }}>
-                        <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                          {firme.map((firma, index) => (
-                            <div
-                              key={firma.id}
-                              className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                                newKomitent.firma === firma.name ? 'bg-gray-100 dark:bg-gray-700' : ''
-                              } ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
-                              onClick={() => {
-                                setNewKomitent({ ...newKomitent, firma: firma.name });
-                                setIsFirmaOpen(false);
-                              }}
-                            >
-                              <span className="text-sm text-gray-700 dark:text-gray-300">{firma.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 pt-0 flex-shrink-0">
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCloseAddKomitentModal}>
-                  Otkaži
-                </Button>
-                <Button onClick={handleAddKomitent}>
-                  {isEditingKomitent ? 'Izmeni komitenta' : 'Dodaj komitenta'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Modal>
+          onSave={handleSaveKomitent}
+          initialData={editingKomitentData ? {
+            naziv: editingKomitentData.naziv || editingKomitentData.name,
+            adresa: editingKomitentData.adresa || '',
+            drzava: editingKomitentData.drzava || '',
+            mesto: editingKomitentData.mesto || '',
+            pib: editingKomitentData.pib || '',
+            maticniBroj: editingKomitentData.maticniBroj || '',
+            delatnost: editingKomitentData.delatnost || '',
+            emailFirme: editingKomitentData.emailFirme || editingKomitentData.email || '',
+            datumPocetkaUgovora: editingKomitentData.datumPocetkaUgovora || new Date(),
+            datumIstekaUgovora: editingKomitentData.datumIstekaUgovora || new Date(),
+            // Include any other fields that might exist on the komitent object
+            ...(editingKomitentData as any)
+          } : undefined}
+          fromAdminDashboard={true}
+        />
 
         {/* Delete Komitent Confirmation Modal */}
         <Modal

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -25,6 +25,7 @@ interface ZaposleniData {
   imePrezime: string;
   prvaPomoc: string;
   osiguranje: boolean;
+  preduzece?: string;
   [key: string]: any;
 }
 
@@ -33,9 +34,10 @@ interface DataTableProps {
   columns: Column[];
   onDeleteClick?: (item: ZaposleniData) => void;
   onEditClick?: (item: ZaposleniData) => void;
+  preduzeceFilter?: string | null;
 }
 
-export default function ZaposleniDataTable({ data: initialData, columns, onDeleteClick, onEditClick }: DataTableProps) {
+export default function ZaposleniDataTable({ data: initialData, columns, onDeleteClick, onEditClick, preduzeceFilter }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
@@ -47,7 +49,12 @@ export default function ZaposleniDataTable({ data: initialData, columns, onDelet
   }, [initialData]);
 
   // Initialize with all items selected
-  const [selectedImePrezime, setSelectedImePrezime] = useState<string[]>(uniqueImePrezime);
+  const [selectedImePrezime, setSelectedImePrezime] = useState<string[]>([]);
+  
+  // Update selected items when data changes (e.g., when preduzece filter is applied)
+  useEffect(() => {
+    setSelectedImePrezime(uniqueImePrezime);
+  }, [uniqueImePrezime]);
 
   const filteredAndSortedData = useMemo(() => {
     return initialData
@@ -92,6 +99,13 @@ export default function ZaposleniDataTable({ data: initialData, columns, onDelet
   return (
     <div className="overflow-hidden rounded-xl bg-white dark:bg-[#1D2939] shadow-theme-sm">
       <div className="flex flex-col gap-4 px-4 py-4">
+        {preduzeceFilter && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              Prikazuju se zaposleni za preduzeće: <span className="font-semibold">{preduzeceFilter}</span>
+            </p>
+          </div>
+        )}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-gray-500 dark:text-gray-400"> Prikaži </span>

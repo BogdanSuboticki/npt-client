@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { useCompanySelection } from "../context/CompanyContext";
 import { useUser } from "../context/UserContext";
@@ -20,6 +20,8 @@ const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const { selectCompany, selectedCompany } = useCompanySelection();
   const { userType } = useUser();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const isAdmin = userType === 'admin' || userType === 'super-admin';
   const isKomitent = userType === 'komitent';
@@ -93,6 +95,11 @@ const AppHeader: React.FC = () => {
     selectCompany(company);
     setShowFullList(false);
     setShowMobileSearch(false);
+    
+    // If on profile page, navigate to zaposleni page with preduzece filter and komitenti context
+    if (location.pathname === '/profile') {
+      navigate(`/zaposleni?context=komitenti&preduzece=${encodeURIComponent(company.naziv)}`);
+    }
   };
 
 

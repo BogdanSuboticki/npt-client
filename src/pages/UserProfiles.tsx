@@ -5,7 +5,6 @@ import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import UserAddressCard from "../components/UserProfile/UserAddressCard";
 import CompanyInfoCard from "../components/UserProfile/CompanyInfoCard";
 import CompanyContactCard from "../components/UserProfile/CompanyContactCard";
-import ContractInfoCard from "../components/UserProfile/ContractInfoCard";
 import SidebarSettingsCard from "../components/UserProfile/SidebarSettingsCard";
 import OrganizationSettingsCard from "../components/UserProfile/OrganizationSettingsCard";
 import SuperAdminDashboard from "../components/UserProfile/SuperAdminDashboard";
@@ -89,12 +88,6 @@ export default function UserProfiles() {
       <PageBreadcrumb pageTitle="Moj Profil" />
       
       <div className="space-y-6">
-        {/* Profile Type Selector */}
-        <ProfileTypeSelector 
-          currentType={userType}
-          onProfileTypeChange={handleProfileTypeChange}
-        />
-
         {/* Main Profile Content */}
         <div className="rounded-2xl lg:py-6">
           <div className="space-y-6">
@@ -118,7 +111,6 @@ export default function UserProfiles() {
               <>
                 <CompanyInfoCard />
                 <CompanyContactCard />
-                <ContractInfoCard />
               </>
             )}
 
@@ -156,89 +148,11 @@ export default function UserProfiles() {
           </div>
         </div>
 
-        {/* Access Control Information */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">
-            Informacije o pristupu
-          </h4>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
-              <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                Tip korisnika
-              </h5>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {userType === 'super-admin' && 'Super Administrator - Pun pristup celokupnom sistemu i svim organizacijama'}
-                {userType === 'admin' && 'Administrator - Pristup korisnicima u svoji firmi'}
-                {userType === 'user' && 'Korisnik - Pristup samo svom nalogu'}
-                {userType === 'komitent' && 'Komitent - Može promeniti profilnu sliku; ostalo samo pregled'}
-              </p>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
-              <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                Mogućnosti
-              </h5>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                {userType === 'super-admin' && (
-                  <>
-                    <li>• Kreiranje i upravljanje svim organizacijama</li>
-                    <li>• Kreiranje novih admina i korisnika</li>
-                    <li>• Pristup svim podacima u sistemu</li>
-                    <li>• Sistemske postavke i konfiguracija</li>
-                    <li>• Upravljanje dozvolama i pristupima</li>
-                    <li>• Monitoring sistema i backup</li>
-                  </>
-                )}
-                {userType === 'admin' && (
-                  <>
-                    <li>• Kreiranje novih korisnika</li>
-                    <li>• Pristup korisnicima u svojoj firmi</li>
-                    <li>• Upravljanje firmom</li>
-                    <li>• Pregled podataka firme</li>
-                  </>
-                )}
-                {userType === 'user' && (
-                  <>
-                    <li>• Izmena sopstvenog naloga</li>
-                    <li>• Pregled sopstvenih podataka</li>
-                    <li>• Ograničen pristup</li>
-                  </>
-                )}
-                {userType === 'komitent' && (
-                  <>
-                    <li>• Može promeniti profilnu sliku</li>
-                    <li>• Samo pregled ostalih podataka</li>
-                    <li>• Ograničen pristup</li>
-                  </>
-                )}
-              </ul>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
-              <h5 className="font-medium text-gray-800 dark:text-white/90 mb-2">
-                {userType === 'super-admin' ? 'Sistem' : 'Firma'}
-              </h5>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {userType === 'super-admin' ? 'Sistem Administracija d.o.o.' : currentUser.company}
-              </p>
-              {userType === 'super-admin' && (
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                  Glavni administrator sistema
-                </p>
-              )}
-              {userType === 'admin' && (
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                  Administrator firme
-                </p>
-              )}
-              {userType === 'komitent' && (
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                  Komitent firme
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Profile Type Selector - Moved to bottom */}
+        <ProfileTypeSelector 
+          currentType={userType}
+          onProfileTypeChange={handleProfileTypeChange}
+        />
       </div>
     </>
   );

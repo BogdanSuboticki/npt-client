@@ -9,11 +9,11 @@ interface OpremaFormProps {
   onClose: () => void;
   onSave: (data: any) => Promise<void> | void;
   initialData?: any;
-  firme: Array<{pib: string, naziv: string}>;
-  lokacije: Array<{id: number, naziv: string, firma_pib: string}>;
+  firme?: Array<{pib: string, naziv: string}>;
+  lokacije?: Array<{id: number, naziv: string, firma_pib: string}>;
 }
 
-export default function OpremaForm({ isOpen, onClose, onSave, initialData, firme, lokacije }: OpremaFormProps) {
+export default function OpremaForm({ isOpen, onClose, onSave, initialData, firme = [], lokacije = [] }: OpremaFormProps) {
   const [formData, setFormData] = React.useState({
     firmaPib: "",
     lokacijaId: "",

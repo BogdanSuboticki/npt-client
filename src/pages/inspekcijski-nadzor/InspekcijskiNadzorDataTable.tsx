@@ -48,9 +48,10 @@ interface DataTableProps {
   data: InspekcijskiNadzorItem[];
   columns: Column[];
   onDeleteClick?: (item: InspekcijskiNadzorItem) => void;
+  onEditClick?: (item: InspekcijskiNadzorItem) => void;
 }
 
-export default function InspekcijskiNadzorDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+export default function InspekcijskiNadzorDataTable({ data: initialData, columns, onDeleteClick, onEditClick: _onEditClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);

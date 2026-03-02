@@ -13,6 +13,7 @@ interface IspitivanjeRadneSredineFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
 }
 
 interface TipIspitivanjaData {
@@ -23,7 +24,7 @@ interface TipIspitivanjaData {
   datumIspitivanja: Date | null;
 }
 
-export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }: IspitivanjeRadneSredineFormProps) {
+export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave, initialData: _initialData }: IspitivanjeRadneSredineFormProps) {
   const context = usePageContext();
   const [formData, setFormData] = React.useState({
     nazivLokacije: "",

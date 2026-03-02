@@ -12,9 +12,10 @@ interface PreglediOpremeFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
 }
 
-export default function PreglediOpremeForm({ isOpen, onClose, onSave }: PreglediOpremeFormProps) {
+export default function PreglediOpremeForm({ isOpen, onClose, onSave, initialData: _initialData }: PreglediOpremeFormProps) {
   const context = usePageContext();
   const [formData, setFormData] = React.useState({
     nazivOpreme: "",

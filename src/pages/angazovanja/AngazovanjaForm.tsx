@@ -158,7 +158,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
   };
 
   const renderDropdown = (
-    ref: React.RefObject<HTMLDivElement>,
+    ref: React.RefObject<HTMLDivElement | null>,
     isOpen: boolean,
     setIsOpen: (v: boolean) => void,
     label: string,

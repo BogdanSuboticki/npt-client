@@ -54,7 +54,7 @@ const EvidencijaObuceniBezbedan: React.FC = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [_saveError, setSaveError] = useState<string | null>(null);
 
   const handleCellChange = (accessor: keyof TableRow, value: string) => {
     setRow(prev => ({ ...prev, [accessor]: value }));

@@ -45,9 +45,10 @@ interface DataTableProps {
   data: PreglediOpremeData[];
   columns: Column[];
   onDeleteClick?: (item: PreglediOpremeData) => void;
+  onEditClick?: (item: PreglediOpremeData) => void;
 }
 
-export default function PreglediOpremeDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+export default function PreglediOpremeDataTable({ data: initialData, columns, onDeleteClick, onEditClick: _onEditClick }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);

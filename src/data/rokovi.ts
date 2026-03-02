@@ -33,6 +33,7 @@ const buildRokoviFromSeeds = (seeds: RokoviSeed[], company: Company): RokoviData
       rok,
       status: "",
       napomena: `${seed.napomena}`,
+      detalji: "",
       companyId: company.id,
       preduzece: company.naziv,
     };
@@ -125,9 +126,10 @@ export const createPovredaInspekcijaRok = (
     rok: deadline,
     status: '',
     napomena: `Obavezno obavestiti inspekciju u roku od 24 sata od povrede. Zaposleni: ${zaposleni}.`,
+    detalji: "",
     companyId: company.id,
     preduzece: company.naziv,
-    povredaId: povredaId, // Link to povreda
+    povredaId: povredaId,
     isCompleted: false
   };
   

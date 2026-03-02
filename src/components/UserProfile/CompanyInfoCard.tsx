@@ -10,12 +10,13 @@ interface CompanyInfoCardProps {
   firma?: {
     naziv: string;
     pib: string;
-    maticni_broj: string;
-    sifra_delatnosti: string;
+    maticni_broj?: string;
+    sifra_delatnosti?: string;
     adresa: string;
     drzava: string;
     mesto: string;
     email: string;
+    [key: string]: any;
   };
   onUpdate?: () => void;
 }

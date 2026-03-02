@@ -120,8 +120,8 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja 
 
 
   const handleOpremaChange = (id: number, field: string, value: string | Date | null) => {
-    setFormData(prevData => {
-      const updatedOprema = prevData.oprema.map(item => {
+    setFormData((prevData: any) => {
+      const updatedOprema = prevData.oprema.map((item: any) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
           
@@ -260,7 +260,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja 
                 </div>
                 
                                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                   {formData.oprema.map((item) => (
+                   {formData.oprema.map((item: any) => (
                      <div key={item.id} className="px-4 py-3">
                                                <div className="grid grid-cols-5 gap-4 min-w-[800px] items-start">
                          {/* Naziv LZS */}

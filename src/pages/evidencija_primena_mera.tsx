@@ -37,7 +37,7 @@ const EvidencijaPrimenaMera: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(31);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [_saveError, setSaveError] = useState<string | null>(null);
 
   const handleRowChange = (idx: number, field: string, value: string) => {
     setRows(prev => {

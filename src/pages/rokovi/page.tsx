@@ -58,7 +58,7 @@ const RokoviPage: React.FC = () => {
   const context = usePageContext();
   const { selectedCompany } = useCompanySelection();
   const [data, setData] = useState<RokoviData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<RokoviData | null>(null);
 

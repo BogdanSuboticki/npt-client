@@ -42,9 +42,10 @@ interface DataTableProps {
   data: LekarskiPreglediData[];
   columns: Column[];
   onDeleteClick?: (item: LekarskiPreglediData) => void;
+  onEditClick?: (item: LekarskiPreglediData) => void;
 }
 
-export default function LekarskiPreglediDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+export default function LekarskiPreglediDataTable({ data: initialData, columns, onDeleteClick, onEditClick: _onEditClick }: DataTableProps) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);

@@ -86,7 +86,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
       } else {
         nextBZRDate.setMonth(nextBZRDate.getMonth() + 36);
       }
-      setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
+      setFormData((prev: any) => ({ ...prev, datumNarednogBZR: nextBZRDate }));
     }
   }, [formData.osposobljavanjeBZR, formData.povecanRizik]);
 
@@ -96,7 +96,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
       const nextZOPDate = new Date(formData.osposobljavanjeZOP);
       // ZOP is always 36 months (3 years) from training date
       nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
-      setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+      setFormData((prev: any) => ({ ...prev, datumNarednogZOP: nextZOPDate }));
     }
   }, [formData.osposobljavanjeZOP]);
 
@@ -133,7 +133,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
 
   const handleDateChange = (field: string, value: Date | null) => {
     if (value) {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      setFormData((prev: any) => ({ ...prev, [field]: value }));
       
       // If BZR training date changes, automatically calculate next BZR date
       // Note: this will be recalculated by the useEffect when povecanRizik is considered
@@ -146,7 +146,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
         const nextZOPDate = new Date(value);
         // ZOP is always 36 months (3 years) from training date
         nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
-        setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+        setFormData((prev: any) => ({ ...prev, datumNarednogZOP: nextZOPDate }));
       }
     }
   };

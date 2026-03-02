@@ -46,7 +46,7 @@ const EvidencijaZastitnaOprema: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [_saveError, setSaveError] = useState<string | null>(null);
 
   const handleCellChange = (rowIdx: number, accessor: keyof TableRow, value: string) => {
     setRows(prev => {

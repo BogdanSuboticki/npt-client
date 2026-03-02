@@ -91,7 +91,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
     if (formData.intervalLekarskog && formData.datumLekarskog) {
       const nextDate = new Date(formData.datumLekarskog);
       nextDate.setMonth(nextDate.getMonth() + parseInt(formData.intervalLekarskog));
-      setFormData(prev => ({ ...prev, datumNarednogLekarskog: nextDate }));
+      setFormData((prev: any) => ({ ...prev, datumNarednogLekarskog: nextDate }));
     }
   }, [formData.intervalLekarskog, formData.datumLekarskog]);
 
@@ -274,7 +274,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
                   value={formData.datumLekarskog}
                   onChange={(date) => {
                     if (date) {
-                      setFormData(prev => ({ ...prev, datumLekarskog: date }));
+                      setFormData((prev: any) => ({ ...prev, datumLekarskog: date }));
                     }
                   }}
                   required
@@ -329,7 +329,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
                   value={formData.datumNarednogLekarskog}
                   onChange={(date) => {
                     if (date) {
-                      setFormData(prev => ({ ...prev, datumNarednogLekarskog: date }));
+                      setFormData((prev: any) => ({ ...prev, datumNarednogLekarskog: date }));
                     }
                   }}
                   required

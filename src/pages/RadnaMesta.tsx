@@ -9,7 +9,7 @@ import ConfirmModal from "../components/ui/modal/ConfirmModal";
 import { api } from "../api/client";
 import { usePageContext } from "../hooks/usePageContext";
 
-const mapRadnoMestoFromApi = (item: any, index: number) => ({
+const mapRadnoMestoFromApi = (item: any, _index: number) => ({
   id: item.id,
   nazivRadnogMesta: item.naziv,
   nazivLokacije: item.lokacija?.naziv ?? "",
@@ -415,19 +415,19 @@ const RadnaMesta: React.FC = () => {
                     {isLzsOpen && (
                       <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                         <div className="pr-1">
-                          {lzsOptions.map((option: string, index: number) => (
+                          {lzsOptions.map((option, index: number) => (
                             <div
-                              key={option}
+                              key={option.lzs}
                               className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                                newLZS.lzs === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                                newLZS.lzs === option.lzs ? 'bg-gray-100 dark:bg-gray-700' : ''
                               } ${index === lzsOptions.length - 1 ? 'rounded-b-lg' : ''}`}
                               onClick={() => {
-                                const defaults = inferDefaults(option);
-                                setNewLZS({ lzs: option, rok: defaults.rok, standard: defaults.standard });
+                                const defaults = inferDefaults(option.lzs);
+                                setNewLZS({ lzs: option.lzs, rok: defaults.rok, standard: defaults.standard });
                                 setIsLzsOpen(false);
                               }}
                             >
-                              <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{option.lzs}</span>
                             </div>
                           ))}
                         </div>

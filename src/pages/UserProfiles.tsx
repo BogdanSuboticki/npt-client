@@ -122,7 +122,7 @@ export default function UserProfiles() {
   const userCompany = user.firma?.naziv || "";
   const profileImageUrl = user.profile_photo_url || "/images/user/owner.jpg";
 
-  const handleProfileImageChange = async (file: File, dataUrl: string) => {
+  const handleProfileImageChange = async (file: File, _dataUrl: string) => {
     try {
       const formData = new FormData();
       formData.append('photo', file);

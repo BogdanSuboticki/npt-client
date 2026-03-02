@@ -119,7 +119,7 @@ const DnevniIzvestajiPage: React.FC = () => {
   const context = usePageContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { selectedCompany, selectCompany } = useCompanySelection();
+  const { selectedCompany } = useCompanySelection();
   const { userType } = useUser();
   const [data, setData] = useState<DnevniIzvestajiData[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

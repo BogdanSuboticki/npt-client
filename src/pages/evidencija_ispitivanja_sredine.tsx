@@ -46,7 +46,7 @@ const EvidencijaIspitivanjaSredine: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [_saveError, setSaveError] = useState<string | null>(null);
 
   // Refs for input fields
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});

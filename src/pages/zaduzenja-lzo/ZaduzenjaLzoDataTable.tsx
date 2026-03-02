@@ -43,6 +43,7 @@ interface DataTableProps {
   data: ZaduzenjaLzoData[];
   columns: Column[];
   onDeleteClick?: (item: ZaduzenjaLzoData) => void;
+  onEditClick?: (item: ZaduzenjaLzoData) => void;
   onUpdateData?: (updatedData: ZaduzenjaLzoData[]) => void;
 }
 
@@ -55,7 +56,7 @@ interface EditOprema {
   narednoZaduzenje: Date | null;
 }
 
-export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDeleteClick, onUpdateData }: DataTableProps) {
+export default function ZaduzenjaLzoDataTable({ data: initialData, columns, onDeleteClick, onEditClick: _onEditClick, onUpdateData }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);

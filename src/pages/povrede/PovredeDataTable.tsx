@@ -18,7 +18,6 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
-import { completePovredaInspekcijaRok } from "../../data/rokovi";
 
 interface Column {
   key: string;
@@ -45,10 +44,11 @@ interface DataTableProps {
   data: PovredeData[];
   columns: Column[];
   onDeleteClick?: (item: PovredeData) => void;
+  onEditClick?: (item: PovredeData) => void;
   onUpdateData?: (updatedData: PovredeData[]) => void;
 }
 
-export default function PovredeDataTable({ data: initialData, columns, onDeleteClick, onUpdateData }: DataTableProps) {
+export default function PovredeDataTable({ data: initialData, columns, onDeleteClick, onEditClick: _onEditClick, onUpdateData }: DataTableProps) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -173,15 +173,6 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
   const handleEditSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingItem) {
-      const wasInspekcijaSet = !!editingItem.datumObavestenjaInspekcije;
-      const isInspekcijaNowSet = !!editDatumObavestenjaInspekcije;
-      
-      // Check if datumObavestenjaInspekcije was just set (completed)
-      if (!wasInspekcijaSet && isInspekcijaNowSet) {
-        // Complete the related rok
-        completePovredaInspekcijaRok(editingItem.id);
-      }
-      
       // Update the data
       const updatedData = initialData.map(item => {
         if (item.id === editingItem.id) {

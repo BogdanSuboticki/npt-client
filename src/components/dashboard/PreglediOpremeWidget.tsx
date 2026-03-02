@@ -1,69 +1,30 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { PreglediOpremeIcon } from "../../icons";
-
-// Sample data - in a real app, this would come from an API
-const samplePreglediOpreme = [
-  {
-    id: 1,
-    nazivOpreme: "Kompresor vazduha",
-    datumPregleda: new Date("2024-01-01"),
-    datumNarednogPregleda: new Date("2024-07-01"),
-    status: "Ispravno",
-  },
-  {
-    id: 2,
-    nazivOpreme: "Kran mostni",
-    datumPregleda: new Date("2024-02-15"),
-    datumNarednogPregleda: new Date("2024-08-15"),
-    status: "Ispravno",
-  },
-  {
-    id: 3,
-    nazivOpreme: "Ventilator industrijski",
-    datumPregleda: new Date("2024-03-10"),
-    datumNarednogPregleda: new Date("2024-06-10"),
-    status: "Neispravno",
-  },
-  {
-    id: 4,
-    nazivOpreme: "Pumpa za vodu",
-    datumPregleda: new Date("2024-01-30"),
-    datumNarednogPregleda: new Date("2026-01-30"),
-    status: "Ispravno",
-  },
-  {
-    id: 5,
-    nazivOpreme: "Generator električni",
-    datumPregleda: new Date("2024-02-05"),
-    datumNarednogPregleda: new Date("2025-02-05"),
-    status: "Ispravno",
-  },
-];
+import { api } from "../../api/client";
 
 export default function PreglediOpremeWidget() {
   const navigate = useNavigate();
 
-  const stats = useMemo(() => {
-    const now = new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    
-    const total = samplePreglediOpreme.length;
-    const upcoming = samplePreglediOpreme.filter(
-      (p) =>
-        p.datumNarednogPregleda <= thirtyDaysFromNow &&
-        p.datumNarednogPregleda >= now
-    ).length;
-    const needsRepair = samplePreglediOpreme.filter(
-      (p) => p.status === "Neispravno"
-    ).length;
-    const expired = samplePreglediOpreme.filter(
-      (p) => p.datumNarednogPregleda < now
-    ).length;
+  const [stats, setStats] = useState({
+    total: 0,
+    upcoming: 0,
+    needsRepair: 0,
+    expired: 0,
+  });
 
-    return { total, upcoming, needsRepair, expired };
+  useEffect(() => {
+    api
+      .get<{
+        total: number;
+        upcoming: number;
+        needsRepair: number;
+        expired: number;
+      }>("dashboard/pregledi-opreme-stats")
+      .then(setStats)
+      .catch(() => {});
   }, []);
 
   const handleClick = () => {
@@ -118,4 +79,3 @@ export default function PreglediOpremeWidget() {
     </div>
   );
 }
-

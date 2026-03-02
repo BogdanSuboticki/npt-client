@@ -1,46 +1,28 @@
 import React from "react";
 import Badge from "../ui/badge/Badge";
 
-const mockData = [
-  {
-    id: 1,
-    title: "Unique Visitors",
-    value: "24.7K",
-    change: "+20%",
-    direction: "up",
-    comparisonText: "Vs last month",
-  },
-  {
-    id: 2,
-    title: "Total Pageviews",
-    value: "55.9K",
-    change: "+4%",
-    direction: "up",
-    comparisonText: "Vs last month",
-  },
-  {
-    id: 3,
-    title: "Bounce Rate",
-    value: "54%",
-    change: "-1.59%",
-    direction: "down",
-    comparisonText: "Vs last month",
-  },
-  {
-    id: 4,
-    title: "Visit Duration",
-    value: "2m 56s",
-    change: "+7%",
-    direction: "up",
-    comparisonText: "Vs last month",
-  },
-];
+const metrics: Array<{
+  id: number;
+  title: string;
+  value: string;
+  change: string;
+  direction: "up" | "down" | "neutral";
+  comparisonText: string;
+}> = [];
 
 const AnalyticsMetrics: React.FC = () => {
+  if (metrics.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 dark:text-gray-400">
+        Nema dostupnih metrika.
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4">
       {/* <!-- Metric Item Start --> */}
-      {mockData.map((item) => (
+      {metrics.map((item) => (
         <div
           key={item.id}
           className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]"

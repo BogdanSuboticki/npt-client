@@ -13,12 +13,9 @@ export default function CardFour() {
           />
         </div>
         <div>
-          <CardTitle>Card title</CardTitle>
+          <CardTitle>Kartica</CardTitle>
 
-          <CardDescription>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi
-            architecto aspernatur cum et ipsum
-          </CardDescription>
+          <CardDescription>Nema opisa.</CardDescription>
 
           <Link
             to="/"

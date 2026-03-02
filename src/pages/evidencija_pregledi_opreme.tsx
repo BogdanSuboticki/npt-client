@@ -16,6 +16,7 @@ import {
   createPrintStyles, 
   createPdfOptions 
 } from '../utils/printDownloadUtils';
+import { api } from '../api/client';
 
 interface TableRow {
   redniBroj: number;
@@ -46,6 +47,7 @@ const EvidencijaPreglediOpreme: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
+  const [_saveError, setSaveError] = useState<string | null>(null);
 
   // Refs for input fields
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -168,13 +170,21 @@ const EvidencijaPreglediOpreme: React.FC = () => {
     setItemsPerPage(prev => prev + 1);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nazivObrasca.trim()) {
       return;
     }
-    // Handle save logic here
-    console.log("Saving form with name:", nazivObrasca);
-    closeModal();
+    try {
+      await api.post('obrasci', {
+        naziv_obrasca: nazivObrasca,
+        uneti_podaci: rows,
+        korisnik_id: null,
+      });
+      closeModal();
+      setNazivObrasca('');
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
   const handleNazivChange = (e: React.ChangeEvent<HTMLInputElement>) => {

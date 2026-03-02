@@ -1,83 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import OsposobljavanjeDataTable from './OsposobljavanjeDataTable';
 import OsposobljavanjeForm from './OsposobljavanjeForm';
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const osposobljavanjeData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    zaposleni: "Petar Petrović",
-    radnoMesto: "Operater viljuškara",
-    lokacija: "Magacin Novi Sad",
-    povecanRizik: true,
-    osposobljavanjeBZR: "2024-01-15",
-    datumNarednogBZR: "2025-01-15",
-    osposobljavanjeZOP: "2024-02-01",
-    datumNarednogZOP: "2025-02-01",
-    prikaziUPodsetniku: true,
-    bzrOdradjeno: true
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    zaposleni: "Ana Anić",
-    radnoMesto: "Administrativni radnik",
-    lokacija: "Kancelarija Beograd",
-    povecanRizik: false,
-    osposobljavanjeBZR: "2024-03-01",
-    datumNarednogBZR: "2025-03-01",
-    osposobljavanjeZOP: "2024-03-15",
-    datumNarednogZOP: "2025-03-15",
-    prikaziUPodsetniku: false,
-    bzrOdradjeno: false
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    zaposleni: "Marko Marković",
-    radnoMesto: "Zavarivač",
-    lokacija: "Proizvodna hala Niš",
-    povecanRizik: true,
-    osposobljavanjeBZR: "2024-02-15",
-    datumNarednogBZR: "2025-02-15",
-    osposobljavanjeZOP: "2024-03-01",
-    datumNarednogZOP: "2025-03-01",
-    prikaziUPodsetniku: true,
-    bzrOdradjeno: true
-  },
-  {
-    id: 4,
-    redniBroj: 4,
-    zaposleni: "Jovan Jovanović",
-    radnoMesto: "Električar održavanja",
-    lokacija: "Pogon Subotica",
-    povecanRizik: true,
-    osposobljavanjeBZR: "2024-04-01",
-    datumNarednogBZR: "2025-04-01",
-    osposobljavanjeZOP: "2024-04-15",
-    datumNarednogZOP: "2025-04-15",
-    prikaziUPodsetniku: true,
-    bzrOdradjeno: false
-  },
-  {
-    id: 5,
-    redniBroj: 5,
-    zaposleni: "Milan Milanković",
-    radnoMesto: "Magacioner",
-    lokacija: "Magacin Kragujevac",
-    povecanRizik: true,
-    osposobljavanjeBZR: "2024-05-01",
-    datumNarednogBZR: "2025-05-01",
-    osposobljavanjeZOP: "2024-05-15",
-    datumNarednogZOP: "2025-05-15",
-    prikaziUPodsetniku: false,
-    bzrOdradjeno: false
-  }
-];
+const mapOsposobljavanjeFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  zaposleni: item.angazovanje?.zaposleni?.ime_prezime ?? "",
+  radnoMesto: item.radnoMesto?.naziv ?? "",
+  lokacija: item.lokacija?.naziv ?? "",
+  povecanRizik: item.radnoMesto?.povecan_rizik ?? false,
+  osposobljavanjeBZR: fromIsoDate(item.datum_provere_bzr)?.toISOString().split('T')[0] ?? "",
+  datumNarednogBZR: fromIsoDate(item.datum_narednog_bzr)?.toISOString().split('T')[0] ?? "",
+  osposobljavanjeZOP: fromIsoDate(item.datum_osposobljavanja_zop)?.toISOString().split('T')[0] ?? "",
+  datumNarednogZOP: fromIsoDate(item.datum_narednog_zop)?.toISOString().split('T')[0] ?? "",
+  angazovanjeId: item.angazovanje_id,
+  firmaPib: item.firma_pib,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -123,47 +67,60 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const Osposobljavanje: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(osposobljavanjeData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [angazovanja, setAngazovanja] = useState<any[]>([]);
 
-  const handleSave = (newData: any) => {
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
-    
+  const loadOsposobljavanja = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`osposobljavanja?context=${context}`);
+      setData(response.data.map(mapOsposobljavanjeFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju osposobljavanja.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadAngazovanja = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`angazovanja?context=${context}`);
+      setAngazovanja(response.data);
+    } catch {
+      // non-critical
+    }
+  };
+
+  useEffect(() => {
+    loadOsposobljavanja();
+    loadAngazovanja();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      angazovanje_id: Number(newData.angazovanjeId),
+      datum_provere_bzr: toIsoDate(newData.osposobljavanjeBZR),
+      datum_narednog_bzr: newData.datumNarednogBZR ? toIsoDate(newData.datumNarednogBZR) : null,
+      datum_osposobljavanja_zop: newData.osposobljavanjeZOP ? toIsoDate(newData.osposobljavanjeZOP) : null,
+      datum_narednog_zop: newData.datumNarednogZOP ? toIsoDate(newData.datumNarednogZOP) : null,
+    };
+
     if (editingItem) {
-      // Update existing item - only update the date fields
-      const updatedItem = {
-        ...editingItem,
-        osposobljavanjeBZR: newData.osposobljavanjeBZR?.toISOString().split('T')[0] || editingItem.osposobljavanjeBZR,
-        datumNarednogBZR: newData.datumNarednogBZR?.toISOString().split('T')[0] || editingItem.datumNarednogBZR,
-        osposobljavanjeZOP: newData.osposobljavanjeZOP?.toISOString().split('T')[0] || editingItem.osposobljavanjeZOP,
-        datumNarednogZOP: newData.datumNarednogZOP?.toISOString().split('T')[0] || editingItem.datumNarednogZOP,
-      };
-      
-      setData(data.map(item => 
-        item.id === editingItem.id ? updatedItem : item
-      ));
+      await api.put(`osposobljavanja/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item
-      const newItem = {
-        id: data.length + 1,
-        redniBroj: data.length + 1,
-        zaposleni: newData.angazovani,
-        radnoMesto: newData.radnoMesto,
-        lokacija: newData.lokacija,
-        povecanRizik: newData.povecanRizik,
-        osposobljavanjeBZR: newData.osposobljavanjeBZR?.toISOString().split('T')[0],
-        datumNarednogBZR: newData.datumNarednogBZR?.toISOString().split('T')[0],
-        osposobljavanjeZOP: newData.osposobljavanjeZOP?.toISOString().split('T')[0],
-        datumNarednogZOP: newData.datumNarednogZOP?.toISOString().split('T')[0],
-        prikaziUPodsetniku: newData.prikaziUPodsetniku || false,
-        bzrOdradjeno: newData.bzrOdradjeno || false
-      };
-      setData([...data, newItem]);
+      await api.post("osposobljavanja", payload);
     }
+    await loadOsposobljavanja();
     setShowForm(false);
   };
 
@@ -172,9 +129,14 @@ const Osposobljavanje: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`osposobljavanja/${itemToDelete.id}`);
+        await loadOsposobljavanja();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju osposobljavanja.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -193,16 +155,6 @@ const Osposobljavanje: React.FC = () => {
   const handleFormClose = () => {
     setShowForm(false);
     setEditingItem(null);
-  };
-
-  const handleCheckboxChange = (id: number, field: 'prikaziUPodsetniku' | 'bzrOdradjeno') => {
-    setData(prevData => 
-      prevData.map(item => 
-        item.id === id 
-          ? { ...item, [field]: !item[field] }
-          : item
-      )
-    );
   };
 
   return (
@@ -282,13 +234,18 @@ const Osposobljavanje: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <OsposobljavanjeDataTable 
-            data={data}
-            columns={columns}
-            onEditClick={handleEditClick}
-            onDeleteClick={handleDeleteClick}
-            onCheckboxChange={handleCheckboxChange}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <OsposobljavanjeDataTable 
+              data={data}
+              columns={columns}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          )}
         </div>
 
         <OsposobljavanjeForm 
@@ -296,6 +253,14 @@ const Osposobljavanje: React.FC = () => {
           onClose={handleFormClose}
           onSave={handleSave}
           initialData={editingItem}
+          angazovanja={angazovanja.map((a: any) => ({
+            id: a.id,
+            zaposleniName: a.zaposleni?.ime_prezime ?? "",
+            radnoMesto: a.radno_mesto?.naziv ?? "",
+            povecanRizik: a.radno_mesto?.povecan_rizik ?? false,
+            lokacija: a.lokacija?.naziv ?? "",
+            firmaPib: a.firma_pib ?? "",
+          }))}
         />
 
         <ConfirmModal

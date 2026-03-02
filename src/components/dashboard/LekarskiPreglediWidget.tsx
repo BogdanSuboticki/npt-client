@@ -1,75 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { LekarskiPreglediIcon } from "../../icons";
-
-// Sample data - in a real app, this would come from an API
-const sampleLekarskiPregledi = [
-  {
-    id: 1,
-    zaposleni: "Marko Petrović",
-    datumLekarskog: new Date("2024-01-15"),
-    datumNarednogLekarskog: new Date("2024-07-15"),
-    aktivan: true,
-  },
-  {
-    id: 2,
-    zaposleni: "Ana Jovanović",
-    datumLekarskog: new Date("2024-02-20"),
-    datumNarednogLekarskog: new Date("2024-08-20"),
-    aktivan: true,
-  },
-  {
-    id: 3,
-    zaposleni: "Stefan Nikolić",
-    datumLekarskog: new Date("2024-03-10"),
-    datumNarednogLekarskog: new Date("2024-09-10"),
-    aktivan: true,
-  },
-  {
-    id: 4,
-    zaposleni: "Marija Đorđević",
-    datumLekarskog: new Date("2024-01-05"),
-    datumNarednogLekarskog: new Date("2024-07-05"),
-    aktivan: false,
-  },
-  {
-    id: 5,
-    zaposleni: "Dragan Simić",
-    datumLekarskog: new Date("2024-02-28"),
-    datumNarednogLekarskog: new Date("2024-08-28"),
-    aktivan: true,
-  },
-  {
-    id: 6,
-    zaposleni: "Jelena Popović",
-    datumLekarskog: new Date("2024-03-15"),
-    datumNarednogLekarskog: new Date("2024-09-15"),
-    aktivan: true,
-  },
-];
+import { api } from "../../api/client";
 
 export default function LekarskiPreglediWidget() {
   const navigate = useNavigate();
 
-  const stats = useMemo(() => {
-    const now = new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    
-    const total = sampleLekarskiPregledi.length;
-    const active = sampleLekarskiPregledi.filter((p) => p.aktivan).length;
-    const upcoming = sampleLekarskiPregledi.filter(
-      (p) =>
-        p.aktivan &&
-        p.datumNarednogLekarskog <= thirtyDaysFromNow &&
-        p.datumNarednogLekarskog >= now
-    ).length;
-    const expired = sampleLekarskiPregledi.filter(
-      (p) => p.aktivan && p.datumNarednogLekarskog < now
-    ).length;
+  const [stats, setStats] = useState({ total: 0, upcoming: 0, expired: 0 });
 
-    return { total, active, upcoming, expired };
+  useEffect(() => {
+    api
+      .get<{ total: number; upcoming: number; expired: number }>(
+        "dashboard/lekarski-pregledi-stats"
+      )
+      .then(setStats)
+      .catch(() => {});
   }, []);
 
   const handleClick = () => {
@@ -101,7 +48,7 @@ export default function LekarskiPreglediWidget() {
         <div>
           <p className="text-xs text-gray-500 dark:text-gray-400">Aktivni</p>
           <p className="mt-1 text-lg font-semibold text-gray-800 dark:text-white/90">
-            {stats.active}
+            {stats.total}
           </p>
         </div>
         <div>
@@ -122,4 +69,3 @@ export default function LekarskiPreglediWidget() {
     </div>
   );
 }
-

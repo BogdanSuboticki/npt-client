@@ -6,11 +6,14 @@ import Input from "../../components/form/input/InputField";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 import Slider from "../../components/ui/Slider";
 import Checkbox from "../../components/form/input/Checkbox";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
 interface IspitivanjeRadneSredineFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
 }
 
 interface TipIspitivanjaData {
@@ -21,15 +24,30 @@ interface TipIspitivanjaData {
   datumIspitivanja: Date | null;
 }
 
-export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }: IspitivanjeRadneSredineFormProps) {
+export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave, initialData: _initialData }: IspitivanjeRadneSredineFormProps) {
+  const context = usePageContext();
   const [formData, setFormData] = React.useState({
     nazivLokacije: "",
     brojMernihMesta: "",
     intervalIspitivanja: "36",
+    lokacijaId: "",
+    firmaPib: "",
   });
 
   const [isLokacijaDropdownOpen, setIsLokacijaDropdownOpen] = React.useState(false);
   const lokacijaDropdownRef = React.useRef<HTMLDivElement>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
+
+  const [lokacijeList, setLokacijeList] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormError(null);
+      api.get<{ data: any[] }>(`lokacije?context=${context}`)
+        .then(res => setLokacijeList(res.data))
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   // Environmental testing types with individual data
   const [tipoviIspitivanja, setTipoviIspitivanja] = React.useState<TipIspitivanjaData[]>([
@@ -70,20 +88,6 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     }
   ]);
 
-  // Location options with their corresponding measurement point counts
-  const lokacijaOptions = [
-    { naziv: 'Fabrika Novi Sad', brojMernihMesta: 8 },
-    { naziv: 'Skladište Beograd', brojMernihMesta: 4 },
-    { naziv: 'Upravna zgrada Niš', brojMernihMesta: 6 },
-    { naziv: 'Pogon Subotica', brojMernihMesta: 12 },
-    { naziv: 'Distributivni centar Kragujevac', brojMernihMesta: 5 },
-    { naziv: 'Tehnički centar Zrenjanin', brojMernihMesta: 7 },
-    { naziv: 'Logistički centar Čačak', brojMernihMesta: 9 },
-    { naziv: 'Proizvodni kompleks Pančevo', brojMernihMesta: 15 },
-    { naziv: 'Poslovni centar Valjevo', brojMernihMesta: 3 },
-    { naziv: 'Industrijska zona Šabac', brojMernihMesta: 6 },
-  ];
-
   // Close dropdown when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -96,12 +100,13 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLokacijaChange = (selectedLokacija: string) => {
-    const lokacija = lokacijaOptions.find(opt => opt.naziv === selectedLokacija);
+  const handleLokacijaChange = (item: any) => {
     setFormData(prev => ({
       ...prev,
-      nazivLokacije: selectedLokacija,
-      brojMernihMesta: lokacija ? lokacija.brojMernihMesta.toString() : ""
+      nazivLokacije: item.naziv,
+      brojMernihMesta: item.broj_mernih_mesta ? item.broj_mernih_mesta.toString() : "",
+      lokacijaId: item.id,
+      firmaPib: item.firma_pib,
     }));
     setIsLokacijaDropdownOpen(false);
   };
@@ -132,25 +137,23 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
     setTipoviIspitivanja(prev => prev.map(tip => ({ ...tip, selected: false })));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!formData.nazivLokacije) {
-      alert('Molimo izaberite lokaciju');
+      setFormError('Molimo izaberite lokaciju');
       return;
     }
 
     const selectedTipovi = tipoviIspitivanja.filter(tip => tip.selected);
     if (selectedTipovi.length === 0) {
-      alert('Molimo izaberite bar jedan tip ispitivanja');
+      setFormError('Molimo izaberite bar jedan tip ispitivanja');
       return;
     }
 
-    // Validate that all selected types have dates
     const invalidTipovi = selectedTipovi.filter(tip => !tip.datumIspitivanja);
     if (invalidTipovi.length > 0) {
-      alert('Molimo unesite datum ispitivanja za sve izabrane tipove ispitivanja');
+      setFormError('Molimo unesite datum ispitivanja za sve izabrane tipove ispitivanja');
       return;
     }
     
@@ -159,7 +162,11 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
       tipoviIspitivanja: selectedTipovi
     };
     
-    onSave(dataToSave);
+    try {
+      await onSave(dataToSave);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
   const selectedTipovi = tipoviIspitivanja.filter(tip => tip.selected);
@@ -176,6 +183,11 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                {formError}
+              </div>
+            )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="col-span-1">
             <Label>Lokacija *</Label>
@@ -198,13 +210,13 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave }:
               {isLokacijaDropdownOpen && (
                 <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                   <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {lokacijaOptions.map((item, index) => (
+                    {lokacijeList.map((item, index) => (
                       <div
-                        key={item.naziv}
+                        key={item.id}
                         className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                          formData.nazivLokacije === item.naziv ? 'bg-gray-100 dark:bg-gray-700' : ''
-                        } ${index === lokacijaOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                        onClick={() => handleLokacijaChange(item.naziv)}
+                          formData.lokacijaId === item.id ? 'bg-gray-100 dark:bg-gray-700' : ''
+                        } ${index === lokacijeList.length - 1 ? 'rounded-b-lg' : ''}`}
+                        onClick={() => handleLokacijaChange(item)}
                       >
                         <span className="text-sm text-gray-700 dark:text-gray-300">{item.naziv}</span>
                       </div>

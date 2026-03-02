@@ -7,50 +7,26 @@ import ZaposleniForm from "./ZaposleniForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
-// Sample data for the table
-const zaposleniData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    imePrezime: "Petar Petrović",
-    prvaPomoc: "Da",
-    osiguranje: true,
-    preduzece: "Tech Solutions d.o.o.",
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    imePrezime: "Ana Anić",
-    prvaPomoc: "Ne",
-    osiguranje: false,
-    preduzece: "Tech Solutions d.o.o.",
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    imePrezime: "Marko Marković",
-    prvaPomoc: "Da",
-    osiguranje: true,
-    preduzece: "Client Company A",
-  },
-  {
-    id: 4,
-    redniBroj: 4,
-    imePrezime: "Jovana Stojanović",
-    prvaPomoc: "Da",
-    osiguranje: true,
-    preduzece: "Client Company A",
-  },
-  {
-    id: 5,
-    redniBroj: 5,
-    imePrezime: "Stefan Đorđević",
-    prvaPomoc: "Ne",
-    osiguranje: false,
-    preduzece: "Client Company B",
-  },
-];
+const mapPrvaPomoc = (value?: string) => {
+  if (!value) return "";
+  const lower = value.toLowerCase();
+  if (lower.includes("osnovni")) return "Osnovni kurs";
+  if (lower.includes("napredni")) return "Napredni kurs";
+  return "Ne";
+};
+
+const mapZaposleniFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  imePrezime: item.ime_prezime,
+  prvaPomoc: mapPrvaPomoc(item.prva_pomoc),
+  osiguranje: item.osiguranje_od_posledica_povrede_na_radu_prof_bolesti === "DA",
+  preduzece: item.firma?.naziv ?? "",
+  firmaPib: item.firma_pib,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -92,12 +68,16 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const ZaposleniPage: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(zaposleniData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [filteredPreduzece, setFilteredPreduzece] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [firme, setFirme] = useState<any[]>([]);
 
   // Read preduzece from URL params and filter data
   useEffect(() => {
@@ -109,26 +89,49 @@ const ZaposleniPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
-    
+  const loadZaposleni = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`zaposleni?context=${context}`);
+      setData(response.data.map(mapZaposleniFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju zaposlenih.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadFirme = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`firme?context=${context}`);
+      setFirme(response.data);
+    } catch (error) {
+      console.error("Greška pri učitavanju firmi:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadZaposleni();
+    loadFirme();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const prvaPomoc = newData.prvaPomoc?.toLowerCase();
+    const payload = {
+      firma_pib: newData.firmaPib,
+      ime_prezime: newData.imePrezime,
+      prva_pomoc: prvaPomoc === "osnovni kurs" ? "osnovni kurs" : prvaPomoc === "napredni kurs" ? "napredni kurs" : "ne",
+      osiguranje_od_posledica_povrede_na_radu_prof_bolesti: newData.osiguranje ? "DA" : "NE",
+    };
+
     if (editingItem) {
-      // Update existing item
-      setData(data.map(item => 
-        item.id === editingItem.id 
-          ? { ...item, ...newData, id: editingItem.id }
-          : item
-      ));
+      await api.put(`zaposleni/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item to the data array
-      const newItem = {
-        id: data.length + 1,
-        ...newData,
-      };
-      setData([...data, newItem]);
+      await api.post("zaposleni", payload);
     }
+    await loadZaposleni();
     setShowForm(false);
   };
 
@@ -142,9 +145,14 @@ const ZaposleniPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`zaposleni/${itemToDelete.id}`);
+        await loadZaposleni();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju zaposlenog.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -236,13 +244,19 @@ const ZaposleniPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <ZaposleniDataTable 
-            data={filteredPreduzece ? data.filter(item => item.preduzece === filteredPreduzece) : data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-            onEditClick={handleEditClick}
-            preduzeceFilter={filteredPreduzece}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <ZaposleniDataTable 
+              data={filteredPreduzece ? data.filter(item => item.preduzece === filteredPreduzece) : data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+              preduzeceFilter={filteredPreduzece}
+            />
+          )}
         </div>
 
         <ZaposleniForm 
@@ -250,6 +264,7 @@ const ZaposleniPage: React.FC = () => {
           onClose={handleFormClose}
           onSave={handleSave}
           initialData={editingItem}
+          firme={firme.map(f => ({ pib: f.pib, naziv: f.naziv }))}
         />
 
         <ConfirmModal

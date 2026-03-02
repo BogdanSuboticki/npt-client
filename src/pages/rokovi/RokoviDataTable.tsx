@@ -26,6 +26,41 @@ interface Column {
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+const oblastColorMap: Record<string, string> = {
+  "Ugovor": "bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300",
+  "Bezbednosne provere": "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
+  "Lekarski pregledi": "bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300",
+  "Pregledi opreme": "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
+  "Osposobljavanje": "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300",
+  "Povrede na radu": "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300",
+  "Kontrola radnih mesta": "bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300",
+  "Inspekcijski nadzor": "bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300",
+  "Lična zaštitna sredstva": "bg-lime-50 text-lime-700 dark:bg-lime-500/10 dark:text-lime-300",
+  "Ispitivanje radne sredine": "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300",
+};
+
+const DetaljiCell = ({ value }: { value: string }) => {
+  if (!value) return <span className="text-gray-400">-</span>;
+
+  const parts = value.split(" | ");
+  return (
+    <div className="flex flex-col gap-1">
+      {parts.map((part, i) => {
+        const colonIdx = part.indexOf(": ");
+        if (colonIdx === -1) return <span key={i} className="text-sm">{part}</span>;
+        const label = part.substring(0, colonIdx);
+        const val = part.substring(colonIdx + 2);
+        return (
+          <span key={i} className="text-sm leading-tight">
+            <span className="text-gray-400 dark:text-gray-500 font-normal">{label}:</span>{" "}
+            <span className="font-medium text-gray-800 dark:text-gray-200">{val}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+};
+
 const getDaysUntilRok = (rok: Date) => {
   const today = new Date();
   const diff = rok.getTime() - today.setHours(0, 0, 0, 0);
@@ -66,16 +101,17 @@ const getStatusClassNames = (status: string) => {
 };
 
 export interface RokoviData {
-  id: number;
+  id: string | number;
   oblast: string;
   vrstaObaveze: string;
   rok: Date;
   status: string;
   napomena: string;
+  detalji: string;
   preduzece?: string;
-  companyId?: string;
-  povredaId?: number;
-  isCompleted?: boolean;
+  firma_pib?: string;
+  source_type?: string;
+  source_id?: number | string;
   [key: string]: any;
 }
 
@@ -423,6 +459,17 @@ export default function RokoviDataTable({
                         >
                           {getStatusLabel(item.rok)}
                         </span>
+                      ) : key === "detalji" ? (
+                        <DetaljiCell value={item.detalji} />
+                      ) : key === "oblast" ? (
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap ${
+                            oblastColorMap[item.oblast] ||
+                            "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                          }`}
+                        >
+                          {item.oblast}
+                        </span>
                       ) : (
                         item[key] || "-"
                       )}
@@ -574,6 +621,15 @@ export default function RokoviDataTable({
                       />
                     </div>
                   </div>
+
+                  {editingItem.detalji && (
+                    <div className="col-span-1 lg:col-span-2">
+                      <Label>Detalji</Label>
+                      <div className="w-full min-h-[44px] px-4 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 cursor-not-allowed">
+                        <DetaljiCell value={editingItem.detalji} />
+                      </div>
+                    </div>
+                  )}
 
                   <div className="w-full">
                     <Label>Status roka</Label>

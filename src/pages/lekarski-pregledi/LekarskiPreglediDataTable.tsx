@@ -42,9 +42,10 @@ interface DataTableProps {
   data: LekarskiPreglediData[];
   columns: Column[];
   onDeleteClick?: (item: LekarskiPreglediData) => void;
+  onEditClick?: (item: LekarskiPreglediData) => void;
 }
 
-export default function LekarskiPreglediDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+export default function LekarskiPreglediDataTable({ data: initialData, columns, onDeleteClick, onEditClick: _onEditClick }: DataTableProps) {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -70,8 +71,10 @@ export default function LekarskiPreglediDataTable({ data: initialData, columns, 
   }, [initialData]);
 
   const uniqueVrsteLekarskog = useMemo(() => {
-    return ["Predhodni", "Periodični", "Vanredni", "Oftamološki"];
-  }, []);
+    const fromData = Array.from(new Set(initialData.map(item => item.vrstaLekarskog).filter(Boolean)));
+    const allTypes = ["Prethodni", "Periodični", "Vanredni", "Oftamološki"];
+    return Array.from(new Set([...allTypes, ...fromData]));
+  }, [initialData]);
 
   const vrstaLekarskogOptions = ["Prethodni", "Periodični", "Vanredni", "Oftamološki"];
   const intervalOptions = ["12", "36", "60"];

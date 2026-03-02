@@ -80,7 +80,7 @@ export default function ModalBasedAlerts() {
             Well Done!
           </h4>
           <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
-            Lorem ipsum dolor sit amet consectetur. Feugiat ipsum libero tempor
+            
             felis risus nisi non. Quisque eu ut tempor curabitur.
           </p>
 
@@ -140,7 +140,7 @@ export default function ModalBasedAlerts() {
             Information Alert!
           </h4>
           <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
-            Lorem ipsum dolor sit amet consectetur. Feugiat ipsum libero tempor
+            
             felis risus nisi non. Quisque eu ut tempor curabitur.
           </p>
 
@@ -200,7 +200,7 @@ export default function ModalBasedAlerts() {
             Warning Alert!
           </h4>
           <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
-            Lorem ipsum dolor sit amet consectetur. Feugiat ipsum libero tempor
+            
             felis risus nisi non. Quisque eu ut tempor curabitur.
           </p>
 
@@ -260,7 +260,7 @@ export default function ModalBasedAlerts() {
             Danger Alert!
           </h4>
           <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
-            Lorem ipsum dolor sit amet consectetur. Feugiat ipsum libero tempor
+            
             felis risus nisi non. Quisque eu ut tempor curabitur.
           </p>
 

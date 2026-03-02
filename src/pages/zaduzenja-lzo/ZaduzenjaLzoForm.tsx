@@ -6,17 +6,33 @@ import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import DatePicker from "../../components/form/input/DatePicker";
 
+interface AngazovanjeWithLzs {
+  id: number;
+  zaposleniName: string;
+  radnoMesto: string;
+  povecanRizik: boolean;
+  firmaPib: string;
+  lzsItems: Array<{
+    id: number;
+    naziv: string;
+    standard: string;
+    rokMeseci: number | null;
+  }>;
+}
+
 interface ZaduzenjaLzoFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
+  angazovanja?: AngazovanjeWithLzs[];
 }
 
-export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaLzoFormProps) {
-  const [formData, setFormData] = React.useState({
+export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja = [] }: ZaduzenjaLzoFormProps) {
+  const [formData, setFormData] = React.useState<any>({
     zaposleni: "",
     radnoMesto: "",
     povecanRizik: false,
+    angazovanjeId: null as number | null,
     oprema: [] as Array<{
       id: number;
       vrstaLzs: string;
@@ -24,17 +40,24 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
       datumZaduzenja: Date | null;
       rok: string;
       narednoZaduzenje: Date | null;
+      lzsId?: number;
     }>,
   });
 
   // Add state for dropdowns
   const [isZaposleniOpen, setIsZaposleniOpen] = React.useState(false);
   const zaposleniRef = useRef<HTMLDivElement>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
 
-  // Employee data with their job positions and equipment
+  useEffect(() => {
+    if (isOpen) setFormError(null);
+  }, [isOpen]);
+
   const zaposleniData: Record<string, {
+    id: number;
     radnoMesto: string;
     povecanRizik: boolean;
+    firmaPib: string;
     oprema: Array<{
       id: number;
       vrstaLzs: string;
@@ -42,123 +65,26 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
       datumZaduzenja: Date | null;
       rok: string;
       narednoZaduzenje: Date | null;
+      lzsId: number;
     }>;
-  }> = {
-    "Petar Petrović": {
-      radnoMesto: "Viljuškari",
-      povecanRizik: true,
-      oprema: [
-        {
-          id: 1,
-          vrstaLzs: "Zaštitna kaciga",
-          standard: "EN 397",
-          datumZaduzenja: null,
-          rok: "24",
-          narednoZaduzenje: null
-        },
-        {
-          id: 2,
-          vrstaLzs: "Zaštitne rukavice",
-          standard: "EN 388",
-          datumZaduzenja: null,
-          rok: "6",
-          narednoZaduzenje: null
-        },
-        {
-          id: 3,
-          vrstaLzs: "Sigurnosne obuće",
-          standard: "EN ISO 20345",
-          datumZaduzenja: null,
-          rok: "12",
-          narednoZaduzenje: null
-        }
-      ]
-    },
-    "Ana Anić": {
-      radnoMesto: "Kranista",
-      povecanRizik: true,
-      oprema: [
-        {
-          id: 1,
-          vrstaLzs: "Zaštitna kaciga",
-          standard: "EN 397",
-          datumZaduzenja: null,
-          rok: "24",
-          narednoZaduzenje: null
-        },
-        {
-          id: 2,
-          vrstaLzs: "Zaštitne rukavice",
-          standard: "EN 388",
-          datumZaduzenja: null,
-          rok: "6",
-          narednoZaduzenje: null
-        },
-        {
-          id: 3,
-          vrstaLzs: "Sigurnosna obuća",
-          standard: "EN ISO 20345",
-          datumZaduzenja: null,
-          rok: "12",
-          narednoZaduzenje: null
-        },
-        {
-          id: 4,
-          vrstaLzs: "Zaštitni pojas",
-          standard: "EN 361",
-          datumZaduzenja: null,
-          rok: "36",
-          narednoZaduzenje: null
-        }
-      ]
-    },
-    "Marko Marković": {
-      radnoMesto: "Mehaničar",
-      povecanRizik: false,
-      oprema: [
-        {
-          id: 1,
-          vrstaLzs: "Zaštitna kaciga",
-          standard: "EN 397",
-          datumZaduzenja: null,
-          rok: "24",
-          narednoZaduzenje: null
-        },
-        {
-          id: 2,
-          vrstaLzs: "Zaštitne rukavice",
-          standard: "EN 388",
-          datumZaduzenja: null,
-          rok: "6",
-          narednoZaduzenje: null
-        },
-        {
-          id: 3,
-          vrstaLzs: "Sigurnosna obuća",
-          standard: "EN ISO 20345",
-          datumZaduzenja: null,
-          rok: "12",
-          narednoZaduzenje: null
-        },
-        {
-          id: 4,
-          vrstaLzs: "Zaštitne naočare",
-          standard: "EN 166",
-          datumZaduzenja: null,
-          rok: "24",
-          narednoZaduzenje: null
-        },
-        {
-          id: 5,
-          vrstaLzs: "Zaštitna odela",
-          standard: "EN 11612",
-          datumZaduzenja: null,
-          rok: "24",
-          narednoZaduzenje: null
-        }
-      ]
-    }
-  };
+  }> = {};
+  for (const a of angazovanja) {
+    zaposleniData[a.zaposleniName] = {
+      id: a.id,
+      radnoMesto: a.radnoMesto,
+      povecanRizik: a.povecanRizik,
+      firmaPib: a.firmaPib,
+      oprema: a.lzsItems.map((lzs, idx) => ({
+        id: Date.now() + idx,
+        vrstaLzs: lzs.naziv,
+        standard: lzs.standard,
+        datumZaduzenja: null,
+        rok: String(lzs.rokMeseci ?? 12),
+        narednoZaduzenje: null,
+        lzsId: lzs.id,
+      })),
+    };
+  }
 
   const zaposleniOptions = Object.keys(zaposleniData);
 
@@ -177,22 +103,25 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.zaposleni || !formData.radnoMesto) {
-      alert('Molimo popunite sva obavezna polja');
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
 
 
 
   const handleOpremaChange = (id: number, field: string, value: string | Date | null) => {
-    setFormData(prevData => {
-      const updatedOprema = prevData.oprema.map(item => {
+    setFormData((prevData: any) => {
+      const updatedOprema = prevData.oprema.map((item: any) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
           
@@ -229,6 +158,11 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
     >
       <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novo Zaduženje LZS</h2>
       <form onSubmit={handleSubmit} className="max-h-[70vh] overflow-y-auto">
+        {formError && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+            {formError}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="col-span-1">
             <Label>Zaposleni *</Label>
@@ -264,9 +198,11 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                             zaposleni: option,
                             radnoMesto: selectedEmployeeData.radnoMesto,
                             povecanRizik: selectedEmployeeData.povecanRizik,
+                            angazovanjeId: selectedEmployeeData.id,
+                            firmaPib: selectedEmployeeData.firmaPib,
                             oprema: selectedEmployeeData.oprema.map((item, index) => ({
                               ...item,
-                              id: Date.now() + index // Generate new IDs to avoid conflicts
+                              id: Date.now() + index,
                             }))
                           });
                           setIsZaposleniOpen(false);
@@ -324,7 +260,7 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave }: ZaduzenjaL
                 </div>
                 
                                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                   {formData.oprema.map((item) => (
+                   {formData.oprema.map((item: any) => (
                      <div key={item.id} className="px-4 py-3">
                                                <div className="grid grid-cols-5 gap-4 min-w-[800px] items-start">
                          {/* Naziv LZS */}

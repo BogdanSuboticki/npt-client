@@ -29,6 +29,7 @@ export interface DnevniIzvestajiData {
   id: number;
   firma: string;
   datum: Date;
+  nadleznoPreduzece?: string;
   svakodnevnaKontrolaBZR: boolean;
   osobaZaSaradnju: string;
   promeneAPR: boolean;
@@ -89,15 +90,13 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
   const { userType } = useUser();
   const isKomitent = userType === 'komitent';
   
-  // Nadležno preduzeće - sample data (same for all companies)
-  const nadleznoPreduzece = 'Sistem Administracija d.o.o.';
-  
   // State to track answers for each question
   const [answers, setAnswers] = useState<Record<string, boolean | null>>({});
   // State to track napomena values
   const [napomenaValues, setNapomenaValues] = useState<Record<string, string>>({});
   // State to track person name
   const [personName, setPersonName] = useState<string>("");
+  const [nadleznoPreduzece, setNadleznoPreduzece] = useState<string>("");
   // State for form modals
   const [openForm, setOpenForm] = useState<{ questionKey: string; isOpen: boolean }>({ questionKey: "", isOpen: false });
   // State for general notes
@@ -108,39 +107,12 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
   // State to store form data
   const [formData, setFormData] = useState<Record<string, any>>({});
   
-  // Hardcoded mapping of company to person name
-  const companyPersonMap: Record<string, string> = {
-    '1': 'Marko Petrović', // Universal Logistics
-    '2': 'Ana Jovanović', // NIS a.d.
-    '3': 'Petar Marković', // Telekom Srbija
-    '4': 'Jovan Nikolić', // Hemofarm
-    '5': 'Milan Stojanović', // Fiat Automobili Srbija
-    '6': 'Snežana Popović', // Gazprom Neft
-    '7': 'Dragan Đorđević', // Delta Holding
-    '8': 'Milica Radović', // MK Group
-    '9': 'Stefan Lazić', // Carlsberg Srbija
-    '10': 'Jelena Milić', // Tigar
-    '11': 'Nenad Vuković', // Zastava Automobili
-    '12': 'Tamara Janković', // Energoprojekt
-    '13': 'Bojan Stanković', // Imlek
-    '14': 'Ivana Đukić', // Bambi
-    '15': 'Dejan Todorović', // Knjaz Miloš
-    '16': 'Marija Pavlović', // Jubmes
-    '17': 'Nikola Simić', // Gorenje
-    '18': 'Sara Jović', // Beko
-    '19': 'Luka Ristić', // Naftna industrija Srbije
-    '20': 'Maja Kostić', // Zrenjanin Pivara
-  };
-  
-  // Update person name when company is selected
   useEffect(() => {
-    if (selectedCompany && selectedCompany.id) {
-      const personNameForCompany = companyPersonMap[selectedCompany.id] || "";
-      setPersonName(personNameForCompany);
-    } else {
+    if (!readOnly) {
       setPersonName("");
+      setNadleznoPreduzece("");
     }
-  }, [selectedCompany]);
+  }, [selectedCompany, readOnly]);
 
   // Load data from selectedReport when in read-only mode
   useEffect(() => {
@@ -172,6 +144,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       setAnswers(reportAnswers);
       setNapomenaValues(reportNapomena);
       setPersonName(selectedReport.osobaZaSaradnju || "");
+      setNadleznoPreduzece(selectedReport.nadleznoPreduzece || "");
       
       // Mark forms as saved if they exist and load form data
       const saved: Record<string, boolean> = {};
@@ -600,6 +573,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
       id: initialData.length > 0 ? Math.max(...initialData.map(r => r.id)) + 1 : 1,
       firma: selectedCompany.naziv,
       datum: today,
+      nadleznoPreduzece: nadleznoPreduzece || "",
       svakodnevnaKontrolaBZR: true,
       osobaZaSaradnju: personName,
       promeneAPR: answers["promeneAPR"] || false,
@@ -795,7 +769,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
           <div class="header-row">
             <div>
               <div><strong>Preduzeće:</strong> ${selectedCompany?.naziv || ''}</div>
-              <div><strong>Nadležno preduzeće:</strong> ${nadleznoPreduzece}</div>
+              <div><strong>Nadležno preduzeće:</strong> ${readOnly && selectedReport ? (selectedReport.nadleznoPreduzece || '-') : (nadleznoPreduzece || '-')}</div>
               <div><strong>Svakodnevna kontrola stanja BZR i komunikacija sa:</strong> ${readOnly && selectedReport ? (selectedReport.osobaZaSaradnju || personName || '-') : (personName || '-')}</div>
             </div>
             <div><strong>Datum:</strong> ${readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}</div>
@@ -909,7 +883,7 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
         <div style="display: flex; justify-content: space-between; font-size: 10px;">
           <div>
             <div><strong>Preduzeće:</strong> ${selectedCompany?.naziv || ''}</div>
-            <div><strong>Nadležno preduzeće:</strong> ${nadleznoPreduzece}</div>
+            <div><strong>Nadležno preduzeće:</strong> ${readOnly && selectedReport ? (selectedReport.nadleznoPreduzece || '-') : (nadleznoPreduzece || '-')}</div>
             <div><strong>Svakodnevna kontrola stanja BZR i komunikacija sa:</strong> ${readOnly && selectedReport ? (selectedReport.osobaZaSaradnju || personName || '-') : (personName || '-')}</div>
           </div>
           <div><strong>Datum:</strong> ${readOnly && selectedReport ? formatDate(selectedReport.datum) : formatDate(today)}</div>
@@ -1003,18 +977,37 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
                     </div>
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nadležno preduzeće:</span>
-                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">{nadleznoPreduzece}</span>
+                      {readOnly ? (
+                        <span className="text-base font-bold text-gray-700 dark:text-gray-300">
+                          {selectedReport?.nadleznoPreduzece || "-"}
+                        </span>
+                      ) : (
+                        <input
+                          type="text"
+                          value={nadleznoPreduzece}
+                          onChange={(e) => setNadleznoPreduzece(e.target.value)}
+                          placeholder="Unesite nadležno preduzeće"
+                          className="w-full max-w-[320px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                         Svakodnevna kontrola stanja BZR i komunikacija sa:
                       </span>
-                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">
-                        {readOnly && selectedReport 
-                          ? (selectedReport.osobaZaSaradnju || personName || "-")
-                          : (personName || "-")
-                        }
-                      </span>
+                      {readOnly ? (
+                        <span className="text-base font-bold text-gray-700 dark:text-gray-300">
+                          {selectedReport?.osobaZaSaradnju || personName || "-"}
+                        </span>
+                      ) : (
+                        <input
+                          type="text"
+                          value={personName}
+                          onChange={(e) => setPersonName(e.target.value)}
+                          placeholder="Unesite ime i prezime"
+                          className="w-full max-w-[320px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Datum:</span>

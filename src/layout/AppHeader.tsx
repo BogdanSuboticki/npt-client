@@ -8,7 +8,8 @@ import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 import SearchInput from "../pages/UiElements/SearchInput";
-import { companies, Company } from "../data/companies";
+import { Company } from "../data/companies";
+import { api } from "../api/client";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -16,12 +17,55 @@ const AppHeader: React.FC = () => {
   const [searchValue, setSearchValue] = useState('');
   const [showFullList, setShowFullList] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [companiesList, setCompaniesList] = useState<Company[]>([]);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const { selectCompany, selectedCompany } = useCompanySelection();
   const { userType } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const currentContext = new URLSearchParams(location.search).get('context') || 'moja-firma';
+  const preduzeceParam = new URLSearchParams(location.search).get('preduzece');
+
+  useEffect(() => {
+    const endpoint = `firme?context=${currentContext}`;
+    api.get<{ data: any[] }>(endpoint)
+      .then((res) => {
+        const mapped: Company[] = res.data.map((f: any) => ({
+          id: f.pib,
+          naziv: f.naziv ?? '',
+          mesto: f.mesto ?? '',
+          pib: f.pib,
+          maticniBroj: f.maticni_broj,
+          delatnost: f.sifra_delatnosti,
+        }));
+        setCompaniesList(mapped);
+
+        const deepLinkName = new URLSearchParams(location.search).get('preduzece');
+        if (deepLinkName) {
+          const match = mapped.find(c => c.naziv === deepLinkName);
+          if (match) {
+            selectCompany(match);
+            setSearchValue(match.naziv);
+          }
+        }
+      })
+      .catch(() => {});
+    if (!preduzeceParam) {
+      selectCompany(null);
+      setSearchValue('');
+    }
+  }, [currentContext]);
+
+  useEffect(() => {
+    if (!preduzeceParam || companiesList.length === 0) return;
+    const match = companiesList.find(c => c.naziv === preduzeceParam);
+    if (match && (!selectedCompany || selectedCompany.pib !== match.pib)) {
+      selectCompany(match);
+      setSearchValue(match.naziv);
+    }
+  }, [location.pathname, preduzeceParam]);
   
   const isAdmin = userType === 'admin' || userType === 'super-admin';
   const isKomitent = userType === 'komitent';
@@ -113,16 +157,14 @@ const AppHeader: React.FC = () => {
     }
   };
 
-  // Group companies alphabetically and filter based on search value
   const getAlphabeticalGroups = () => {
-    // Filter companies based on search value
     const filteredCompanies = searchValue.length > 0 
-      ? companies.filter(company =>
+      ? companiesList.filter(company =>
           company.naziv.toLowerCase().includes(searchValue.toLowerCase()) ||
           company.mesto.toLowerCase().includes(searchValue.toLowerCase()) ||
           (company.delatnost && company.delatnost.toLowerCase().includes(searchValue.toLowerCase()))
         )
-      : companies; // Show all companies when search is empty
+      : companiesList;
     
     const sortedCompanies = [...filteredCompanies].sort((a, b) => 
       a.naziv.toLowerCase().localeCompare(b.naziv.toLowerCase())

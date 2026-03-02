@@ -16,6 +16,7 @@ import {
   createPrintStyles, 
   createPdfOptions 
 } from '../utils/printDownloadUtils';
+import { api } from '../api/client';
 
 // Define TableRow type for injury records
 type TableRow = {
@@ -44,6 +45,7 @@ const EvidencijaPovredaRad: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
+  const [_saveError, setSaveError] = useState<string | null>(null);
 
   const handleCellChange = (rowIdx: number, accessor: keyof TableRow, value: string) => {
     setRows((prev) => {
@@ -154,13 +156,21 @@ const EvidencijaPovredaRad: React.FC = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nazivObrasca.trim()) {
       return;
     }
-    // Handle save logic here
-    console.log("Saving form with name:", nazivObrasca);
-    closeModal();
+    try {
+      await api.post('obrasci', {
+        naziv_obrasca: nazivObrasca,
+        uneti_podaci: rows,
+        korisnik_id: null,
+      });
+      closeModal();
+      setNazivObrasca('');
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
   const handleNazivChange = (e: React.ChangeEvent<HTMLInputElement>) => {

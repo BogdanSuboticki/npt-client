@@ -1,8 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { MojNalogIcon } from "../../icons";
+import { api, clearAuthToken } from "../../api/client";
+
+interface AuthenticatedUser {
+  id: number;
+  name: string;
+  ime?: string;
+  prezime?: string;
+  email: string;
+  role: string;
+  profile_photo_url?: string;
+  firma?: {
+    naziv: string;
+  };
+}
 
 interface UserDropdownProps {
   isOpen?: boolean;
@@ -16,6 +30,9 @@ export default function UserDropdown({
   onClose: externalOnClose 
 }: UserDropdownProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Use external control if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
@@ -35,16 +52,73 @@ export default function UserDropdown({
       setInternalIsOpen(false);
     }
   }
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userData = await api.get<AuthenticatedUser>("auth/me");
+        setUser(userData);
+      } catch (error) {
+        console.error("Failed to load user:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    closeDropdown();
+    try {
+      await api.post("auth/logout", {});
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      clearAuthToken();
+      navigate("/signin");
+    }
+  };
+
+  const displayName = user?.name || (user?.ime && user?.prezime ? `${user.ime} ${user.prezime}` : user?.email || "Korisnik");
+  const companyName = user?.firma?.naziv || "";
+  const profileImageUrl = user?.profile_photo_url || "/images/user/owner.jpg";
+
+  if (isLoading) {
+    return (
+      <div className="relative">
+        <button
+          className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
+          disabled
+        >
+          <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
+            <div className="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+          </span>
+          <span className="block mr-1 font-medium text-theme-sm">Učitavanje...</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       <button
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-3">
+        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
+          <img
+            src={profileImageUrl}
+            alt={displayName}
+            className="object-cover w-full h-full"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/images/user/owner.jpg";
+            }}
+          />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Stefan Stefanović</span>
+        <span className="block mr-1 font-medium text-theme-sm">{displayName}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 ${
             isOpen ? "rotate-180" : ""
@@ -72,13 +146,15 @@ export default function UserDropdown({
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-white">
-            Stefan Stefanović
+            {displayName}
           </span>
+          {companyName && (
+            <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
+              {companyName}
+            </span>
+          )}
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            Universal Logistics
-          </span>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            stefan.stef@unoversal-logistics.com
+            {user?.email}
           </span>
         </div>
 
@@ -121,9 +197,9 @@ export default function UserDropdown({
             </DropdownItem>
           </li>
         </ul>
-        <Link
-          to="/signin"
-          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 w-full text-left"
         >
           <svg
             className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
@@ -141,7 +217,7 @@ export default function UserDropdown({
             />
           </svg>
           <span className="dark:text-white">Izloguj se</span>
-        </Link>
+        </button>
       </Dropdown>
     </div>
   );

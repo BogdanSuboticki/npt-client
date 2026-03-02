@@ -6,14 +6,24 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 
+interface AngazovanjeOption {
+  id: number;
+  zaposleniName: string;
+  radnoMesto: string;
+  povecanRizik: boolean;
+  firmaPib: string;
+}
+
 interface LekarskiPreglediFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
+  angazovanja?: AngazovanjeOption[];
 }
 
-export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: LekarskiPreglediFormProps) {
-  const [formData, setFormData] = React.useState({
+export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialData, angazovanja = [] }: LekarskiPreglediFormProps) {
+  const [formData, setFormData] = React.useState<any>({
     zaposleni: "",
     radnoMesto: "",
     povecanRizik: false,
@@ -21,7 +31,10 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
     datumLekarskog: new Date(),
     intervalLekarskog: "",
     datumNarednogLekarskog: new Date(),
+    angazovanjeId: null as number | null,
   });
+
+  const [formError, setFormError] = React.useState("");
 
   // Add state for dropdowns
   const [isZaposleniOpen, setIsZaposleniOpen] = React.useState(false);
@@ -31,36 +44,20 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
   const vrstaLekarskogRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<HTMLDivElement>(null);
 
-  // Employee data with their job positions
   const zaposleniData: Record<string, {
+    id: number;
     radnoMesto: string;
     povecanRizik: boolean;
-  }> = {
-    "Petar Petrović": {
-      radnoMesto: "Viljuškari",
-      povecanRizik: true,
-    },
-    "Ana Anić": {
-      radnoMesto: "Kranista",
-      povecanRizik: true,
-    },
-    "Marko Marković": {
-      radnoMesto: "Mehaničar",
-      povecanRizik: false,
-    },
-    "Jovana Jovanović": {
-      radnoMesto: "Električar",
-      povecanRizik: true,
-    },
-    "Stefan Stefanović": {
-      radnoMesto: "Viljuškari",
-      povecanRizik: true,
-    },
-    "Marija Marić": {
-      radnoMesto: "Kontrolor kvaliteta",
-      povecanRizik: false,
-    }
-  };
+    firmaPib: string;
+  }> = {};
+  for (const a of angazovanja) {
+    zaposleniData[a.zaposleniName] = {
+      id: a.id,
+      radnoMesto: a.radnoMesto,
+      povecanRizik: a.povecanRizik,
+      firmaPib: a.firmaPib,
+    };
+  }
 
   const zaposleniOptions = Object.keys(zaposleniData);
   const vrstaLekarskogOptions = ["Prethodni", "Periodični", "Vanredni", "Oftamološki"];
@@ -94,18 +91,51 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
     if (formData.intervalLekarskog && formData.datumLekarskog) {
       const nextDate = new Date(formData.datumLekarskog);
       nextDate.setMonth(nextDate.getMonth() + parseInt(formData.intervalLekarskog));
-      setFormData(prev => ({ ...prev, datumNarednogLekarskog: nextDate }));
+      setFormData((prev: any) => ({ ...prev, datumNarednogLekarskog: nextDate }));
     }
   }, [formData.intervalLekarskog, formData.datumLekarskog]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        zaposleni: initialData.zaposleni || "",
+        radnoMesto: initialData.radnoMesto || "",
+        povecanRizik: initialData.povecanRizik || false,
+        vrstaLekarskog: initialData.vrstaLekarskog || "",
+        datumLekarskog: initialData.datumLekarskog instanceof Date ? initialData.datumLekarskog : new Date(initialData.datumLekarskog || Date.now()),
+        intervalLekarskog: initialData.intervalMeseci ? String(initialData.intervalMeseci) : "",
+        datumNarednogLekarskog: initialData.datumNarednogLekarskog instanceof Date ? initialData.datumNarednogLekarskog : new Date(initialData.datumNarednogLekarskog || Date.now()),
+        angazovanjeId: initialData.angazovanjeId || null,
+      });
+    } else {
+      setFormData({
+        zaposleni: "",
+        radnoMesto: "",
+        povecanRizik: false,
+        vrstaLekarskog: "",
+        datumLekarskog: new Date(),
+        intervalLekarskog: "",
+        datumNarednogLekarskog: new Date(),
+        angazovanjeId: null,
+      });
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    if (isOpen) setFormError("");
+  }, [isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.zaposleni || !formData.radnoMesto || !formData.vrstaLekarskog || !formData.datumLekarskog || !formData.intervalLekarskog || !formData.datumNarednogLekarskog) {
-      alert('Molimo popunite sva obavezna polja');
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Greška pri čuvanju.");
+    }
   };
 
   return (
@@ -116,6 +146,11 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
     >
       <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Lekarski Pregled</h2>
       <form onSubmit={handleSubmit}>
+        {formError && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+            {formError}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="w-full">
                 <Label>Zaposleni *</Label>
@@ -152,6 +187,8 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                                  zaposleni: option,
                                  radnoMesto: selectedEmployeeData.radnoMesto,
                                  povecanRizik: selectedEmployeeData.povecanRizik,
+                                 angazovanjeId: selectedEmployeeData.id,
+                                 firmaPib: selectedEmployeeData.firmaPib,
                                });
                                setIsZaposleniOpen(false);
                              }}
@@ -237,7 +274,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                   value={formData.datumLekarskog}
                   onChange={(date) => {
                     if (date) {
-                      setFormData(prev => ({ ...prev, datumLekarskog: date }));
+                      setFormData((prev: any) => ({ ...prev, datumLekarskog: date }));
                     }
                   }}
                   required
@@ -292,7 +329,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave }: Lekars
                   value={formData.datumNarednogLekarskog}
                   onChange={(date) => {
                     if (date) {
-                      setFormData(prev => ({ ...prev, datumNarednogLekarskog: date }));
+                      setFormData((prev: any) => ({ ...prev, datumNarednogLekarskog: date }));
                     }
                   }}
                   required

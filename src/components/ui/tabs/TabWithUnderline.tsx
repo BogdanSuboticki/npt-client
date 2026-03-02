@@ -41,24 +41,24 @@ const TabContent: React.FC<TabContentProps> = ({ title, isActive }) => {
         {title}
       </h3>
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        {title} ipsum dolor sit amet consectetur. Non vitae facilisis urna
-        tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a.
-        Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi
-        nulla elit sit libero scelerisque ante.
+        Nema dostupnog sadržaja.
       </p>
     </div>
   );
 };
 
-const tabs = [
-  { id: "overview", label: "Overview" },
-  { id: "notification", label: "Notification" },
-  { id: "analytics", label: "Analytics" },
-  { id: "customers", label: "Customers" },
-];
+const tabs: Array<{ id: string; label: string }> = [];
 
 const TabWithUnderline: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
+
+  if (tabs.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 dark:text-gray-400">
+        Nema sadržaja za prikaz.
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 border border-gray-200 rounded-xl dark:border-gray-800">

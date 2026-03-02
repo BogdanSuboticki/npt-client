@@ -6,12 +6,9 @@ export default function CardLinkOne() {
     <div>
       <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
         <div>
-          <CardTitle>Card title</CardTitle>
+          <CardTitle>Kartica</CardTitle>
 
-          <CardDescription>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi
-            architecto aspernatur cum et ipsum
-          </CardDescription>
+          <CardDescription>Nema opisa.</CardDescription>
 
           <Link
             to="/"

@@ -12,11 +12,14 @@ import { DeleteButtonIcon } from "../../icons";
 interface InspekcijskiNadzorFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
+  firme: Array<{ pib: string; naziv: string }>;
 }
 
-export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: InspekcijskiNadzorFormProps) {
+export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave, initialData, firme }: InspekcijskiNadzorFormProps) {
   const [formData, setFormData] = React.useState({
+    firmaPib: "",
     brojResenja: "",
     datumNadzora: new Date(),
     napomena: "",
@@ -29,24 +32,55 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
     }>,
   });
 
+  const [formError, setFormError] = React.useState("");
+  const [isFirmaOpen, setIsFirmaOpen] = React.useState(false);
+  const firmaRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Ensure dates are Date objects
-    setFormData((prev) => ({
-      ...prev,
-      datumNadzora: prev.datumNadzora ? new Date(prev.datumNadzora) : new Date(),
-    }));
+    const handleClickOutside = (event: MouseEvent) => {
+      if (firmaRef.current && !firmaRef.current.contains(event.target as HTMLElement)) {
+        setIsFirmaOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isOpen) {
+      setFormError("");
+      if (initialData) {
+        setFormData({
+          firmaPib: initialData.firmaPib || "",
+          brojResenja: initialData.brojResenja || "",
+          datumNadzora: initialData.datumNadzora ? new Date(initialData.datumNadzora) : new Date(),
+          napomena: initialData.napomena || "",
+          mere: initialData.mere || [],
+        });
+      } else {
+        setFormData({
+          firmaPib: "",
+          brojResenja: "",
+          datumNadzora: new Date(),
+          napomena: "",
+          mere: [],
+        });
+      }
+    }
+  }, [initialData, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.brojResenja || !formData.datumNadzora) {
-      alert('Molimo popunite sva obavezna polja (Broj rešenja, Datum nadzora)');
+    if (!formData.firmaPib || !formData.brojResenja || !formData.datumNadzora) {
+      setFormError('Molimo popunite sva obavezna polja (Firma, Broj rešenja, Datum nadzora)');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Greška pri čuvanju.");
+    }
   };
 
   const addMera = () => {
@@ -94,11 +128,58 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave }: Insp
     >
       <div className="flex flex-col h-full">
         <div className="p-5 lg:p-10 pb-0">
-          <h4 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Novi Inspekcijski Nadzor</h4>
+          <h4 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">{initialData ? "Izmeni Inspekcijski Nadzor" : "Novi Inspekcijski Nadzor"}</h4>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                {formError}
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+              <div className="w-full">
+                <Label>Firma *</Label>
+                <div className="relative w-full" ref={firmaRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsFirmaOpen(!isFirmaOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>
+                      {formData.firmaPib
+                        ? firme.find(f => f.pib === formData.firmaPib)
+                          ? `${firme.find(f => f.pib === formData.firmaPib)!.naziv} (${formData.firmaPib})`
+                          : formData.firmaPib
+                        : "Izaberite firmu"}
+                    </span>
+                    <svg className={`w-4 h-4 transition-transform ${isFirmaOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isFirmaOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto">
+                        {firme.map((firma, index) => (
+                          <div
+                            key={firma.pib}
+                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                              formData.firmaPib === firma.pib ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => {
+                              setFormData({ ...formData, firmaPib: firma.pib });
+                              setIsFirmaOpen(false);
+                            }}
+                          >
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{firma.naziv} ({firma.pib})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="w-full">
                 <Label>Broj rešenja *</Label>
                 <Input

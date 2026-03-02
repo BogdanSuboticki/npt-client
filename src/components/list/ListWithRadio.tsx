@@ -17,7 +17,7 @@ export default function ListWithRadio() {
             name="example"
             value="option1"
             checked={selectedValue === "option1"}
-            label="Lorem ipsum dolor sit amet"
+            label=""
             onChange={handleChange}
           />
         </li>
@@ -37,7 +37,7 @@ export default function ListWithRadio() {
             name="example"
             value="option3"
             checked={selectedValue === "option3"}
-            label="Lorem ipsum dolor sit amet"
+            label=""
             onChange={handleChange}
           />
         </li>
@@ -47,7 +47,7 @@ export default function ListWithRadio() {
             name="example"
             value="option4"
             checked={selectedValue === "option4"}
-            label="Lorem ipsum dolor sit amet"
+            label=""
             onChange={handleChange}
           />
         </li>
@@ -57,7 +57,7 @@ export default function ListWithRadio() {
             name="example"
             value="option5"
             checked={selectedValue === "option5"}
-            label="Lorem ipsum dolor sit amet"
+            label=""
             onChange={handleChange}
           />
         </li>

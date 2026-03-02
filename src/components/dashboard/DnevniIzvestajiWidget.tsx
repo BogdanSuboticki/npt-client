@@ -1,173 +1,42 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { useCompanySelection } from "../../context/CompanyContext";
 import { useUser } from "../../context/UserContext";
 import { DnevniIzvestajiData } from "../../pages/dnevni-izvestaji/DnevniIzvestajiDataTable";
 import { DnevniIzvestajiIcon } from "../../icons";
-import { companies } from "../../data/companies";
-
-// Sample data - in a real app, this would come from an API
-// Expanded to include reports from multiple companies
-const sampleReports: DnevniIzvestajiData[] = [
-  {
-    id: 1,
-    firma: "Universal Logistics",
-    datum: new Date("2025-01-15"),
-    svakodnevnaKontrolaBZR: true,
-    osobaZaSaradnju: "Marko Petrović",
-    promeneAPR: false,
-    napomenaPromeneAPR: "",
-    promenaPoslovaRadnihZadataka: false,
-    napomenaPromenaPoslova: "",
-    promenaRadnihMestaZaposlenih: false,
-    formaPromenaRadnihMesta: null,
-    promenaRadneSnage: false,
-    formaPromenaRadneSnage: null,
-    novaSredstvaZaRad: false,
-    formaNovaSredstvaZaRad: null,
-    stazeZaKomunikacijuBezbedne: true,
-    napomenaStazeZaKomunikaciju: "Sve staze su prohodne i bezbedne.",
-    planiranePopravkeRemont: false,
-    napomenaPlaniranePopravke: "",
-    koriscenjeLZS: false,
-    napomenaKoriscenjeLZS: "",
-    novaGradilistaNoviPogoni: false,
-    napomenaNovaGradilista: "",
-    povredaNaRadu: false,
-    formaPovredaNaRadu: null,
-    potencijalniRizici: false,
-    napomenaPotencijalniRizici: "",
-    napomena: "",
-    napomenaBZR: "",
-    pregledan: false,
-    napomenaAdmin: "",
-  },
-  {
-    id: 2,
-    firma: "Universal Logistics",
-    datum: new Date("2025-01-16"),
-    svakodnevnaKontrolaBZR: true,
-    osobaZaSaradnju: "Marko Petrović",
-    promeneAPR: true,
-    napomenaPromeneAPR: "Izmena u APR-u za novi projekat.",
-    promenaPoslovaRadnihZadataka: false,
-    napomenaPromenaPoslova: "",
-    promenaRadnihMestaZaposlenih: false,
-    formaPromenaRadnihMesta: null,
-    promenaRadneSnage: false,
-    formaPromenaRadneSnage: null,
-    novaSredstvaZaRad: false,
-    formaNovaSredstvaZaRad: null,
-    stazeZaKomunikacijuBezbedne: true,
-    napomenaStazeZaKomunikaciju: "",
-    planiranePopravkeRemont: false,
-    napomenaPlaniranePopravke: "",
-    koriscenjeLZS: false,
-    napomenaKoriscenjeLZS: "",
-    novaGradilistaNoviPogoni: false,
-    napomenaNovaGradilista: "",
-    povredaNaRadu: false,
-    formaPovredaNaRadu: null,
-    potencijalniRizici: false,
-    napomenaPotencijalniRizici: "",
-    napomena: "",
-    napomenaBZR: "",
-    pregledan: true,
-    napomenaAdmin: "Sve u redu.",
-  },
-  {
-    id: 3,
-    firma: "NIS a.d.",
-    datum: new Date("2025-01-17"),
-    svakodnevnaKontrolaBZR: true,
-    osobaZaSaradnju: "Ana Jovanović",
-    promeneAPR: false,
-    napomenaPromeneAPR: "",
-    promenaPoslovaRadnihZadataka: false,
-    napomenaPromenaPoslova: "",
-    promenaRadnihMestaZaposlenih: false,
-    formaPromenaRadnihMesta: null,
-    promenaRadneSnage: false,
-    formaPromenaRadneSnage: null,
-    novaSredstvaZaRad: false,
-    formaNovaSredstvaZaRad: null,
-    stazeZaKomunikacijuBezbedne: true,
-    napomenaStazeZaKomunikaciju: "",
-    planiranePopravkeRemont: false,
-    napomenaPlaniranePopravke: "",
-    koriscenjeLZS: false,
-    napomenaKoriscenjeLZS: "",
-    novaGradilistaNoviPogoni: false,
-    napomenaNovaGradilista: "",
-    povredaNaRadu: false,
-    formaPovredaNaRadu: null,
-    potencijalniRizici: false,
-    napomenaPotencijalniRizici: "",
-    napomena: "",
-    napomenaBZR: "",
-    pregledan: false,
-    napomenaAdmin: "",
-  },
-  {
-    id: 4,
-    firma: "Telekom Srbija",
-    datum: new Date("2025-01-18"),
-    svakodnevnaKontrolaBZR: true,
-    osobaZaSaradnju: "Petar Marković",
-    promeneAPR: false,
-    napomenaPromeneAPR: "",
-    promenaPoslovaRadnihZadataka: false,
-    napomenaPromenaPoslova: "",
-    promenaRadnihMestaZaposlenih: false,
-    formaPromenaRadnihMesta: null,
-    promenaRadneSnage: false,
-    formaPromenaRadneSnage: null,
-    novaSredstvaZaRad: false,
-    formaNovaSredstvaZaRad: null,
-    stazeZaKomunikacijuBezbedne: true,
-    napomenaStazeZaKomunikaciju: "",
-    planiranePopravkeRemont: false,
-    napomenaPlaniranePopravke: "",
-    koriscenjeLZS: false,
-    napomenaKoriscenjeLZS: "",
-    novaGradilistaNoviPogoni: false,
-    napomenaNovaGradilista: "",
-    povredaNaRadu: false,
-    formaPovredaNaRadu: null,
-    potencijalniRizici: false,
-    napomenaPotencijalniRizici: "",
-    napomena: "",
-    napomenaBZR: "",
-    pregledan: false,
-    napomenaAdmin: "",
-  },
-];
+import { api } from "../../api/client";
 
 export default function DnevniIzvestajiWidget() {
   const navigate = useNavigate();
-  const { selectCompany } = useCompanySelection();
   const { userType } = useUser();
 
   const isKomitent = userType === 'komitent';
 
-  // For komitent, show only their company's unreviewed reports
-  // For admin/super-admin, show all unreviewed reports from all companies
-  const allUnreviewedReports = useMemo(() => {
-    if (isKomitent) {
-      // For komitent, get their company (default to first company for now)
-      const komitentCompany = companies[0];
-      return sampleReports.filter(
-        (report) => report.firma === komitentCompany.naziv && !report.pregledan
-      );
-    } else {
-      // For admin/super-admin, show all unreviewed reports from all companies
-      return sampleReports.filter((report) => !report.pregledan);
-    }
-  }, [isKomitent]);
+  const [reports, setReports] = useState<DnevniIzvestajiData[]>([]);
 
-  // Sort by date (newest first) and limit display
+  useEffect(() => {
+    api
+      .get<{ data: any[] }>("dnevni-izvestaji")
+      .then((res) => {
+        const mapped = res.data.map((item): DnevniIzvestajiData => ({
+          id: item.id,
+          firma: item.firma?.naziv ?? "",
+          datum: new Date(item.datum),
+          pregledan: item.pregledan,
+          napomenaBZR: item.napomena_bzr ?? "",
+          osobaZaSaradnju: item.osoba_za_saradnju ?? "",
+          ...item.podaci,
+        }));
+        setReports(mapped);
+      })
+      .catch(() => {});
+  }, []);
+
+  const allUnreviewedReports = useMemo(() => {
+    return reports.filter((report) => !report.pregledan);
+  }, [reports]);
+
   const sortedReports = useMemo(() => {
     return allUnreviewedReports
       .sort((a, b) => b.datum.getTime() - a.datum.getTime())
@@ -183,26 +52,11 @@ export default function DnevniIzvestajiWidget() {
   };
 
   const handleAddToday = () => {
-    // For komitent, auto-select their company
-    if (isKomitent) {
-      const komitentCompany = companies[0];
-      selectCompany(komitentCompany);
-    }
     navigate("/dnevni-izvestaji");
   };
 
   const handleReportClick = (report: DnevniIzvestajiData) => {
-    // Find the company by name
-    const company = companies.find((c) => c.naziv === report.firma);
-    
-    if (company) {
-      selectCompany(company);
-      // Navigate to dnevni izvestaji page with report ID
-      navigate(`/dnevni-izvestaji?reportId=${report.id}`);
-    } else {
-      // Fallback: just navigate if company not found
-      navigate(`/dnevni-izvestaji?reportId=${report.id}`);
-    }
+    navigate(`/dnevni-izvestaji?reportId=${report.id}`);
   };
 
   return (
@@ -279,4 +133,3 @@ export default function DnevniIzvestajiWidget() {
     </div>
   );
 }
-

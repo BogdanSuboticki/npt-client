@@ -5,14 +5,18 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
 interface PreglediOpremeFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
 }
 
-export default function PreglediOpremeForm({ isOpen, onClose, onSave }: PreglediOpremeFormProps) {
+export default function PreglediOpremeForm({ isOpen, onClose, onSave, initialData: _initialData }: PreglediOpremeFormProps) {
+  const context = usePageContext();
   const [formData, setFormData] = React.useState({
     nazivOpreme: "",
     vrstaOpreme: "",
@@ -22,7 +26,10 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     status: "",
     datumNarednogPregleda: new Date(),
     napomena: "",
-    standard: ""
+    standard: "",
+    opremaId: "",
+    firmaPib: "",
+    lokacijaId: "",
   });
 
   // Add state for dropdowns
@@ -32,19 +39,21 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
   const nazivOpremeRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<HTMLDivElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
 
-  // Equipment data with names and their corresponding types
-  const opremaData = [
-    { naziv: "Viljuškar", vrsta: "Oprema za rad", lokacija: "Lokacija 1", standard: "EN 1175-1" },
-    { naziv: "Kran", vrsta: "Oprema za rad", lokacija: "Lokacija 2", standard: "EN 13001-1" },
-    { naziv: "Transformator", vrsta: "Elektro i gromobranska instalacija", lokacija: "Lokacija 3", standard: "EN 60076" },
-    { naziv: "Kompresor", vrsta: "Oprema za rad", lokacija: "Lokacija 1", standard: "EN 1012-1" },
-    { naziv: "Generator", vrsta: "Elektro i gromobranska instalacija", lokacija: "Lokacija 2", standard: "EN 60034-1" },
-    { naziv: "Pumpa", vrsta: "Oprema za rad", lokacija: "Lokacija 3", standard: "EN 809" }
-  ];
+  const [opremaList, setOpremaList] = React.useState<any[]>([]);
 
-  // Interval is fixed to 36 months
-  const intervalOptions = ["36"];
+  useEffect(() => {
+    if (isOpen) {
+      setFormError(null);
+      api.get<{ data: any[] }>(`oprema?context=${context}`)
+        .then(res => setOpremaList(res.data))
+        .catch(() => {});
+    }
+  }, [isOpen]);
+
+  // Interval options must match backend enum: ['1', '3', '6', '12', '24', '36']
+  const intervalOptions = ["1", "3", "6", "12", "24", "36"];
   const statusOptions = ["Ispravno", "Neispravno"];
 
   // Add click outside handler for dropdowns
@@ -67,15 +76,16 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Auto-fill vrsta opreme, lokacija and standard when naziv opreme is selected
-  const handleNazivOpremeChange = (naziv: string) => {
-    const selectedOprema = opremaData.find(item => item.naziv === naziv);
+  const handleNazivOpremeChange = (item: any) => {
     setFormData(prev => ({
       ...prev,
-      nazivOpreme: naziv,
-      vrstaOpreme: selectedOprema ? selectedOprema.vrsta : "",
-      lokacija: selectedOprema ? selectedOprema.lokacija : "",
-      standard: selectedOprema ? selectedOprema.standard : ""
+      nazivOpreme: item.naziv,
+      vrstaOpreme: item.vrsta_opreme ?? "",
+      lokacija: item.lokacija?.naziv ?? "",
+      standard: item.standard ?? "",
+      opremaId: item.id,
+      firmaPib: item.firma_pib,
+      lokacijaId: item.lokacija_id ?? "",
     }));
     setIsNazivOpremeOpen(false);
   };
@@ -92,14 +102,17 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
     }
   }, [formData.intervalPregleda, formData.datumPregleda]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nazivOpreme || !formData.vrstaOpreme || !formData.lokacija || !formData.intervalPregleda || !formData.datumPregleda || !formData.status) {
-      alert('Molimo popunite sva obavezna polja');
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
 
@@ -116,6 +129,11 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                {formError}
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
               <div className="w-full">
                 <Label>Naziv opreme *</Label>
@@ -138,13 +156,13 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave }: Pregledi
                   {isNazivOpremeOpen && (
                     <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                       <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                        {opremaData.map((item, index) => (
+                        {opremaList.map((item, index) => (
                           <div
-                            key={item.naziv}
+                            key={item.id}
                             className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                              formData.nazivOpreme === item.naziv ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            } ${index === opremaData.length - 1 ? 'rounded-b-lg' : ''}`}
-                            onClick={() => handleNazivOpremeChange(item.naziv)}
+                              formData.opremaId === item.id ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === opremaList.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => handleNazivOpremeChange(item)}
                           >
                             <span className="text-sm text-gray-700 dark:text-gray-300">{item.naziv}</span>
                           </div>

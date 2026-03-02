@@ -1,75 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LekarskiPreglediDataTable from "./LekarskiPreglediDataTable";
 import LekarskiPreglediForm from "./LekarskiPreglediForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const lekarskiPreglediData = [
-  {
-    id: 1,
-    zaposleni: "Marko Petrović",
-    radnoMesto: "Inženjer proizvodnje",
-    povecanRizik: true,
-    vrstaLekarskog: "Predhodni",
-    datumLekarskog: new Date("2024-01-15"),
-    datumNarednogLekarskog: new Date("2024-07-15"),
-    aktivan: true,
-  },
-  {
-    id: 2,
-    zaposleni: "Ana Jovanović",
-    radnoMesto: "Tehničar održavanja",
-    povecanRizik: false,
-    vrstaLekarskog: "Periodični",
-    datumLekarskog: new Date("2024-02-20"),
-    datumNarednogLekarskog: new Date("2024-08-20"),
-    aktivan: true,
-  },
-  {
-    id: 3,
-    zaposleni: "Stefan Nikolić",
-    radnoMesto: "Električar",
-    povecanRizik: true,
-    vrstaLekarskog: "Vanredni",
-    datumLekarskog: new Date("2024-03-10"),
-    datumNarednogLekarskog: new Date("2024-09-10"),
-    aktivan: true,
-  },
-  {
-    id: 4,
-    zaposleni: "Marija Đorđević",
-    radnoMesto: "Hemijski tehničar",
-    povecanRizik: true,
-    vrstaLekarskog: "Periodični",
-    datumLekarskog: new Date("2024-01-05"),
-    datumNarednogLekarskog: new Date("2024-07-05"),
-    aktivan: false,
-  },
-  {
-    id: 5,
-    zaposleni: "Dragan Simić",
-    radnoMesto: "Mehaničar",
-    povecanRizik: false,
-    vrstaLekarskog: "Predhodni",
-    datumLekarskog: new Date("2024-02-28"),
-    datumNarednogLekarskog: new Date("2024-08-28"),
-    aktivan: true,
-  },
-  {
-    id: 6,
-    zaposleni: "Jelena Popović",
-    radnoMesto: "Laborant",
-    povecanRizik: true,
-    vrstaLekarskog: "Vanredni",
-    datumLekarskog: new Date("2024-03-15"),
-    datumNarednogLekarskog: new Date("2024-09-15"),
-    aktivan: true,
-  },
-];
+// Backend stores ASCII enum values; frontend displays diacritical (Serbian) versions
+const VRSTA_PREGLEDA_API_TO_DISPLAY: Record<string, string> = {
+  'Prethodni': 'Prethodni',
+  'Periodicni': 'Periodični',
+  'Vandredni': 'Vanredni',
+  'Oftamoloski': 'Oftamološki',
+};
+const VRSTA_PREGLEDA_DISPLAY_TO_API: Record<string, string> = {
+  'Prethodni': 'Prethodni',
+  'Periodični': 'Periodicni',
+  'Vanredni': 'Vandredni',
+  'Oftamološki': 'Oftamoloski',
+};
+
+const mapLekarskiPregledFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  zaposleni: item.angazovanje?.zaposleni?.ime_prezime ?? "",
+  radnoMesto: item.radnoMesto?.naziv ?? "",
+  povecanRizik: item.radnoMesto?.povecan_rizik ?? false,
+  vrstaLekarskog: VRSTA_PREGLEDA_API_TO_DISPLAY[item.vrsta_pregleda] ?? item.vrsta_pregleda,
+  datumLekarskog: fromIsoDate(item.datum_pregleda) ?? new Date(),
+  datumNarednogLekarskog: fromIsoDate(item.datum_narednog_pregleda) ?? new Date(),
+  aktivan: item.datum_narednog_pregleda ? new Date(item.datum_narednog_pregleda) >= new Date() : false,
+  angazovanjeId: item.angazovanje_id,
+  firmaPib: item.firma_pib,
+  intervalMeseci: item.interval_meseci,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -113,20 +81,59 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const LekarskiPreglediPage: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(lekarskiPreglediData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [angazovanja, setAngazovanja] = useState<any[]>([]);
 
-  const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
+  const loadLekarskiPregledi = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`lekarski-pregledi?context=${context}`);
+      setData(response.data.map(mapLekarskiPregledFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju lekarskih pregleda.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadAngazovanja = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`angazovanja?context=${context}`);
+      setAngazovanja(response.data);
+    } catch {
+      // non-critical
+    }
+  };
+
+  useEffect(() => {
+    loadLekarskiPregledi();
+    loadAngazovanja();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      angazovanje_id: Number(newData.angazovanjeId),
+      vrsta_pregleda: VRSTA_PREGLEDA_DISPLAY_TO_API[newData.vrstaLekarskog] ?? newData.vrstaLekarskog,
+      interval_meseci: Number(newData.intervalLekarskog),
+      datum_pregleda: toIsoDate(newData.datumLekarskog),
     };
-    setData([...data, newItem]);
+
+    if (editingItem) {
+      await api.put(`lekarski-pregledi/${editingItem.id}`, payload);
+      setEditingItem(null);
+    } else {
+      await api.post("lekarski-pregledi", payload);
+    }
+    await loadLekarskiPregledi();
     setShowForm(false);
   };
 
@@ -135,9 +142,14 @@ const LekarskiPreglediPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`lekarski-pregledi/${itemToDelete.id}`);
+        await loadLekarskiPregledi();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju lekarskog pregleda.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -146,6 +158,16 @@ const LekarskiPreglediPage: React.FC = () => {
   const handleDeleteCancel = () => {
     setItemToDelete(null);
     setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -224,17 +246,32 @@ const LekarskiPreglediPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <LekarskiPreglediDataTable 
-            data={data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <LekarskiPreglediDataTable 
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+            />
+          )}
         </div>
 
         <LekarskiPreglediForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
+          angazovanja={angazovanja.map((a: any) => ({
+            id: a.id,
+            zaposleniName: a.zaposleni?.ime_prezime ?? "",
+            radnoMesto: a.radno_mesto?.naziv ?? "",
+            povecanRizik: a.radno_mesto?.povecan_rizik ?? false,
+            firmaPib: a.firma_pib ?? "",
+          }))}
         />
 
         <ConfirmModal

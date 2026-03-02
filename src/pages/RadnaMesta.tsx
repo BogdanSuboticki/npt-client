@@ -6,262 +6,29 @@ import { Modal } from "../components/ui/modal";
 import Label from "../components/form/Label";
 import ExportPopoverButton from "../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../components/ui/modal/ConfirmModal";
+import { api } from "../api/client";
+import { usePageContext } from "../hooks/usePageContext";
 
-// Sample data for the table
-const radnaMestaData = [
-  {
-    id: 1,
-    nazivRadnogMesta: "Operater viljuškara",
-    nazivLokacije: "Magacin Novi Sad",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-001" },
-      { lzs: "Zaštitna oprema", rok: 6, standard: "ISO-2023-002" },
-      { lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-003" }
-    ]
-  },
-  {
-    id: 2,
-    nazivRadnogMesta: "Administrativni radnik",
-    nazivLokacije: "Kancelarija Beograd",
-    povecanRizik: "Ne",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: [
-      { lzs: "Računar", rok: 36, standard: "ISO-2023-004" },
-      { lzs: "Stolica", rok: 60, standard: "ISO-2023-005" }
-    ]
-  },
-  {
-    id: 3,
-    nazivRadnogMesta: "Zavarivač",
-    nazivLokacije: "Proizvodna hala Niš",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Zavarivačka maska", rok: 12, standard: "ISO-2023-006" },
-      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-007" },
-      { lzs: "Zavarivački aparat", rok: 48, standard: "ISO-2023-008" }
-    ]
-  },
-  {
-    id: 4,
-    nazivRadnogMesta: "Električar održavanja",
-    nazivLokacije: "Pogon Subotica",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Ne",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Multimetar", rok: 24, standard: "ISO-2023-009" },
-      { lzs: "Zaštitne rukavice", rok: 6, standard: "ISO-2023-010" },
-      { lzs: "Alat za električne radove", rok: 36, standard: "ISO-2023-011" }
-    ]
-  },
-  {
-    id: 5,
-    nazivRadnogMesta: "Magacioner",
-    nazivLokacije: "Magacin Kragujevac",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Ne",
-    obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: [
-      { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-012" },
-      { lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-013" }
-    ]
-  },
-  {
-    id: 6,
-    nazivRadnogMesta: "Menadžer proizvodnje",
-    nazivLokacije: "Proizvodna hala Beograd",
-    povecanRizik: "Ne",
-    obavezanOftamoloskiPregled: "Ne",
-    obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: [
-      { lzs: "Računar", rok: 36, standard: "ISO-2023-014" },
-      { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-015" }
-    ]
-  },
-  {
-    id: 7,
-    nazivRadnogMesta: "Laboratorijski tehničar",
-    nazivLokacije: "Laboratorija Novi Sad",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-016" },
-      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-017" },
-      { lzs: "Mikroskop", rok: 60, standard: "ISO-2023-018" }
-    ]
-  },
-  {
-    id: 8,
-    nazivRadnogMesta: "Vozač viljuškara",
-    nazivLokacije: "Skladište Čačak",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-019" },
-      { lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-020" }
-    ]
-  },
-  {
-    id: 9,
-    nazivRadnogMesta: "Inženjer bezbednosti",
-    nazivLokacije: "Kancelarija Novi Sad",
-    povecanRizik: "Ne",
-    obavezanOftamoloskiPregled: "Ne",
-    obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: [
-      { lzs: "Računar", rok: 36, standard: "ISO-2023-021" },
-      { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-022" }
-    ]
-  },
-  {
-    id: 10,
-    nazivRadnogMesta: "Operater na mašini",
-    nazivLokacije: "Pogon Valjevo",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Proizvodna mašina", rok: 48, standard: "ISO-2023-023" },
-      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-024" }
-    ]
-  },
-  {
-    id: 11,
-    nazivRadnogMesta: "Tehničar održavanja",
-    nazivLokacije: "Pogon Pančevo",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Ne",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-025" },
-      { lzs: "Multimetar", rok: 24, standard: "ISO-2023-026" }
-    ]
-  },
-  {
-    id: 12,
-    nazivRadnogMesta: "Kontrolor kvaliteta",
-    nazivLokacije: "Proizvodna hala Šabac",
-    povecanRizik: "Ne",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: [
-      { lzs: "Mikroskop", rok: 60, standard: "ISO-2023-027" },
-      { lzs: "Računar", rok: 36, standard: "ISO-2023-028" }
-    ]
-  },
-  {
-    id: 13,
-    nazivRadnogMesta: "Hemijski tehničar",
-    nazivLokacije: "Laboratorija Beograd",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-029" },
-      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-030" }
-    ]
-  },
-  {
-    id: 14,
-    nazivRadnogMesta: "Referent nabavke",
-    nazivLokacije: "Kancelarija Kragujevac",
-    povecanRizik: "Ne",
-    obavezanOftamoloskiPregled: "Da",
-    obavezanPregledPoDrugomOsnovu: "Ne",
-    oprema: [
-      { lzs: "Računar", rok: 36, standard: "ISO-2023-031" },
-      { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-032" }
-    ]
-  },
-  {
-    id: 15,
-    nazivRadnogMesta: "Bravar",
-    nazivLokacije: "Radionica Zrenjanin",
-    povecanRizik: "Da",
-    obavezanOftamoloskiPregled: "Ne",
-    obavezanPregledPoDrugomOsnovu: "Da",
-    oprema: [
-      { lzs: "Alat za bravarske radove", rok: 24, standard: "ISO-2023-033" },
-      { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-034" }
-    ]
-  }
-];
+const mapRadnoMestoFromApi = (item: any, _index: number) => ({
+  id: item.id,
+  nazivRadnogMesta: item.naziv,
+  nazivLokacije: item.lokacija?.naziv ?? "",
+  povecanRizik: item.povecan_rizik ? "Da" : "Ne",
+  obavezanOftamoloskiPregled: item.oftamoloski_pregled,
+  obavezanPregledPoDrugomOsnovu: item.drugi_pregled,
+  oprema: item.lzs?.map((l: any) => ({
+    lzs: l.naziv,
+    rok: l.pivot?.rok_meseci ?? "",
+    standard: l.standard ?? "",
+    id: l.id,
+  })) || [],
+  lokacijaId: item.lokacija_id,
+  firmaPib: item.firma_pib,
+});
 
-// Sample data for the second table (LZS data)
-const lzsData = {
-  1: [ // Operater viljuškara
-    { id: 1, lzs: "Viljuškara", rok: 12, standard: "ISO-2023-001" },
-    { id: 2, lzs: "Zaštitna oprema", rok: 6, standard: "ISO-2023-002" },
-    { id: 3, lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-003" },
-  ],
-  2: [ // Administrativni radnik
-    { id: 4, lzs: "Računar", rok: 36, standard: "ISO-2023-004" },
-    { id: 5, lzs: "Stolica", rok: 60, standard: "ISO-2023-005" },
-  ],
-  3: [ // Zavarivač
-    { id: 6, lzs: "Zavarivačka maska", rok: 12, standard: "ISO-2023-006" },
-    { id: 7, lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-007" },
-    { id: 8, lzs: "Zavarivački aparat", rok: 48, standard: "ISO-2023-008" },
-  ],
-  4: [ // Električar održavanja
-    { id: 9, lzs: "Multimetar", rok: 24, standard: "ISO-2023-009" },
-    { id: 10, lzs: "Zaštitne rukavice", rok: 6, standard: "ISO-2023-010" },
-    { id: 11, lzs: "Alat za električne radove", rok: 36, standard: "ISO-2023-011" },
-  ],
-  5: [ // Magacioner
-    { id: 12, lzs: "Viljuškara", rok: 12, standard: "ISO-2023-012" },
-    { id: 13, lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-013" },
-  ],
-  6: [ // Menadžer proizvodnje
-    { id: 14, lzs: "Računar", rok: 36, standard: "ISO-2023-014" },
-    { id: 15, lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-015" },
-  ],
-  7: [ // Laboratorijski tehničar
-    { id: 16, lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-016" },
-    { id: 17, lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-017" },
-    { id: 18, lzs: "Mikroskop", rok: 60, standard: "ISO-2023-018" },
-  ],
-  8: [ // Vozač viljuškara
-    { id: 19, lzs: "Viljuškara", rok: 12, standard: "ISO-2023-019" },
-    { id: 20, lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-020" },
-  ],
-  9: [ // Inženjer bezbednosti
-    { id: 21, lzs: "Računar", rok: 36, standard: "ISO-2023-021" },
-    { id: 22, lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-022" },
-  ],
-  10: [ // Operater na mašini
-    { id: 23, lzs: "Proizvodna mašina", rok: 48, standard: "ISO-2023-023" },
-    { id: 24, lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-024" },
-  ],
-  11: [ // Tehničar održavanja
-    { id: 25, lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-025" },
-    { id: 26, lzs: "Multimetar", rok: 24, standard: "ISO-2023-026" },
-  ],
-  12: [ // Kontrolor kvaliteta
-    { id: 27, lzs: "Mikroskop", rok: 60, standard: "ISO-2023-027" },
-    { id: 28, lzs: "Računar", rok: 36, standard: "ISO-2023-028" },
-  ],
-  13: [ // Hemijski tehničar
-    { id: 29, lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-029" },
-    { id: 30, lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-030" },
-  ],
-  14: [ // Referent nabavke
-    { id: 31, lzs: "Računar", rok: 36, standard: "ISO-2023-031" },
-    { id: 32, lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-032" },
-  ],
-  15: [ // Bravar
-    { id: 33, lzs: "Alat za bravarske radove", rok: 24, standard: "ISO-2023-033" },
-    { id: 34, lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-034" },
-  ],
-};
+const radnaMestaData: any[] = [];
+
+const lzsData: Record<string, any[]> = {};
 
 const columns = [
   { key: "id", label: "", sortable: true },
@@ -283,14 +50,61 @@ const lzsColumns = [
 ];
 
 const RadnaMesta: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(radnaMestaData);
+  const [data, setData] = useState<any[]>(radnaMestaData);
   const [selectedRadnoMesto, setSelectedRadnoMesto] = useState<any>(null);
   const [showLZSModal, setShowLZSModal] = useState(false);
   const [lzsDataState, setLzsDataState] = useState(lzsData);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [allLzs, setAllLzs] = useState<any[]>([]);
+  const [firme, setFirme] = useState<any[]>([]);
+  const [lokacije, setLokacije] = useState<any[]>([]);
+
+  const loadRadnaMesta = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`radna-mesta?context=${context}`);
+      setData(response.data.map(mapRadnoMestoFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju radnih mesta.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadLzs = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`lzs?context=${context}`);
+      setAllLzs(response.data);
+    } catch {
+      // LZS loading failure is non-critical
+    }
+  };
+
+  const loadFirmeAndLokacije = async () => {
+    try {
+      const [firmeRes, lokacijeRes] = await Promise.all([
+        api.get<{ data: any[] }>(`firme?context=${context}`),
+        api.get<{ data: any[] }>(`lokacije?context=${context}`),
+      ]);
+      setFirme(firmeRes.data.map((f: any) => ({ pib: f.pib, naziv: f.naziv })));
+      setLokacije(lokacijeRes.data.map((l: any) => ({ id: l.id, naziv: l.naziv, firma_pib: l.firma_pib })));
+    } catch {
+      // Non-critical
+    }
+  };
+
+  useEffect(() => {
+    loadRadnaMesta();
+    loadLzs();
+    loadFirmeAndLokacije();
+  }, [context]);
   
   // Form state for new LZS entry
   const [newLZS, setNewLZS] = useState({
@@ -303,23 +117,18 @@ const RadnaMesta: React.FC = () => {
   const [isLzsOpen, setIsLzsOpen] = useState(false);
   const lzsRef = useRef<HTMLDivElement>(null);
 
-  // Options for LZS based on selected workplace equipment
-  const lzsOptions = (selectedRadnoMesto?.oprema as string[]) || [];
+  const lzsOptions = (selectedRadnoMesto?.oprema || []) as Array<{ lzs: string; rok?: number; standard?: string; id?: number }>;
 
-  // Infer defaults for rok and standard by selected LZS name
   const inferDefaults = (name: string): { rok: string; standard: string } => {
-    const lower = name.toLowerCase();
-    if (lower.includes('kacig')) return { rok: '6', standard: 'ISO-2023-020' };
-    if (lower.includes('rukavic')) return { rok: '6', standard: 'ISO-2023-010' };
-    if (lower.includes('viljuškar') || lower.includes('viljusk')) return { rok: '12', standard: 'ISO-2023-019' };
-    if (lower.includes('alat')) return { rok: '24', standard: 'ISO-2023-033' };
-    if (lower.includes('multimetar')) return { rok: '24', standard: 'ISO-2023-009' };
-    if (lower.includes('laborator') && lower.includes('pribor')) return { rok: '12', standard: 'ISO-2023-016' };
-    if (lower.includes('odel') || lower.includes('odij')) return { rok: '6', standard: 'ISO-2023-017' };
-    if (lower.includes('mikroskop')) return { rok: '60', standard: 'ISO-2023-018' };
-    if (lower.includes('računar') || lower.includes('racunar')) return { rok: '36', standard: 'ISO-2023-014' };
-    if (lower.includes('mobilni')) return { rok: '24', standard: 'ISO-2023-015' };
-    return { rok: '12', standard: 'ISO-2023-000' };
+    const match = allLzs.find((l: any) => l.naziv === name);
+    if (match) {
+      return { rok: String(match.pivot?.rok_meseci ?? 12), standard: match.standard ?? '' };
+    }
+    const opremaMatch = lzsOptions.find(o => o.lzs === name);
+    if (opremaMatch) {
+      return { rok: String(opremaMatch.rok ?? 12), standard: opremaMatch.standard ?? '' };
+    }
+    return { rok: '12', standard: '' };
   };
 
   // Add click outside handler for dropdowns
@@ -337,36 +146,30 @@ const RadnaMesta: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSave = (newData: any) => {
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
-    
+  const handleSave = async (newData: any) => {
+    const payload: any = {
+      naziv: newData.nazivRadnogMesta,
+      lokacija_id: Number(newData.lokacijaId),
+      firma_pib: newData.firmaPib,
+      povecan_rizik: newData.povecanRizik || false,
+      oftamoloski_pregled: newData.obavezanOftamoloskiPregled ? "DA" : "NE",
+      drugi_pregled: newData.obavezanPregledPoDrugomOsnovu ? "DA" : "NE",
+    };
+
+    if (newData.oprema && newData.oprema.length > 0) {
+      payload.lzs = newData.oprema.map((op: any) => ({
+        id: Number(op.id || op.lzsId),
+        rok_meseci: op.rok ? Number(op.rok) : null,
+      }));
+    }
+
     if (editingItem) {
-      // Update existing item
-      const updatedItem = {
-        ...editingItem,
-        nazivRadnogMesta: newData.nazivRadnogMesta,
-        povecanRizik: newData.povecanRizik ? "Da" : "Ne",
-        obavezanOftamoloskiPregled: newData.obavezanOftamoloskiPregled ? "Da" : "Ne",
-        obavezanPregledPoDrugomOsnovu: newData.obavezanPregledPoDrugomOsnovu ? "Da" : "Ne",
-        oprema: newData.oprema || []
-      };
-      
-      setData(data.map(item => 
-        item.id === editingItem.id ? updatedItem : item
-      ));
+      await api.put(`radna-mesta/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item
-      const newItem = {
-        id: data.length + 1,
-        ...newData,
-        povecanRizik: newData.povecanRizik ? "Da" : "Ne",
-        obavezanOftamoloskiPregled: newData.obavezanOftamoloskiPregled ? "Da" : "Ne",
-        obavezanPregledPoDrugomOsnovu: newData.obavezanPregledPoDrugomOsnovu ? "Da" : "Ne",
-        oprema: newData.oprema || []
-      };
-      setData([...data, newItem]);
+      await api.post("radna-mesta", payload);
     }
+    await loadRadnaMesta();
     setShowForm(false);
   };
 
@@ -419,9 +222,14 @@ const RadnaMesta: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`radna-mesta/${itemToDelete.id}`);
+        await loadRadnaMesta();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju radnog mesta.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -521,13 +329,19 @@ const RadnaMesta: React.FC = () => {
       </div>
       
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-        <DataTableTwo 
-          data={data}
-          columns={columns}
-          onEditClick={handleEditClick}
-          onDeleteClick={handleDeleteClick}
-          onUpdateData={handleUpdateData}
-        />
+        {isLoading ? (
+          <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+        ) : errorMessage ? (
+          <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+        ) : (
+          <DataTableTwo 
+            data={data}
+            columns={columns}
+            onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
+            onUpdateData={handleUpdateData}
+          />
+        )}
       </div>
 
       <RadnoMestoForm
@@ -535,6 +349,14 @@ const RadnaMesta: React.FC = () => {
         onClose={handleFormClose}
         onSave={handleSave}
         initialData={editingItem}
+        lzsOptions={allLzs.map((l: any) => ({
+          id: l.id,
+          lzs: l.naziv,
+          rok: 12,
+          standard: l.standard ?? '',
+        }))}
+        firme={firme}
+        lokacije={lokacije}
       />
 
              {/* LZS Modal */}
@@ -593,19 +415,19 @@ const RadnaMesta: React.FC = () => {
                     {isLzsOpen && (
                       <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                         <div className="pr-1">
-                          {lzsOptions.map((option: string, index: number) => (
+                          {lzsOptions.map((option, index: number) => (
                             <div
-                              key={option}
+                              key={option.lzs}
                               className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                                newLZS.lzs === option ? 'bg-gray-100 dark:bg-gray-700' : ''
+                                newLZS.lzs === option.lzs ? 'bg-gray-100 dark:bg-gray-700' : ''
                               } ${index === lzsOptions.length - 1 ? 'rounded-b-lg' : ''}`}
                               onClick={() => {
-                                const defaults = inferDefaults(option);
-                                setNewLZS({ lzs: option, rok: defaults.rok, standard: defaults.standard });
+                                const defaults = inferDefaults(option.lzs);
+                                setNewLZS({ lzs: option.lzs, rok: defaults.rok, standard: defaults.standard });
                                 setIsLzsOpen(false);
                               }}
                             >
-                              <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{option.lzs}</span>
                             </div>
                           ))}
                         </div>

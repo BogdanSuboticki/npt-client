@@ -1,34 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LZSDataTable from './LZSDataTable';
 import LZSForm from './LZSForm';
 import Button from '../../components/ui/button/Button';
 import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
 import ConfirmModal from '../../components/ui/modal/ConfirmModal';
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
-// Sample data for the table
-const lzsData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    nazivLZS: "Zaštitna kaciga",
-    standard: "EN 397",
-    napomena: "Redovno održavanje"
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    nazivLZS: "Zaštitne rukavice",
-    standard: "EN 388",
-    napomena: ""
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    nazivLZS: "Sigurnosna obuća",
-    standard: "EN ISO 20345",
-    napomena: "Godišnji pregled"
-  }
-];
+const mapLzsFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  nazivLZS: item.naziv,
+  standard: item.standard,
+  napomena: item.napomena ?? "",
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -69,39 +54,58 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const LZS: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(lzsData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [firme, setFirme] = useState<Array<{pib: string, naziv: string}>>([]);
 
-  const handleSave = (newData: any) => {
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
-    
+  const loadLzs = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`lzs?context=${context}`);
+      setData(response.data.map(mapLzsFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju LZS.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadFirme = async () => {
+    try {
+      const firmeRes = await api.get<{ data: any[] }>(`firme?context=${context}`);
+      setFirme(firmeRes.data.map((f: any) => ({ pib: f.pib, naziv: f.naziv })));
+    } catch (error) {
+      console.error("Failed to load firme:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadLzs();
+    loadFirme();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      naziv: newData.nazivLZS,
+      standard: newData.standard,
+      napomena: newData.napomena || null,
+    };
+
     if (editingItem) {
-      // Update existing item
-      const updatedItem = {
-        ...editingItem,
-        nazivLZS: newData.nazivLZS,
-        standard: newData.standard,
-        napomena: newData.napomena
-      };
-      
-      setData(data.map(item => 
-        item.id === editingItem.id ? updatedItem : item
-      ));
+      await api.put(`lzs/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item
-      const newItem = {
-        id: data.length + 1,
-        redniBroj: data.length + 1,
-        nazivLZS: newData.nazivLZS,
-        standard: newData.standard,
-        napomena: newData.napomena
-      };
-      setData([...data, newItem]);
+      await api.post("lzs", payload);
     }
+    await loadLzs();
     setShowForm(false);
   };
 
@@ -110,9 +114,14 @@ const LZS: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`lzs/${itemToDelete.id}`);
+        await loadLzs();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju LZS.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -209,12 +218,18 @@ const LZS: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <LZSDataTable 
-            data={data}
-            columns={columns}
-            onEditClick={handleEditClick}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <LZSDataTable 
+              data={data}
+              columns={columns}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          )}
         </div>
 
         <LZSForm 
@@ -222,6 +237,7 @@ const LZS: React.FC = () => {
           onClose={handleFormClose}
           onSave={handleSave}
           initialData={editingItem}
+          firme={firme}
         />
 
         <ConfirmModal

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
@@ -11,33 +11,38 @@ import { useUser } from "../../context/UserContext";
 interface AngazovanjaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
   initialData?: any;
-  fromAdminDashboard?: boolean; // When true, hide slider but show email/šifra fields
+  fromAdminDashboard?: boolean;
+  zaposleniList?: Array<{ id: number; ime_prezime: string; firma_pib: string }>;
+  radnaMestaList?: Array<{ id: number; naziv: string; firma_pib: string; lokacija_id: number }>;
+  lokacijeList?: Array<{ id: number; naziv: string; firma_pib: string }>;
 }
 
-export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, fromAdminDashboard = false }: AngazovanjaFormProps) {
+export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, fromAdminDashboard = false, zaposleniList = [], radnaMestaList = [], lokacijeList = [] }: AngazovanjaFormProps) {
   const { userType } = useUser();
   const isAdmin = userType === 'admin';
   
   const [formData, setFormData] = React.useState({
-    zaposleni: "",
-    radnoMesto: "",
-    lokacija: "",
+    zaposleniId: "",
+    zaposleniLabel: "",
+    radnoMestoId: "",
+    radnoMestoLabel: "",
+    lokacijaId: "",
+    lokacijaLabel: "",
+    firmaPib: "",
     vrstaAngazovanja: "Redovno angažovanje",
     datumPocetka: new Date(),
     datumPrestanka: null as Date | null,
   });
 
-  // State for creating new korisnik
-  // If fromAdminDashboard, default to true (show email/šifra fields)
   const [createKorisnik, setCreateKorisnik] = React.useState(fromAdminDashboard);
   const [korisnikData, setKorisnikData] = React.useState({
     email: "",
     sifra: "",
   });
+  const [formError, setFormError] = React.useState<string | null>(null);
 
-  // Add state for dropdowns
   const [isZaposleniOpen, setIsZaposleniOpen] = React.useState(false);
   const [isRadnoMestoOpen, setIsRadnoMestoOpen] = React.useState(false);
   const [isLokacijaOpen, setIsLokacijaOpen] = React.useState(false);
@@ -46,45 +51,50 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
   const radnoMestoRef = useRef<HTMLDivElement>(null);
   const lokacijaRef = useRef<HTMLDivElement>(null);
 
-  // Example options - replace with actual data from your tables
-  const zaposleniOptions = ["Petar Petrović", "Ana Anić", "Marko Marković", "Jovan Jovanović"];
-  const radnoMestoOptions = ["Inženjer bezbednosti", "Tehničar za radnu zaštitu", "Koordinator bezbednosti", "Inspektor rada"];
-  const lokacijaOptions = ["Beograd", "Novi Sad", "Niš", "Kragujevac", "Subotica"];
   const vrstaAngazovanjaOptions = ["Redovno angažovanje", "Stručna praksa"];
 
-  // Add click outside handler for dropdowns
+  const firmaPib = useMemo(() => {
+    if (formData.zaposleniId) {
+      const z = zaposleniList.find(z => z.id === Number(formData.zaposleniId));
+      return z?.firma_pib ?? "";
+    }
+    return "";
+  }, [formData.zaposleniId, zaposleniList]);
+
+  const filteredRadnaMesta = useMemo(() => {
+    if (!firmaPib) return [];
+    return radnaMestaList.filter(rm => rm.firma_pib === firmaPib);
+  }, [firmaPib, radnaMestaList]);
+
+  const filteredLokacije = useMemo(() => {
+    if (!firmaPib) return [];
+    return lokacijeList.filter(l => l.firma_pib === firmaPib);
+  }, [firmaPib, lokacijeList]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      
-      // Close dropdowns
-      if (zaposleniRef.current && !zaposleniRef.current.contains(target)) {
-        setIsZaposleniOpen(false);
-      }
-      if (radnoMestoRef.current && !radnoMestoRef.current.contains(target)) {
-        setIsRadnoMestoOpen(false);
-      }
-      if (lokacijaRef.current && !lokacijaRef.current.contains(target)) {
-        setIsLokacijaOpen(false);
-      }
+      if (zaposleniRef.current && !zaposleniRef.current.contains(target)) setIsZaposleniOpen(false);
+      if (radnoMestoRef.current && !radnoMestoRef.current.contains(target)) setIsRadnoMestoOpen(false);
+      if (lokacijaRef.current && !lokacijaRef.current.contains(target)) setIsLokacijaOpen(false);
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Populate form with initialData when provided or reset when modal opens
   useEffect(() => {
-    if (!isOpen) {
-      // Reset form when modal is closed
-      return;
-    }
+    if (!isOpen) return;
+    setFormError(null);
     
     if (initialData) {
       setFormData({
-        zaposleni: initialData.imePrezime || "",
-        radnoMesto: initialData.radnoMesto || "",
-        lokacija: initialData.lokacija || "",
+        zaposleniId: initialData.zaposleniId?.toString() ?? "",
+        zaposleniLabel: initialData.imePrezime || "",
+        radnoMestoId: initialData.radnoMestoId?.toString() ?? "",
+        radnoMestoLabel: initialData.radnoMesto || "",
+        lokacijaId: initialData.lokacijaId?.toString() ?? "",
+        lokacijaLabel: initialData.lokacija || "",
+        firmaPib: initialData.firmaPib || "",
         vrstaAngazovanja: initialData.vrstaAngazovanja || "Redovno angažovanje",
         datumPocetka: initialData.pocetakAngazovanja ? new Date(initialData.pocetakAngazovanja) : new Date(),
         datumPrestanka: initialData.prestanakAngazovanja ? new Date(initialData.prestanakAngazovanja) : null,
@@ -92,11 +102,14 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
       setCreateKorisnik(fromAdminDashboard);
       setKorisnikData({ email: "", sifra: "" });
     } else {
-      // Reset form when no initial data
       setFormData({
-        zaposleni: "",
-        radnoMesto: "",
-        lokacija: "",
+        zaposleniId: "",
+        zaposleniLabel: "",
+        radnoMestoId: "",
+        radnoMestoLabel: "",
+        lokacijaId: "",
+        lokacijaLabel: "",
+        firmaPib: "",
         vrstaAngazovanja: "Redovno angažovanje",
         datumPocetka: new Date(),
         datumPrestanka: null,
@@ -106,43 +119,94 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
     }
   }, [initialData, fromAdminDashboard, isOpen]);
 
-  const handleDateChange = (value: Date | null) => {
-    if (value) {
-      setFormData(prev => ({ ...prev, datumPocetka: value }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     
-    // Validate form fields
-    if (!formData.zaposleni || !formData.radnoMesto || !formData.lokacija || !formData.datumPocetka) {
-      alert('Molimo popunite sva obavezna polja');
+    if (!formData.zaposleniId || !formData.radnoMestoId || !formData.lokacijaId || !formData.datumPocetka) {
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
     
-    // Additional validation when creating new korisnik user (or from admin dashboard)
     if (createKorisnik || fromAdminDashboard) {
       if (!korisnikData.email || !korisnikData.sifra) {
-        alert('Molimo popunite email i šifru za kreiranje korisnika');
+        setFormError('Molimo popunite email i šifru za kreiranje korisnika');
         return;
       }
     }
     
     const submitData = {
-      ...formData,
+      zaposleniId: formData.zaposleniId,
+      radnoMestoId: formData.radnoMestoId,
+      lokacijaId: formData.lokacijaId,
+      firmaPib: firmaPib,
+      vrstaAngazovanja: formData.vrstaAngazovanja,
+      datumPocetka: formData.datumPocetka,
+      datumPrestanka: formData.datumPrestanka,
       ...((createKorisnik || fromAdminDashboard) ? { 
-        createKorisnik: true,
-        korisnikData: {
-          email: korisnikData.email,
-          sifra: korisnikData.sifra,
-        },
+        kreirajKorisnika: true,
+        email: korisnikData.email,
+        password: korisnikData.sifra,
       } : {}),
     };
     
-    onSave(submitData);
-    onClose();
+    try {
+      await onSave(submitData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Greška pri čuvanju.");
+    }
   };
+
+  const renderDropdown = (
+    ref: React.RefObject<HTMLDivElement | null>,
+    isOpen: boolean,
+    setIsOpen: (v: boolean) => void,
+    label: string,
+    options: Array<{ value: string; label: string }>,
+    selected: string,
+    onSelect: (value: string, label: string) => void,
+    disabled?: boolean,
+    placeholder?: string,
+  ) => (
+    <div className="relative w-full" ref={ref as React.RefObject<HTMLDivElement>}>
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className={`flex items-center justify-between w-full h-11 px-4 text-sm border rounded-lg ${
+          disabled
+            ? 'text-gray-400 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-500 cursor-not-allowed'
+            : 'text-gray-800 bg-[#F9FAFB] border-gray-300 dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 dark:hover:bg-white/[0.03]'
+        }`}
+      >
+        <span>{selected ? options.find(o => o.value === selected)?.label ?? selected : (placeholder || `Izaberite ${label.toLowerCase()}`)}</span>
+        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && !disabled && (
+        <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
+          <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+            {options.length === 0 ? (
+              <div className="px-4 py-2 text-sm text-gray-400 dark:text-gray-500">Nema dostupnih opcija</div>
+            ) : options.map((option, index) => (
+              <div
+                key={option.value}
+                className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                  selected === option.value ? 'bg-gray-100 dark:bg-gray-700' : ''
+                } ${index === options.length - 1 ? 'rounded-b-lg' : ''}`}
+                onClick={() => {
+                  onSelect(option.value, option.label);
+                  setIsOpen(false);
+                }}
+              >
+                <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <Modal
@@ -153,13 +217,20 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
       <div className="flex flex-col h-full">
         <div className="p-5 lg:p-5 lg:pt-10 lg:pl-10 pb-0">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            {fromAdminDashboard ? "Dodaj korisnika" : initialData ? "Izmeni Angažovanje" : "Novo Angažovanje"}
+            {fromAdminDashboard 
+              ? (initialData ? "Izmeni korisnika" : "Dodaj korisnika")
+              : (initialData ? "Izmeni Angažovanje" : "Novo Angažovanje")
+            }
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                {formError}
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-4 pb-4">
-          {/* Show slider only if not from admin dashboard and is admin and no initial data */}
           {isAdmin && !initialData && !fromAdminDashboard && (
             <div className="col-span-1">
               <Slider
@@ -169,9 +240,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
                 value={createKorisnik}
                 onChange={(value) => {
                   setCreateKorisnik(value);
-                  if (!value) {
-                    setKorisnikData({ email: "", sifra: "" });
-                  }
+                  if (!value) setKorisnikData({ email: "", sifra: "" });
                 }}
                 size="full"
                 name="slider-create-korisnik"
@@ -180,7 +249,6 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
             </div>
           )}
 
-          {/* Show email and šifra fields at the top if fromAdminDashboard OR if createKorisnik is true (when slider is enabled) */}
           {(fromAdminDashboard || (createKorisnik && isAdmin && !initialData)) && (
             <>
               <div className="col-span-1">
@@ -208,129 +276,59 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
             <Label>Zaposleni *</Label>
             {initialData ? (
               <div className="w-full h-11 px-4 text-sm text-gray-800 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 flex items-center">
-                {formData.zaposleni}
+                {formData.zaposleniLabel}
               </div>
             ) : (
-              <div className="relative w-full" ref={zaposleniRef}>
-                <button
-                  type="button"
-                  onClick={() => setIsZaposleniOpen(!isZaposleniOpen)}
-                  className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                >
-                  <span>{formData.zaposleni || "Izaberite zaposlenog"}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${isZaposleniOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {isZaposleniOpen && (
-                  <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
-                    <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                      {zaposleniOptions.map((option: string, index: number) => (
-                        <div
-                          key={option}
-                          className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                            formData.zaposleni === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                          } ${index === zaposleniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                          onClick={() => {
-                            setFormData({ ...formData, zaposleni: option });
-                            setIsZaposleniOpen(false);
-                          }}
-                        >
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              renderDropdown(
+                zaposleniRef, isZaposleniOpen, setIsZaposleniOpen, "zaposlenog",
+                zaposleniList.map(z => ({ value: z.id.toString(), label: z.ime_prezime })),
+                formData.zaposleniId,
+                (value, label) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    zaposleniId: value,
+                    zaposleniLabel: label,
+                    radnoMestoId: "",
+                    radnoMestoLabel: "",
+                    lokacijaId: "",
+                    lokacijaLabel: "",
+                  }));
+                }
+              )
             )}
           </div>
 
           <div className="col-span-1">
             <Label>Radno mesto *</Label>
-            <div className="relative w-full" ref={radnoMestoRef}>
-              <button
-                type="button"
-                onClick={() => setIsRadnoMestoOpen(!isRadnoMestoOpen)}
-                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-              >
-                <span>{formData.radnoMesto || "Izaberite radno mesto"}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isRadnoMestoOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {isRadnoMestoOpen && (
-                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
-                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {radnoMestoOptions.map((option: string, index: number) => (
-                      <div
-                        key={option}
-                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                          formData.radnoMesto === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                        } ${index === radnoMestoOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                        onClick={() => {
-                          setFormData({ ...formData, radnoMesto: option });
-                          setIsRadnoMestoOpen(false);
-                        }}
-                      >
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            {renderDropdown(
+              radnoMestoRef, isRadnoMestoOpen, setIsRadnoMestoOpen, "radno mesto",
+              filteredRadnaMesta.map(rm => ({ value: rm.id.toString(), label: rm.naziv })),
+              formData.radnoMestoId,
+              (value, label) => {
+                const rm = filteredRadnaMesta.find(r => r.id === Number(value));
+                setFormData(prev => ({
+                  ...prev,
+                  radnoMestoId: value,
+                  radnoMestoLabel: label,
+                  lokacijaId: rm?.lokacija_id?.toString() ?? prev.lokacijaId,
+                  lokacijaLabel: rm ? (lokacijeList.find(l => l.id === rm.lokacija_id)?.naziv ?? prev.lokacijaLabel) : prev.lokacijaLabel,
+                }));
+              },
+              !firmaPib,
+              !firmaPib ? "Prvo izaberite zaposlenog" : "Izaberite radno mesto"
+            )}
           </div>
 
           <div className="col-span-1">
             <Label>Lokacija *</Label>
-            <div className="relative w-full" ref={lokacijaRef}>
-              <button
-                type="button"
-                onClick={() => setIsLokacijaOpen(!isLokacijaOpen)}
-                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-              >
-                <span>{formData.lokacija || "Izaberite lokaciju"}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${isLokacijaOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {isLokacijaOpen && (
-                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-[#11181E] dark:border-gray-700">
-                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {lokacijaOptions.map((option: string, index: number) => (
-                      <div
-                        key={option}
-                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                          formData.lokacija === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                        } ${index === lokacijaOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                        onClick={() => {
-                          setFormData({ ...formData, lokacija: option });
-                          setIsLokacijaOpen(false);
-                        }}
-                      >
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            {renderDropdown(
+              lokacijaRef, isLokacijaOpen, setIsLokacijaOpen, "lokaciju",
+              filteredLokacije.map(l => ({ value: l.id.toString(), label: l.naziv })),
+              formData.lokacijaId,
+              (value, label) => setFormData(prev => ({ ...prev, lokacijaId: value, lokacijaLabel: label })),
+              !firmaPib,
+              !firmaPib ? "Prvo izaberite zaposlenog" : "Izaberite lokaciju"
+            )}
           </div>
 
           <div className="col-span-1">
@@ -344,7 +342,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
                     value={option}
                     checked={formData.vrstaAngazovanja === option}
                     onChange={(e) => setFormData({ ...formData, vrstaAngazovanja: e.target.value })}
-                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-900 dark:border-gray-600 focus:outline-none"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-900 dark:border-gray-600 focus:outline-none"
                   />
                   <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{option}</span>
                 </label>
@@ -356,7 +354,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
             <Label>Datum početka angažovanja *</Label>
             <CustomDatePicker
               value={formData.datumPocetka}
-              onChange={(newValue) => handleDateChange(newValue)}
+              onChange={(newValue) => { if (newValue) setFormData(prev => ({ ...prev, datumPocetka: newValue })); }}
             />
           </div>
 
@@ -364,9 +362,7 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
             <Label>Datum prestanka angažovanja</Label>
             <CustomDatePicker
               value={formData.datumPrestanka}
-              onChange={(newValue) => {
-                setFormData(prev => ({ ...prev, datumPrestanka: newValue }));
-              }}
+              onChange={(newValue) => setFormData(prev => ({ ...prev, datumPrestanka: newValue }))}
             />
           </div>
           </div>
@@ -374,15 +370,10 @@ export default function AngazovanjaForm({ isOpen, onClose, onSave, initialData, 
 
           <div className="pb-5 pt-2 lg:pb-10 pr-5 lg:pr-10 pl-5 lg:pl-10 flex-shrink-0">
             <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-              >
+              <Button variant="outline" onClick={onClose}>
                 Otkaži
               </Button>
-              <Button
-                type="submit"
-              >
+              <Button type="submit">
                 Sačuvaj
               </Button>
             </div>

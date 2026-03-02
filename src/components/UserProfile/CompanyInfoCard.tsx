@@ -3,20 +3,89 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { api } from "../../api/client";
 
-export default function CompanyInfoCard() {
+interface CompanyInfoCardProps {
+  firma?: {
+    naziv: string;
+    pib: string;
+    maticni_broj?: string;
+    sifra_delatnosti?: string;
+    adresa: string;
+    drzava: string;
+    mesto: string;
+    email: string;
+    [key: string]: any;
+  };
+  onUpdate?: () => void;
+}
+
+export default function CompanyInfoCard({ firma, onUpdate }: CompanyInfoCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving company changes...");
-    closeModal();
+  const [formData, setFormData] = useState({
+    naziv: firma?.naziv || "",
+    pib: firma?.pib || "",
+    maticni_broj: firma?.maticni_broj || "",
+    sifra_delatnosti: firma?.sifra_delatnosti || "",
+    adresa: firma?.adresa || "",
+    drzava: firma?.drzava || "Srbija",
+    mesto: firma?.mesto || "",
+    email: firma?.email || "",
+  });
+
+  useEffect(() => {
+    if (firma) {
+      setFormData({
+        naziv: firma.naziv || "",
+        pib: firma.pib || "",
+        maticni_broj: firma.maticni_broj || "",
+        sifra_delatnosti: firma.sifra_delatnosti || "",
+        adresa: firma.adresa || "",
+        drzava: firma.drzava || "Srbija",
+        mesto: firma.mesto || "",
+        email: firma.email || "",
+      });
+    }
+  }, [firma]);
+  
+  const handleSave = async () => {
+    if (!firma?.pib) return;
+    
+    setIsSaving(true);
+    setErrorMessage(null);
+    
+    try {
+      await api.put(`firme/${firma.pib}`, {
+        naziv: formData.naziv,
+        maticni_broj: formData.maticni_broj,
+        sifra_delatnosti: formData.sifra_delatnosti,
+        adresa: formData.adresa,
+        drzava: formData.drzava,
+        mesto: formData.mesto,
+        email: formData.email,
+      });
+      
+      if (onUpdate) {
+        onUpdate();
+      }
+      closeModal();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri čuvanju informacija o firmi.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Add state for dropdowns
   const [isDrzavaOpen, setIsDrzavaOpen] = React.useState(false);
-  const [selectedDrzava, setSelectedDrzava] = React.useState("serbia");
+  const [selectedDrzava, setSelectedDrzava] = React.useState(() => {
+    const drzavaLower = firma?.drzava?.toLowerCase() || "serbia";
+    return countries.find(c => c.label.toLowerCase() === drzavaLower)?.value || "serbia";
+  });
   const drzavaRef = useRef<HTMLDivElement>(null);
 
   const countries = [
@@ -58,7 +127,7 @@ export default function CompanyInfoCard() {
                   Naziv firme
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  Tech Solutions d.o.o.
+                  {firma?.naziv || "-"}
                 </p>
               </div>
 
@@ -67,7 +136,7 @@ export default function CompanyInfoCard() {
                   PIB
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  123456789
+                  {firma?.pib || "-"}
                 </p>
               </div>
 
@@ -76,7 +145,7 @@ export default function CompanyInfoCard() {
                   Matični broj firme
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  12345678
+                  {firma?.maticni_broj || "-"}
                 </p>
               </div>
 
@@ -85,7 +154,7 @@ export default function CompanyInfoCard() {
                   Šifra delatnosti
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  6201
+                  {firma?.sifra_delatnosti || "-"}
                 </p>
               </div>
 
@@ -94,7 +163,7 @@ export default function CompanyInfoCard() {
                   Adresa firme
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  Bulevar Nikole Tesle 15, Beograd
+                  {firma?.adresa || "-"}
                 </p>
               </div>
 
@@ -103,7 +172,7 @@ export default function CompanyInfoCard() {
                   Država
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  Srbija
+                  {firma?.drzava || "-"}
                 </p>
               </div>
 
@@ -112,7 +181,7 @@ export default function CompanyInfoCard() {
                   Mesto
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  Beograd
+                  {firma?.mesto || "-"}
                 </p>
               </div>
 
@@ -121,7 +190,7 @@ export default function CompanyInfoCard() {
                   Email adresa firme
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  info@techsolutions.rs
+                  {firma?.email || "-"}
                 </p>
               </div>
             </div>
@@ -162,31 +231,55 @@ export default function CompanyInfoCard() {
             </p>
           </div>
                      <form className="flex flex-col">
+             {errorMessage && (
+               <div className="px-2 mb-4 text-sm text-error-500">{errorMessage}</div>
+             )}
              <div className="px-2 pb-3">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Naziv firme</Label>
-                  <Input type="text" value="Tech Solutions d.o.o." />
+                  <Input 
+                    type="text" 
+                    value={formData.naziv}
+                    onChange={(e) => setFormData({ ...formData, naziv: e.target.value })}
+                  />
                 </div>
 
                 <div>
                   <Label>PIB (poreski identifikacioni broj)</Label>
-                  <Input type="text" value="123456789" />
+                  <Input 
+                    type="text" 
+                    value={formData.pib}
+                    disabled
+                    readOnly
+                  />
                 </div>
 
                 <div>
                   <Label>Matični broj firme</Label>
-                  <Input type="text" value="12345678" />
+                  <Input 
+                    type="text" 
+                    value={formData.maticni_broj}
+                    onChange={(e) => setFormData({ ...formData, maticni_broj: e.target.value })}
+                  />
                 </div>
 
                 <div>
                   <Label>Šifra delatnosti</Label>
-                  <Input type="text" value="6201" />
+                  <Input 
+                    type="text" 
+                    value={formData.sifra_delatnosti}
+                    onChange={(e) => setFormData({ ...formData, sifra_delatnosti: e.target.value })}
+                  />
                 </div>
 
                 <div>
                   <Label>Adresa firme</Label>
-                  <Input type="text" value="Bulevar Nikole Tesle 15, Beograd" />
+                  <Input 
+                    type="text" 
+                    value={formData.adresa}
+                    onChange={(e) => setFormData({ ...formData, adresa: e.target.value })}
+                  />
                 </div>
 
                 <div>
@@ -200,7 +293,7 @@ export default function CompanyInfoCard() {
                        onClick={() => setIsDrzavaOpen(!isDrzavaOpen)}
                        className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
                      >
-                       <span>{countries.find(country => country.value === selectedDrzava)?.label || "Izaberi državu"}</span>
+                       <span>{countries.find(country => country.value === selectedDrzava)?.label || formData.drzava || "Izaberi državu"}</span>
                        <svg
                          className={`w-4 h-4 transition-transform ${isDrzavaOpen ? 'rotate-180' : ''}`}
                          fill="none"
@@ -222,6 +315,7 @@ export default function CompanyInfoCard() {
                                }`}
                                onClick={() => {
                                  setSelectedDrzava(option.value);
+                                 setFormData({ ...formData, drzava: option.label });
                                  setIsDrzavaOpen(false);
                                }}
                              >
@@ -236,21 +330,29 @@ export default function CompanyInfoCard() {
 
                 <div>
                   <Label>Mesto</Label>
-                  <Input type="text" value="Beograd" />
+                  <Input 
+                    type="text" 
+                    value={formData.mesto}
+                    onChange={(e) => setFormData({ ...formData, mesto: e.target.value })}
+                  />
                 </div>
 
                 <div>
                   <Label>Email adresa firme</Label>
-                  <Input type="email" value="info@techsolutions.rs" />
+                  <Input 
+                    type="email" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button variant="outline" onClick={closeModal}>
+              <Button variant="outline" onClick={closeModal} disabled={isSaving}>
                 Otkaži
               </Button>
-              <Button onClick={handleSave}>
-                Sačuvaj
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Čuvanje..." : "Sačuvaj"}
               </Button>
             </div>
           </form>

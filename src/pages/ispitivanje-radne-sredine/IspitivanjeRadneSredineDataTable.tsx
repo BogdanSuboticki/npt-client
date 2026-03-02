@@ -40,6 +40,8 @@ interface DataTableProps {
   data: IspitivanjeData[];
   columns: Column[];
   onDeleteClick?: (item: IspitivanjeData) => void;
+  onEditClick?: (item: IspitivanjeData) => void;
+  onIzvrsiIspitivanje?: (item: IspitivanjeData, columnKey: string, formData: { ispravno: boolean; datumIspitivanja: Date }) => Promise<void>;
 }
 
 interface TipIspitivanjaData {
@@ -65,16 +67,17 @@ const formatDate = (dateStr: string | null | undefined): string => {
   }
 };
 
-export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns, onDeleteClick }: DataTableProps) {
+export default function IspitivanjeRadneSredineDataTable({ data: initialData, columns, onDeleteClick, onIzvrsiIspitivanje }: DataTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key || 'redniBroj');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [data] = useState<IspitivanjeData[]>(initialData);
+  const data = initialData;
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [isNovoFormOpen, setIsNovoFormOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<string>("");
+  const [selectedItem, setSelectedItem] = useState<IspitivanjeData | null>(null);
   const { isOpen: isEditOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const [editingItem, setEditingItem] = useState<IspitivanjeData | null>(null);
   const [editTipoviIspitivanja, setEditTipoviIspitivanja] = useState<TipIspitivanjaData[]>([]);
@@ -151,43 +154,24 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
     }
   };
 
-  // Function to render special cell content for specific columns
-  const renderCellContent = (key: string, value: any) => {
+  const renderCellContent = (key: string, value: any, item: IspitivanjeData) => {
     const specialColumns = ['mikroklimaLetnja', 'mikroklimaZimska', 'fizickeStetnosti', 'hemijskeStetnosti', 'osvetljenje'];
     
     if (specialColumns.includes(key)) {
-      // Check if value is an object with dates
-      if (value && typeof value === 'object' && value.prethodnoIspitivanje && value.narednoIspitivanje) {
-        return (
-          <div className="flex flex-col gap-2">
-            <div className="text-xs text-gray-600 dark:text-gray-400">
-              Prethodno ispitivanje: <span className="font-medium">{value.prethodnoIspitivanje}</span>
-            </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">
-              Naredno ispitivanje: <span className="font-medium">{value.narednoIspitivanje}</span>
-            </div>
-            <button 
-              className="px-3 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600 transition-colors"
-              onClick={() => handleIzvrsiIspitivanje(key)}
-            >
-              Izvrši ispitivanje
-            </button>
-          </div>
-        );
-      }
-      
-      // Fallback for old data structure
+      const prethodno = value && typeof value === 'object' ? (value.prethodnoIspitivanje || '-') : '-';
+      const naredno = value && typeof value === 'object' ? (value.narednoIspitivanje || '-') : '-';
+
       return (
         <div className="flex flex-col gap-2">
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            Prethodno ispitivanje: <span className="font-medium">-</span>
+            Prethodno ispitivanje: <span className="font-medium">{prethodno}</span>
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            Naredno ispitivanje: <span className="font-medium">-</span>
+            Naredno ispitivanje: <span className="font-medium">{naredno}</span>
           </div>
           <button 
             className="px-3 py-1 text-xs bg-brand-500 text-white rounded hover:bg-brand-600 transition-colors"
-            onClick={() => handleIzvrsiIspitivanje(key)}
+            onClick={() => handleIzvrsiIspitivanje(key, item)}
           >
             Izvrši ispitivanje
           </button>
@@ -198,15 +182,18 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
     return key.includes('datum') ? formatDate(value) : value;
   };
 
-  const handleIzvrsiIspitivanje = (columnKey: string) => {
+  const handleIzvrsiIspitivanje = (columnKey: string, item: IspitivanjeData) => {
     setSelectedColumn(columnKey);
+    setSelectedItem(item);
     setIsNovoFormOpen(true);
   };
 
-  const handleNovoIspitivanjeSave = (formData: any) => {
-    console.log('Novo ispitivanje data:', formData, 'for column:', selectedColumn);
-    // Handle the form data here
+  const handleNovoIspitivanjeSave = async (formData: any) => {
+    if (selectedItem && onIzvrsiIspitivanje) {
+      await onIzvrsiIspitivanje(selectedItem, selectedColumn, formData);
+    }
     setIsNovoFormOpen(false);
+    setSelectedItem(null);
   };
 
   const handleEditClick = (item: IspitivanjeData) => {
@@ -439,7 +426,7 @@ export default function IspitivanjeRadneSredineDataTable({ data: initialData, co
                             index === 0 ? 'border-l-0' : index === columns.length - 1 ? 'border-r-0' : ''
                           }`}
                         >
-                          {renderCellContent(key, item[key])}
+                          {renderCellContent(key, item[key], item)}
                         </TableCell>
                       ))}
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">

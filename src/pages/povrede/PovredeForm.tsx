@@ -5,14 +5,18 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
 interface PovredeFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
+  initialData?: any;
 }
 
-export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProps) {
+export default function PovredeForm({ isOpen, onClose, onSave, initialData }: PovredeFormProps) {
+  const context = usePageContext();
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     datumPovrede: new Date(),
@@ -23,7 +27,11 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
     datumPreuzimanjaIzFonda: null as Date | null,
     datumDostavjanjaUpravi: null as Date | null,
     napomena: "",
+    angazovanjeId: "",
+    firmaPib: "",
   });
+
+  const [angazovanjaList, setAngazovanjaList] = React.useState<any[]>([]);
 
   const [brojListeNumber, setBrojListeNumber] = React.useState("");
   const currentYear = new Date().getFullYear();
@@ -48,9 +56,36 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
   const [isTezinaPovredeOpen, setIsTezinaPovredeOpen] = React.useState(false);
   const zaposleniRef = useRef<HTMLDivElement>(null);
   const tezinaPovredeRef = useRef<HTMLDivElement>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
 
-  // Example options - replace with actual data
-  const zaposleniOptions = ["Angažovani 1", "Angažovani 2", "Angažovani 3"];
+  useEffect(() => {
+    if (isOpen) {
+      api.get<{ data: any[] }>(`angazovanja?context=${context}`)
+        .then(res => setAngazovanjaList(res.data))
+        .catch(() => {});
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData({
+        zaposleni: initialData.zaposleni ?? "",
+        datumPovrede: initialData.datumPovrede ?? new Date(),
+        tezinaPovrede: initialData.tezinaPovrede ?? "",
+        brojPovredneListe: initialData.brojPovredneListe ?? "",
+        datumObavestenjaInspekcije: initialData.datumObavestenjaInspekcije ?? null,
+        datumPredajeFondu: initialData.datumPredajeFondu ?? null,
+        datumPreuzimanjaIzFonda: initialData.datumPreuzimanjaIzFonda ?? null,
+        datumDostavjanjaUpravi: initialData.datumDostavjanjaUpravi ?? null,
+        napomena: initialData.napomena ?? "",
+        angazovanjeId: initialData.angazovanjeId ?? "",
+        firmaPib: initialData.firmaPib ?? "",
+      });
+      const match = initialData.brojPovredneListe?.match(/^PL-(\d+)\//);
+      if (match) setBrojListeNumber(match[1]);
+    }
+  }, [isOpen, initialData]);
+
   const tezinaPovredeOptions = ["Laka", "Srednja", "Teška", "Smrtna", "Kolektivna"];
 
   // Add click outside handler for dropdowns
@@ -71,7 +106,6 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFormData({
@@ -84,19 +118,25 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
         datumPreuzimanjaIzFonda: null,
         datumDostavjanjaUpravi: null,
         napomena: "",
+        angazovanjeId: "",
+        firmaPib: "",
       });
       setBrojListeNumber("");
+      setFormError(null);
     }
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.zaposleni || !formData.datumPovrede || !formData.tezinaPovrede) {
-      alert('Molimo popunite sva obavezna polja');
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
   return (
@@ -111,6 +151,11 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                {formError}
+              </div>
+            )}
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 pb-4">
           <div className="w-full">
             <Label>Zaposleni *</Label>
@@ -133,18 +178,18 @@ export default function PovredeForm({ isOpen, onClose, onSave }: PovredeFormProp
               {isZaposleniOpen && (
                 <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                   <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {zaposleniOptions.map((option: string, index: number) => (
+                    {angazovanjaList.map((item: any, index: number) => (
                       <div
-                        key={option}
+                        key={item.id}
                         className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                          formData.zaposleni === option ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            } ${index === zaposleniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
+                          formData.angazovanjeId === item.id ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } ${index === angazovanjaList.length - 1 ? 'rounded-b-lg' : ''}`}
                         onClick={() => {
-                          setFormData({ ...formData, zaposleni: option });
+                          setFormData({ ...formData, zaposleni: item.zaposleni?.ime_prezime, angazovanjeId: item.id, firmaPib: item.firma_pib });
                           setIsZaposleniOpen(false);
                         }}
                       >
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{item.zaposleni?.ime_prezime}</span>
                       </div>
                     ))}
                   </div>

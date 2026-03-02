@@ -1,99 +1,57 @@
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { UserIcon, GroupIcon, BoxIconLine, ZaposleniIcon } from "../../icons";
+import { api } from "../../api/client";
 
-// Sample data - in a real app, this would come from API
-const sampleUsers = [
-  {
-    id: "1",
-    role: "super-admin",
-    status: "active",
-  },
-  {
-    id: "2",
-    role: "admin",
-    status: "active",
-  },
-  {
-    id: "3",
-    role: "user",
-    status: "active",
-  },
-  {
-    id: "4",
-    role: "komitent",
-    status: "active",
-  },
-];
+export default function SystemMetrics() {
+  const [stats, setStats] = useState({
+    adminCount: 0,
+    userCount: 0,
+    komitentCount: 0,
+    companyCount: 0,
+    workerCount: 0,
+  });
 
-const sampleFirme = [
-  { id: "1", naziv: "Tech Solutions d.o.o." },
-  { id: "2", naziv: "Client Company A" },
-  { id: "3", naziv: "Client Company B" },
-  { id: "4", naziv: "New Organization" },
-];
-
-const sampleZaposleni = [
-  { id: 1, imePrezime: "Petar Petrović" },
-  { id: 2, imePrezime: "Ana Anić" },
-  { id: 3, imePrezime: "Marko Marković" },
-];
-
-interface SystemMetricsProps {
-  // Optional props for when API is connected
-  adminCount?: number;
-  userCount?: number;
-  komitentCount?: number;
-  companyCount?: number;
-  workerCount?: number;
-}
-
-export default function SystemMetrics({
-  adminCount,
-  userCount,
-  komitentCount,
-  companyCount,
-  workerCount,
-}: SystemMetricsProps = {}) {
-  // Calculate counts from sample data if not provided
-  const metrics = useMemo(() => {
-    // In a real app, these would come from API
-    const admins = adminCount ?? sampleUsers.filter(u => u.role === 'admin' || u.role === 'super-admin').length;
-    const users = userCount ?? sampleUsers.filter(u => u.role === 'user').length;
-    const komitenti = komitentCount ?? sampleUsers.filter(u => u.role === 'komitent').length;
-    const firme = companyCount ?? sampleFirme.length;
-    const radnici = workerCount ?? sampleZaposleni.length;
-
-    return { admins, users, komitenti, firme, radnici };
-  }, [adminCount, userCount, komitentCount, companyCount, workerCount]);
+  useEffect(() => {
+    api
+      .get<{
+        adminCount: number;
+        userCount: number;
+        komitentCount: number;
+        companyCount: number;
+        workerCount: number;
+      }>("dashboard/stats")
+      .then(setStats)
+      .catch(() => {});
+  }, []);
 
   const metricsData = [
     {
       label: "Administratori",
-      value: metrics.admins,
+      value: stats.adminCount,
       icon: UserIcon,
       color: "warning",
     },
     {
       label: "Korisnici",
-      value: metrics.users,
+      value: stats.userCount,
       icon: GroupIcon,
       color: "success",
     },
     {
       label: "Komitenti",
-      value: metrics.komitenti,
+      value: stats.komitentCount,
       icon: UserIcon,
       color: "info",
     },
     {
       label: "Preduzeća",
-      value: metrics.firme,
+      value: stats.companyCount,
       icon: BoxIconLine,
       color: "primary",
     },
     {
       label: "Radnici",
-      value: metrics.radnici,
+      value: stats.workerCount,
       icon: ZaposleniIcon,
       color: "success",
     },
@@ -126,4 +84,3 @@ export default function SystemMetrics({
     </div>
   );
 }
-

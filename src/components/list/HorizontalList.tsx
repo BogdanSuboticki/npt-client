@@ -21,7 +21,7 @@ export default function HorizontalList() {
             </svg>
           </span>
 
-          <span> Lorem ipsum dolor sit amet </span>
+          <span>Nema stavki.</span>
         </li>
 
         <li className="flex items-center gap-2 border-b border-gray-200 px-3 py-2.5 text-sm text-gray-500 last:border-0 dark:border-gray-800 dark:text-gray-400 md:border-b-0 md:border-r">
@@ -43,7 +43,7 @@ export default function HorizontalList() {
             </svg>
           </span>
 
-          <span> It is a long established </span>
+          <span>Nema stavki.</span>
         </li>
 
         <li className="flex items-center gap-2 border-b border-gray-200 px-3 py-2.5 text-sm text-gray-500 last:border-0 dark:border-gray-800 dark:text-gray-400 md:border-b-0 md:border-r">
@@ -65,7 +65,7 @@ export default function HorizontalList() {
             </svg>
           </span>
 
-          <span> Lorem ipsum dolor sit amet </span>
+          <span>Nema stavki.</span>
         </li>
 
         <li className="flex items-center gap-2 border-b border-gray-200 px-3 py-2.5 text-sm text-gray-500 last:border-0 dark:border-gray-800 dark:text-gray-400 md:border-b-0 md:border-r">
@@ -87,7 +87,7 @@ export default function HorizontalList() {
             </svg>
           </span>
 
-          <span> Lorem ipsum dolor sit amet </span>
+          <span>Nema stavki.</span>
         </li>
 
         <li className="flex items-center gap-2 border-b border-gray-200 px-3 py-2.5 text-sm text-gray-500 last:border-0 dark:border-gray-800 dark:text-gray-400 md:border-b-0 md:border-r">
@@ -109,7 +109,7 @@ export default function HorizontalList() {
             </svg>
           </span>
 
-          <span> Lorem ipsum dolor sit amet </span>
+          <span>Nema stavki.</span>
         </li>
       </ul>
     </div>

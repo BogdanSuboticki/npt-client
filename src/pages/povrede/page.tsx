@@ -1,56 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
-    import PovredeDataTable from "./PovredeDataTable";
-    import PovredeForm from "./PovredeForm";
-    import Button from "../../components/ui/button/Button";
-    import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
-    import ConfirmModal from "../../components/ui/modal/ConfirmModal";
-    import { useCompanySelection } from "../../context/CompanyContext";
-    import { createPovredaInspekcijaRok } from "../../data/rokovi";
+import React, { useState, useEffect } from "react";
+import PovredeDataTable from "./PovredeDataTable";
+import PovredeForm from "./PovredeForm";
+import Button from "../../components/ui/button/Button";
+import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const povredeData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    zaposleni: "Zaposleni 1",
-    datumPovrede: new Date("2024-01-15"),
-    tezinaPovrede: "Laka",
-    brojPovredneListe: "PL-001/2024",
-    datumObavestenjaInspekcije: new Date("2024-01-16"),
-    datumPredajeFondu: new Date("2024-01-20"),
-    datumPreuzimanjaIzFonda: new Date("2024-02-05"),
-    datumDostavjanjaUpravi: new Date("2024-02-10"),
-    napomena: "Povreda na radu - udarac u glavu",
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    zaposleni: "Zaposleni 2",
-    datumPovrede: new Date("2024-02-10"),
-    tezinaPovrede: "Srednja",
-    brojPovredneListe: "PL-002/2024",
-    datumObavestenjaInspekcije: new Date("2024-02-11"),
-    datumPredajeFondu: new Date("2024-02-15"),
-    datumPreuzimanjaIzFonda: new Date("2024-03-01"),
-    datumDostavjanjaUpravi: new Date("2024-03-05"),
-    napomena: "Povreda na radu - prelom noge",
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    zaposleni: "Zaposleni 3",
-    datumPovrede: new Date("2024-03-05"),
-    tezinaPovrede: "Teška",
-    brojPovredneListe: "PL-003/2024",
-    datumObavestenjaInspekcije: null as Date | null, // Not yet set - this will create a deadline
-    datumPredajeFondu: null as Date | null,
-    datumPreuzimanjaIzFonda: null as Date | null,
-    datumDostavjanjaUpravi: null as Date | null,
-    napomena: "Povreda na radu - opekotine",
-  },
-];
+// Backend stores ASCII enum values; frontend displays diacritical (Serbian) versions
+const TEZINA_POVREDE_API_TO_DISPLAY: Record<string, string> = {
+  'Teska': 'Teška',
+};
+const TEZINA_POVREDE_DISPLAY_TO_API: Record<string, string> = {
+  'Teška': 'Teska',
+};
+
+const mapPovredaFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  zaposleni: item.angazovanje?.zaposleni?.ime_prezime ?? "",
+  datumPovrede: fromIsoDate(item.datum_povrede) ?? new Date(),
+  tezinaPovrede: TEZINA_POVREDE_API_TO_DISPLAY[item.tezina_povrede] ?? item.tezina_povrede,
+  brojPovredneListe: item.broj_povredne_liste ?? "",
+  datumObavestenjaInspekcije: fromIsoDate(item.datum_obavestenja_inspekcije),
+  datumPredajeFondu: fromIsoDate(item.datum_predaje_fondu),
+  datumPreuzimanjaIzFonda: fromIsoDate(item.datum_preuzimanja_iz_fonda),
+  datumDostavjanjaUpravi: fromIsoDate(item.datum_dostavljanja_upravi),
+  napomena: item.napomena ?? "",
+  angazovanjeId: item.angazovanje_id,
+  firmaPib: item.firma_pib,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -76,7 +58,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error in LekarskiPregledi component:', error);
+    console.error('Error in Povrede component:', error);
     console.error('Error info:', errorInfo);
   }
 
@@ -96,37 +78,54 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const LekarskiPreglediPage: React.FC = () => {
-  const { selectedCompany } = useCompanySelection();
+const PovredePage: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(povredeData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
-    };
-    setData([...data, newItem]);
-    
-    // Create a 24-hour deadline in Rokovi if datumPovrede is set and company is selected
-    if (newData.datumPovrede && selectedCompany && !newData.datumObavestenjaInspekcije) {
-      try {
-        createPovredaInspekcijaRok(
-          newItem.id,
-          newData.datumPovrede,
-          newData.zaposleni || 'Nepoznato',
-          selectedCompany
-        );
-      } catch (error) {
-        console.error('Error creating rok for povreda:', error);
-      }
+  const loadPovrede = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<any[]>(`povrede?context=${context}`);
+      setData(response.map(mapPovredaFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju povreda.");
+    } finally {
+      setIsLoading(false);
     }
-    
+  };
+
+  useEffect(() => {
+    loadPovrede();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      angazovanje_id: Number(newData.angazovanjeId),
+      firma_pib: newData.firmaPib,
+      tezina_povrede: TEZINA_POVREDE_DISPLAY_TO_API[newData.tezinaPovrede] ?? newData.tezinaPovrede,
+      datum_povrede: toIsoDate(newData.datumPovrede),
+      broj_povredne_liste: newData.brojPovredneListe || null,
+      datum_obavestenja_inspekcije: newData.datumObavestenjaInspekcije ? toIsoDate(newData.datumObavestenjaInspekcije) : null,
+      datum_predaje_fondu: newData.datumPredajeFondu ? toIsoDate(newData.datumPredajeFondu) : null,
+      datum_preuzimanja_iz_fonda: newData.datumPreuzimanjaIzFonda ? toIsoDate(newData.datumPreuzimanjaIzFonda) : null,
+      datum_dostavljanja_upravi: newData.datumDostavjanjaUpravi ? toIsoDate(newData.datumDostavjanjaUpravi) : null,
+      napomena: newData.napomena || null,
+    };
+
+    if (editingItem) {
+      await api.put(`povrede/${editingItem.id}`, payload);
+      setEditingItem(null);
+    } else {
+      await api.post<{ id: number }>("povrede", payload);
+    }
+    await loadPovrede();
     setShowForm(false);
   };
 
@@ -135,9 +134,14 @@ const LekarskiPreglediPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`povrede/${itemToDelete.id}`);
+        await loadPovrede();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju povrede.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -146,6 +150,16 @@ const LekarskiPreglediPage: React.FC = () => {
   const handleDeleteCancel = () => {
     setItemToDelete(null);
     setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -224,18 +238,26 @@ const LekarskiPreglediPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-           <PovredeDataTable 
-             data={data}
-             columns={columns}
-             onDeleteClick={handleDeleteClick}
-             onUpdateData={setData}
-           />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <PovredeDataTable 
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+              onUpdateData={setData}
+            />
+          )}
         </div>
 
         <PovredeForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
         />
 
         <ConfirmModal
@@ -253,4 +275,4 @@ const LekarskiPreglediPage: React.FC = () => {
   );
 };
 
-export default LekarskiPreglediPage; 
+export default PovredePage; 

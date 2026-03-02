@@ -12,7 +12,7 @@ import { useUser } from "../../context/UserContext";
 interface FirmeFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
   initialData?: any;
   fromAdminDashboard?: boolean; // When true, hide slider but show email/šifra fields
   userLabel?: string; // Label for user type (default: "komitenta", can be "administratora" for super admin)
@@ -74,9 +74,9 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData, fromAd
   // Populate form with initialData when provided or reset when modal opens
   useEffect(() => {
     if (!isOpen) {
-      // Reset form when modal is closed
       return;
     }
+    setFormError(null);
 
     if (initialData) {
       setFormData({
@@ -130,20 +130,22 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData, fromAd
 
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formError, setFormError] = React.useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!formData.nazivFirme || !formData.adresaFirme || !formData.drzava || !formData.mesto || 
-        !formData.pib || !formData.maticniBroj || !formData.sifraDelatnosti || 
+        !formData.pib || !formData.maticniBroj || !formData.sifraDelatnosti || !formData.emailFirme ||
         !formData.imePrezimeOsobeZaSaradnju || !formData.telefonOsobeZaSaradnju || 
         !formData.emailOsobeZaSaradnju || !formData.datumPocetkaUgovora || !formData.datumIstekaUgovora) {
-      alert('Molimo popunite sva obavezna polja');
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
     
-    // Additional validation when creating new komitent user (or from admin dashboard)
     if (createKomitent || fromAdminDashboard) {
       if (!komitentData.email || !komitentData.sifra) {
-        alert('Molimo popunite email i šifru za kreiranje komitenta');
+        setFormError('Molimo popunite email i šifru za kreiranje komitenta');
         return;
       }
     }
@@ -159,8 +161,11 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData, fromAd
       } : {}),
     };
     
-    onSave(submitData);
-    onClose();
+    try {
+      await onSave(submitData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Greška pri čuvanju.");
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -182,11 +187,19 @@ export default function FirmeForm({ isOpen, onClose, onSave, initialData, fromAd
           <div className="flex flex-col h-full">
             <div className="p-5 pt-10">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {fromAdminDashboard ? "Dodaj komitenta" : initialData ? "Izmeni Preduzeće" : "Novo Preduzeće"}
+                {fromAdminDashboard 
+                  ? (initialData ? "Izmeni komitenta" : "Dodaj komitenta")
+                  : (initialData ? "Izmeni Preduzeće" : "Novo Preduzeće")
+                }
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
               <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+                {formError && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                    {formError}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
           {/* Show slider only if not from admin dashboard and is admin and no initial data */}
           {isAdmin && !initialData && !fromAdminDashboard && (

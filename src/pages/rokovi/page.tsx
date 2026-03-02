@@ -5,12 +5,14 @@ import RokoviDataTable, { RokoviData } from "./RokoviDataTable";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { useCompanySelection } from "../../context/CompanyContext";
-import { getRokoviByCompanyWithDynamic } from "../../data/rokovi";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
 const columns = [
   { key: "preduzece", label: "Preduzeće", sortable: true },
   { key: "oblast", label: "Oblast", sortable: true },
   { key: "vrstaObaveze", label: "Vrsta obaveze", sortable: true },
+  { key: "detalji", label: "Detalji", sortable: true },
   { key: "rok", label: "Rok", sortable: true },
   { key: "status", label: "Status", sortable: true },
   { key: "napomena", label: "Napomena", sortable: true },
@@ -53,18 +55,40 @@ class ErrorBoundary extends React.Component<
 }
 
 const RokoviPage: React.FC = () => {
+  const context = usePageContext();
   const { selectedCompany } = useCompanySelection();
   const [data, setData] = useState<RokoviData[]>([]);
+  const [, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<RokoviData | null>(null);
 
   useEffect(() => {
-    if (selectedCompany) {
-      setData(getRokoviByCompanyWithDynamic(selectedCompany));
-    } else {
-      setData([]);
-    }
-  }, [selectedCompany]);
+    setIsLoading(true);
+    api.get<{ data: any[] }>(`rokovi?context=${context}`)
+      .then((res) => {
+        const mapped: RokoviData[] = res.data.map((item: any) => ({
+          id: item.id,
+          oblast: item.oblast,
+          vrstaObaveze: item.vrstaObaveze,
+          rok: new Date(item.rok),
+          status: "",
+          napomena: item.napomena ?? "",
+          detalji: item.detalji ?? "",
+          preduzece: item.preduzece ?? "",
+          firma_pib: item.firma_pib,
+          source_type: item.source_type,
+          source_id: item.source_id,
+        }));
+
+        if (selectedCompany) {
+          setData(mapped.filter((r) => r.firma_pib === selectedCompany.pib));
+        } else {
+          setData(mapped);
+        }
+      })
+      .catch(() => setData([]))
+      .finally(() => setIsLoading(false));
+  }, [selectedCompany, context]);
 
   const handleDeleteClick = (item: RokoviData) => {
     setItemToDelete(item);

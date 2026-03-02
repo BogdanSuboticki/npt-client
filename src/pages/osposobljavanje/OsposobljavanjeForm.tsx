@@ -4,15 +4,25 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import CustomDatePicker from "../../components/form/input/DatePicker";
 
+interface AngazovanjeOption {
+  id: number;
+  zaposleniName: string;
+  radnoMesto: string;
+  povecanRizik: boolean;
+  lokacija: string;
+  firmaPib: string;
+}
+
 interface OsposobljavanjeFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
   initialData?: any;
+  angazovanja?: AngazovanjeOption[];
 }
 
-export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialData }: OsposobljavanjeFormProps) {
-  const [formData, setFormData] = React.useState({
+export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialData, angazovanja = [] }: OsposobljavanjeFormProps) {
+  const [formData, setFormData] = React.useState<any>({
     angazovani: "",
     radnoMesto: "",
     povecanRizik: false,
@@ -22,50 +32,35 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
     osposobljavanjeZOP: new Date(),
     datumNarednogZOP: new Date(),
     prikaziUPodsetniku: false,
-    bzrOdradjeno: false
+    bzrOdradjeno: false,
+    angazovanjeId: null as number | null,
   });
 
   // Add state for dropdowns
   const [isAngazovaniOpen, setIsAngazovaniOpen] = React.useState(false);
   const angazovaniRef = useRef<HTMLDivElement>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
 
-  // Employee data with their job positions and locations
+  React.useEffect(() => {
+    if (isOpen) setFormError(null);
+  }, [isOpen]);
+
   const angazovaniData: Record<string, {
+    id: number;
     radnoMesto: string;
     povecanRizik: boolean;
     lokacija: string;
-  }> = {
-    "Petar Petrović": {
-      radnoMesto: "Viljuškari",
-      povecanRizik: true,
-      lokacija: "Beograd",
-    },
-    "Ana Anić": {
-      radnoMesto: "Kranista",
-      povecanRizik: true,
-      lokacija: "Novi Sad",
-    },
-    "Marko Marković": {
-      radnoMesto: "Mehaničar",
-      povecanRizik: false,
-      lokacija: "Niš",
-    },
-    "Jovana Jovanović": {
-      radnoMesto: "Električar",
-      povecanRizik: true,
-      lokacija: "Kragujevac",
-    },
-    "Stefan Stefanović": {
-      radnoMesto: "Viljuškari",
-      povecanRizik: true,
-      lokacija: "Subotica",
-    },
-    "Marija Marić": {
-      radnoMesto: "Kontrolor kvaliteta",
-      povecanRizik: false,
-      lokacija: "Zrenjanin",
-    }
-  };
+    firmaPib: string;
+  }> = {};
+  for (const a of angazovanja) {
+    angazovaniData[a.zaposleniName] = {
+      id: a.id,
+      radnoMesto: a.radnoMesto,
+      povecanRizik: a.povecanRizik,
+      lokacija: a.lokacija,
+      firmaPib: a.firmaPib,
+    };
+  }
 
   const angazovaniOptions = Object.keys(angazovaniData);
 
@@ -91,7 +86,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
       } else {
         nextBZRDate.setMonth(nextBZRDate.getMonth() + 36);
       }
-      setFormData(prev => ({ ...prev, datumNarednogBZR: nextBZRDate }));
+      setFormData((prev: any) => ({ ...prev, datumNarednogBZR: nextBZRDate }));
     }
   }, [formData.osposobljavanjeBZR, formData.povecanRizik]);
 
@@ -101,11 +96,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
       const nextZOPDate = new Date(formData.osposobljavanjeZOP);
       // ZOP is always 36 months (3 years) from training date
       nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
-      setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+      setFormData((prev: any) => ({ ...prev, datumNarednogZOP: nextZOPDate }));
     }
   }, [formData.osposobljavanjeZOP]);
 
-  // Populate form with initialData when provided (for editing)
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -118,24 +112,28 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
         osposobljavanjeZOP: initialData.osposobljavanjeZOP ? new Date(initialData.osposobljavanjeZOP) : new Date(),
         datumNarednogZOP: initialData.datumNarednogZOP ? new Date(initialData.datumNarednogZOP) : new Date(),
         prikaziUPodsetniku: initialData.prikaziUPodsetniku || false,
-        bzrOdradjeno: initialData.bzrOdradjeno || false
+        bzrOdradjeno: initialData.bzrOdradjeno || false,
+        angazovanjeId: initialData.angazovanjeId || null,
       });
     }
-  }, [initialData]); // Depend on initialData
+  }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.angazovani || !formData.radnoMesto || !formData.lokacija || !formData.osposobljavanjeBZR) {
-      alert('Molimo popunite sva obavezna polja');
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
   const handleDateChange = (field: string, value: Date | null) => {
     if (value) {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      setFormData((prev: any) => ({ ...prev, [field]: value }));
       
       // If BZR training date changes, automatically calculate next BZR date
       // Note: this will be recalculated by the useEffect when povecanRizik is considered
@@ -148,7 +146,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
         const nextZOPDate = new Date(value);
         // ZOP is always 36 months (3 years) from training date
         nextZOPDate.setFullYear(nextZOPDate.getFullYear() + 3);
-        setFormData(prev => ({ ...prev, datumNarednogZOP: nextZOPDate }));
+        setFormData((prev: any) => ({ ...prev, datumNarednogZOP: nextZOPDate }));
       }
     }
   };
@@ -163,6 +161,11 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
         {initialData ? "Izmeni Osposobljavanje/Provera BZR" : "Novo Osposobljavanje/Provera BZR"}
       </h2>
       <form onSubmit={handleSubmit}>
+        {formError && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+            {formError}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="w-full">
                 <Label>Zaposleni *</Label>
@@ -203,12 +206,14 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
                             } ${index === angazovaniOptions.length - 1 ? 'rounded-b-lg' : ''}`}
                                                          onClick={() => {
                                const selectedEmployeeData = angazovaniData[option];
-                               const newFormData = {
+                               const newFormData: any = {
                                  ...formData,
                                  angazovani: option,
                                  radnoMesto: selectedEmployeeData.radnoMesto,
                                  povecanRizik: selectedEmployeeData.povecanRizik,
                                  lokacija: selectedEmployeeData.lokacija,
+                                 angazovanjeId: selectedEmployeeData.id,
+                                 firmaPib: selectedEmployeeData.firmaPib,
                                };
                                
                                // Automatically calculate next BZR date based on risk level

@@ -39,7 +39,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [theme, isInitialized]);
 
   const toggleTheme = () => {
+    document.documentElement.classList.add("disable-transitions");
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove("disable-transitions");
+      });
+    });
   };
 
   return (

@@ -20,51 +20,15 @@ export default function EmailWrapper() {
 
             <div>
               <span className="mb-0.5 block text-sm font-medium text-gray-800 dark:text-white/90">
-                Contact For “Website Design”
+                Detalji poruke
               </span>
               <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                Codescandy hello@example.com
+                Pošiljalac nije dostupan
               </span>
             </div>
           </div>
           <div className="text-sm text-gray-500 mb-7 dark:text-gray-400">
-            <p className="mb-4">Hello Dear Alexander,</p>
-
-            <p className="mb-4">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent
-              ut rutrum mi. Aenean ac leo non justo suscipit consectetur. Nam
-              vestibulum eleifend magna quis porta. ipsum dolor sit amet,
-              consectetur adipiscing elit. Praesent ut rutrum mi. Aenean ac leo
-            </p>
-
-            <p className="mb-4">
-              Praesent ut rutrum mi. Aenean ac leo non justo suscipit
-              consectetur. Nam vestibulum eleifend magna quis porta.
-            </p>
-
-            <p className="mb-4">
-              Nullam tincidunt sodales diam, quis rhoncus dolor aliquet a. Nulla
-              a rhoncus lectus. In nunc neque, pellentesque non massa ornare,
-              accumsan ornare massa. odales diam, quis rhoncus dolor aliquet a.
-              Nulla a rhoncus lectus. In nunc neque
-            </p>
-
-            <p className="mb-4">
-              Suspendisse semper vel turpis vitae aliquam. Aenean semper dui in
-              consequat ullamcorper.
-            </p>
-
-            <p className="mb-4">
-              Nullam tincidunt sodales diam, quis rhoncus dolor aliquet a. Nulla
-              a rhoncus lectus. In nunc neque, pellentesque non massa ornare,
-              accumsan ornare massa. sodales diam, quis rhoncus dolor aliquet a.
-              Nulla a rhoncus lectus. In nunc neque
-            </p>
-
-            <p>
-              Praesent ut rutrum mi. Aenean ac leo non justo suscipit
-              consectetur. Nam vestibulum eleifend magna quis porta.
-            </p>
+            Sadržaj poruke nije dostupan.
           </div>
 
           <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 sm:p-4">
@@ -88,61 +52,8 @@ export default function EmailWrapper() {
               </span>
 
               <span className="text-sm text-gray-700 dark:text-gray-400">
-                2 Attachments
+                Nema priloga
               </span>
-            </div>
-
-            <div className="flex flex-col items-center gap-3 sm:flex-row">
-              <div className="relative hover:border-gray-300 dark:hover:border-white/[0.05] flex w-full cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white py-2.5 pl-3 pr-5 dark:border-gray-800 dark:bg-white/5 sm:w-auto">
-                <div className="w-full h-10 max-w-10">
-                  <img
-                    src="./images/task/pdf.svg"
-                    width={40}
-                    height={40}
-                    className="w-full"
-                    alt="icon"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                    Guidelines.pdf
-                  </p>
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                      PDF
-                    </span>
-                    <span className="inline-block w-1 h-1 bg-gray-400 rounded-full"></span>
-                    <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                      Download
-                    </span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="relative hover:border-gray-300 dark:hover:border-white/[0.05] flex w-full cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white py-2.5 pl-3 pr-5 dark:border-gray-800 dark:bg-white/5 sm:w-auto">
-                <div className="w-full h-10 max-w-10">
-                  <img
-                    width={40}
-                    height={40}
-                    src="./images/task/google-drive.svg"
-                    alt="icon"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                    Branding Assets
-                  </p>
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                      Media
-                    </span>
-                    <span className="inline-block w-1 h-1 bg-gray-400 rounded-full"></span>
-                    <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                      Download
-                    </span>
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

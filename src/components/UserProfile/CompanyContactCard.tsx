@@ -3,14 +3,74 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { useState, useEffect } from "react";
+import { api } from "../../api/client";
 
-export default function CompanyContactCard() {
+interface CompanyContactCardProps {
+  firma?: {
+    pib: string;
+    direktor_ime_prezime?: string;
+    direktor_telefon?: string;
+    direktor_email?: string;
+    saradnik_ime_prezime?: string;
+    saradnik_telefon?: string;
+    saradnik_email?: string;
+  };
+  onUpdate?: () => void;
+}
+
+export default function CompanyContactCard({ firma, onUpdate }: CompanyContactCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving company contact changes...");
-    closeModal();
+  const [formData, setFormData] = useState({
+    direktor_ime_prezime: firma?.direktor_ime_prezime || "",
+    direktor_telefon: firma?.direktor_telefon || "",
+    direktor_email: firma?.direktor_email || "",
+    saradnik_ime_prezime: firma?.saradnik_ime_prezime || "",
+    saradnik_telefon: firma?.saradnik_telefon || "",
+    saradnik_email: firma?.saradnik_email || "",
+  });
+
+  useEffect(() => {
+    if (firma) {
+      setFormData({
+        direktor_ime_prezime: firma.direktor_ime_prezime || "",
+        direktor_telefon: firma.direktor_telefon || "",
+        direktor_email: firma.direktor_email || "",
+        saradnik_ime_prezime: firma.saradnik_ime_prezime || "",
+        saradnik_telefon: firma.saradnik_telefon || "",
+        saradnik_email: firma.saradnik_email || "",
+      });
+    }
+  }, [firma]);
+  
+  const handleSave = async () => {
+    if (!firma?.pib) return;
+    
+    setIsSaving(true);
+    setErrorMessage(null);
+    
+    try {
+      await api.put(`firme/${firma.pib}`, {
+        direktor_ime_prezime: formData.direktor_ime_prezime || null,
+        direktor_telefon: formData.direktor_telefon || null,
+        direktor_email: formData.direktor_email || null,
+        saradnik_ime_prezime: formData.saradnik_ime_prezime || null,
+        saradnik_telefon: formData.saradnik_telefon || null,
+        saradnik_email: formData.saradnik_email || null,
+      });
+      
+      if (onUpdate) {
+        onUpdate();
+      }
+      closeModal();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri čuvanju kontakt informacija.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -28,7 +88,7 @@ export default function CompanyContactCard() {
                   Ime i prezime direktora firme
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  Marko Petrović
+                  {firma?.direktor_ime_prezime || "-"}
                 </p>
               </div>
 
@@ -37,7 +97,7 @@ export default function CompanyContactCard() {
                   Broj telefona direktora
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  +381 11 123 4567
+                  {firma?.direktor_telefon || "-"}
                 </p>
               </div>
 
@@ -46,7 +106,7 @@ export default function CompanyContactCard() {
                   Email adresa direktora
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  direktor@techsolutions.rs
+                  {firma?.direktor_email || "-"}
                 </p>
               </div>
 
@@ -55,7 +115,7 @@ export default function CompanyContactCard() {
                   Ime i prezime osobe za saradnju
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  Ana Jovanović
+                  {firma?.saradnik_ime_prezime || "-"}
                 </p>
               </div>
 
@@ -64,7 +124,7 @@ export default function CompanyContactCard() {
                   Broj telefona osobe za saradnju
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  +381 11 987 6543
+                  {firma?.saradnik_telefon || "-"}
                 </p>
               </div>
 
@@ -73,7 +133,7 @@ export default function CompanyContactCard() {
                   Email adresa osobe za saradnju
                 </p>
                 <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  saradnja@techsolutions.rs
+                  {firma?.saradnik_email || "-"}
                 </p>
               </div>
             </div>
@@ -114,6 +174,9 @@ export default function CompanyContactCard() {
             </p>
           </div>
           <form className="flex flex-col">
+            {errorMessage && (
+              <div className="px-2 mb-4 text-sm text-error-500">{errorMessage}</div>
+            )}
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
               <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
@@ -123,17 +186,29 @@ export default function CompanyContactCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div>
                     <Label>Ime i prezime direktora firme</Label>
-                    <Input type="text" value="Marko Petrović" />
+                    <Input 
+                      type="text" 
+                      value={formData.direktor_ime_prezime}
+                      onChange={(e) => setFormData({ ...formData, direktor_ime_prezime: e.target.value })}
+                    />
                   </div>
 
                   <div>
                     <Label>Broj telefona direktora</Label>
-                    <Input type="tel" value="+381 11 123 4567" />
+                    <Input 
+                      type="tel" 
+                      value={formData.direktor_telefon}
+                      onChange={(e) => setFormData({ ...formData, direktor_telefon: e.target.value })}
+                    />
                   </div>
 
                   <div>
                     <Label>Email adresa direktora</Label>
-                    <Input type="email" value="direktor@techsolutions.rs" />
+                    <Input 
+                      type="email" 
+                      value={formData.direktor_email}
+                      onChange={(e) => setFormData({ ...formData, direktor_email: e.target.value })}
+                    />
                   </div>
                 </div>
               </div>
@@ -146,27 +221,39 @@ export default function CompanyContactCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div>
                     <Label>Ime i prezime osobe za saradnju</Label>
-                    <Input type="text" value="Ana Jovanović" />
+                    <Input 
+                      type="text" 
+                      value={formData.saradnik_ime_prezime}
+                      onChange={(e) => setFormData({ ...formData, saradnik_ime_prezime: e.target.value })}
+                    />
                   </div>
 
                   <div>
                     <Label>Broj telefona osobe za saradnju</Label>
-                    <Input type="tel" value="+381 11 987 6543" />
+                    <Input 
+                      type="tel" 
+                      value={formData.saradnik_telefon}
+                      onChange={(e) => setFormData({ ...formData, saradnik_telefon: e.target.value })}
+                    />
                   </div>
 
                   <div>
                     <Label>Email adresa osobe za saradnju</Label>
-                    <Input type="email" value="saradnja@techsolutions.rs" />
+                    <Input 
+                      type="email" 
+                      value={formData.saradnik_email}
+                      onChange={(e) => setFormData({ ...formData, saradnik_email: e.target.value })}
+                    />
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button variant="outline" onClick={closeModal}>
+              <Button variant="outline" onClick={closeModal} disabled={isSaving}>
                 Otkaži
               </Button>
-              <Button onClick={handleSave}>
-                Sačuvaj
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Čuvanje..." : "Sačuvaj"}
               </Button>
             </div>
           </form>

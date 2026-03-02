@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { useCompanySelection } from "../../context/CompanyContext";
 import { RokoviData } from "../../pages/rokovi/RokoviDataTable";
 import { RokoviIcon } from "../../icons";
-import { getAllRokovi } from "../../data/rokovi";
-import { companies } from "../../data/companies";
+import { api } from "../../api/client";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -48,23 +46,32 @@ type FilterType = "all" | "expiring" | "expired";
 
 export default function RokoviWidget() {
   const navigate = useNavigate();
-  const { selectCompany } = useCompanySelection();
   const [filter, setFilter] = useState<FilterType>("all");
+  const [allRokovi, setAllRokovi] = useState<RokoviData[]>([]);
 
-  // Get all Rokovi from all companies
-  const allRokovi = useMemo(() => getAllRokovi(), []);
+  useEffect(() => {
+    api
+      .get<{ data: any[] }>("rokovi")
+      .then((res) => {
+        const mapped = res.data.map(
+          (item): RokoviData => ({
+            ...item,
+            rok: new Date(item.rok),
+          })
+        );
+        setAllRokovi(mapped);
+      })
+      .catch(() => {});
+  }, []);
 
-  // Filter Rokovi that are expiring (within 3 days) or expired, excluding completed ones
   const relevantRokovi = useMemo(() => {
     return allRokovi.filter((rok) => {
-      // Exclude completed rokovi
       if (rok.isCompleted) return false;
       const daysUntil = getDaysUntilRok(rok.rok);
-      return daysUntil <= 3; // Expiring in 3 days or expired
+      return daysUntil <= 3;
     });
   }, [allRokovi]);
 
-  // Apply filter
   const filteredRokovi = useMemo(() => {
     if (filter === "all") {
       return relevantRokovi;
@@ -82,22 +89,18 @@ export default function RokoviWidget() {
     return relevantRokovi;
   }, [relevantRokovi, filter]);
 
-  // Sort by deadline (expired first, then by days until)
   const sortedRokovi = useMemo(() => {
     return [...filteredRokovi].sort((a, b) => {
       const daysA = getDaysUntilRok(a.rok);
       const daysB = getDaysUntilRok(b.rok);
-      
-      // Expired items first
+
       if (daysA < 0 && daysB >= 0) return -1;
       if (daysA >= 0 && daysB < 0) return 1;
-      
-      // Then sort by days until (ascending)
+
       return daysA - daysB;
     });
   }, [filteredRokovi]);
 
-  // Get counts
   const expiringCount = useMemo(() => {
     return relevantRokovi.filter((rok) => {
       const daysUntil = getDaysUntilRok(rok.rok);
@@ -120,16 +123,8 @@ export default function RokoviWidget() {
     });
   };
 
-  const handleRokClick = (rok: RokoviData) => {
-    // Find the company by companyId or preduzece name
-    const company = companies.find(
-      (c) => c.id === rok.companyId || c.naziv === rok.preduzece
-    );
-    
-    if (company) {
-      selectCompany(company);
-      navigate("/rokovi");
-    }
+  const handleRokClick = (_rok: RokoviData) => {
+    navigate("/rokovi");
   };
 
   return (
@@ -207,6 +202,11 @@ export default function RokoviWidget() {
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate">
                     {rok.oblast} - {rok.vrstaObaveze}
                   </p>
+                  {rok.detalji && (
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5 truncate">
+                      {rok.detalji}
+                    </p>
+                  )}
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                     Rok: {formatDate(rok.rok)}
                   </p>
@@ -245,4 +245,3 @@ export default function RokoviWidget() {
     </div>
   );
 }
-

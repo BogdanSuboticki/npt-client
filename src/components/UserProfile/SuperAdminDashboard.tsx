@@ -147,158 +147,11 @@ export default function SuperAdminDashboard() {
   // Editing komitent state - stores the komitent being edited
   const [editingKomitentData, setEditingKomitentData] = useState<Komitent | null>(null);
 
-  const firme: Firma[] = [
-    {
-      id: "1",
-      name: "Tech Solutions d.o.o.",
-      naziv: "Tech Solutions d.o.o.",
-      email: "info@techsolutions.rs",
-      type: "admin",
-      status: "active",
-      userCount: 45,
-      adminCount: 3,
-      createdAt: "2023-06-15",
-      lastActivity: "2024-01-15 14:30",
-      adresa: "Bulevar Kralja Aleksandra 1",
-      mesto: "Beograd",
-      pib: "123456789",
-      maticniBroj: "987654321",
-      delatnost: "IT delatnost",
-      datumIstekaUgovora: new Date("2024-12-31")
-    },
-    {
-      id: "2",
-      name: "Client Company A",
-      naziv: "Client Company A",
-      email: "contact@clienta.rs",
-      type: "client",
-      status: "active",
-      userCount: 12,
-      adminCount: 1,
-      createdAt: "2023-08-22",
-      lastActivity: "2024-01-15 12:15",
-      adresa: "Ulica Kralja Petra 10",
-      mesto: "Novi Sad",
-      pib: "987654321",
-      maticniBroj: "123456789",
-      delatnost: "Uslužne delatnosti",
-      datumIstekaUgovora: new Date("2024-06-30")
-    },
-    {
-      id: "3",
-      name: "Client Company B",
-      naziv: "Client Company B",
-      email: "info@clientb.rs",
-      type: "client",
-      status: "active",
-      userCount: 8,
-      adminCount: 1,
-      createdAt: "2023-09-10",
-      lastActivity: "2024-01-14 16:45",
-      adresa: "Ulica Nikole Pašića 5",
-      mesto: "Niš",
-      pib: "456789123",
-      maticniBroj: "789123456",
-      delatnost: "Trgovina",
-      datumIstekaUgovora: new Date("2024-09-20")
-    },
-    {
-      id: "4",
-      name: "New Organization",
-      naziv: "New Organization",
-      email: "admin@neworg.rs",
-      type: "admin",
-      status: "pending",
-      userCount: 0,
-      adminCount: 0,
-      createdAt: "2024-01-15",
-      lastActivity: "N/A",
-      adresa: "Ulica Maršala Tita 15",
-      mesto: "Kragujevac",
-      pib: "789123456",
-      maticniBroj: "456789123",
-      delatnost: "Proizvodnja",
-      datumIstekaUgovora: new Date("2024-11-10")
-    }
-  ];
+  const firme: Firma[] = [];
 
-  const users: User[] = [
-    {
-      id: "1",
-      name: "Aleksandar Nikolić",
-      email: "aleksandar.nikolic@sistem.rs",
-      role: "super-admin",
-      organization: "Sistem Administracija d.o.o.",
-      status: "active",
-      lastLogin: "2024-01-15 14:30",
-      permissions: {
-        canCreateUsers: true,
-        canManageOrganizations: true,
-        canAccessAllData: true,
-        canManageSystem: true
-      }
-    },
-    {
-      id: "2",
-      name: "Marko Petrović",
-      email: "marko.petrovic@techsolutions.rs",
-      role: "admin",
-      organization: "Tech Solutions d.o.o.",
-      status: "active",
-      lastLogin: "2024-01-15 13:45",
-      permissions: {
-        canCreateUsers: true,
-        canManageOrganizations: false,
-        canAccessAllData: false,
-        canManageSystem: false
-      }
-    },
-    {
-      id: "3",
-      name: "Ana Jovanović",
-      email: "ana.jovanovic@techsolutions.rs",
-      role: "user",
-      organization: "Tech Solutions d.o.o.",
-      status: "active",
-      lastLogin: "2024-01-15 11:20",
-      permissions: {
-        canCreateUsers: false,
-        canManageOrganizations: false,
-        canAccessAllData: false,
-        canManageSystem: false
-      }
-    }
-  ];
+  const users: User[] = [];
 
-  const komitenti: Komitent[] = [
-    {
-      id: "1",
-      name: "Petar Stojanović",
-      email: "petar.stojanovic@komitent.rs",
-      organization: "Tech Solutions d.o.o.",
-      status: "active",
-      lastLogin: "2024-01-15 10:30",
-      createdAt: "2023-12-01"
-    },
-    {
-      id: "2",
-      name: "Milica Đorđević",
-      email: "milica.djordjevic@komitent.rs",
-      organization: "Client Company A",
-      status: "active",
-      lastLogin: "2024-01-14 16:20",
-      createdAt: "2023-11-15"
-    },
-    {
-      id: "3",
-      name: "Stefan Marković",
-      email: "stefan.markovic@komitent.rs",
-      organization: "Client Company B",
-      status: "inactive",
-      lastLogin: "2024-01-10 09:15",
-      createdAt: "2023-10-20"
-    }
-  ];
+  const komitenti: Komitent[] = [];
 
 
   const handleSavePermissions = () => {
@@ -811,6 +664,11 @@ export default function SuperAdminDashboard() {
               </div>
               
               <div className="overflow-x-auto">
+                {adminOrganizations.length === 0 ? (
+                  <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+                    Nema administratora za prikaz.
+                  </div>
+                ) : (
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
@@ -886,6 +744,7 @@ export default function SuperAdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+                )}
               </div>
             </div>
           )}
@@ -920,8 +779,12 @@ export default function SuperAdminDashboard() {
                </div>
                
                {/* Group users by organization */}
-               {(() => {
-                 const groupedUsers = users.reduce((acc, user) => {
+              {users.length === 0 ? (
+                <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+                  Nema korisnika za prikaz.
+                </div>
+              ) : (() => {
+                const groupedUsers = users.reduce((acc, user) => {
                    const org = user.organization;
                    if (!acc[org]) {
                      acc[org] = [];
@@ -930,7 +793,7 @@ export default function SuperAdminDashboard() {
                    return acc;
                  }, {} as { [key: string]: User[] });
 
-                 return Object.entries(groupedUsers).map(([organization, orgUsers]) => (
+                return Object.entries(groupedUsers).map(([organization, orgUsers]) => (
                    <div key={organization} className="space-y-3">
                                            {/* Organization Header */}
                       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-l-4 border-blue-500 px-6 py-4 rounded-lg shadow-sm">
@@ -1065,7 +928,11 @@ export default function SuperAdminDashboard() {
               </div>
               
               {/* Group komitenti by organization */}
-              {(() => {
+              {komitenti.length === 0 ? (
+                <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+                  Nema komitenata za prikaz.
+                </div>
+              ) : (() => {
                 const groupedKomitenti = komitenti.reduce((acc, komitent) => {
                   const org = komitent.organization;
                   if (!acc[org]) {

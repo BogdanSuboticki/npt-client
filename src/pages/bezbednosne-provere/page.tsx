@@ -1,45 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
     import BezbednosneProvereDataTable from "./BezbednosneProvereDataTable";
     import BezbednosneProvereForm from "./BezbednosneProvereForm";
     import Button from "../../components/ui/button/Button";
     import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
     import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const lekarskiPreglediData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    lokacija: "Lokacija 1",
-    datumObilaska: new Date("2024-01-01"),
-    periodObilaska: "Period 1",
-    sledeciObilazak: "Sledeći obilazak 1",
-    napomena: "Napomena 1",
-    primalacZapisnika: "Marko Petrović",
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    lokacija: "Lokacija 2",
-    datumObilaska: new Date("2024-02-01"),
-    periodObilaska: "Period 2",
-    sledeciObilazak: "Sledeći obilazak 2",
-    napomena: "Napomena 2",
-    primalacZapisnika: "Ana Jovanović",
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    lokacija: "Lokacija 3",
-    datumObilaska: new Date("2024-03-01"),
-    periodObilaska: "Period 3",
-    sledeciObilazak: "Sledeći obilazak 3",
-    napomena: "Napomena 3",
-    primalacZapisnika: "Stefan Nikolić",
-  },
-];
+const mapProveraFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  lokacija: item.lokacija?.naziv ?? `#${item.lokacija_id}`,
+  datumProvere: fromIsoDate(item.datum_provere) ?? new Date(),
+  intervalProvere: item.interval_provere?.toString() ?? "",
+  sledecaProvera: fromIsoDate(item.sledeca_provera) ?? new Date(),
+  napomena: item.napomena ?? "",
+  primalacZapisnika: "",
+  firmaPib: item.firma_pib,
+  lokacijaId: item.lokacija_id,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -83,20 +65,59 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const LekarskiPreglediPage: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(lekarskiPreglediData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [firme, setFirme] = useState<Array<{ pib: string; naziv: string }>>([]);
+  const [lokacije, setLokacije] = useState<Array<{ id: number; naziv: string; firma_pib: string }>>([]);
 
-  const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
+  const loadProvere = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`bezbednosne-provere?context=${context}`);
+      setData(response.data.map(mapProveraFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju provera.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadFirmeAndLokacije = async () => {
+    try {
+      const [firmeRes, lokacijeRes] = await Promise.all([
+        api.get<{ data: any[] }>(`firme?context=${context}`),
+        api.get<{ data: any[] }>(`lokacije?context=${context}`),
+      ]);
+      setFirme(firmeRes.data.map((f: any) => ({ pib: f.pib, naziv: f.naziv })));
+      setLokacije(lokacijeRes.data.map((l: any) => ({ id: l.id, naziv: l.naziv, firma_pib: l.firma_pib })));
+    } catch (error) {
+      console.error("Failed to load firme/lokacije:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadProvere();
+    loadFirmeAndLokacije();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      lokacija_id: Number(newData.lokacijaId),
+      datum_provere: toIsoDate(newData.datumProvere),
+      interval_provere: Number(newData.periodProvere),
+      sledeca_provera: toIsoDate(newData.sledecaProvera),
+      napomena: newData.napomena || null,
     };
-    setData([...data, newItem]);
+
+    await api.post("bezbednosne-provere", payload);
+    await loadProvere();
     setShowForm(false);
   };
 
@@ -105,9 +126,14 @@ const LekarskiPreglediPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`bezbednosne-provere/${itemToDelete.id}`);
+        await loadProvere();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju provere.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -194,17 +220,25 @@ const LekarskiPreglediPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <BezbednosneProvereDataTable 
-            data={data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <BezbednosneProvereDataTable 
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+            />
+          )}
         </div>
 
         <BezbednosneProvereForm 
           isOpen={showForm}
           onClose={() => setShowForm(false)}
           onSave={handleSave}
+          firme={firme}
+          lokacije={lokacije}
         />
 
         <ConfirmModal

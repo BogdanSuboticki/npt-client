@@ -7,59 +7,65 @@ import Input from "../../components/form/input/InputField";
 interface OpremaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
   initialData?: any;
+  firme?: Array<{pib: string, naziv: string}>;
+  lokacije?: Array<{id: number, naziv: string, firma_pib: string}>;
 }
 
-export default function OpremaForm({ isOpen, onClose, onSave, initialData }: OpremaFormProps) {
+export default function OpremaForm({ isOpen, onClose, onSave, initialData, firme = [], lokacije = [] }: OpremaFormProps) {
   const [formData, setFormData] = React.useState({
+    firmaPib: "",
+    lokacijaId: "",
     nazivOpreme: "",
     vrstaOpreme: "",
     fabrickBroj: "",
     inventarniBroj: "",
-    lokacija: "",
     godinaProizvodnje: new Date().getFullYear(),
     intervalPregleda: 36,
     napomena: ""
   });
 
-  // Populate form with initialData when provided (for editing)
+  const [formError, setFormError] = React.useState<string | null>(null);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
+        firmaPib: initialData.firmaPib || "",
+        lokacijaId: initialData.lokacijaId?.toString() || "",
         nazivOpreme: initialData.nazivOpreme || "",
         vrstaOpreme: initialData.vrstaOpreme || "",
         fabrickBroj: initialData.fabrickBroj || "",
         inventarniBroj: initialData.inventarniBroj || "",
-        lokacija: initialData.lokacija || "",
         godinaProizvodnje: initialData.godinaProizvodnje || new Date().getFullYear(),
         intervalPregleda: 36,
         napomena: initialData.napomena || ""
       });
     } else {
-      // Reset form when no initial data
       setFormData({
+        firmaPib: "",
+        lokacijaId: "",
         nazivOpreme: "",
         vrstaOpreme: "",
         fabrickBroj: "",
         inventarniBroj: "",
-        lokacija: "",
         godinaProizvodnje: new Date().getFullYear(),
         intervalPregleda: 36,
         napomena: ""
       });
     }
+    setFormError(null);
   }, [initialData]);
 
-  // Add state for dropdowns
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isVrstaDropdownOpen, setIsVrstaDropdownOpen] = React.useState(false);
+  const [isFirmaDropdownOpen, setIsFirmaDropdownOpen] = React.useState(false);
   const [isLokacijaDropdownOpen, setIsLokacijaDropdownOpen] = React.useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const vrstaDropdownRef = useRef<HTMLDivElement>(null);
+  const firmaDropdownRef = useRef<HTMLDivElement>(null);
   const lokacijaDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -67,6 +73,9 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
       }
       if (vrstaDropdownRef.current && !vrstaDropdownRef.current.contains(event.target as Node)) {
         setIsVrstaDropdownOpen(false);
+      }
+      if (firmaDropdownRef.current && !firmaDropdownRef.current.contains(event.target as Node)) {
+        setIsFirmaDropdownOpen(false);
       }
       if (lokacijaDropdownRef.current && !lokacijaDropdownRef.current.contains(event.target as Node)) {
         setIsLokacijaDropdownOpen(false);
@@ -77,37 +86,38 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Generate years for dropdown (from 1950 to current year)
   const years = Array.from(
     { length: new Date().getFullYear() - 1949 },
     (_, i) => new Date().getFullYear() - i
   );
 
-  // Vrsta opreme options
   const vrstaOpremeOptions = [
     "Oprema za rad",
     "Elektro i gromobranska instalacija"
   ];
 
-  // Lokacija options
-  const lokacijaOptions = [
-    "Lokacija 1",
-    "Lokacija 2", 
-    "Lokacija 3",
-    "Skladište A",
-    "Skladište B",
-    "Proizvodna hala 1",
-    "Proizvodna hala 2"
-  ];
+  const filteredLokacije = lokacije.filter(l => l.firma_pib === formData.firmaPib);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const selectedFirmaLabel = firme.find(f => f.pib === formData.firmaPib);
+  const selectedLokacijaLabel = filteredLokacije.find(l => l.id === Number(formData.lokacijaId));
+
+  const handleFirmaChange = (pib: string) => {
+    setFormData({ ...formData, firmaPib: pib, lokacijaId: "" });
+    setIsFirmaDropdownOpen(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nazivOpreme || !formData.vrstaOpreme || !formData.lokacija) {
-      alert('Molimo popunite sva obavezna polja');
+    setFormError(null);
+    if (!formData.firmaPib || !formData.lokacijaId || !formData.nazivOpreme || !formData.vrstaOpreme) {
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (err: any) {
+      setFormError(err?.message || "Greška pri čuvanju.");
+    }
   };
 
   return (
@@ -124,7 +134,83 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                {formError}
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+              <div className="col-span-1">
+                <Label>Firma *</Label>
+                <div className="relative w-full" ref={firmaDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsFirmaDropdownOpen(!isFirmaDropdownOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>{selectedFirmaLabel ? `${selectedFirmaLabel.naziv} (${selectedFirmaLabel.pib})` : "Izaberite..."}</span>
+                    <svg className={`w-4 h-4 transition-transform ${isFirmaDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isFirmaDropdownOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                        {firme.map((firma, index) => (
+                          <div
+                            key={firma.pib}
+                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${formData.firmaPib === firma.pib ? 'bg-gray-100 dark:bg-gray-700' : ''} ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
+                            onClick={() => handleFirmaChange(firma.pib)}
+                          >
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{firma.naziv} ({firma.pib})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-1">
+                <Label>Lokacija *</Label>
+                <div className="relative w-full" ref={lokacijaDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsLokacijaDropdownOpen(!isLokacijaDropdownOpen)}
+                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+                  >
+                    <span>{selectedLokacijaLabel ? selectedLokacijaLabel.naziv : "Izaberite..."}</span>
+                    <svg className={`w-4 h-4 transition-transform ${isLokacijaDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isLokacijaDropdownOpen && (
+                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                        {filteredLokacije.length === 0 ? (
+                          <div className="px-4 py-2 text-sm text-gray-400 dark:text-gray-500">
+                            {formData.firmaPib ? "Nema lokacija za izabranu firmu" : "Prvo izaberite firmu"}
+                          </div>
+                        ) : (
+                          filteredLokacije.map((lok, index) => (
+                            <div
+                              key={lok.id}
+                              className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${formData.lokacijaId === String(lok.id) ? 'bg-gray-100 dark:bg-gray-700' : ''} ${index === filteredLokacije.length - 1 ? 'rounded-b-lg' : ''}`}
+                              onClick={() => {
+                                setFormData({ ...formData, lokacijaId: String(lok.id) });
+                                setIsLokacijaDropdownOpen(false);
+                              }}
+                            >
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{lok.naziv}</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="col-span-1">
                 <Label>Naziv opreme *</Label>
                 <Input 
@@ -166,47 +252,6 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
                             onClick={() => {
                               setFormData({ ...formData, vrstaOpreme: item });
                               setIsVrstaDropdownOpen(false);
-                            }}
-                          >
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="col-span-1">
-                <Label>Lokacija *</Label>
-                <div className="relative w-full" ref={lokacijaDropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setIsLokacijaDropdownOpen(!isLokacijaDropdownOpen)}
-                    className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-                  >
-                    <span>{formData.lokacija || "Izaberite lokaciju"}</span>
-                    <svg
-                      className={`w-4 h-4 transition-transform ml-2 ${isLokacijaDropdownOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isLokacijaDropdownOpen && (
-                    <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                      <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                        {lokacijaOptions.map((item, index) => (
-                          <div
-                            key={item}
-                            className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
-                              formData.lokacija === item ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            } ${index === lokacijaOptions.length - 1 ? 'rounded-b-lg' : ''}`}
-                            onClick={() => {
-                              setFormData({ ...formData, lokacija: item });
-                              setIsLokacijaDropdownOpen(false);
                             }}
                           >
                             <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
@@ -318,4 +363,4 @@ export default function OpremaForm({ isOpen, onClose, onSave, initialData }: Opr
       </div>
     </Modal>
   );
-} 
+}

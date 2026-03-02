@@ -18,7 +18,6 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
-import { completePovredaInspekcijaRok } from "../../data/rokovi";
 
 interface Column {
   key: string;
@@ -173,15 +172,6 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
   const handleEditSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingItem) {
-      const wasInspekcijaSet = !!editingItem.datumObavestenjaInspekcije;
-      const isInspekcijaNowSet = !!editDatumObavestenjaInspekcije;
-      
-      // Check if datumObavestenjaInspekcije was just set (completed)
-      if (!wasInspekcijaSet && isInspekcijaNowSet) {
-        // Complete the related rok
-        completePovredaInspekcijaRok(editingItem.id);
-      }
-      
       // Update the data
       const updatedData = initialData.map(item => {
         if (item.id === editingItem.id) {

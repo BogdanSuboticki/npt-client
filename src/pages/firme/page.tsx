@@ -1,80 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FirmeDataTable from "./FirmeDataTable";
 import FirmeForm from "./FirmeForm";
 import Button from "../../components/ui/button/Button";
 import { usePageContext } from "../../hooks/usePageContext";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for Moje Preduzeće context
-const mojaFirmaData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    naziv: "Moje Preduzeće 1",
-    adresa: "Adresa Moje Preduzeće 1",
-    mesto: "Beograd",
-    pib: "1234567890",
-    maticniBroj: "1234567890",
-    delatnost: "IT delatnost",
-    datumIstekaUgovora: new Date("2024-12-31"),
-    aktivan: true,
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    naziv: "Moje Preduzeće 2",
-    adresa: "Adresa Moje Preduzeće 2",
-    mesto: "Novi Sad",
-    pib: "0987654321",
-    maticniBroj: "0987654321",
-    delatnost: "Proizvodnja",
-    datumIstekaUgovora: new Date("2024-06-30"),
-    aktivan: true,
-  },
-];
-
-// Sample data for Komitenti context
-const komitentiData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    naziv: "Komitent Preduzeće 1",
-    adresa: "Adresa Komitent 1",
-    mesto: "Niš",
-    pib: "1122334455",
-    maticniBroj: "1122334455",
-    delatnost: "Uslužne delatnosti",
-    datumIstekaUgovora: new Date("2024-03-15"),
-    aktivan: true,
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    naziv: "Komitent Preduzeće 2",
-    adresa: "Adresa Komitent 2",
-    mesto: "Kragujevac",
-    pib: "5566778899",
-    maticniBroj: "5566778899",
-    delatnost: "Trgovina",
-    datumIstekaUgovora: new Date("2024-09-20"),
-    aktivan: true,
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    naziv: "Komitent Preduzeće 3",
-    adresa: "Adresa Komitent 3",
-    mesto: "Subotica",
-    pib: "9988776655",
-    maticniBroj: "9988776655",
-    delatnost: "Poljoprivreda",
-    datumIstekaUgovora: new Date("2024-11-10"),
-    aktivan: false,
-  },
-];
+const mapFirmaFromApi = (firma: any, index: number) => {
+  const datumIsteka = fromIsoDate(firma.datum_isteka_ugovora) ?? new Date();
+  return {
+    id: index + 1,
+    redniBroj: index + 1,
+    naziv: firma.naziv,
+    adresa: firma.adresa,
+    mesto: firma.mesto,
+    pib: firma.pib,
+    maticniBroj: firma.maticni_broj,
+    delatnost: firma.sifra_delatnosti,
+    datumIstekaUgovora: datumIsteka,
+    datumPocetkaUgovora: fromIsoDate(firma.datum_pocetka_ugovora) ?? new Date(),
+    drzava: firma.drzava,
+    emailFirme: firma.email,
+    imePrezimeDirektora: firma.direktor_ime_prezime,
+    telefonDirektora: firma.direktor_telefon,
+    emailDirektora: firma.direktor_email,
+    imePrezimeOsobeZaSaradnju: firma.saradnik_ime_prezime,
+    telefonOsobeZaSaradnju: firma.saradnik_telefon,
+    emailOsobeZaSaradnju: firma.saradnik_email,
+    aktivan: datumIsteka >= new Date(),
+  };
+};
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -126,54 +85,67 @@ const Firme: React.FC = () => {
   const context = usePageContext();
 
   // State for data management
-  const [mojaFirmaState, setMojaFirmaState] = useState(mojaFirmaData);
-  const [komitentiState, setKomitentiState] = useState(komitentiData);
+  const [firmeState, setFirmeState] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadFirme = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`firme?context=${context}`);
+      const mapped = response.data.map(mapFirmaFromApi);
+      setFirmeState(mapped);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju firmi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadFirme();
+  }, [context]);
 
   // Get data based on context
   const getDataForContext = () => {
-    switch (context) {
-      case 'komitenti':
-        return komitentiState;
-      case 'moja-firma':
-      default:
-        return mojaFirmaState;
-    }
+    return firmeState;
   };
 
-  const getDataSetter = () => {
-    switch (context) {
-      case 'komitenti':
-        return setKomitentiState;
-      case 'moja-firma':
-      default:
-        return setMojaFirmaState;
-    }
-  };
+  const handleSave = async (data: any) => {
+    const payload: Record<string, any> = {
+      naziv: data.nazivFirme,
+      adresa: data.adresaFirme,
+      drzava: data.drzava,
+      mesto: data.mesto,
+      pib: data.pib,
+      maticni_broj: data.maticniBroj,
+      sifra_delatnosti: data.sifraDelatnosti,
+      email: data.emailFirme,
+      direktor_ime_prezime: data.imePrezimeDirektora || null,
+      direktor_telefon: data.telefonDirektora || null,
+      direktor_email: data.emailDirektora || null,
+      saradnik_ime_prezime: data.imePrezimeOsobeZaSaradnju,
+      saradnik_telefon: data.telefonOsobeZaSaradnju,
+      saradnik_email: data.emailOsobeZaSaradnju,
+      datum_pocetka_ugovora: toIsoDate(data.datumPocetkaUgovora),
+      datum_isteka_ugovora: toIsoDate(data.datumIstekaUgovora),
+      komitent: context === 'komitenti',
+    };
 
-  const handleSave = (data: any) => {
-    // Here you would typically save the data to your backend
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry for ${context}:`, data);
-    
-    const setter = getDataSetter();
-    
+    if (data.createKomitent) {
+      payload.kreiraj_komitenta = true;
+      payload.komitent_email = data.komitentData?.email;
+      payload.komitent_password = data.komitentData?.sifra;
+    }
+
     if (editingItem) {
-      // Update existing item
-      setter((prev: any[]) => 
-        prev.map(item => 
-          item.id === editingItem.id 
-            ? { ...item, ...data, id: editingItem.id }
-            : item
-        )
-      );
+      await api.put(`firme/${editingItem.pib}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item to the appropriate data array
-      const newItem = {
-        id: getDataForContext().length + 1,
-        ...data,
-      };
-      setter((prev: any[]) => [...prev, newItem]);
+      await api.post("firme", payload);
     }
+    await loadFirme();
     setShowForm(false);
   };
 
@@ -187,10 +159,14 @@ const Firme: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      const setter = getDataSetter();
-      setter((prev: any[]) => prev.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`firme/${itemToDelete.pib}`);
+        await loadFirme();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju firme.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -282,12 +258,18 @@ const Firme: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
           <FirmeDataTable 
             data={getDataForContext()}
             columns={columns}
             onDeleteClick={handleDeleteClick}
             onEditClick={handleEditClick}
           />
+          )}
         </div>
 
         <FirmeForm 

@@ -1,50 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { PovredeIcon } from "../../icons";
-
-// Sample data - in a real app, this would come from an API
-const samplePovrede = [
-  {
-    id: 1,
-    zaposleni: "Zaposleni 1",
-    datumPovrede: new Date("2024-01-15"),
-    tezinaPovrede: "Laka",
-    datumObavestenjaInspekcije: new Date("2024-01-16"),
-  },
-  {
-    id: 2,
-    zaposleni: "Zaposleni 2",
-    datumPovrede: new Date("2024-02-10"),
-    tezinaPovrede: "Srednja",
-    datumObavestenjaInspekcije: new Date("2024-02-11"),
-  },
-  {
-    id: 3,
-    zaposleni: "Zaposleni 3",
-    datumPovrede: new Date("2024-03-05"),
-    tezinaPovrede: "Teška",
-    datumObavestenjaInspekcije: null,
-  },
-];
+import { api } from "../../api/client";
 
 export default function PovredeWidget() {
   const navigate = useNavigate();
 
-  const stats = useMemo(() => {
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    
-    const total = samplePovrede.length;
-    const recent = samplePovrede.filter(
-      (p) => p.datumPovrede >= thirtyDaysAgo
-    ).length;
-    const needsAttention = samplePovrede.filter(
-      (p) => p.datumObavestenjaInspekcije === null
-    ).length;
+  const [stats, setStats] = useState({ total: 0, recent: 0, needsAttention: 0 });
 
-    return { total, recent, needsAttention };
+  useEffect(() => {
+    api
+      .get<{ total: number; recent: number; needsAttention: number }>(
+        "dashboard/povrede-stats"
+      )
+      .then(setStats)
+      .catch(() => {});
   }, []);
 
   const handleClick = () => {
@@ -99,4 +71,3 @@ export default function PovredeWidget() {
     </div>
   );
 }
-

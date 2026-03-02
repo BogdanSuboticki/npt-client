@@ -54,6 +54,8 @@ export default function OrganizationSettingsCard() {
   const [showFirmeFormModal, setShowFirmeFormModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editingUserData, setEditingUserData] = useState<any>(null);
+  const [editingCompanyData, setEditingCompanyData] = useState<any>(null);
   const [newKorisnik, setNewKorisnik] = useState({
     ime: '',
     prezime: '',
@@ -81,92 +83,7 @@ export default function OrganizationSettingsCard() {
 
 
   
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "1",
-      name: "Ana Jovanović",
-      email: "ana.jovanovic@techsolutions.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org1",
-        name: "Tech Solutions d.o.o.",
-        type: "admin"
-      },
-      access: { mojaFirma: true, komitenti: false, ostalo: true }
-    },
-    {
-      id: "2",
-      name: "Petar Nikolić",
-      email: "petar.nikolic@techsolutions.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org1",
-        name: "Tech Solutions d.o.o.",
-        type: "admin"
-      },
-      access: { mojaFirma: true, komitenti: true, ostalo: false }
-    },
-    {
-      id: "3",
-      name: "Marija Petrović",
-      email: "marija.petrovic@techsolutions.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org1",
-        name: "Tech Solutions d.o.o.",
-        type: "admin"
-      },
-      access: { mojaFirma: false, komitenti: false, ostalo: false }
-    },
-    {
-      id: "4",
-      name: "Stefan Đorđević",
-      email: "stefan.djordjevic@inovativne.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org2",
-        name: "Inovativne Tehnologije d.o.o.",
-        type: "client"
-      },
-      access: { mojaFirma: true, komitenti: true, ostalo: true }
-    },
-    {
-      id: "5",
-      name: "Jelena Stojanović",
-      email: "jelena.stojanovic@inovativne.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org2",
-        name: "Inovativne Tehnologije d.o.o.",
-        type: "client"
-      },
-      access: { mojaFirma: false, komitenti: true, ostalo: false }
-    },
-    {
-      id: "6",
-      name: "Marko Ivanović",
-      email: "marko.ivanovic@progres.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org3",
-        name: "Progres Konstrukcije d.o.o.",
-        type: "client"
-      },
-      access: { mojaFirma: true, komitenti: false, ostalo: true }
-    },
-    {
-      id: "7",
-      name: "Sofija Petrović",
-      email: "sofija.petrovic@progres.rs",
-      role: "Korisnik",
-      organization: {
-        id: "org3",
-        name: "Progres Konstrukcije d.o.o.",
-        type: "client"
-      },
-      access: { mojaFirma: true, komitenti: true, ostalo: false }
-    }
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [tempUsers, setTempUsers] = useState<User[]>(users);
   
@@ -195,27 +112,45 @@ export default function OrganizationSettingsCard() {
   };
 
   const handleEditUser = (user: User) => {
-    // Set the form data for editing
-    setNewKorisnik({
-      ime: user.name.split(' ')[0] || '',
-      prezime: user.name.split(' ').slice(1).join(' ') || '',
-      email: user.email
-    });
+    // Set the form data for editing - use AngazovanjaForm instead of simple modal
     setIsEditing(true);
     setEditingUserId(user.id);
-    setShowAddKorisnikModal(true);
+    // Prepare initial data for AngazovanjaForm
+    // Note: You may need to adjust this based on what data is available for the user
+    setEditingUserData({
+      imePrezime: user.name,
+      email: user.email,
+      // Add other fields if available in user object
+    });
+    setShowAngazovanjaFormModal(true);
     console.log('Editing user:', user);
   };
 
   const handleEditCompany = (organization: Organization) => {
-    // Set the form data for editing company
-    setNewCompany({
-      naziv: organization.name,
-      email: organization.users[0]?.email || ''
-    });
+    // Set the form data for editing company - use FirmeForm instead of simple modal
     setIsEditing(true);
     setEditingUserId(organization.id);
-    setShowAddKorisnikModal(true);
+    // Prepare initial data for FirmeForm - map all available fields
+    setEditingCompanyData({
+      naziv: organization.naziv || organization.name,
+      adresa: organization.adresa || '',
+      drzava: organization.drzava || '',
+      mesto: organization.mesto || '',
+      pib: organization.pib || '',
+      maticniBroj: organization.maticniBroj || '',
+      sifraDelatnosti: organization.sifraDelatnosti || organization.delatnost || '',
+      emailFirme: organization.emailFirme || organization.users[0]?.email || '',
+      imePrezimeDirektora: organization.imePrezimeDirektora || '',
+      telefonDirektora: organization.telefonDirektora || '',
+      emailDirektora: organization.emailDirektora || '',
+      imePrezimeOsobeZaSaradnju: organization.imePrezimeOsobeZaSaradnju || '',
+      telefonOsobeZaSaradnju: organization.telefonOsobeZaSaradnju || '',
+      emailOsobeZaSaradnju: organization.emailOsobeZaSaradnju || '',
+      datumPocetkaUgovora: organization.datumPocetkaUgovora || null,
+      datumIstekaUgovora: organization.datumIstekaUgovora || null,
+      obaveznaObukaPrvePomoci: organization.obaveznaObukaPrvePomoci || false,
+    });
+    setShowFirmeFormModal(true);
     console.log('Editing company:', organization);
   };
 
@@ -365,44 +300,6 @@ export default function OrganizationSettingsCard() {
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
               Podešavanja organizacije
             </h4>
-
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Broj korisnika u organizaciji
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {users.length} korisnika ({adminOrganizations.length} admin, {clientOrganizations.length} komitenti)
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Tip korisnika
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  Administrator
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Status
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  Aktivan
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Poslednja izmena
-                </p>
-                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  Danas, 14:30
-                </p>
-              </div>
-            </div>
           </div>
 
 
@@ -418,7 +315,7 @@ export default function OrganizationSettingsCard() {
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
-                         Korisnici ({adminOrganizations.reduce((total, org) => total + org.users.length, 0)})
+                         Korisnik ({adminOrganizations.reduce((total, org) => total + org.users.length, 0)})
           </button>
           <button
             onClick={() => setActiveTab('komitenti')}
@@ -428,7 +325,7 @@ export default function OrganizationSettingsCard() {
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
-            Komitenti ({clientOrganizations.length})
+            Komitent ({clientOrganizations.length})
           </button>
         </div>
 
@@ -443,9 +340,15 @@ export default function OrganizationSettingsCard() {
             <Button size="sm" onClick={() => {
               if (activeTab === 'korisnici') {
                 // For korisnici tab, open AngazovanjaForm
+                setIsEditing(false);
+                setEditingUserId(null);
+                setEditingUserData(null);
                 setShowAngazovanjaFormModal(true);
               } else {
                 // For komitenti tab, open FirmeForm
+                setIsEditing(false);
+                setEditingUserId(null);
+                setEditingCompanyData(null);
                 setShowFirmeFormModal(true);
               }
             }}>
@@ -469,7 +372,12 @@ export default function OrganizationSettingsCard() {
           {/* Tab Content */}
           {activeTab === 'korisnici' && (
             <div className="space-y-6">
-              {adminOrganizations.map((organization) => (
+              {adminOrganizations.length === 0 ? (
+                <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+                  Nema korisnika za prikaz.
+                </div>
+              ) : (
+              adminOrganizations.map((organization) => (
                 <div key={organization.id} className="border border-gray-200 rounded-lg dark:border-gray-700">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
@@ -541,12 +449,18 @@ export default function OrganizationSettingsCard() {
                     </table>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
           )}
 
                      {activeTab === 'komitenti' && (
              <div className="overflow-x-auto">
+               {clientOrganizations.length === 0 ? (
+                 <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+                   Nema komitenata za prikaz.
+                 </div>
+               ) : (
                <table className="w-full text-sm text-left">
                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                    <tr>
@@ -621,6 +535,7 @@ export default function OrganizationSettingsCard() {
                    })}
                  </tbody>
                </table>
+               )}
              </div>
            )}
         </div>
@@ -798,29 +713,61 @@ export default function OrganizationSettingsCard() {
           </div>
         </Modal>
 
-        {/* AngazovanjaForm Modal for adding users from admin dashboard */}
+        {/* AngazovanjaForm Modal for adding/editing users from admin dashboard */}
         <AngazovanjaForm
           isOpen={showAngazovanjaFormModal}
-          onClose={() => setShowAngazovanjaFormModal(false)}
+          onClose={() => {
+            setShowAngazovanjaFormModal(false);
+            setIsEditing(false);
+            setEditingUserId(null);
+            setEditingUserData(null);
+          }}
           onSave={(data: any) => {
             // Handle save logic here
-            console.log('Saving user data from admin dashboard:', data);
-            // In a real app, you would save to backend here
+            if (isEditing && editingUserId) {
+              console.log('Updating user data from admin dashboard:', data);
+              // Update existing user logic here
+              // In a real app, you would update to backend here
+            } else {
+              console.log('Saving new user data from admin dashboard:', data);
+              // Add new user logic here
+              // In a real app, you would save to backend here
+            }
             setShowAngazovanjaFormModal(false);
+            setIsEditing(false);
+            setEditingUserId(null);
+            setEditingUserData(null);
           }}
+          initialData={editingUserData}
           fromAdminDashboard={true}
         />
 
-        {/* FirmeForm Modal for adding komitenti from admin dashboard */}
+        {/* FirmeForm Modal for adding/editing komitenti from admin dashboard */}
         <FirmeForm
           isOpen={showFirmeFormModal}
-          onClose={() => setShowFirmeFormModal(false)}
+          onClose={() => {
+            setShowFirmeFormModal(false);
+            setIsEditing(false);
+            setEditingUserId(null);
+            setEditingCompanyData(null);
+          }}
           onSave={(data: any) => {
             // Handle save logic here
-            console.log('Saving komitent data from admin dashboard:', data);
-            // In a real app, you would save to backend here
+            if (isEditing && editingUserId) {
+              console.log('Updating komitent data from admin dashboard:', data);
+              // Update existing komitent logic here
+              // In a real app, you would update to backend here
+            } else {
+              console.log('Saving new komitent data from admin dashboard:', data);
+              // Add new komitent logic here
+              // In a real app, you would save to backend here
+            }
             setShowFirmeFormModal(false);
+            setIsEditing(false);
+            setEditingUserId(null);
+            setEditingCompanyData(null);
           }}
+          initialData={editingCompanyData}
           fromAdminDashboard={true}
         />
       </div>

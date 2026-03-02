@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import NotesForm from "./NotesForm";
 import Button from "../../components/ui/button/Button";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
+import { api } from "../../api/client";
+import { fromIsoDate } from "../../utils/date";
 
 interface Note {
   id: number;
@@ -16,30 +18,13 @@ interface Note {
   updatedAt: Date;
 }
 
-// Sample data
-const initialNotesData: Note[] = [
-  {
-    id: 1,
-    title: "Važna beleška",
-    content: "Ovo je primer beleške sa nekim važnim informacijama koje treba zapamtiti. Može sadržati više redova teksta i različite informacije.",
-    createdAt: new Date("2024-01-15T10:30:00"),
-    updatedAt: new Date("2024-01-15T10:30:00"),
-  },
-  {
-    id: 2,
-    title: "Sastanak sa timom",
-    content: "Sastanak zakazan za sledeću nedelju. Pripremiti materijale za prezentaciju i proveriti dostupnost svih članova tima.",
-    createdAt: new Date("2024-01-20T14:00:00"),
-    updatedAt: new Date("2024-01-20T14:00:00"),
-  },
-  {
-    id: 3,
-    title: "Ideje za projekat",
-    content: "Lista ideja koje treba razmotriti:\n- Nova funkcionalnost\n- Poboljšanje korisničkog iskustva\n- Optimizacija performansi",
-    createdAt: new Date("2024-01-22T09:15:00"),
-    updatedAt: new Date("2024-01-22T09:15:00"),
-  },
-];
+const mapNoteFromApi = (item: any): Note => ({
+  id: item.id,
+  title: item.naslov,
+  content: item.sadrzaj ?? "",
+  createdAt: fromIsoDate(item.created_at) ?? new Date(),
+  updatedAt: fromIsoDate(item.updated_at) ?? new Date(),
+});
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
   constructor(props: { children: React.ReactNode }) {
@@ -74,12 +59,31 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
 const NotesPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState<Note[]>(initialNotesData);
+  const [data, setData] = useState<Note[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Note | null>(null);
   const [editingItem, setEditingItem] = useState<Note | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredNote, setHoveredNote] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadNotes = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>("notes");
+      setData(response.data.map(mapNoteFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju beleški.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNotes();
+  }, []);
 
   const filteredNotes = useMemo(() => {
     if (!searchQuery.trim()) return data;
@@ -91,24 +95,19 @@ const NotesPage: React.FC = () => {
     );
   }, [data, searchQuery]);
 
-  const handleSave = (noteData: Omit<Note, "id" | "createdAt" | "updatedAt">) => {
+  const handleSave = async (noteData: Omit<Note, "id" | "createdAt" | "updatedAt">) => {
+    const payload = {
+      naslov: noteData.title,
+      sadrzaj: noteData.content,
+    };
+
     if (editingItem) {
-      const updatedData = data.map(item => 
-        item.id === editingItem.id 
-          ? { ...item, ...noteData, updatedAt: new Date() }
-          : item
-      );
-      setData(updatedData);
+      await api.put(`notes/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      const newNote: Note = {
-        id: data.length > 0 ? Math.max(...data.map(n => n.id)) + 1 : 1,
-        ...noteData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setData([newNote, ...data]);
+      await api.post("notes", payload);
     }
+    await loadNotes();
     setShowForm(false);
   };
 
@@ -126,9 +125,14 @@ const NotesPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`notes/${itemToDelete.id}`);
+        await loadNotes();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju beleške.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -242,7 +246,11 @@ const NotesPage: React.FC = () => {
         </div>
 
         {/* Notes Grid */}
-        {filteredNotes.length > 0 ? (
+        {isLoading ? (
+          <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+        ) : errorMessage ? (
+          <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+        ) : filteredNotes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredNotes.map((note) => (
               <div

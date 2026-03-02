@@ -7,35 +7,7 @@ interface TabData {
   count?: number;
 }
 
-const tabData: TabData[] = [
-  {
-    id: "overview",
-    label: "Overview",
-    content:
-      "Overview ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-    count: 8,
-  },
-  {
-    id: "notification",
-    label: "Notification",
-    content:
-      "Notification ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    content:
-      "Analytics ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-    count: 4,
-  },
-  {
-    id: "customers",
-    label: "Customers",
-    content:
-      "Customers ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-    count: 12,
-  },
-];
+const tabData: TabData[] = [];
 
 const TabButton: React.FC<{
   tab: TabData;
@@ -70,6 +42,14 @@ const TabContent: React.FC<{ tab: TabData }> = ({ tab }) => (
 
 const TabWithBadge: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
+
+  if (tabData.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 dark:text-gray-400">
+        Nema sadržaja za prikaz.
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 border border-gray-200 rounded-xl dark:border-gray-800">

@@ -8,26 +8,11 @@ interface CardIconTwoProps {
   link: string;
 }
 
-const mockFilledForms = [
-  {
-    id: "1",
-    date: "15.03.2024",
-    status: "completed",
-    employee: "Marko Marković"
-  },
-  {
-    id: "2",
-    date: "10.03.2024",
-    status: "completed",
-    employee: "Petar Petrović"
-  },
-  {
-    id: "3",
-    date: "05.03.2024",
-    status: "completed",
-    employee: "Ana Anić"
-  }
-];
+const recentForms: Array<{
+  id: string;
+  date: string;
+  employee: string;
+}> = [];
 
 export default function CardIconTwo({ title, description, link }: CardIconTwoProps) {
   // Extract the type from the link (remove the leading slash)
@@ -64,17 +49,23 @@ export default function CardIconTwo({ title, description, link }: CardIconTwoPro
             </Link>
           </div>
           <div className="space-y-2">
-            {mockFilledForms.map((form) => (
-              <div 
-                key={form.id}
-                className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">{form.employee}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{form.date}</span>
-                </div>
+            {recentForms.length === 0 ? (
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Nema popunjenih obrazaca.
               </div>
-            ))}
+            ) : (
+              recentForms.map((form) => (
+                <div 
+                  key={form.id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{form.employee}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{form.date}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

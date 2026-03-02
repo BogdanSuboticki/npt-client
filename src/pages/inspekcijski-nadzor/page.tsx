@@ -1,72 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InspekcijskiNadzorDataTable from "./InspekcijskiNadzorDataTable";
 import InspekcijskiNadzorForm from "./InspekcijskiNadzorForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const inspekcijskiNadzorData = [
-  {
-    id: 1,
-    brojResenja: "123-45/2024",
-    datumNadzora: new Date("2024-01-12"),
-    datumObavestavanjaInspekcije: new Date("2024-01-10"),
-    napomena: "Uočene nepravilnosti u skladištu hemikalija",
-    mere: [
-      {
-        id: 1,
-        nazivMere: "Sanacija opasnosti",
-        rokIzvrsenja: new Date("2024-02-15"),
-        datumRealizacije: new Date("2024-02-10"),
-      },
-      {
-        id: 2,
-        nazivMere: "Obuka zaposlenih",
-        rokIzvrsenja: new Date("2024-02-20"),
-        datumRealizacije: new Date("2024-02-18"),
-      },
-      {
-        id: 3,
-        nazivMere: "Zabrana rada",
-        rokIzvrsenja: new Date("2024-02-25"),
-        datumRealizacije: null,
-      }
-    ],
-  },
-  {
-    id: 2,
-    brojResenja: "678-90/2024",
-    datumNadzora: new Date("2024-02-05"),
-    datumObavestavanjaInspekcije: new Date("2024-02-03"),
-    napomena: "Potrebna obuka zaposlenih za rad na visini",
-    mere: [
-      {
-        id: 2,
-        nazivMere: "Obuka zaposlenih",
-        rokIzvrsenja: new Date("2024-03-01"),
-        datumRealizacije: null,
-      }
-    ],
-  },
-  {
-    id: 3,
-    brojResenja: "555-11/2024",
-    datumNadzora: new Date("2024-03-18"),
-    datumObavestavanjaInspekcije: new Date("2024-03-16"),
-    napomena: "Zabrana upotrebe neispravne opreme",
-    mere: [
-      {
-        id: 3,
-        nazivMere: "Zabrana rada",
-        rokIzvrsenja: new Date("2024-03-25"),
-        datumRealizacije: new Date("2024-03-22"),
-      }
-    ],
-  },
-];
+const mapInspekcijskiNadzorFromApi = (item: any, index: number) => {
+  const flattened: any[] = [];
+  if (item.mere && item.mere.length > 0) {
+    item.mere.forEach((mera: any, meraIndex: number) => {
+      flattened.push({
+        id: item.id,
+        redniBroj: index + 1,
+        brojResenja: item.broj_resenja,
+        datumNadzora: fromIsoDate(item.datum_nadzora) ?? new Date(),
+        napomena: item.napomena ?? "",
+        nazivMere: mera.naziv_mere,
+        rokIzvrsenja: fromIsoDate(mera.rok_izvrsenja) ?? new Date(),
+        datumRealizacije: fromIsoDate(mera.datum_realizacije_mere),
+        datumObavestavanjaInspekcije: fromIsoDate(mera.datum_obavestavanja_inspekcije),
+        meraId: mera.id,
+        isFirstRow: meraIndex === 0,
+        totalRows: item.mere.length,
+        firmaPib: item.firma_pib,
+      });
+    });
+  } else {
+    flattened.push({
+      id: item.id,
+      redniBroj: index + 1,
+      brojResenja: item.broj_resenja,
+      datumNadzora: fromIsoDate(item.datum_nadzora) ?? new Date(),
+      napomena: item.napomena ?? "",
+      nazivMere: "",
+      rokIzvrsenja: null,
+      datumRealizacije: null,
+      datumObavestavanjaInspekcije: null,
+      isFirstRow: true,
+      totalRows: 1,
+      firmaPib: item.firma_pib,
+    });
+  }
+  return flattened;
+};
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -111,19 +92,65 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const InspekcijskiNadzorPage: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(inspekcijskiNadzorData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [firme, setFirme] = useState<any[]>([]);
 
-  const handleSave = (newData: any) => {
-    console.log('Saving new inspekcijski nadzor entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
+  const loadInspekcijskiNadzor = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`inspekcijski-nadzori?context=${context}`);
+      const flattened = response.data.flatMap(mapInspekcijskiNadzorFromApi);
+      setData(flattened);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju inspekcijskih nadzora.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadFirme = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`firme?context=${context}`);
+      setFirme(response.data.map((f: any) => ({ pib: f.pib, naziv: f.naziv })));
+    } catch {
+      // Non-critical
+    }
+  };
+
+  useEffect(() => {
+    loadInspekcijskiNadzor();
+    loadFirme();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      broj_resenja: newData.brojResenja,
+      datum_nadzora: toIsoDate(newData.datumNadzora),
+      napomena: newData.napomena || null,
+      mere: newData.mere?.map((m: any) => ({
+        naziv_mere: m.nazivMere,
+        rok_izvrsenja: toIsoDate(m.rokIzvrsenja),
+        datum_realizacije_mere: m.datumRealizacije ? toIsoDate(m.datumRealizacije) : null,
+        datum_obavestavanja_inspekcije: m.datumObavestavanjaInspekcije ? toIsoDate(m.datumObavestavanjaInspekcije) : null,
+      })) || [],
     };
-    setData([...data, newItem]);
+
+    if (editingItem) {
+      await api.put(`inspekcijski-nadzori/${editingItem.id}`, payload);
+      setEditingItem(null);
+    } else {
+      await api.post("inspekcijski-nadzori", payload);
+    }
+    await loadInspekcijskiNadzor();
     setShowForm(false);
   };
 
@@ -132,9 +159,14 @@ const InspekcijskiNadzorPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`inspekcijski-nadzori/${itemToDelete.id}`);
+        await loadInspekcijskiNadzor();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju inspekcijskog nadzora.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -143,6 +175,16 @@ const InspekcijskiNadzorPage: React.FC = () => {
   const handleDeleteCancel = () => {
     setItemToDelete(null);
     setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -221,17 +263,26 @@ const InspekcijskiNadzorPage: React.FC = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <InspekcijskiNadzorDataTable 
-            data={data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <InspekcijskiNadzorDataTable 
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+            />
+          )}
         </div>
 
         <InspekcijskiNadzorForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
+          firme={firme}
         />
 
         <ConfirmModal

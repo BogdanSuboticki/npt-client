@@ -97,6 +97,9 @@ import RokoviPage from "./pages/rokovi/page";
 import DnevniIzvestajiPage from "./pages/dnevni-izvestaji/page";
 import NotesPage from "./pages/notes/page";
 import TehnickaPodrska from "./pages/TehnickaPodrska";
+import SuperAdminDashboard from "./pages/super-admin-dashboard/SuperAdminDashboard";
+import SuperAdminRedirect from "./pages/super-admin-dashboard/SuperAdminRedirect";
+import CentarObavestenjaPage from "./pages/centar-obavestenja/page";
 
 export default function App() {
   return (
@@ -106,10 +109,14 @@ export default function App() {
           <Router>
           <ScrollToTop />
           <Routes>
+          {/* Super Admin Database Dashboard — standalone, no sidebar */}
+          <Route path="/database" element={<ProtectedRoute allowedRoles={['super-admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Ecommerce />} />
+            <Route index path="/" element={<SuperAdminRedirect><Ecommerce /></SuperAdminRedirect>} />
             <Route path="/dnevni-izvestaji" element={<DnevniIzvestajiPage />} />
+            <Route path="/centar-obavestenja" element={<CentarObavestenjaPage />} />
             <Route path="/analytics" element={<ProtectedRoute excludedRoles={['komitent']}><Analytics /></ProtectedRoute>} />
             <Route path="/marketing" element={<ProtectedRoute excludedRoles={['komitent']}><Marketing /></ProtectedRoute>} />
             <Route path="/crm" element={<ProtectedRoute excludedRoles={['komitent']}><Crm /></ProtectedRoute>} />

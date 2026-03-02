@@ -19,7 +19,7 @@ export default function PopoverWithLink() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <Link
@@ -58,7 +58,7 @@ export default function PopoverWithLink() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <Link
@@ -97,7 +97,7 @@ export default function PopoverWithLink() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <Link
@@ -136,7 +136,7 @@ export default function PopoverWithLink() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <Link

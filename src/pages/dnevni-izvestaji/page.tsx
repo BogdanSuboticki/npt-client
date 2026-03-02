@@ -11,80 +11,11 @@ import Button from "../../components/ui/button/Button";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { useCompanySelection } from "../../context/CompanyContext";
 import { useUser } from "../../context/UserContext";
-import { companies } from "../../data/companies";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 import { useEffect } from "react";
 import { ReactComponent as PrintIcon } from '../../icons/Print.svg?react';
 import { ReactComponent as DownloadIcon } from '../../icons/download.svg?react';
-
-// Sample data for the table
-const dnevniIzvestajiData: DnevniIzvestajiData[] = [
-  {
-    id: 1,
-    firma: "Universal Logistics",
-    datum: new Date("2025-01-15"),
-    svakodnevnaKontrolaBZR: true,
-    osobaZaSaradnju: "Marko Petrović",
-    promeneAPR: false,
-    napomenaPromeneAPR: "",
-    promenaPoslovaRadnihZadataka: false,
-    napomenaPromenaPoslova: "",
-    promenaRadnihMestaZaposlenih: false,
-    formaPromenaRadnihMesta: null,
-    promenaRadneSnage: false,
-    formaPromenaRadneSnage: null,
-    novaSredstvaZaRad: false,
-    formaNovaSredstvaZaRad: null,
-    stazeZaKomunikacijuBezbedne: true,
-    napomenaStazeZaKomunikaciju: "Sve staze su prohodne i bezbedne.",
-    planiranePopravkeRemont: false,
-    napomenaPlaniranePopravke: "",
-    koriscenjeLZS: false,
-    napomenaKoriscenjeLZS: "",
-    novaGradilistaNoviPogoni: false,
-    napomenaNovaGradilista: "",
-    povredaNaRadu: false,
-    formaPovredaNaRadu: null,
-    potencijalniRizici: false,
-    napomenaPotencijalniRizici: "",
-    napomena: "",
-    napomenaBZR: "",
-    pregledan: false,
-    napomenaAdmin: "",
-  },
-  {
-    id: 2,
-    firma: "Universal Logistics",
-    datum: new Date("2025-01-16"),
-    svakodnevnaKontrolaBZR: true,
-    osobaZaSaradnju: "Marko Petrović",
-    promeneAPR: true,
-    napomenaPromeneAPR: "Izmena u APR-u za novi projekat.",
-    promenaPoslovaRadnihZadataka: false,
-    napomenaPromenaPoslova: "",
-    promenaRadnihMestaZaposlenih: false,
-    formaPromenaRadnihMesta: null,
-    promenaRadneSnage: false,
-    formaPromenaRadneSnage: null,
-    novaSredstvaZaRad: false,
-    formaNovaSredstvaZaRad: null,
-    stazeZaKomunikacijuBezbedne: true,
-    napomenaStazeZaKomunikaciju: "",
-    planiranePopravkeRemont: false,
-    napomenaPlaniranePopravke: "",
-    koriscenjeLZS: false,
-    napomenaKoriscenjeLZS: "",
-    novaGradilistaNoviPogoni: false,
-    napomenaNovaGradilista: "",
-    povredaNaRadu: false,
-    formaPovredaNaRadu: null,
-    potencijalniRizici: false,
-    napomenaPotencijalniRizici: "",
-    napomena: "",
-    napomenaBZR: "",
-    pregledan: true,
-    napomenaAdmin: "Sve u redu.",
-  },
-];
 
 const columns = [
   { key: "firma", label: "Firma", sortable: true },
@@ -185,11 +116,12 @@ class ErrorBoundary extends React.Component<
 }
 
 const DnevniIzvestajiPage: React.FC = () => {
+  const context = usePageContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { selectedCompany, selectCompany } = useCompanySelection();
   const { userType } = useUser();
-  const [data, setData] = useState<DnevniIzvestajiData[]>(dnevniIzvestajiData);
+  const [data, setData] = useState<DnevniIzvestajiData[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<DnevniIzvestajiData | null>(
     null
@@ -200,16 +132,30 @@ const DnevniIzvestajiPage: React.FC = () => {
   const isAdmin = userType === 'admin' || userType === 'super-admin';
   const isKomitent = userType === 'komitent';
 
-  // Auto-select company for komitent (default to first company for now)
-  // In a real app, this would come from user profile/context
-  useEffect(() => {
-    if (isKomitent && !selectedCompany) {
-      const komitentCompany = companies[0]; // Default to first company
-      selectCompany(komitentCompany);
-    }
-  }, [isKomitent, selectedCompany, selectCompany]);
+  const mapFromApi = (item: any): DnevniIzvestajiData => ({
+    id: item.id,
+    firma: item.firma?.naziv ?? '',
+    datum: new Date(item.datum),
+    osobaZaSaradnju: item.osoba_za_saradnju ?? '',
+    pregledan: item.pregledan ?? false,
+    napomenaBZR: item.napomena_bzr ?? '',
+    firmaPib: item.firma_pib,
+    ...(item.podaci ?? {}),
+  });
 
-  // Handle report ID from URL (when coming from widget)
+  const loadData = () => {
+    api.get<{ data: any[] }>(`dnevni-izvestaji?context=${context}`)
+      .then((res) => {
+        const mapped = res.data.map(mapFromApi);
+        setData(mapped);
+      })
+      .catch(() => setData([]));
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [selectedCompany, context]);
+
   useEffect(() => {
     const reportIdParam = searchParams.get('reportId');
     if (reportIdParam) {
@@ -217,7 +163,6 @@ const DnevniIzvestajiPage: React.FC = () => {
       const report = data.find(r => r.id === reportId);
       if (report) {
         setSelectedReport(report);
-        // Remove the query parameter after setting the report
         setSearchParams({});
       }
     }
@@ -231,9 +176,12 @@ const DnevniIzvestajiPage: React.FC = () => {
     await dataTableRef.current?.handleDownloadPDF();
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter((record) => record.id !== itemToDelete.id));
+      try {
+        await api.del(`dnevni-izvestaji/${itemToDelete.id}`);
+        loadData();
+      } catch { /* ignore */ }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -258,31 +206,45 @@ const DnevniIzvestajiPage: React.FC = () => {
     }
   };
 
-  const handlePregledanChange = (reportId: number, pregledan: boolean) => {
-    setData(data.map(report => 
-      report.id === reportId ? { ...report, pregledan } : report
-    ));
-    if (selectedReport && selectedReport.id === reportId) {
-      setSelectedReport({ ...selectedReport, pregledan });
-    }
+  const handlePregledanChange = async (reportId: number, pregledan: boolean) => {
+    try {
+      await api.put(`dnevni-izvestaji/${reportId}`, { pregledan });
+      setData(data.map(report =>
+        report.id === reportId ? { ...report, pregledan } : report
+      ));
+      if (selectedReport && selectedReport.id === reportId) {
+        setSelectedReport({ ...selectedReport, pregledan });
+      }
+    } catch { /* ignore */ }
   };
 
-  const handleNapomenaBZRChange = (reportId: number, napomena: string) => {
-    setData(data.map(report => 
-      report.id === reportId ? { ...report, napomenaBZR: napomena } : report
-    ));
-    if (selectedReport && selectedReport.id === reportId) {
-      setSelectedReport({ ...selectedReport, napomenaBZR: napomena });
-    }
+  const handleNapomenaBZRChange = async (reportId: number, napomena: string) => {
+    try {
+      await api.put(`dnevni-izvestaji/${reportId}`, { napomena_bzr: napomena });
+      setData(data.map(report =>
+        report.id === reportId ? { ...report, napomenaBZR: napomena } : report
+      ));
+      if (selectedReport && selectedReport.id === reportId) {
+        setSelectedReport({ ...selectedReport, napomenaBZR: napomena });
+      }
+    } catch { /* ignore */ }
   };
 
-  const handleSaveReport = (reportData: DnevniIzvestajiData) => {
-    // Add the new report to the data array
-    setData([...data, reportData]);
-    // Set it as the selected report to show it in read-only mode
-    setSelectedReport(reportData);
-    // Show success message
-    alert('Izveštaj je uspešno sačuvan!');
+  const handleSaveReport = async (reportData: DnevniIzvestajiData) => {
+    if (!selectedCompany) return;
+
+    const { id, firma, datum, osobaZaSaradnju, pregledan, napomenaBZR, firmaPib, ...podaci } = reportData;
+    try {
+      await api.post("dnevni-izvestaji", {
+        firma_pib: selectedCompany.pib,
+        datum: datum instanceof Date ? datum.toISOString().split('T')[0] : datum,
+        osoba_za_saradnju: osobaZaSaradnju || null,
+        podaci,
+        pregledan: false,
+      });
+      loadData();
+      setSelectedReport(reportData);
+    } catch { /* ignore */ }
   };
 
   // Admin view: Show list or selected report

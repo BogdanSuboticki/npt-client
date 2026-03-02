@@ -18,7 +18,7 @@ export default function PopoverButton() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <div className="flex items-center gap-3 mt-5">
@@ -51,7 +51,7 @@ export default function PopoverButton() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <div className="flex items-center gap-3 mt-5">
@@ -84,7 +84,7 @@ export default function PopoverButton() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <div className="flex items-center gap-3 mt-5">
@@ -117,7 +117,7 @@ export default function PopoverButton() {
               </div>
               <div className="p-5">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Lorem ipsum dolor sit amet, consect adipiscing elit. Mauris
+                  
                   facilisis congue exclamate justo nec facilisis.
                 </p>
                 <div className="flex items-center gap-3 mt-5">

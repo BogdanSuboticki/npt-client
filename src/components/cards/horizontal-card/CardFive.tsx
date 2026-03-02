@@ -13,11 +13,8 @@ export default function CardFive() {
           />
         </div>
         <div>
-          <CardTitle>Card title</CardTitle>
-          <CardDescription>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi
-            architecto aspernatur cum et ipsum
-          </CardDescription>
+          <CardTitle>Kartica</CardTitle>
+          <CardDescription>Nema opisa.</CardDescription>
           <Link
             to="/"
             className="inline-flex items-center gap-1 mt-4 text-sm text-brand-500 hover:text-brand-600"
@@ -37,7 +34,7 @@ export default function CardFive() {
                 fill=""
               />
             </svg>
-            Card link
+            Detalji
           </Link>
         </div>
       </div>

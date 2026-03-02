@@ -29,9 +29,9 @@ interface BezbednosneProvereData {
   id: number;
   redniBroj: number;
   lokacija: string;
-  datumObilaska: Date;
-  periodObilaska: string;
-  sledeciObilazak: string;
+  datumProvere: Date;
+  intervalProvere: string;
+  sledecaProvera: Date;
   napomena: string;
   primalacZapisnika: string;
   [key: string]: any;
@@ -75,8 +75,8 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
           return false;
         }
         const matchesLokacije = selectedLokacije.includes(item.lokacija);
-        const matchesDateRange = (!dateFrom || item.datumObilaska >= dateFrom) &&
-                               (!dateTo || item.datumObilaska <= dateTo);
+        const matchesDateRange = (!dateFrom || item.datumProvere >= dateFrom) &&
+                               (!dateTo || item.datumProvere <= dateTo);
         return matchesLokacije && matchesDateRange;
       })
       .sort((a, b) => {
@@ -127,7 +127,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
 
   const handleEditClick = (item: BezbednosneProvereData) => {
     setEditingItem(item);
-    setEditDatum(item.datumObilaska);
+    setEditDatum(item.datumProvere);
     setEditNapomena(item.napomena || "");
     openEditModal();
   };
@@ -283,7 +283,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                         startIndex + index + 1
                       ) : key === 'povecanRizik' || key === 'nocniRad' ? (
                         item[key] ? 'DA' : 'NE'
-                      ) : key === 'datumLekarskog' || key === 'datumNarednogLekarskog' || key === 'datumObilaska' ? (
+                      ) : item[key] instanceof Date ? (
                         formatDate(item[key])
                       ) : (
                         item[key]
@@ -431,7 +431,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
                 <Label>Interval kontrole (u danima) *</Label>
                 <input
                   type="text"
-                  value={editingItem.periodObilaska}
+                  value={editingItem.intervalProvere}
                   readOnly
                   className="w-full h-11 px-4 text-sm text-gray-600 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 cursor-not-allowed"
                 />
@@ -453,7 +453,7 @@ export default function BezbednosneProvereDataTable({ data: initialData, columns
               <div className="col-span-1">
                 <Label>Naredna kontrola</Label>
                 <CustomDatePicker
-                  value={new Date(editingItem.sledeciObilazak)}
+                  value={editingItem.sledecaProvera}
                   onChange={() => {}}
                   disabled
                 />

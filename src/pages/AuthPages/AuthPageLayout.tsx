@@ -28,7 +28,7 @@ export default function AuthLayout({
               <h1 className="text-white text-4xl font-bold">HSEradar</h1>
               </Link>
               <p className="text-center text-gray-400 dark:text-white/60">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut.
+                Prijavite se da nastavite.
               </p>
             </div>
           </div>

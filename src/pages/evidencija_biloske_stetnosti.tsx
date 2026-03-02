@@ -16,6 +16,7 @@ import {
   createPrintStyles, 
   createPdfOptions 
 } from '../utils/printDownloadUtils';
+import { api } from '../api/client';
 
 // Add TableRow type with index signature
 type TableRow = {
@@ -57,6 +58,7 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
+  const [saveError, setSaveError] = useState<string | null>(null);
   
   // Create refs for each input field
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -205,13 +207,21 @@ const EvidencijaBiloskeStetnosti: React.FC = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nazivObrasca.trim()) {
       return;
     }
-    // Handle save logic here
-    console.log("Saving form with name:", nazivObrasca);
-    closeModal();
+    try {
+      await api.post('obrasci', {
+        naziv_obrasca: nazivObrasca,
+        uneti_podaci: rows,
+        korisnik_id: null,
+      });
+      closeModal();
+      setNazivObrasca('');
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Greška pri čuvanju.');
+    }
   };
 
   const handleNazivChange = (e: React.ChangeEvent<HTMLInputElement>) => {

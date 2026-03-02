@@ -18,15 +18,17 @@ interface Note {
 interface NotesFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (note: Omit<Note, "id" | "createdAt" | "updatedAt">) => void;
+  onSave: (note: Omit<Note, "id" | "createdAt" | "updatedAt">) => Promise<void> | void;
   initialData?: Note;
 }
 
 export default function NotesForm({ isOpen, onClose, onSave, initialData }: NotesFormProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
+    setFormError("");
     if (initialData) {
       setTitle(initialData.title);
       setContent(initialData.content);
@@ -36,15 +38,16 @@ export default function NotesForm({ isOpen, onClose, onSave, initialData }: Note
     }
   }, [initialData, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
       return;
     }
-    onSave({ title: title.trim(), content: content.trim() });
-    setTitle("");
-    setContent("");
-    onClose();
+    try {
+      await onSave({ title: title.trim(), content: content.trim() });
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Greška pri čuvanju.");
+    }
   };
 
   return (
@@ -61,6 +64,11 @@ export default function NotesForm({ isOpen, onClose, onSave, initialData }: Note
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="px-5 lg:px-10 overflow-y-auto flex-1 max-h-[calc(90vh-280px)]">
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+                {formError}
+              </div>
+            )}
             <div className="flex flex-col gap-4 pb-4">
               <div className="w-full">
                 <Label>Naslov *</Label>

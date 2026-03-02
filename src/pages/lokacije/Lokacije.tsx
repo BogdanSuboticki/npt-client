@@ -1,27 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LokacijeDataTable from "./LokacijeDataTable";
 import LokacijeForm from "./LokacijeForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
-// Sample data
-const sampleData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    nazivLokacije: "Glavna zgrada",
-    brojMernihMesta: 15,
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    nazivLokacije: "Skladište A",
-    brojMernihMesta: 8,
-  },
-];
+const mapLokacijaFromApi = (lokacija: any, index: number) => ({
+  id: lokacija.id,
+  redniBroj: index + 1,
+  nazivLokacije: lokacija.naziv,
+  brojMernihMesta: lokacija.broj_mernih_mesta,
+  firmaPib: lokacija.firma_pib,
+});
 
 // Column definitions
 const columns = [
@@ -62,37 +56,57 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 export default function Lokacije() {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(sampleData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [firme, setFirme] = useState<any[]>([]);
 
-  const handleSave = (newData: any) => {
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
-    
+  const loadLokacije = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`lokacije?context=${context}`);
+      setData(response.data.map(mapLokacijaFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju lokacija.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadFirme = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`firme?context=${context}`);
+      setFirme(response.data.map((f: any) => ({ pib: f.pib, naziv: f.naziv })));
+    } catch (error) {
+      console.error("Greška pri učitavanju firmi:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadLokacije();
+    loadFirme();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      naziv: newData.nazivLokacije,
+      broj_mernih_mesta: parseInt(newData.brojMernihMesta),
+      firma_pib: newData.firmaPib,
+    };
+
     if (editingItem) {
-      // Update existing item
-      const updatedItem = {
-        ...editingItem,
-        nazivLokacije: newData.nazivLokacije,
-        brojMernihMesta: parseInt(newData.brojMernihMesta),
-      };
-      
-      setData(data.map(item => 
-        item.id === editingItem.id ? updatedItem : item
-      ));
+      await api.put(`lokacije/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item
-      const newItem = {
-        id: data.length + 1,
-        redniBroj: data.length + 1,
-        nazivLokacije: newData.nazivLokacije,
-        brojMernihMesta: parseInt(newData.brojMernihMesta),
-      };
-      setData([...data, newItem]);
+      await api.post("lokacije", payload);
     }
+    await loadLokacije();
     setShowForm(false);
   };
 
@@ -101,9 +115,14 @@ export default function Lokacije() {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`lokacije/${itemToDelete.id}`);
+        await loadLokacije();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju lokacije.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -200,12 +219,18 @@ export default function Lokacije() {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <LokacijeDataTable 
-            data={data} 
-            columns={columns} 
-            onEditClick={handleEditClick}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <LokacijeDataTable 
+              data={data} 
+              columns={columns} 
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          )}
         </div>
 
         <LokacijeForm
@@ -213,6 +238,7 @@ export default function Lokacije() {
           onClose={handleFormClose}
           onSave={handleSave}
           initialData={editingItem}
+          firme={firme}
         />
 
         <ConfirmModal

@@ -1,283 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import IspitivanjeRadneSredineDataTable from './IspitivanjeRadneSredineDataTable';
 import IspitivanjeRadneSredineForm from './IspitivanjeRadneSredineForm';
 import Button from '../../components/ui/button/Button';
 import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
 import ConfirmModal from '../../components/ui/modal/ConfirmModal';
+import { api } from '../../api/client';
+import { usePageContext } from '../../hooks/usePageContext';
+import { fromIsoDate, toIsoDate } from '../../utils/date';
 
-// Sample data for the table
-const sampleData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    nazivLokacije: 'Fabrika Novi Sad',
-    brojMernihMesta: 8,
-    intervalIspitivanja: '6 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '15.06.2023',
-      narednoIspitivanje: '15.12.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '10.01.2023',
-      narednoIspitivanje: '10.07.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '22.03.2023',
-      narednoIspitivanje: '22.09.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '05.05.2023',
-      narednoIspitivanje: '05.11.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '18.04.2023',
-      narednoIspitivanje: '18.10.2023'
+const computeNarednoIspitivanje = (datumIspitivanja: string | null, intervalMeseci: number): string => {
+  const date = fromIsoDate(datumIspitivanja);
+  if (!date) return '';
+  const naredno = new Date(date);
+  naredno.setMonth(naredno.getMonth() + intervalMeseci);
+  return naredno.toLocaleDateString('sr-Latn-RS');
+};
+
+const tipKeyToNaziv: Record<string, string> = {
+  mikroklimaLetnja: 'Ispitivanje Mikroklime letnje',
+  mikroklimaZimska: 'Ispitivanje Mikroklime zimske',
+  fizickeStetnosti: 'Ispitivanje Fizičkih štetnosti',
+  hemijskeStetnosti: 'Ispitivanje Hemijskih štetnosti',
+  osvetljenje: 'Ispitivanje Osvetljenja',
+};
+
+const mapIspitivanjeFromApi = (item: any, index: number) => {
+  const rezultati = item.rezultati || [];
+  const intervalMeseci = item.interval_ispitivanja_meseci ?? 36;
+  const result: any = {
+    id: item.id,
+    redniBroj: index + 1,
+    nazivLokacije: item.lokacija?.naziv ?? '',
+    brojMernihMesta: item.broj_mernih_mesta,
+    intervalIspitivanja: `${item.interval_ispitivanja_meseci} meseci`,
+    intervalIspitivanjaMeseci: item.interval_ispitivanja_meseci,
+    lokacijaId: item.lokacija_id,
+    firmaPib: item.firma_pib,
+    _rawRezultati: rezultati,
+  };
+
+  rezultati.forEach((rez: any) => {
+    const tip = rez.tip;
+    const prethodno = fromIsoDate(rez.datum_ispitivanja)?.toLocaleDateString('sr-Latn-RS') ?? '';
+    const naredno = computeNarednoIspitivanje(rez.datum_ispitivanja, intervalMeseci);
+
+    if (tip.includes('Mikroklima letnja')) {
+      result.mikroklimaLetnja = { prethodnoIspitivanje: prethodno, narednoIspitivanje: naredno };
+    } else if (tip.includes('Mikroklima zimska')) {
+      result.mikroklimaZimska = { prethodnoIspitivanje: prethodno, narednoIspitivanje: naredno };
+    } else if (tip.includes('Fizičk')) {
+      result.fizickeStetnosti = { prethodnoIspitivanje: prethodno, narednoIspitivanje: naredno };
+    } else if (tip.includes('Hemijsk')) {
+      result.hemijskeStetnosti = { prethodnoIspitivanje: prethodno, narednoIspitivanje: naredno };
+    } else if (tip.includes('Osvetljenj')) {
+      result.osvetljenje = { prethodnoIspitivanje: prethodno, narednoIspitivanje: naredno };
     }
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    nazivLokacije: 'Skladište Beograd',
-    brojMernihMesta: 4,
-    intervalIspitivanja: '12 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '12.07.2022',
-      narednoIspitivanje: '12.07.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '08.02.2022',
-      narednoIspitivanje: '08.02.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '25.09.2022',
-      narednoIspitivanje: '25.09.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '14.11.2022',
-      narednoIspitivanje: '14.11.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '03.08.2022',
-      narednoIspitivanje: '03.08.2023'
-    }
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    nazivLokacije: 'Upravna zgrada Niš',
-    brojMernihMesta: 6,
-    intervalIspitivanja: '6 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '20.05.2023',
-      narednoIspitivanje: '20.11.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '15.12.2022',
-      narednoIspitivanje: '15.06.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '28.02.2023',
-      narednoIspitivanje: '28.08.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '10.04.2023',
-      narednoIspitivanje: '10.10.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '07.03.2023',
-      narednoIspitivanje: '07.09.2023'
-    }
-  },
-  {
-    id: 4,
-    redniBroj: 4,
-    nazivLokacije: 'Pogon Subotica',
-    brojMernihMesta: 12,
-    intervalIspitivanja: '3 meseca',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '30.06.2023',
-      narednoIspitivanje: '30.09.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '25.03.2023',
-      narednoIspitivanje: '25.06.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '12.05.2023',
-      narednoIspitivanje: '12.08.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '18.07.2023',
-      narednoIspitivanje: '18.10.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '05.04.2023',
-      narednoIspitivanje: '05.07.2023'
-    }
-  },
-  {
-    id: 5,
-    redniBroj: 5,
-    nazivLokacije: 'Distributivni centar Kragujevac',
-    brojMernihMesta: 5,
-    intervalIspitivanja: '12 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '22.08.2022',
-      narednoIspitivanje: '22.08.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '14.01.2022',
-      narednoIspitivanje: '14.01.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '09.10.2022',
-      narednoIspitivanje: '09.10.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '17.12.2022',
-      narednoIspitivanje: '17.12.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '31.07.2022',
-      narednoIspitivanje: '31.07.2023'
-    }
-  },
-  {
-    id: 6,
-    redniBroj: 6,
-    nazivLokacije: 'Tehnički centar Zrenjanin',
-    brojMernihMesta: 7,
-    intervalIspitivanja: '6 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '11.04.2023',
-      narednoIspitivanje: '11.10.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '06.11.2022',
-      narednoIspitivanje: '06.05.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '24.01.2023',
-      narednoIspitivanje: '24.07.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '13.03.2023',
-      narednoIspitivanje: '13.09.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '29.02.2023',
-      narednoIspitivanje: '29.08.2023'
-    }
-  },
-  {
-    id: 7,
-    redniBroj: 7,
-    nazivLokacije: 'Logistički centar Čačak',
-    brojMernihMesta: 9,
-    intervalIspitivanja: '6 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '16.09.2022',
-      narednoIspitivanje: '16.03.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '21.12.2022',
-      narednoIspitivanje: '21.06.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '08.05.2023',
-      narednoIspitivanje: '08.11.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '26.07.2022',
-      narednoIspitivanje: '26.01.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '19.10.2022',
-      narednoIspitivanje: '19.04.2023'
-    }
-  },
-  {
-    id: 8,
-    redniBroj: 8,
-    nazivLokacije: 'Proizvodni kompleks Pančevo',
-    brojMernihMesta: 15,
-    intervalIspitivanja: '3 meseca',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '02.08.2023',
-      narednoIspitivanje: '02.11.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '27.05.2023',
-      narednoIspitivanje: '27.08.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '14.06.2023',
-      narednoIspitivanje: '14.09.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '01.09.2023',
-      narednoIspitivanje: '01.12.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '23.07.2023',
-      narednoIspitivanje: '23.10.2023'
-    }
-  },
-  {
-    id: 9,
-    redniBroj: 9,
-    nazivLokacije: 'Poslovni centar Valjevo',
-    brojMernihMesta: 3,
-    intervalIspitivanja: '12 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '09.12.2022',
-      narednoIspitivanje: '09.12.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '03.03.2022',
-      narednoIspitivanje: '03.03.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '18.06.2022',
-      narednoIspitivanje: '18.06.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '30.09.2022',
-      narednoIspitivanje: '30.09.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '12.04.2022',
-      narednoIspitivanje: '12.04.2023'
-    }
-  },
-  {
-    id: 10,
-    redniBroj: 10,
-    nazivLokacije: 'Industrijska zona Šabac',
-    brojMernihMesta: 6,
-    intervalIspitivanja: '6 meseci',
-    mikroklimaLetnja: {
-      prethodnoIspitivanje: '25.03.2023',
-      narednoIspitivanje: '25.09.2023'
-    },
-    mikroklimaZimska: {
-      prethodnoIspitivanje: '17.10.2022',
-      narednoIspitivanje: '17.04.2023'
-    },
-    fizickeStetnosti: {
-      prethodnoIspitivanje: '04.01.2023',
-      narednoIspitivanje: '04.07.2023'
-    },
-    hemijskeStetnosti: {
-      prethodnoIspitivanje: '22.05.2023',
-      narednoIspitivanje: '22.11.2023'
-    },
-    osvetljenje: {
-      prethodnoIspitivanje: '11.02.2023',
-      narednoIspitivanje: '11.08.2023'
-    }
-  }
-];
+  });
+
+  return result;
+};
 
 // Column definitions for the table
 const columns = [
@@ -324,20 +105,57 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const IspitivanjeRadneSredine: React.FC = () => {
+  const context = usePageContext();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [data, setData] = useState(sampleData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSave = (newData: any) => {
-    setData(prev => [
-      ...prev,
-      {
-        ...newData,
-        id: prev.length + 1,
-        redniBroj: prev.length + 1,
-      }
-    ]);
+  const loadIspitivanja = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`ispitivanja-radne-sredine?context=${context}`);
+      setData(response.data.map(mapIspitivanjeFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Greška pri učitavanju ispitivanja radne sredine.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadIspitivanja();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    // The form sends tipoviIspitivanja as an array of selected types with:
+    //   { key, naziv, selected, ispravno (boolean), datumIspitivanja (Date) }
+    // Map to the backend expected format with tip (string) and status ('ispravno'/'neispravno')
+    const rezultati = (newData.tipoviIspitivanja || []).map((tip: any) => ({
+      tip: tip.naziv,
+      status: tip.ispravno ? 'ispravno' : 'neispravno',
+      datum_ispitivanja: toIsoDate(tip.datumIspitivanja),
+    }));
+
+    const payload = {
+      firma_pib: newData.firmaPib,
+      lokacija_id: Number(newData.lokacijaId),
+      broj_mernih_mesta: Number(newData.brojMernihMesta),
+      interval_ispitivanja_meseci: Number(newData.intervalIspitivanja),
+      rezultati,
+    };
+
+    if (editingItem) {
+      await api.put(`ispitivanja-radne-sredine/${editingItem.id}`, payload);
+      setEditingItem(null);
+    } else {
+      await api.post('ispitivanja-radne-sredine', payload);
+    }
+    await loadIspitivanja();
     setIsFormOpen(false);
   };
 
@@ -346,9 +164,14 @@ const IspitivanjeRadneSredine: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`ispitivanja-radne-sredine/${itemToDelete.id}`);
+        await loadIspitivanja();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : 'Greška pri brisanju ispitivanja radne sredine.');
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -357,6 +180,45 @@ const IspitivanjeRadneSredine: React.FC = () => {
   const handleDeleteCancel = () => {
     setItemToDelete(null);
     setShowDeleteModal(false);
+  };
+
+  const handleIzvrsiIspitivanje = async (item: any, columnKey: string, formData: { ispravno: boolean; datumIspitivanja: Date }) => {
+    const tipNaziv = tipKeyToNaziv[columnKey];
+    if (!tipNaziv) return;
+
+    const rawRezultati: any[] = item._rawRezultati || [];
+    const updatedRezultati = rawRezultati
+      .filter((r: any) => r.tip !== tipNaziv)
+      .map((r: any) => ({
+        tip: r.tip,
+        status: r.status,
+        datum_ispitivanja: r.datum_ispitivanja,
+      }));
+
+    updatedRezultati.push({
+      tip: tipNaziv,
+      status: formData.ispravno ? 'ispravno' : 'neispravno',
+      datum_ispitivanja: toIsoDate(formData.datumIspitivanja),
+    });
+
+    await api.put(`ispitivanja-radne-sredine/${item.id}`, {
+      firma_pib: item.firmaPib,
+      lokacija_id: Number(item.lokacijaId),
+      broj_mernih_mesta: Number(item.brojMernihMesta),
+      interval_ispitivanja_meseci: Number(item.intervalIspitivanjaMeseci),
+      rezultati: updatedRezultati,
+    });
+    await loadIspitivanja();
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setIsFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingItem(null);
   };
 
   return (
@@ -435,17 +297,26 @@ const IspitivanjeRadneSredine: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <IspitivanjeRadneSredineDataTable
-            data={data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <IspitivanjeRadneSredineDataTable
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+              onIzvrsiIspitivanje={handleIzvrsiIspitivanje}
+            />
+          )}
         </div>
 
         <IspitivanjeRadneSredineForm
           isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
         />
 
         <ConfirmModal

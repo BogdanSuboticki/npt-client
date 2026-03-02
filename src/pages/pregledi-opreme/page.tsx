@@ -1,85 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PreglediOpremeDataTable from "./PreglediOpremeDataTable";
 import PreglediOpremeForm from "./PreglediOpremeForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const preglediOpremeData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    nazivOpreme: "Kompresor vazduha",
-    vrstaOpreme: "Oprema za rad",
-    inventarniBroj: "INV-001",
-    lokacija: "Proizvodna hala A",
-    datumPregleda: new Date("2024-01-01"),
-    intervalPregleda: "1",
-    status: "Ispravno",
-    datumNarednogPregleda: new Date("2024-07-01"),
-    napomena: "Redovna kontrola",
-    standard: "EN 1012-1",
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    nazivOpreme: "Kran mostni",
-    vrstaOpreme: "Oprema za rad",
-    inventarniBroj: "INV-002",
-    lokacija: "Skladište B",
-    datumPregleda: new Date("2024-02-15"),
-    intervalPregleda: "3",
-    status: "Ispravno",
-    datumNarednogPregleda: new Date("2024-08-15"),
-    napomena: "Redovna kontrola",
-    standard: "EN 13001-1",
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    nazivOpreme: "Ventilator industrijski",
-    vrstaOpreme: "Oprema za rad",
-    inventarniBroj: "INV-003",
-    lokacija: "Proizvodna hala B",
-    datumPregleda: new Date("2024-03-10"),
-    intervalPregleda: "6",
-    status: "Neispravno",
-    datumNarednogPregleda: new Date("2024-06-10"),
-    napomena: "Potrebna je zamena motora, oprema trenutno neispravna",
-    standard: "EN 60335-2-80",
-  },
-  {
-    id: 4,
-    redniBroj: 4,
-    nazivOpreme: "Pumpa za vodu",
-    vrstaOpreme: "Oprema za rad",
-    inventarniBroj: "INV-004",
-    lokacija: "Tehnička prostorija",
-    datumPregleda: new Date("2024-01-30"),
-    intervalPregleda: "24",
-    status: "Ispravno",
-    datumNarednogPregleda: new Date("2026-01-30"),
-    napomena: "Oprema u odličnom stanju, nema potrebe za intervencijom",
-    standard: "EN 809",
-  },
-  {
-    id: 5,
-    redniBroj: 5,
-    nazivOpreme: "Generator električni",
-    vrstaOpreme: "Elektro i gromobranska instalacija",
-    inventarniBroj: "INV-005",
-    lokacija: "Energetski centar",
-    datumPregleda: new Date("2024-02-05"),
-    intervalPregleda: "12",
-    status: "Ispravno",
-    datumNarednogPregleda: new Date("2025-02-05"),
-    napomena: "Redovna kontrola, potrebna je zamena ulja",
-    standard: "EN 60034-1",
-  },
-];
+const mapPregledOpremeFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  nazivOpreme: item.naziv_opreme ?? item.oprema?.naziv ?? "",
+  vrstaOpreme: item.vrsta_opreme ?? item.oprema?.vrsta_opreme ?? "",
+  inventarniBroj: item.oprema?.inventarni_broj ?? "",
+  lokacija: item.lokacija?.naziv ?? "",
+  datumPregleda: fromIsoDate(item.datum_pregleda) ?? new Date(),
+  intervalPregleda: item.interval_pregleda?.toString() ?? "",
+  status: item.status === "ispravno" ? "Ispravno" : "Neispravno",
+  datumNarednogPregleda: fromIsoDate(item.datum_narednog_pregleda) ?? new Date(),
+  napomena: item.napomena ?? "",
+  standard: item.standard ?? item.oprema?.standard ?? "",
+  opremaId: item.oprema_id,
+  firmaPib: item.firma_pib,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -126,20 +72,49 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const PreglediOpremePage: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(preglediOpremeData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
+  const loadPreglediOpreme = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`pregledi-opreme?context=${context}`);
+      setData(response.data.map(mapPregledOpremeFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju pregleda opreme.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPreglediOpreme();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      oprema_id: Number(newData.opremaId),
+      interval_pregleda: Number(newData.intervalPregleda),
+      datum_pregleda: toIsoDate(newData.datumPregleda),
+      status: newData.status.toLowerCase(),
+      napomena: newData.napomena || null,
     };
-    setData([...data, newItem]);
+
+    if (editingItem) {
+      await api.put(`pregledi-opreme/${editingItem.id}`, payload);
+      setEditingItem(null);
+    } else {
+      await api.post("pregledi-opreme", payload);
+    }
+    await loadPreglediOpreme();
     setShowForm(false);
   };
 
@@ -148,9 +123,14 @@ const PreglediOpremePage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`pregledi-opreme/${itemToDelete.id}`);
+        await loadPreglediOpreme();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju pregleda opreme.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -159,6 +139,16 @@ const PreglediOpremePage: React.FC = () => {
   const handleDeleteCancel = () => {
     setItemToDelete(null);
     setShowDeleteModal(false);
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -237,17 +227,25 @@ const PreglediOpremePage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <PreglediOpremeDataTable 
-            data={data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <PreglediOpremeDataTable 
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+            />
+          )}
         </div>
 
         <PreglediOpremeForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          initialData={editingItem}
         />
 
         <ConfirmModal

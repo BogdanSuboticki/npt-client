@@ -5,15 +5,27 @@ import Label from "../components/form/Label";
 import Input from "../components/form/input/InputField";
 import Checkbox from "../components/form/input/Checkbox";
 
+interface LzsOption {
+  id: number;
+  lzs: string;
+  rok: number;
+  standard: string;
+}
+
 interface RadnoMestoFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: any) => Promise<void> | void;
   initialData?: any;
+  lzsOptions?: LzsOption[];
+  firme: Array<{ pib: string; naziv: string }>;
+  lokacije: Array<{ id: number; naziv: string; firma_pib: string }>;
 }
 
-export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }: RadnoMestoFormProps) {
+export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData, lzsOptions = [], firme, lokacije }: RadnoMestoFormProps) {
   const [formData, setFormData] = React.useState({
+    firmaPib: "",
+    lokacijaId: "",
     nazivRadnogMesta: "",
     povecanRizik: false,
     obavezanOftamoloskiPregled: false,
@@ -22,42 +34,29 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }:
     oprema: [] as Array<{lzs: string, rok: number, standard: string}>
   });
 
-  // Add state for dropdowns
   const [isOpremaOpen, setIsOpremaOpen] = React.useState(false);
+  const [isFirmaOpen, setIsFirmaOpen] = React.useState(false);
+  const [isLokacijaOpen, setIsLokacijaOpen] = React.useState(false);
+  const [formError, setFormError] = React.useState("");
   const opremaRef = useRef<HTMLDivElement>(null);
+  const firmaRef = useRef<HTMLDivElement>(null);
+  const lokacijaRef = useRef<HTMLDivElement>(null);
 
-  // Lekarski pregled options
+  const filteredLokacije = lokacije.filter(l => l.firma_pib === formData.firmaPib);
 
-  // Equipment options
-  const opremaOptions = [
-    { lzs: "Viljuškara", rok: 12, standard: "ISO-2023-001" },
-    { lzs: "Zaštitna kaciga", rok: 6, standard: "ISO-2023-002" },
-    { lzs: "Zaštitne rukavice", rok: 6, standard: "ISO-2023-003" },
-    { lzs: "Sigurnosna obuća", rok: 12, standard: "ISO-2023-004" },
-    { lzs: "Zaštitni pojas", rok: 6, standard: "ISO-2023-005" },
-    { lzs: "Zaštitne naočare", rok: 6, standard: "ISO-2023-006" },
-    { lzs: "Zaštitna odela", rok: 6, standard: "ISO-2023-007" },
-    { lzs: "Multimetar", rok: 24, standard: "ISO-2023-008" },
-    { lzs: "Alat za održavanje", rok: 24, standard: "ISO-2023-009" },
-    { lzs: "Laboratorijski pribor", rok: 12, standard: "ISO-2023-010" },
-    { lzs: "Mikroskop", rok: 60, standard: "ISO-2023-011" },
-    { lzs: "Računar", rok: 36, standard: "ISO-2023-012" },
-    { lzs: "Mobilni telefon", rok: 24, standard: "ISO-2023-013" },
-    { lzs: "Stolica", rok: 60, standard: "ISO-2023-014" },
-    { lzs: "Zavarivačka maska", rok: 12, standard: "ISO-2023-015" },
-    { lzs: "Zavarivački aparat", rok: 48, standard: "ISO-2023-016" },
-    { lzs: "Alat za električne radove", rok: 36, standard: "ISO-2023-017" },
-    { lzs: "Alat za bravarske radove", rok: 24, standard: "ISO-2023-018" },
-    { lzs: "Proizvodna mašina", rok: 48, standard: "ISO-2023-019" }
-  ];
+  const opremaOptions = lzsOptions;
 
   // Add click outside handler for dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       
-      // Close dropdowns
-
+      if (firmaRef.current && !firmaRef.current.contains(target)) {
+        setIsFirmaOpen(false);
+      }
+      if (lokacijaRef.current && !lokacijaRef.current.contains(target)) {
+        setIsLokacijaOpen(false);
+      }
       if (opremaRef.current && !opremaRef.current.contains(target)) {
         setIsOpremaOpen(false);
       }
@@ -71,6 +70,8 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }:
   useEffect(() => {
     if (initialData) {
       setFormData({
+        firmaPib: initialData.firmaPib || "",
+        lokacijaId: initialData.lokacijaId ? String(initialData.lokacijaId) : "",
         nazivRadnogMesta: initialData.nazivRadnogMesta || "",
         povecanRizik: initialData.povecanRizik === "Da",
         obavezanOftamoloskiPregled: initialData.obavezanOftamoloskiPregled === "Da",
@@ -79,8 +80,9 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }:
         oprema: initialData.oprema || []
       });
     } else {
-      // Reset form when no initial data
       setFormData({
+        firmaPib: "",
+        lokacijaId: "",
         nazivRadnogMesta: "",
         povecanRizik: false,
         obavezanOftamoloskiPregled: false,
@@ -91,14 +93,21 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }:
     }
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isOpen) setFormError("");
+  }, [isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nazivRadnogMesta) {
-      alert('Molimo popunite sva obavezna polja');
+    if (!formData.firmaPib || !formData.lokacijaId || !formData.nazivRadnogMesta) {
+      setFormError('Molimo popunite sva obavezna polja');
       return;
     }
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Greška pri čuvanju.");
+    }
   };
 
   const handleOpremaSelectAll = () => {
@@ -130,7 +139,104 @@ export default function RadnoMestoForm({ isOpen, onClose, onSave, initialData }:
           {initialData ? "Izmeni Radno Mesto" : "Novo Radno Mesto"}
         </h4>
 
+        {formError && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+            {formError}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+          <div className="col-span-1">
+            <Label>Firma *</Label>
+            <div className="relative w-full" ref={firmaRef}>
+              <button
+                type="button"
+                onClick={() => setIsFirmaOpen(!isFirmaOpen)}
+                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              >
+                <span>
+                  {formData.firmaPib
+                    ? firme.find(f => f.pib === formData.firmaPib)?.naziv || formData.firmaPib
+                    : "Izaberi firmu"}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isFirmaOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isFirmaOpen && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    {firme.map((firma, index) => (
+                      <div
+                        key={firma.pib}
+                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                          formData.firmaPib === firma.pib ? 'bg-gray-100 dark:bg-gray-700' : ''
+                        } ${index === firme.length - 1 ? 'rounded-b-lg' : ''}`}
+                        onClick={() => {
+                          setFormData({...formData, firmaPib: firma.pib, lokacijaId: ""});
+                          setIsFirmaOpen(false);
+                        }}
+                      >
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{firma.naziv}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="col-span-1">
+            <Label>Lokacija *</Label>
+            <div className="relative w-full" ref={lokacijaRef}>
+              <button
+                type="button"
+                onClick={() => setIsLokacijaOpen(!isLokacijaOpen)}
+                disabled={!formData.firmaPib}
+                className="flex items-center justify-between w-full h-11 px-4 text-sm text-gray-800 bg-[#F9FAFB] border border-gray-300 rounded-lg dark:bg-[#101828] dark:border-gray-700 dark:text-white/90 hover:bg-gray-50 hover:text-gray-800 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>
+                  {formData.lokacijaId
+                    ? lokacije.find(l => String(l.id) === formData.lokacijaId)?.naziv || formData.lokacijaId
+                    : "Izaberi lokaciju"}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isLokacijaOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isLokacijaOpen && (
+                <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                  <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
+                    {filteredLokacije.map((lok, index) => (
+                      <div
+                        key={lok.id}
+                        className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
+                          formData.lokacijaId === String(lok.id) ? 'bg-gray-100 dark:bg-gray-700' : ''
+                        } ${index === filteredLokacije.length - 1 ? 'rounded-b-lg' : ''}`}
+                        onClick={() => {
+                          setFormData({...formData, lokacijaId: String(lok.id)});
+                          setIsLokacijaOpen(false);
+                        }}
+                      >
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{lok.naziv}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="col-span-1">
             <Label>Naziv radnog mesta *</Label>
             <Input 

@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from "react";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
@@ -8,75 +8,132 @@ import CompanyContactCard from "../components/UserProfile/CompanyContactCard";
 import SidebarSettingsCard from "../components/UserProfile/SidebarSettingsCard";
 import OrganizationSettingsCard from "../components/UserProfile/OrganizationSettingsCard";
 import SuperAdminDashboard from "../components/UserProfile/SuperAdminDashboard";
-import ProfileTypeSelector from "../components/UserProfile/ProfileTypeSelector";
 import PageMeta from "../components/common/PageMeta";
 import { useUser } from "../context/UserContext";
+import { api } from "../api/client";
 
 type UserType = 'super-admin' | 'admin' | 'user' | 'komitent';
 
-interface UserData {
+interface AuthenticatedUser {
+  id: number;
   name: string;
-  role: string;
-  location: string;
-  company: string;
+  ime?: string;
+  prezime?: string;
   email: string;
-  phone: string;
-  bio: string;
+  role: string;
+  firma_pib?: string;
+  profile_photo_url?: string;
+  firma?: {
+    naziv: string;
+    pib: string;
+    maticni_broj?: string;
+    sifra_delatnosti?: string;
+    adresa: string;
+    mesto: string;
+    drzava: string;
+    email: string;
+    direktor_ime_prezime?: string;
+    direktor_telefon?: string;
+    direktor_email?: string;
+    saradnik_ime_prezime?: string;
+    saradnik_telefon?: string;
+    saradnik_email?: string;
+  };
 }
 
-const userData: Record<UserType, UserData> = {
-  'super-admin': {
-    name: "Aleksandar Nikolić",
-    role: "Super Administrator",
-    location: "Beograd, Srbija",
-    company: "Sistem Administracija d.o.o.",
-    email: "aleksandar.nikolic@sistem.rs",
-    phone: "+381 11 555 1234",
-    bio: "Glavni administrator sistema sa punim pristupom svim organizacijama, korisnicima i sistemskim postavkama"
-  },
-  'admin': {
-    name: "Marko Petrović",
-    role: "Administrator",
-    location: "Novi Sad, Srbija",
-    company: "Tech Solutions d.o.o.",
-    email: "marko.petrovic@techsolutions.rs",
-    phone: "+381 21 123 4567",
-    bio: "Administrator firme sa pristupom korisnicima u svojoj firmi"
-  },
-  'user': {
-    name: "Ana Jovanović",
-    role: "Korisnik",
-    location: "Niš, Srbija",
-    company: "Tech Solutions d.o.o.",
-    email: "ana.jovanovic@techsolutions.rs",
-    phone: "+381 18 987 6543",
-    bio: "Redovan korisnik sistema sa pristupom samo svom nalogu"
-  },
-  'komitent': {
-    name: "Petar Marković",
-    role: "Komitent",
-    location: "Kragujevac, Srbija",
-    company: "Tech Solutions d.o.o.",
-    email: "petar.markovic@techsolutions.rs",
-    phone: "+381 34 456 7890",
-    bio: "Komitent sa pristupom samo za pregled podataka - bez mogućnosti izmena"
+const mapRoleToUserType = (role: string): UserType => {
+  if (role === 'super_admin') return 'super-admin';
+  if (role === 'admin') return 'admin';
+  if (role === 'komitent') return 'komitent';
+  return 'user';
+};
+
+const getRoleDisplayName = (role: string): string => {
+  switch (role) {
+    case 'super_admin':
+      return 'Super Administrator';
+    case 'admin':
+      return 'Administrator';
+    case 'komitent':
+      return 'Komitent';
+    default:
+      return 'Korisnik';
   }
 };
 
 export default function UserProfiles() {
-  const { userType, setUserType } = useUser();
-  const currentUser = userData[userType];
-  const displayName =
-    userType === 'super-admin'
-      ? 'Super admin Profil 1'
-      : userType === 'admin'
-      ? currentUser.company
-      : userType === 'komitent'
-      ? currentUser.name
-      : currentUser.name;
+  const { setUserType } = useUser();
+  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleProfileTypeChange = (type: UserType) => {
-    setUserType(type);
+  const loadUser = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const userData = await api.get<AuthenticatedUser>("auth/me");
+      setUser(userData);
+      const mappedRole = mapRoleToUserType(userData.role);
+      setUserType(mappedRole);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju korisnika.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUser();
+  }, [setUserType]);
+
+  if (isLoading) {
+    return (
+      <>
+        <PageMeta
+          title="Moj Profil"
+          description="Ovo je stranica za prikaz mojeg profila"
+        />
+        <PageBreadcrumb pageTitle="Moj Profil" />
+        <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+      </>
+    );
+  }
+
+  if (errorMessage || !user) {
+    return (
+      <>
+        <PageMeta
+          title="Moj Profil"
+          description="Ovo je stranica za prikaz mojeg profila"
+        />
+        <PageBreadcrumb pageTitle="Moj Profil" />
+        <div className="p-4 text-sm text-error-500">
+          {errorMessage || "Greška pri učitavanju korisnika."}
+        </div>
+      </>
+    );
+  }
+
+  const userType = mapRoleToUserType(user.role);
+  const displayName = user.name || `${user.ime || ''} ${user.prezime || ''}`.trim() || user.email;
+  const userLocation = user.firma?.mesto && user.firma?.drzava 
+    ? `${user.firma.mesto}, ${user.firma.drzava}`
+    : "Srbija";
+  const userCompany = user.firma?.naziv || "";
+  const profileImageUrl = user.profile_photo_url || "/images/user/owner.jpg";
+
+  const handleProfileImageChange = async (file: File, dataUrl: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      
+      const response = await api.post<{ user: AuthenticatedUser }>("auth/profile-photo", formData);
+      setUser(response.user);
+      // Clear any error message on success
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri ažuriranju profilne slike.");
+    }
   };
 
   return (
@@ -95,10 +152,12 @@ export default function UserProfiles() {
             <UserMetaCard 
               userType={userType}
               userName={displayName}
-              userRole={currentUser.role}
-              userLocation={currentUser.location}
-              userCompany={currentUser.company}
+              userRole={getRoleDisplayName(user.role)}
+              userLocation={userLocation}
+              userCompany={userCompany}
+              profileImageUrl={profileImageUrl}
               enableImageUpload={true}
+              onProfileImageChange={handleProfileImageChange}
             />
 
             {/* Super Admin Dashboard - Only for Super Admin */}
@@ -107,10 +166,10 @@ export default function UserProfiles() {
             )}
 
             {/* Company Information Cards - Only for Admin, moved to top */}
-            {userType === 'admin' && (
+            {userType === 'admin' && user.firma && (
               <>
-                <CompanyInfoCard />
-                <CompanyContactCard />
+                <CompanyInfoCard firma={user.firma} onUpdate={loadUser} />
+                <CompanyContactCard firma={user.firma} onUpdate={loadUser} />
               </>
             )}
 
@@ -119,20 +178,20 @@ export default function UserProfiles() {
               <UserInfoCard 
                 userType={userType}
                 userName={displayName}
-                userEmail={currentUser.email}
-                userPhone={currentUser.phone}
-                userBio={currentUser.bio}
+                userEmail={user.email}
+                userPhone=""
+                userBio=""
               />
             )}
 
             {/* User Address Card - Hidden for Super Admin and Admin */}
-            {(userType === 'user' || userType === 'komitent') && (
+            {(userType === 'user' || userType === 'komitent') && user.firma && (
               <UserAddressCard 
                 userType={userType}
-                userCountry="Srbija"
-                userCity={currentUser.location.split(', ')[0]}
-                userPostalCode="11000"
-                userTaxId="123456789"
+                userCountry={user.firma.drzava || "Srbija"}
+                userCity={user.firma.mesto || ""}
+                userPostalCode=""
+                userTaxId={user.firma.pib || ""}
               />
             )}
 
@@ -147,12 +206,6 @@ export default function UserProfiles() {
             )}
           </div>
         </div>
-
-        {/* Profile Type Selector - Moved to bottom */}
-        <ProfileTypeSelector 
-          currentType={userType}
-          onProfileTypeChange={handleProfileTypeChange}
-        />
       </div>
     </>
   );

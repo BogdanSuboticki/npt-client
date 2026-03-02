@@ -6,10 +6,7 @@ export default function RoundedRibbon() {
       </span>
       <div className="p-5 pt-16">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Lorem ipsum dolor sit amet consectetur. Eget nulla suscipit arcu
-          rutrum amet vel nec fringilla vulputate. Sed aliquam fringilla
-          vulputate imperdiet arcu natoque purus ac nec ultricies nulla
-          ultrices.
+          Nema dostupnog sadržaja.
         </p>
       </div>
     </div>

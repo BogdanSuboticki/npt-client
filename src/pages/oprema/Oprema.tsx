@@ -1,49 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import OpremaDataTable from './OpremaDataTable';
 import OpremaForm from './OpremaForm';
 import Button from '../../components/ui/button/Button';
 import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
 import ConfirmModal from '../../components/ui/modal/ConfirmModal';
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
 
-// Sample data for the table
-const opremaData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    nazivOpreme: "Viljuškar",
-    vrstaOpreme: "Oprema za rad",
-    fabrickBroj: "FB123456",
-    inventarniBroj: "INV789",
-    lokacija: "Skladište A",
-    godinaProizvodnje: 2020,
-    intervalPregleda: 36,
-    napomena: "Redovno održavanje"
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    nazivOpreme: "Kran",
-    vrstaOpreme: "Oprema za rad",
-    fabrickBroj: "FB789012",
-    inventarniBroj: "INV456",
-    lokacija: "Proizvodna hala 1",
-    godinaProizvodnje: 2019,
-    intervalPregleda: 36,
-    napomena: "Potrebno zamena delova"
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    nazivOpreme: "Transformator",
-    vrstaOpreme: "Elektro i gromobranska instalacija",
-    fabrickBroj: "FB345678",
-    inventarniBroj: "INV123",
-    lokacija: "Lokacija 1",
-    godinaProizvodnje: 2021,
-    intervalPregleda: 36,
-    napomena: "Godišnji pregled"
-  }
-];
+const mapOpremaFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  nazivOpreme: item.naziv,
+  vrstaOpreme: item.vrsta_opreme,
+  fabrickBroj: item.fabricki_broj ?? "",
+  inventarniBroj: item.inventarni_broj ?? "",
+  lokacija: item.lokacija?.naziv ?? `#${item.lokacija_id}`,
+  lokacijaId: item.lokacija_id,
+  firmaPib: item.firma_pib,
+  godinaProizvodnje: item.godina_proizvodnje ?? "",
+  intervalPregleda: item.interval_pregleda,
+  napomena: item.napomena ?? "",
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -88,48 +65,68 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const Oprema: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(opremaData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [firme, setFirme] = useState<Array<{pib: string, naziv: string}>>([]);
+  const [lokacije, setLokacije] = useState<Array<{id: number, naziv: string, firma_pib: string}>>([]);
 
-  const handleSave = (newData: any) => {
-    console.log(`Saving ${editingItem ? 'updated' : 'new'} entry:`, newData);
-    
+  const loadOprema = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`oprema?context=${context}`);
+      setData(response.data.map(mapOpremaFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju opreme.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadFirmeAndLokacije = async () => {
+    try {
+      const [firmeRes, lokacijeRes] = await Promise.all([
+        api.get<{ data: any[] }>(`firme?context=${context}`),
+        api.get<{ data: any[] }>(`lokacije?context=${context}`),
+      ]);
+      setFirme(firmeRes.data.map((f: any) => ({ pib: f.pib, naziv: f.naziv })));
+      setLokacije(lokacijeRes.data.map((l: any) => ({ id: l.id, naziv: l.naziv, firma_pib: l.firma_pib })));
+    } catch (error) {
+      console.error("Failed to load firme/lokacije:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadOprema();
+    loadFirmeAndLokacije();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const payload = {
+      firma_pib: newData.firmaPib,
+      lokacija_id: Number(newData.lokacijaId),
+      naziv: newData.nazivOpreme,
+      vrsta_opreme: newData.vrstaOpreme,
+      fabricki_broj: newData.fabrickBroj || null,
+      inventarni_broj: newData.inventarniBroj || null,
+      godina_proizvodnje: newData.godinaProizvodnje || null,
+      interval_pregleda: newData.intervalPregleda || 36,
+      napomena: newData.napomena || null,
+    };
+
     if (editingItem) {
-      // Update existing item
-      const updatedItem = {
-        ...editingItem,
-        nazivOpreme: newData.nazivOpreme,
-        vrstaOpreme: newData.vrstaOpreme,
-        fabrickBroj: newData.fabrickBroj,
-        inventarniBroj: newData.inventarniBroj,
-        lokacija: newData.lokacija,
-        godinaProizvodnje: newData.godinaProizvodnje,
-        napomena: newData.napomena
-      };
-      
-      setData(data.map(item => 
-        item.id === editingItem.id ? updatedItem : item
-      ));
+      await api.put(`oprema/${editingItem.id}`, payload);
       setEditingItem(null);
     } else {
-      // Add new item
-      const newItem = {
-        id: data.length + 1,
-        redniBroj: data.length + 1,
-        nazivOpreme: newData.nazivOpreme,
-        vrstaOpreme: newData.vrstaOpreme,
-        fabrickBroj: newData.fabrickBroj,
-        inventarniBroj: newData.inventarniBroj,
-        lokacija: newData.lokacija,
-        godinaProizvodnje: newData.godinaProizvodnje,
-        intervalPregleda: 36,
-        napomena: newData.napomena
-      };
-      setData([...data, newItem]);
+      await api.post("oprema", payload);
     }
+    await loadOprema();
     setShowForm(false);
   };
 
@@ -138,9 +135,14 @@ const Oprema: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`oprema/${itemToDelete.id}`);
+        await loadOprema();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju opreme.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -237,12 +239,18 @@ const Oprema: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <OpremaDataTable 
-            data={data}
-            columns={columns}
-            onEditClick={handleEditClick}
-            onDeleteClick={handleDeleteClick}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <OpremaDataTable 
+              data={data}
+              columns={columns}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          )}
         </div>
 
         <OpremaForm 
@@ -250,6 +258,8 @@ const Oprema: React.FC = () => {
           onClose={handleFormClose}
           onSave={handleSave}
           initialData={editingItem}
+          firme={firme}
+          lokacije={lokacije}
         />
 
         <ConfirmModal

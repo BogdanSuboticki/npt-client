@@ -411,7 +411,7 @@ const AppSidebar: React.FC = () => {
                                {/* Moje Preduzeće Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showMojaFirma) || 
-                     (userType === 'user' && organizationSettings.usersCanSeeMojaFirma)) && (
+                     userType === 'user') && (
               <div>
                 <button
                   onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
@@ -449,7 +449,7 @@ const AppSidebar: React.FC = () => {
                                {/* Komitenti Section - Show for Super Admin, or Admin if showKomitenti is true, or User if allowed by organization */}
                    {(userType === 'super-admin' || 
                      (userType === 'admin' && showKomitenti) || 
-                     (userType === 'user' && organizationSettings.usersCanSeeKomitenti)) && (
+                     userType === 'user') && (
               <div className="">
                 <button
                   onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
@@ -517,20 +517,11 @@ const AppSidebar: React.FC = () => {
                    height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
                  }}
                >
-                 {renderMenuItems(
-                   userType === 'komitent' 
-                     ? othersItems.filter(item => 
-                         item.path === "/profile" || 
-                         item.path === "/notes" || 
-                         item.path === "/faq" || 
-                         item.path === "/obrasci" || 
-                         item.path === "/tehnicka-podrska"
-                       )
-                     : othersItems
-                 )}
+                 {renderMenuItems(othersItems)}
                </div>
              </div>
            )}
+
           </div>
         </nav>
 

@@ -5,17 +5,17 @@ const accordionData = [
   {
     title: "Do I get free updates?",
     content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis magna ac nibh malesuada consectetur at vitae ipsum orem ipsum dolor sit amet, consectetur adipiscing elit nam fermentum, leo et lacinia accumsan.",
+      "",
   },
   {
     title: "Do I get free updates?",
     content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis magna ac nibh malesuada consectetur at vitae ipsum orem ipsum dolor sit amet, consectetur adipiscing elit nam fermentum, leo et lacinia accumsan.",
+      "",
   },
   {
     title: "Can I Customize TailAdmin to suit my needs?",
     content:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis magna ac nibh malesuada consectetur at vitae ipsum orem ipsum dolor sit amet, consectetur adipiscing elit nam fermentum, leo et lacinia accumsan.",
+      "",
   },
   {
     title: "What does Unlimited Projects mean?",

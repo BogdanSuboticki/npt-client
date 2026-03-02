@@ -80,36 +80,7 @@ const CustomersIcon: React.FC = () => (
   </svg>
 );
 
-const tabData: TabData[] = [
-  {
-    id: "overview",
-    label: "Overview",
-    icon: <OverviewIcon />,
-    content:
-      "Overview ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-  },
-  {
-    id: "notification",
-    label: "Notification",
-    icon: <NotificationIcon />,
-    content:
-      "Notification ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    icon: <AnalyticsIcon />,
-    content:
-      "Analytics ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-  },
-  {
-    id: "customers",
-    label: "Customers",
-    icon: <CustomersIcon />,
-    content:
-      "Customers ipsum dolor sit amet consectetur. Non vitae facilisis urna tortor placerat egestas donec. Faucibus diam gravida enim elit lacus a. Tincidunt fermentum condimentum quis et a et tempus. Tristique urna nisi nulla elit sit libero scelerisque ante.",
-  },
-];
+const tabData: TabData[] = [];
 
 const TabButton: React.FC<TabButtonProps> = ({
   label,
@@ -149,6 +120,14 @@ const TabContent: React.FC<TabContentProps> = ({ content, isActive }) => {
 
 export default function TabWithUnderlineAndIcon() {
   const [activeTab, setActiveTab] = useState<TabData["id"]>("overview");
+
+  if (tabData.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 dark:text-gray-400">
+        Nema sadržaja za prikaz.
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 border border-gray-200 rounded-xl dark:border-gray-800">

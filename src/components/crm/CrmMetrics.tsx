@@ -1,37 +1,27 @@
 import Badge from "../ui/badge/Badge";
 
-const mockData = [
-  {
-    id: 1,
-    title: "Active Deal",
-    value: "$120,369",
-    change: "+20%",
-    direction: "up",
-    comparisonText: "last month",
-  },
-  {
-    id: 2,
-    title: "Revenue Total",
-    value: "$234,210",
-    change: "+9.0%",
-    direction: "up",
-    comparisonText: "last month",
-  },
-  {
-    id: 3,
-    title: "Closed Deals",
-    value: "874",
-    change: "-4.5%",
-    direction: "down",
-    comparisonText: "last month",
-  },
-];
+const metrics: Array<{
+  id: number;
+  title: string;
+  value: string;
+  change: string;
+  direction: "up" | "down" | "neutral";
+  comparisonText: string;
+}> = [];
 
 export default function CrmMetrics() {
+  if (metrics.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 dark:text-gray-400">
+        Nema dostupnih metrika.
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-3">
       {/* <!-- Metric Item Start --> */}
-      {mockData.map((item) => (
+      {metrics.map((item) => (
         <div
           key={item.id}
           className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"

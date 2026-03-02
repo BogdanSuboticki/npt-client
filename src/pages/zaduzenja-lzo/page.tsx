@@ -1,51 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ZaduzenjaLzoDataTable from "./ZaduzenjaLzoDataTable";
 import ZaduzenjaLzoForm from "./ZaduzenjaLzoForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+import { api } from "../../api/client";
+import { usePageContext } from "../../hooks/usePageContext";
+import { fromIsoDate, toIsoDate } from "../../utils/date";
 
-// Sample data for the table
-const zaduzenjaLzoData = [
-  {
-    id: 1,
-    redniBroj: 1,
-    zaposleni: "Petar Petrović",
-    radnoMesto: "Viljuškari",
-    povecanRizik: true,
-    zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") },
-      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") },
-      { naziv: "Zaštitne naočare", datumOd: new Date("2024-01-15"), datumDo: new Date("2024-12-31") }
-    ],
-  },
-  {
-    id: 2,
-    redniBroj: 2,
-    zaposleni: "Ana Anić",
-    radnoMesto: "Kranista",
-    povecanRizik: false,
-    zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-02-01"), datumDo: new Date("2024-11-30") },
-      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-02-01"), datumDo: new Date("2024-11-30") }
-    ],
-  },
-  {
-    id: 3,
-    redniBroj: 3,
-    zaposleni: "Marko Marković",
-    radnoMesto: "Mehaničar",
-    povecanRizik: true,
-    zaduzenaOprema: [
-      { naziv: "Zaštitna kaciga", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
-      { naziv: "Zaštitne rukavice", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
-      { naziv: "Zaštitne naočare", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") },
-      { naziv: "Zaštitna obuća", datumOd: new Date("2024-03-01"), datumDo: new Date("2025-02-28") }
-    ],
-  },
-];
+const mapZaduzenjeLzsFromApi = (item: any, index: number) => ({
+  id: item.id,
+  redniBroj: index + 1,
+  zaposleni: item.angazovanje?.zaposleni?.ime_prezime ?? "",
+  radnoMesto: item.radnoMesto?.naziv ?? "",
+  povecanRizik: item.radnoMesto?.povecan_rizik ?? false,
+  zaduzenaOprema: item.zaduzenaLzs?.map((z: any) => ({
+    naziv: z.naziv_lzs,
+    datumOd: fromIsoDate(z.datum_zaduzenja) ?? new Date(),
+    datumDo: fromIsoDate(z.datum_narednog_zaduzenja),
+  })) || [],
+  angazovanjeId: item.angazovanje_id,
+  firmaPib: item.firma_pib,
+});
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
@@ -89,20 +67,65 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const ZaduzenjaLzoPage: React.FC = () => {
+  const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
-  const [data, setData] = useState(zaduzenjaLzoData);
+  const [data, setData] = useState<any[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [angazovanja, setAngazovanja] = useState<any[]>([]);
 
-  const handleSave = (newData: any) => {
-    // Here you would typically save the data to your backend
-    console.log('Saving new entry:', newData);
-    // Add new item to the data array
-    const newItem = {
-      id: data.length + 1,
-      ...newData,
+  const loadZaduzenja = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await api.get<{ data: any[] }>(`zaduzenja-lzs?context=${context}`);
+      setData(response.data.map(mapZaduzenjeLzsFromApi));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju zaduženja LZS.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadAngazovanja = async () => {
+    try {
+      const response = await api.get<{ data: any[] }>(`angazovanja?context=${context}`);
+      setAngazovanja(response.data);
+    } catch {
+      // non-critical
+    }
+  };
+
+  useEffect(() => {
+    loadZaduzenja();
+    loadAngazovanja();
+  }, [context]);
+
+  const handleSave = async (newData: any) => {
+    const stavke = (newData.oprema || newData.zaduzenaOprema || []).map((oprema: any) => ({
+      lzs_id: Number(oprema.lzsId || oprema.id),
+      naziv_lzs: oprema.vrstaLzs || oprema.naziv,
+      standard: oprema.standard || null,
+      datum_zaduzenja: toIsoDate(oprema.datumZaduzenja || oprema.datumOd),
+      rok_meseci: oprema.rok ? Number(oprema.rok) : null,
+    }));
+
+    const payload = {
+      firma_pib: newData.firmaPib,
+      angazovanje_id: Number(newData.angazovanjeId),
+      stavke,
     };
-    setData([...data, newItem]);
+
+    if (editingItem) {
+      await api.put(`zaduzenja-lzs/${editingItem.id}`, payload);
+      setEditingItem(null);
+    } else {
+      await api.post("zaduzenja-lzs", payload);
+    }
+    await loadZaduzenja();
     setShowForm(false);
   };
 
@@ -111,9 +134,14 @@ const ZaduzenjaLzoPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (itemToDelete) {
-      setData(data.filter(d => d.id !== itemToDelete.id));
+      try {
+        await api.del(`zaduzenja-lzs/${itemToDelete.id}`);
+        await loadZaduzenja();
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Greška pri brisanju zaduženja LZS.");
+      }
       setItemToDelete(null);
       setShowDeleteModal(false);
     }
@@ -124,8 +152,14 @@ const ZaduzenjaLzoPage: React.FC = () => {
     setShowDeleteModal(false);
   };
 
-  const handleUpdateData = (updatedData: any[]) => {
-    setData(updatedData);
+  const handleEditClick = (item: any) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingItem(null);
   };
 
   return (
@@ -204,18 +238,38 @@ const ZaduzenjaLzoPage: React.FC = () => {
         </div>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-[0_0_5px_rgba(0,0,0,0.1)]">
-          <ZaduzenjaLzoDataTable 
-            data={data}
-            columns={columns}
-            onDeleteClick={handleDeleteClick}
-            onUpdateData={handleUpdateData}
-          />
+          {isLoading ? (
+            <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Učitavanje...</div>
+          ) : errorMessage ? (
+            <div className="p-4 text-sm text-error-500">{errorMessage}</div>
+          ) : (
+            <ZaduzenjaLzoDataTable 
+              data={data}
+              columns={columns}
+              onDeleteClick={handleDeleteClick}
+              onEditClick={handleEditClick}
+              onUpdateData={setData}
+            />
+          )}
         </div>
 
         <ZaduzenjaLzoForm 
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={handleFormClose}
           onSave={handleSave}
+          angazovanja={angazovanja.map((a: any) => ({
+            id: a.id,
+            zaposleniName: a.zaposleni?.ime_prezime ?? "",
+            radnoMesto: a.radno_mesto?.naziv ?? "",
+            povecanRizik: a.radno_mesto?.povecan_rizik ?? false,
+            firmaPib: a.firma_pib ?? "",
+            lzsItems: (a.radno_mesto?.lzs ?? []).map((l: any) => ({
+              id: l.id,
+              naziv: l.naziv,
+              standard: l.standard ?? "",
+              rokMeseci: l.pivot?.rok_meseci ?? null,
+            })),
+          }))}
         />
 
         <ConfirmModal

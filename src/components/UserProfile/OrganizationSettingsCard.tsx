@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
@@ -7,6 +7,7 @@ import Label from "../form/Label";
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import AngazovanjaForm from "../../pages/angazovanja/AngazovanjaForm";
 import FirmeForm from "../../pages/firme/FirmeForm";
+import { api } from "../../api/client";
 
 interface User {
   id: string;
@@ -81,13 +82,59 @@ export default function OrganizationSettingsCard() {
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-
-  
+  // State for users and loading
   const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [tempUsers, setTempUsers] = useState<User[]>(users);
-  
+  const [tempUsers, setTempUsers] = useState<User[]>([]);
 
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await api.get<{ users: Array<{
+          id: number;
+          name: string;
+          email: string;
+          role: string;
+          permissions: {
+            'moje-preduzece'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+            'komitenti'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+          };
+        }> }>("section-permissions/users");
+
+        // Transform backend data to frontend format
+        const transformedUsers: User[] = response.users.map(u => ({
+          id: String(u.id),
+          name: u.name,
+          email: u.email,
+          role: u.role === 'user' ? 'Korisnik' : u.role === 'komitent' ? 'Komitent' : u.role,
+          organization: {
+            id: u.role === 'komitent' ? 'client-' + u.id : 'org-' + u.id,
+            name: u.role === 'komitent' ? 'Komitent Organizacija' : 'Tech Solutions d.o.o.',
+            type: u.role === 'komitent' ? 'client' : 'admin' as 'admin' | 'client',
+          },
+          access: {
+            mojaFirma: u.permissions?.['moje-preduzece']?.can_view ?? false,
+            komitenti: u.permissions?.['komitenti']?.can_view ?? false,
+            ostalo: false,
+          },
+        }));
+
+        setUsers(transformedUsers);
+        setTempUsers(transformedUsers);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Greška pri učitavanju korisnika.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleAccessChange = (userId: string, accessType: keyof User['access'], value: boolean) => {
     // Find the user name for display
@@ -250,17 +297,66 @@ export default function OrganizationSettingsCard() {
     setNewCompany({ naziv: '', email: '' });
   };
 
-  const confirmAccessChange = () => {
+  const confirmAccessChange = async () => {
     if (pendingAccessChange) {
-      setTempUsers(prev => prev.map(user => 
-        user.id === pendingAccessChange.userId 
-          ? { ...user, access: { ...user.access, [pendingAccessChange.accessType]: pendingAccessChange.checked } }
-          : user
-      ));
-      
-      // Close modal and reset pending change
-      setShowAccessChangeModal(false);
-      setPendingAccessChange(null);
+      const userId = pendingAccessChange.userId;
+      const accessType = pendingAccessChange.accessType;
+      const checked = pendingAccessChange.checked;
+
+      // Map frontend access type to backend section name
+      const sectionMapping: Record<string, string> = {
+        mojaFirma: 'moje-preduzece',
+        komitenti: 'komitenti',
+        ostalo: 'ostalo'
+      };
+
+      const section = sectionMapping[accessType];
+      if (!section) {
+        setError('Nepoznat tip pristupa');
+        setShowAccessChangeModal(false);
+        setPendingAccessChange(null);
+        return;
+      }
+
+      try {
+        // Get current permissions for the user
+        const user = tempUsers.find(u => u.id === userId);
+        if (!user) return;
+
+        // Build permissions payload
+        const permissions = {
+          'moje-preduzece': {
+            can_view: accessType === 'mojaFirma' ? checked : user.access.mojaFirma,
+            can_create: false,
+            can_edit: false,
+            can_delete: false
+          },
+          'komitenti': {
+            can_view: accessType === 'komitenti' ? checked : user.access.komitenti,
+            can_create: false,
+            can_edit: false,
+            can_delete: false
+          }
+        };
+
+        // Call API to save permissions
+        await api.put(`section-permissions/users/${userId}`, { permissions });
+
+        // Update local state after successful save
+        setTempUsers(prev => prev.map(u =>
+          u.id === userId
+            ? { ...u, access: { ...u.access, [accessType]: checked } }
+            : u
+        ));
+
+        // Close modal
+        setShowAccessChangeModal(false);
+        setPendingAccessChange(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Greška pri čuvanju dozvola.');
+        setShowAccessChangeModal(false);
+        setPendingAccessChange(null);
+      }
     }
   };
   
@@ -301,10 +397,24 @@ export default function OrganizationSettingsCard() {
               Podešavanja organizacije
             </h4>
           </div>
-
-
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+            Učitavanje korisnika...
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="p-4 text-sm text-error-500">
+            {error}
+          </div>
+        )}
+
+        {!isLoading && !error && (
+          <>
         {/* Tab Navigation */}
         <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-700">
           <button
@@ -539,7 +649,8 @@ export default function OrganizationSettingsCard() {
              </div>
            )}
         </div>
-
+          </>
+        )}
 
        </div>
 

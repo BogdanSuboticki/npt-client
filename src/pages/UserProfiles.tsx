@@ -23,6 +23,10 @@ interface AuthenticatedUser {
   role: string;
   firma_pib?: string;
   profile_photo_url?: string;
+  section_permissions?: {
+    'moje-preduzece'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+    'komitenti'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+  };
   firma?: {
     naziv: string;
     pib: string;
@@ -62,7 +66,7 @@ const getRoleDisplayName = (role: string): string => {
 };
 
 export default function UserProfiles() {
-  const { setUserType } = useUser();
+  const { setUserType, setSectionPermissions, setSidebarMode } = useUser();
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -75,6 +79,22 @@ export default function UserProfiles() {
       setUser(userData);
       const mappedRole = mapRoleToUserType(userData.role);
       setUserType(mappedRole);
+
+      // Set section permissions from backend
+      const permissions = userData?.section_permissions ?? {};
+      setSectionPermissions(permissions);
+
+      // Set sidebar mode based on permissions
+      const canSeeMojePreduzece = permissions?.['moje-preduzece']?.can_view ?? (userData.role !== 'user');
+      const canSeeKomitenti = permissions?.['komitenti']?.can_view ?? (userData.role !== 'user');
+
+      if (canSeeMojePreduzece && canSeeKomitenti) {
+        setSidebarMode('both');
+      } else if (canSeeKomitenti) {
+        setSidebarMode('komitenti');
+      } else {
+        setSidebarMode('moja-firma');
+      }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Greška pri učitavanju korisnika.");
     } finally {
@@ -149,14 +169,14 @@ export default function UserProfiles() {
         <div className="rounded-2xl lg:py-6">
           <div className="space-y-6">
             {/* User Meta Card - Always visible */}
-            <UserMetaCard 
+            <UserMetaCard
               userType={userType}
               userName={displayName}
               userRole={getRoleDisplayName(user.role)}
               userLocation={userLocation}
               userCompany={userCompany}
               profileImageUrl={profileImageUrl}
-              enableImageUpload={true}
+              enableImageUpload={userType === 'admin' || userType === 'super-admin'}
               onProfileImageChange={handleProfileImageChange}
             />
 
@@ -173,25 +193,44 @@ export default function UserProfiles() {
               </>
             )}
 
+            {/* Read-only notice for regular users */}
+            {(userType === 'user' || userType === 'komitent') && (
+              <div className="p-4 text-sm text-blue-600 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p className="font-medium">Profil je samo za čitanje</p>
+                    <p className="mt-1">
+                      Podatke na profilu može menjati samo administrator. Ukoliko želite da promenite neke podatke, kontaktirajte administratora.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* User Info Card - Hidden for Super Admin and Admin */}
             {(userType === 'user' || userType === 'komitent') && (
-              <UserInfoCard 
+              <UserInfoCard
                 userType={userType}
                 userName={displayName}
                 userEmail={user.email}
                 userPhone=""
                 userBio=""
+                isReadOnly={true}
               />
             )}
 
             {/* User Address Card - Hidden for Super Admin and Admin */}
             {(userType === 'user' || userType === 'komitent') && user.firma && (
-              <UserAddressCard 
+              <UserAddressCard
                 userType={userType}
                 userCountry={user.firma.drzava || "Srbija"}
                 userCity={user.firma.mesto || ""}
                 userPostalCode=""
                 userTaxId={user.firma.pib || ""}
+                isReadOnly={true}
               />
             )}
 

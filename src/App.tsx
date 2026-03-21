@@ -67,6 +67,7 @@ import Tabs from "./pages/UiElements/Tabs";
 import Tooltips from "./pages/UiElements/Tooltips";
 import Modals from "./pages/UiElements/Modals";
 import ResetPassword from "./pages/AuthPages/ResetPassword";
+import ChangePassword from "./pages/AuthPages/ChangePassword";
 import TwoStepVerification from "./pages/AuthPages/TwoStepVerification";
 import Success from "./pages/OtherPage/Success";
 import AppLayout from "./layout/AppLayout";
@@ -74,6 +75,7 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import TaskList from "./pages/Task/TaskList";
 import Saas from "./pages/Dashboard/Saas";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import PublicOnlyRoute from "./components/common/PublicOnlyRoute";
 import RadnaMesta from "./pages/RadnaMesta";
 import EvidencijaRizicnaRadnaMesta from "./pages/Evidencija_rizicna_radna_mesta";
 import EvidencijaPovredaRad from "./pages/Evidencija_povreda_rad";
@@ -100,6 +102,19 @@ import TehnickaPodrska from "./pages/TehnickaPodrska";
 import SuperAdminDashboard from "./pages/super-admin-dashboard/SuperAdminDashboard";
 import SuperAdminRedirect from "./pages/super-admin-dashboard/SuperAdminRedirect";
 import CentarObavestenjaPage from "./pages/centar-obavestenja/page";
+import { useUser } from "./context/UserContext";
+import { Navigate } from "react-router";
+
+// Component to protect routes when password change is required
+function PasswordChangeGuard({ children }: { children: React.ReactNode }) {
+  const { mustChangePassword } = useUser();
+
+  if (mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
@@ -110,124 +125,126 @@ export default function App() {
           <ScrollToTop />
           <Routes>
           {/* Super Admin Database Dashboard — standalone, no sidebar */}
-          <Route path="/database" element={<ProtectedRoute allowedRoles={['super-admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+          <Route path="/database" element={<ProtectedRoute allowedRoles={['super-admin']}><PasswordChangeGuard><SuperAdminDashboard /></PasswordChangeGuard></ProtectedRoute>} />
 
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<SuperAdminRedirect><Ecommerce /></SuperAdminRedirect>} />
-            <Route path="/dnevni-izvestaji" element={<DnevniIzvestajiPage />} />
-            <Route path="/centar-obavestenja" element={<CentarObavestenjaPage />} />
-            <Route path="/analytics" element={<ProtectedRoute excludedRoles={['komitent']}><Analytics /></ProtectedRoute>} />
-            <Route path="/marketing" element={<ProtectedRoute excludedRoles={['komitent']}><Marketing /></ProtectedRoute>} />
-            <Route path="/crm" element={<ProtectedRoute excludedRoles={['komitent']}><Crm /></ProtectedRoute>} />
-            <Route path="/stocks" element={<ProtectedRoute excludedRoles={['komitent']}><Stocks /></ProtectedRoute>} />
-            <Route path="/saas" element={<ProtectedRoute excludedRoles={['komitent']}><Saas /></ProtectedRoute>} />
-            <Route path="/lekarski-pregledi" element={<ProtectedRoute excludedRoles={['komitent']}><LekarskiPreglediPage /></ProtectedRoute>} />
-            <Route path="/inspekcijski-nadzor" element={<ProtectedRoute excludedRoles={['komitent']}><InspekcijskiNadzorPage /></ProtectedRoute>} />
-            <Route path="/ispitivanje-radne-sredine" element={<ProtectedRoute excludedRoles={['komitent']}><IspitivanjeRadneSredine /></ProtectedRoute>} />
-            <Route path="/bezbednosne-provere" element={<ProtectedRoute excludedRoles={['komitent']}><BezbednosneProverePage /></ProtectedRoute>} />
-            <Route path="/povrede" element={<ProtectedRoute excludedRoles={['komitent']}><PovredePage /></ProtectedRoute>} />
-            <Route path="/pregledi-opreme" element={<ProtectedRoute excludedRoles={['komitent']}><PreglediOpremePage /></ProtectedRoute>} />
-            <Route path="/rokovi" element={<ProtectedRoute excludedRoles={['komitent']}><RokoviPage /></ProtectedRoute>} />
-            <Route path="/firme" element={<ProtectedRoute excludedRoles={['komitent']}><Firme /></ProtectedRoute>} />
-            <Route path="/zaposleni" element={<ProtectedRoute excludedRoles={['komitent']}><ZaposleniPage /></ProtectedRoute>} />
-            <Route path="/angazovanja" element={<ProtectedRoute excludedRoles={['komitent']}><AngazovanjaPage /></ProtectedRoute>} />
-            <Route path="/zaduzenja-lzo" element={<ProtectedRoute excludedRoles={['komitent']}><ZaduzenjaLzoPage /></ProtectedRoute>} />
+            <Route index path="/" element={<ProtectedRoute><PasswordChangeGuard><SuperAdminRedirect><Ecommerce /></SuperAdminRedirect></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/dnevni-izvestaji" element={<ProtectedRoute><PasswordChangeGuard><DnevniIzvestajiPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/centar-obavestenja" element={<ProtectedRoute><PasswordChangeGuard><CentarObavestenjaPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Analytics /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/marketing" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Marketing /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/crm" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Crm /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/stocks" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Stocks /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/saas" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Saas /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/lekarski-pregledi" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><LekarskiPreglediPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/inspekcijski-nadzor" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><InspekcijskiNadzorPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/ispitivanje-radne-sredine" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><IspitivanjeRadneSredine /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/bezbednosne-provere" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><BezbednosneProverePage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/povrede" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><PovredePage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/pregledi-opreme" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><PreglediOpremePage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/rokovi" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><RokoviPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/firme" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Firme /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/zaposleni" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><ZaposleniPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/angazovanja" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><AngazovanjaPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/zaduzenja-lzo" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><ZaduzenjaLzoPage /></PasswordChangeGuard></ProtectedRoute>} />
             {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<ProtectedRoute excludedRoles={['komitent']}><Calendar /></ProtectedRoute>} />
-            <Route path="/invoice" element={<ProtectedRoute excludedRoles={['komitent']}><Invoices /></ProtectedRoute>} />
-            <Route path="/faq" element={<Faqs />} />
-            <Route path="/pricing-tables" element={<ProtectedRoute excludedRoles={['komitent']}><PricingTables /></ProtectedRoute>} />
-            <Route path="/blank" element={<ProtectedRoute excludedRoles={['komitent']}><Blank /></ProtectedRoute>} />
-            <Route path="/obrasci" element={<Obrasci />} />
-            <Route path="/prethodni-obrasci" element={<ProtectedRoute excludedRoles={['komitent']}><PrethodniObrasci /></ProtectedRoute>} />
-            <Route path="/notes" element={<NotesPage />} />
-            <Route path="/tehnicka-podrska" element={<TehnickaPodrska />} />
-            <Route path="/osposobljavanje" element={<ProtectedRoute excludedRoles={['komitent']}><Osposobljavanje /></ProtectedRoute>} />
-            <Route path="/oprema" element={<ProtectedRoute excludedRoles={['komitent']}><Oprema /></ProtectedRoute>} />
-            <Route path="/lzs" element={<ProtectedRoute excludedRoles={['komitent']}><LZS /></ProtectedRoute>} />
-            <Route path="/lokacije" element={<ProtectedRoute excludedRoles={['komitent']}><Lokacije /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><PasswordChangeGuard><UserProfiles /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Calendar /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/invoice" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Invoices /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/faq" element={<ProtectedRoute><PasswordChangeGuard><Faqs /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/pricing-tables" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><PricingTables /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/blank" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Blank /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/obrasci" element={<ProtectedRoute><PasswordChangeGuard><Obrasci /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/prethodni-obrasci" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><PrethodniObrasci /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/notes" element={<ProtectedRoute><PasswordChangeGuard><NotesPage /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/tehnicka-podrska" element={<ProtectedRoute><PasswordChangeGuard><TehnickaPodrska /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/osposobljavanje" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Osposobljavanje /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/oprema" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Oprema /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/lzs" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><LZS /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/lokacije" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Lokacije /></PasswordChangeGuard></ProtectedRoute>} />
 
             {/* Forms */}
-            <Route path="/form-elements" element={<ProtectedRoute excludedRoles={['komitent']}><FormElements /></ProtectedRoute>} />
-            <Route path="/form-layout" element={<ProtectedRoute excludedRoles={['komitent']}><FormLayout /></ProtectedRoute>} />
+            <Route path="/form-elements" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><FormElements /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/form-layout" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><FormLayout /></PasswordChangeGuard></ProtectedRoute>} />
 
             {/* Applications */}
-            <Route path="/chat" element={<ProtectedRoute excludedRoles={['komitent']}><Chats /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Chats /></PasswordChangeGuard></ProtectedRoute>} />
 
-            <Route path="/task-list" element={<ProtectedRoute excludedRoles={['komitent']}><TaskList /></ProtectedRoute>} />
-            <Route path="/task-kanban" element={<ProtectedRoute excludedRoles={['komitent']}><TaskKanban /></ProtectedRoute>} />
-            <Route path="/file-manager" element={<ProtectedRoute excludedRoles={['komitent']}><FileManager /></ProtectedRoute>} />
+            <Route path="/task-list" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><TaskList /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/task-kanban" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><TaskKanban /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/file-manager" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><FileManager /></PasswordChangeGuard></ProtectedRoute>} />
 
             {/* Email */}
 
-            <Route path="/inbox" element={<ProtectedRoute excludedRoles={['komitent']}><EmailInbox /></ProtectedRoute>} />
-            <Route path="/inbox-details" element={<ProtectedRoute excludedRoles={['komitent']}><EmailDetails /></ProtectedRoute>} />
+            <Route path="/inbox" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EmailInbox /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/inbox-details" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EmailDetails /></PasswordChangeGuard></ProtectedRoute>} />
 
             {/* Tables */}
-            <Route path="/basic-tables" element={<ProtectedRoute excludedRoles={['komitent']}><BasicTables /></ProtectedRoute>} />
-            <Route path="/data-tables" element={<ProtectedRoute excludedRoles={['komitent']}><DataTables /></ProtectedRoute>} />
+            <Route path="/basic-tables" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><BasicTables /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/data-tables" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><DataTables /></PasswordChangeGuard></ProtectedRoute>} />
 
             {/* Ui Elements */}
-            <Route path="/alerts" element={<ProtectedRoute excludedRoles={['komitent']}><Alerts /></ProtectedRoute>} />
-            <Route path="/avatars" element={<ProtectedRoute excludedRoles={['komitent']}><Avatars /></ProtectedRoute>} />
-            <Route path="/badge" element={<ProtectedRoute excludedRoles={['komitent']}><Badges /></ProtectedRoute>} />
-            <Route path="/breadcrumb" element={<ProtectedRoute excludedRoles={['komitent']}><BreadCrumb /></ProtectedRoute>} />
-            <Route path="/buttons" element={<ProtectedRoute excludedRoles={['komitent']}><Buttons /></ProtectedRoute>} />
-            <Route path="/buttons-group" element={<ProtectedRoute excludedRoles={['komitent']}><ButtonsGroup /></ProtectedRoute>} />
-            <Route path="/cards" element={<ProtectedRoute excludedRoles={['komitent']}><Cards /></ProtectedRoute>} />
-            <Route path="/carousel" element={<ProtectedRoute excludedRoles={['komitent']}><Carousel /></ProtectedRoute>} />
-            <Route path="/dropdowns" element={<ProtectedRoute excludedRoles={['komitent']}><Dropdowns /></ProtectedRoute>} />
-            <Route path="/images" element={<ProtectedRoute excludedRoles={['komitent']}><Images /></ProtectedRoute>} />
-            <Route path="/links" element={<ProtectedRoute excludedRoles={['komitent']}><Links /></ProtectedRoute>} />
-            <Route path="/list" element={<ProtectedRoute excludedRoles={['komitent']}><Lists /></ProtectedRoute>} />
-            <Route path="/modals" element={<ProtectedRoute excludedRoles={['komitent']}><Modals /></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute excludedRoles={['komitent']}><Notifications /></ProtectedRoute>} />
-            <Route path="/pagination" element={<ProtectedRoute excludedRoles={['komitent']}><Pagination /></ProtectedRoute>} />
-            <Route path="/popovers" element={<ProtectedRoute excludedRoles={['komitent']}><Popovers /></ProtectedRoute>} />
-            <Route path="/progress-bar" element={<ProtectedRoute excludedRoles={['komitent']}><Progressbar /></ProtectedRoute>} />
-            <Route path="/ribbons" element={<ProtectedRoute excludedRoles={['komitent']}><Ribbons /></ProtectedRoute>} />
-            <Route path="/spinners" element={<ProtectedRoute excludedRoles={['komitent']}><Spinners /></ProtectedRoute>} />
-            <Route path="/tabs" element={<ProtectedRoute excludedRoles={['komitent']}><Tabs /></ProtectedRoute>} />
-            <Route path="/tooltips" element={<ProtectedRoute excludedRoles={['komitent']}><Tooltips /></ProtectedRoute>} />
-            <Route path="/videos" element={<ProtectedRoute excludedRoles={['komitent']}><Videos /></ProtectedRoute>} />
+            <Route path="/alerts" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Alerts /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/avatars" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Avatars /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/badge" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Badges /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/breadcrumb" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><BreadCrumb /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/buttons" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Buttons /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/buttons-group" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><ButtonsGroup /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/cards" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Cards /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/carousel" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Carousel /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/dropdowns" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Dropdowns /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/images" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Images /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/links" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Links /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/list" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Lists /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/modals" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Modals /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Notifications /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/pagination" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Pagination /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/popovers" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Popovers /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/progress-bar" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Progressbar /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/ribbons" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Ribbons /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/spinners" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Spinners /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/tabs" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Tabs /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/tooltips" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Tooltips /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/videos" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><Videos /></PasswordChangeGuard></ProtectedRoute>} />
 
             {/* Charts */}
-            <Route path="/line-chart" element={<ProtectedRoute excludedRoles={['komitent']}><LineChart /></ProtectedRoute>} />
-            <Route path="/bar-chart" element={<ProtectedRoute excludedRoles={['komitent']}><BarChart /></ProtectedRoute>} />
-            <Route path="/pie-chart" element={<ProtectedRoute excludedRoles={['komitent']}><PieChart /></ProtectedRoute>} />
+            <Route path="/line-chart" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><LineChart /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/bar-chart" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><BarChart /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/pie-chart" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><PieChart /></PasswordChangeGuard></ProtectedRoute>} />
 
-            <Route path="/radna-mesta" element={<ProtectedRoute excludedRoles={['komitent']}><RadnaMesta /></ProtectedRoute>} />
-            <Route path="/evidencija-rizicna-radna-mesta" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaRizicnaRadnaMesta /></ProtectedRoute>} />
-            <Route path="/evidencija-povreda-rad" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaPovredaRad /></ProtectedRoute>} />
-            <Route path="/evidencija-profesionalne-bolesti" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaProfesionalneBolesti /></ProtectedRoute>} />
-            <Route path="/evidencija-biloske-stetnosti" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaBiloskeStetnosti /></ProtectedRoute>} />
-            <Route path="/evidencija-kancerogeni-mutageni" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaKancerogeniMutageni /></ProtectedRoute>} />
-            <Route path="/evidencija-obuceni-bezbedan" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaObuceniBezbedan /></ProtectedRoute>} />
-            <Route path="/evidencija-primena-mera" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaPrimenaMera /></ProtectedRoute>} />
-            <Route path="/evidencija-pregledi-opreme" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaPreglediOpreme /></ProtectedRoute>} />
-            <Route path="/elektricne-instalacije" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaElektricneInstalacije /></ProtectedRoute>} />
-            <Route path="/ispitivanja-sredine" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaIspitivanjaSredine /></ProtectedRoute>} />
-            <Route path="/zastitna-oprema" element={<ProtectedRoute excludedRoles={['komitent']}><EvidencijaZastitnaOprema /></ProtectedRoute>} />
+            <Route path="/radna-mesta" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><RadnaMesta /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-rizicna-radna-mesta" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaRizicnaRadnaMesta /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-povreda-rad" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaPovredaRad /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-profesionalne-bolesti" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaProfesionalneBolesti /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-biloske-stetnosti" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaBiloskeStetnosti /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-kancerogeni-mutageni" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaKancerogeniMutageni /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-obuceni-bezbedan" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaObuceniBezbedan /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-primena-mera" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaPrimenaMera /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/evidencija-pregledi-opreme" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaPreglediOpreme /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/elektricne-instalacije" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaElektricneInstalacije /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/ispitivanja-sredine" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaIspitivanjaSredine /></PasswordChangeGuard></ProtectedRoute>} />
+            <Route path="/zastitna-oprema" element={<ProtectedRoute excludedRoles={['komitent']}><PasswordChangeGuard><EvidencijaZastitnaOprema /></PasswordChangeGuard></ProtectedRoute>} />
           </Route>
 
-          {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route
-            path="/two-step-verification"
-            element={<TwoStepVerification />}
-          />
+          {/* Auth Layout - Public Only Routes (redirect if authenticated) */}
+          <Route path="/signin" element={<PublicOnlyRoute><SignIn /></PublicOnlyRoute>} />
+          <Route path="/signup" element={<PublicOnlyRoute><SignUp /></PublicOnlyRoute>} />
+          <Route path="/reset-password" element={<PublicOnlyRoute><ResetPassword /></PublicOnlyRoute>} />
+          <Route path="/two-step-verification" element={<PublicOnlyRoute><TwoStepVerification /></PublicOnlyRoute>} />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-          <Route path="/maintenance" element={<Maintenance />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/five-zero-zero" element={<FiveZeroZero />} />
-          <Route path="/five-zero-three" element={<FiveZeroThree />} />
-          <Route path="/coming-soon" element={<ComingSoon />} />
+          {/* Change Password - Protected (only for authenticated users) */}
+          <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+
+          {/* Fallback Route - Protected */}
+          <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
+
+          {/* Error/Status Pages - Protected */}
+          <Route path="/maintenance" element={<ProtectedRoute><Maintenance /></ProtectedRoute>} />
+          <Route path="/success" element={<ProtectedRoute><Success /></ProtectedRoute>} />
+          <Route path="/five-zero-zero" element={<ProtectedRoute><FiveZeroZero /></ProtectedRoute>} />
+          <Route path="/five-zero-three" element={<ProtectedRoute><FiveZeroThree /></ProtectedRoute>} />
+          <Route path="/coming-soon" element={<ProtectedRoute><ComingSoon /></ProtectedRoute>} />
         </Routes>
       </Router>
     </LocalizationProvider>

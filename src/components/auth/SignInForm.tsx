@@ -14,7 +14,7 @@ export default function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setUserType } = useUser();
+  const { setUserType, setMustChangePassword, setSectionPermissions, setSidebarMode } = useUser();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -22,7 +22,17 @@ export default function SignInForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post<{ token: string; user: { role?: string } }>("auth/login", {
+      const response = await api.post<{
+        token: string;
+        user: {
+          role?: string;
+          must_change_password?: boolean;
+          section_permissions?: {
+            'moje-preduzece'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+            'komitenti'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+          };
+        }
+      }>("auth/login", {
         email,
         password,
         device_name: "web",
@@ -35,8 +45,33 @@ export default function SignInForm() {
         role === "super_admin" ? "super-admin" : (role as "admin" | "user" | "komitent");
       setUserType(mappedRole);
 
-      // Super admin goes directly to the database dashboard
-      navigate(mappedRole === "super-admin" ? "/database" : "/");
+      // Set section permissions from backend
+      const permissions = response.user?.section_permissions ?? {};
+      setSectionPermissions(permissions);
+
+      // Set sidebar mode based on permissions
+      const canSeeMojePreduzece = permissions?.['moje-preduzece']?.can_view ?? (role !== 'user');
+      const canSeeKomitenti = permissions?.['komitenti']?.can_view ?? (role !== 'user');
+
+      if (canSeeMojePreduzece && canSeeKomitenti) {
+        setSidebarMode('both');
+      } else if (canSeeKomitenti) {
+        setSidebarMode('komitenti');
+      } else {
+        setSidebarMode('moja-firma');
+      }
+
+      // Check if user must change password
+      const mustChangePassword = response.user?.must_change_password ?? false;
+      setMustChangePassword(mustChangePassword);
+
+      if (mustChangePassword) {
+        // Redirect to password change page
+        navigate("/change-password");
+      } else {
+        // Super admin goes directly to the database dashboard
+        navigate(mappedRole === "super-admin" ? "/database" : "/");
+      }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Prijava nije uspela.");
     } finally {

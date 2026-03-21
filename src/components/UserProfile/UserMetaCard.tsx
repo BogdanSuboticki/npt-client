@@ -12,14 +12,16 @@ interface UserMetaCardProps {
   onProfileImageChange?: (file: File, dataUrl: string) => void;
 }
 
-export default function UserMetaCard({ 
-  userType = 'user', 
+export default function UserMetaCard({
+  userType = 'user',
   userName = "Musharof Chowdhury",
   userLocation = "Arizona, United States",
   profileImageUrl = "/images/user/owner.jpg",
-  enableImageUpload = true,
+  enableImageUpload: enableImageUploadProp = true,
   onProfileImageChange,
 }: UserMetaCardProps) {
+  // Disable image upload for 'user' and 'komitent' roles - only admins can change profile images
+  const enableImageUpload = enableImageUploadProp && (userType === 'admin' || userType === 'super-admin');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [localImageDataUrl, setLocalImageDataUrl] = useState<string | null>(null);

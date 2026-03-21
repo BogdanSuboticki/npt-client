@@ -2,6 +2,11 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 type UserType = 'super-admin' | 'admin' | 'user' | 'komitent';
 
+interface SectionPermissions {
+  'moje-preduzece'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+  'komitenti'?: { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean };
+}
+
 interface UserContextType {
   userType: UserType;
   setUserType: (type: UserType) => void;
@@ -11,6 +16,12 @@ interface UserContextType {
   setShowKomitenti: (show: boolean) => void;
   sidebarMode: 'both' | 'moja-firma' | 'komitenti';
   setSidebarMode: (mode: 'both' | 'moja-firma' | 'komitenti') => void;
+  // Password change requirement
+  mustChangePassword: boolean;
+  setMustChangePassword: (value: boolean) => void;
+  // Section permissions from backend
+  sectionPermissions: SectionPermissions;
+  setSectionPermissions: (permissions: SectionPermissions) => void;
   // Organization settings for Admin users
   organizationSettings: {
     usersCanSeeMojaFirma: boolean;
@@ -47,12 +58,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const [showMojaFirma, setShowMojaFirma] = useState<boolean>(() => {
     const saved = localStorage.getItem('showMojaFirma');
-    return saved ? JSON.parse(saved) : true;
+    // Default to false - permissions will determine actual visibility
+    return saved ? JSON.parse(saved) : false;
   });
 
   const [showKomitenti, setShowKomitenti] = useState<boolean>(() => {
     const saved = localStorage.getItem('showKomitenti');
-    return saved ? JSON.parse(saved) : true;
+    // Default to false - permissions will determine actual visibility
+    return saved ? JSON.parse(saved) : false;
   });
 
   const [organizationSettings, setOrganizationSettings] = useState(() => {
@@ -64,6 +77,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       usersCanCustomizeSettings: true,
       restrictToBasicFunctions: false,
     };
+  });
+
+  const [mustChangePassword, setMustChangePassword] = useState<boolean>(() => {
+    const saved = localStorage.getItem('mustChangePassword');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const [sectionPermissions, setSectionPermissions] = useState<SectionPermissions>(() => {
+    const saved = localStorage.getItem('sectionPermissions');
+    return saved ? JSON.parse(saved) : {};
   });
 
   // Update sidebar visibility based on mode
@@ -83,6 +106,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         break;
     }
   }, [sidebarMode]);
+
+  // Update sidebar visibility when section permissions change
+  useEffect(() => {
+    if (sectionPermissions && Object.keys(sectionPermissions).length > 0) {
+      const canSeeMojePreduzece = sectionPermissions?.['moje-preduzece']?.can_view ?? false;
+      const canSeeKomitenti = sectionPermissions?.['komitenti']?.can_view ?? false;
+
+      if (canSeeMojePreduzece && canSeeKomitenti) {
+        setSidebarMode('both');
+      } else if (canSeeKomitenti) {
+        setSidebarMode('komitenti');
+      } else if (canSeeMojePreduzece) {
+        setSidebarMode('moja-firma');
+      } else {
+        // User can't see any section - default to moja-firma but it'll be hidden
+        setSidebarMode('moja-firma');
+      }
+    }
+  }, [sectionPermissions]);
 
   // Save user type to localStorage
   useEffect(() => {
@@ -107,6 +149,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     localStorage.setItem('organizationSettings', JSON.stringify(organizationSettings));
   }, [organizationSettings]);
 
+  useEffect(() => {
+    localStorage.setItem('mustChangePassword', JSON.stringify(mustChangePassword));
+  }, [mustChangePassword]);
+
+  useEffect(() => {
+    localStorage.setItem('sectionPermissions', JSON.stringify(sectionPermissions));
+  }, [sectionPermissions]);
+
   const value: UserContextType = {
     userType,
     setUserType,
@@ -116,6 +166,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setShowKomitenti,
     sidebarMode,
     setSidebarMode,
+    mustChangePassword,
+    setMustChangePassword,
+    sectionPermissions,
+    setSectionPermissions,
     organizationSettings,
     setOrganizationSettings,
   };

@@ -10,81 +10,87 @@ interface UserInfoCardProps {
   userEmail?: string;
   userPhone?: string;
   userBio?: string;
+  isReadOnly?: boolean;
 }
 
-export default function UserInfoCard({ 
+export default function UserInfoCard({
   userType = 'user',
   userName = "Musharof Chowdhury",
   userEmail = "randomuser@pimjo.com",
   userPhone = "+09 363 398 46",
-  userBio = "Team Manager"
+  userBio = "Team Manager",
+  isReadOnly = false
 }: UserInfoCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
-  
+
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");
     closeModal();
   };
+
+  // Determine if this component should be read-only based on userType or isReadOnly prop
+  const readOnly = isReadOnly || userType === 'user' || userType === 'komitent';
+
   return (
     <div className="p-5 border border-gray-200 bg-white dark:bg-gray-800 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
-                      <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-              Lične informacije
-            </h4>
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
+            Lične informacije
+          </h4>
 
-                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-              <div>
-                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
-                  Ime i prezime
-                </p>
-                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  {userName}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
-                  Email adresa
-                </p>
-                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  {userEmail}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
-                  Broj telefona
-                </p>
-                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  {userPhone}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
-                  Opis
-                </p>
-                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                  {userBio}
-                </p>
-              </div>
-
-              {userType !== 'user' && userType !== 'komitent' && (
-                <div>
-                  <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
-                    Tip korisnika
-                  </p>
-                  <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
-                    {userType === 'super-admin' ? 'Super Administrator' : 'Administrator'}
-                  </p>
-                </div>
-              )}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
+            <div>
+              <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
+                Ime i prezime
+              </p>
+              <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
+                {userName}
+              </p>
             </div>
+
+            <div>
+              <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
+                Email adresa
+              </p>
+              <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
+                {userEmail}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
+                Broj telefona
+              </p>
+              <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
+                {userPhone}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
+                Opis
+              </p>
+              <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
+                {userBio}
+              </p>
+            </div>
+
+            {userType !== 'user' && userType !== 'komitent' && (
+              <div>
+                <p className="mb-2 text-sm leading-normal text-gray-500 dark:text-gray-400">
+                  Tip korisnika
+                </p>
+                <p className="text-[16px] font-medium text-gray-800 dark:text-white/90">
+                  {userType === 'super-admin' ? 'Super Administrator' : 'Administrator'}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {userType !== 'komitent' && (
+        {!readOnly && (
           <button
             onClick={openModal}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-[#F9FAFB] px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-[#101828] dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
@@ -104,7 +110,7 @@ export default function UserInfoCard({
                 fill=""
               />
             </svg>
-                        Uredi
+            Uredi
           </button>
         )}
       </div>

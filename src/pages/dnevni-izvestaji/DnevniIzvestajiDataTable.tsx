@@ -966,15 +966,17 @@ const DnevniIzvestajiDataTable = forwardRef<DataTableHandle, DataTableProps>(({
         {/* Header with status badge and mark as pregledan button */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            {/* Display Nadležno preduzeće, Preduzeće, BZR kontrola, and Datum */}
+            {/* Display Nadležno preduzeće, Preduzeće (non-komitent only), BZR kontrola, and Datum */}
             {selectedCompany && (
               <div className="flex flex-col gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col gap-2 text-sm">
                   <div className="flex flex-col gap-2">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Preduzeće:</span>
-                      <span className="text-base font-bold text-gray-700 dark:text-gray-300">{selectedCompany.naziv}</span>
-                    </div>
+                    {!isKomitent && (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Preduzeće:</span>
+                        <span className="text-base font-bold text-gray-700 dark:text-gray-300">{selectedCompany.naziv}</span>
+                      </div>
+                    )}
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nadležno preduzeće:</span>
                       {readOnly ? (

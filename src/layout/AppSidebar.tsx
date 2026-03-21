@@ -27,16 +27,6 @@ import {
   MojNalogIcon,
 } from "../icons";
 
-// Import the shop icon for Firme
-const FirmeIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3 10V19C3 19.5304 3.21071 20.0391 3.58579 20.4142C3.96086 20.7893 4.46957 21 5 21H19C19.5304 21 20.0391 20.7893 20.4142 20.4142C20.7893 20.0391 21 19.5304 21 19V10" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M14.833 21V15C14.833 14.4696 14.6223 13.9609 14.2472 13.5858C13.8721 13.2107 13.3634 13 12.833 13H10.833C10.3026 13 9.79387 13.2107 9.41879 13.5858C9.04372 13.9609 8.83301 14.4696 8.83301 15V21" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="16"/>
-    <path d="M21.818 9.364L20.124 3.435C20.0881 3.30965 20.0124 3.19939 19.9083 3.1209C19.8042 3.04241 19.6774 2.99997 19.547 3H15.5L15.975 8.704C15.9823 8.79568 16.0114 8.88429 16.0597 8.96254C16.1081 9.04078 16.1743 9.10641 16.253 9.154C16.643 9.387 17.405 9.817 18 10C19.016 10.313 20.5 10.2 21.346 10.096C21.4282 10.0854 21.5072 10.0569 21.5773 10.0126C21.6474 9.96835 21.707 9.90929 21.752 9.8396C21.7969 9.7699 21.8261 9.69123 21.8375 9.60909C21.8489 9.52695 21.8423 9.44331 21.818 9.364Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M14 10C14.568 9.825 15.288 9.426 15.69 9.188C15.7835 9.13205 15.8594 9.05087 15.909 8.95377C15.9585 8.85667 15.9796 8.74757 15.97 8.639L15.5 3H8.5L8.03 8.639C8.02018 8.74774 8.04124 8.85704 8.09077 8.95433C8.14031 9.05163 8.2163 9.13297 8.31 9.189C8.712 9.426 9.432 9.825 10 10C11.493 10.46 12.507 10.46 14 10Z" stroke="currentColor" strokeWidth="1.5"/>
-    <path d="M3.87599 3.435L2.18199 9.365C2.15808 9.44418 2.15169 9.52762 2.16326 9.60951C2.17483 9.69141 2.20408 9.76981 2.24899 9.83927C2.2939 9.90873 2.35339 9.96758 2.42333 10.0117C2.49326 10.0559 2.57197 10.0843 2.65399 10.095C3.49899 10.2 4.98399 10.312 5.99999 10C6.59499 9.817 7.35799 9.387 7.74699 9.155C7.82582 9.10731 7.89215 9.04153 7.9405 8.9631C7.98884 8.88467 8.0178 8.79585 8.02499 8.704L8.49999 3H4.45299C4.32261 2.99997 4.19577 3.04241 4.09166 3.1209C3.98756 3.19939 3.91185 3.30965 3.87599 3.435Z" stroke="currentColor" strokeWidth="1.5"/>
-  </svg>
-);
 import { useSidebar } from "../context/SidebarContext";
 
 type NavItem = {
@@ -47,11 +37,6 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <FirmeIcon />,
-    name: "Preduzeća",
-    path: "/firme?context=moja-firma",
-  },
   {
     icon: <ZaposleniIcon />,
     name: "Zaposleni",
@@ -162,12 +147,40 @@ const othersItems: NavItem[] = [
   },
 ];
 
-const supportItems: NavItem[] = [
+const komitentOthersItems: NavItem[] = [
   {
-    icon: <FirmeIcon />,
-    name: "Preduzeća",
-    path: "/firme?context=komitenti",
+    icon: <DnevniIzvestajiIcon />,
+    name: "Dnevni izveštaj",
+    path: "/",
   },
+  {
+    icon: <ObrasciIcon />,
+    name: "Obrasci",
+    path: "/obrasci"
+  },
+  {
+    icon: <NotesIcon />,
+    name: "Notes",
+    path: "/notes",
+  },
+  {
+    icon: <CestaPitanjaIcon />,
+    name: "Česta pitanja",
+    path: "/faq",
+  },
+  {
+    icon: <TehnickaPodrskaIcon />,
+    name: "Tehnička podrška",
+    path: "/tehnicka-podrska",
+  },
+  {
+    icon: <MojNalogIcon />,
+    name: "Moj nalog",
+    path: "/profile",
+  },
+];
+
+const supportItems: NavItem[] = [
   {
     icon: <ZaposleniIcon />,
     name: "Zaposleni",
@@ -408,10 +421,9 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pb-32 lg:pb-0">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
-                               {/* Moje Preduzeće Section - Show for Super Admin, or Admin if showMojaFirma is true, or User if allowed by organization */}
-                   {(userType === 'super-admin' || 
-                     (userType === 'admin' && showMojaFirma) || 
-                     userType === 'user') && (
+                               {/* Moje Preduzeće Section - Show if showMojaFirma is true (set based on section permissions) */}
+                   {(userType === 'super-admin' ||
+                     ((userType === 'admin' || userType === 'user') && showMojaFirma)) && (
               <div>
                 <button
                   onClick={() => setIsMojaFirmaCollapsed(!isMojaFirmaCollapsed)}
@@ -446,10 +458,9 @@ const AppSidebar: React.FC = () => {
               </div>
             )}
 
-                               {/* Komitenti Section - Show for Super Admin, or Admin if showKomitenti is true, or User if allowed by organization */}
-                   {(userType === 'super-admin' || 
-                     (userType === 'admin' && showKomitenti) || 
-                     userType === 'user') && (
+                               {/* Komitenti Section - Show if showKomitenti is true (set based on section permissions) */}
+                   {(userType === 'super-admin' ||
+                     ((userType === 'admin' || userType === 'user') && showKomitenti)) && (
               <div className="">
                 <button
                   onClick={() => setIsKomitentiCollapsed(!isKomitentiCollapsed)}
@@ -484,43 +495,45 @@ const AppSidebar: React.FC = () => {
               </div>
             )}
                                                                {/* Ostalo Section - Show for Super Admin and Admin, or User if allowed by organization, or Komitent (only for profile access) */}
-                    {(userType === 'super-admin' || 
-                      userType === 'admin' || 
+                    {(userType === 'super-admin' ||
+                      userType === 'admin' ||
                       (userType === 'user' && organizationSettings.usersCanSeeOstalo) ||
                       userType === 'komitent') && (
                       <div className="">
-                        <button
-                          onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}
-                          className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
-                            !isExpanded && !isHovered
-                              ? "lg:justify-center"
-                              : "justify-start"
-                          }`}
+                        {userType !== 'komitent' && (
+                          <button
+                            onClick={() => setIsOstaloCollapsed(!isOstaloCollapsed)}
+                            className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 w-full ${
+                              !isExpanded && !isHovered
+                                ? "lg:justify-center"
+                                : "justify-start"
+                            }`}
+                          >
+                            {isExpanded || isHovered || isMobileOpen ? (
+                              <div className="flex items-center gap-2">
+                                <span>OSTALO</span>
+                                <ChevronDownIcon
+                                  className={`w-4 h-4 transition-transform duration-200 ${
+                                    !isOstaloCollapsed ? "rotate-180" : ""
+                                  }`}
+                                />
+                              </div>
+                            ) : (
+                              <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
+                            )}
+                          </button>
+                        )}
+                        <div
+                          ref={ostaloRef}
+                          className="overflow-hidden transition-all duration-300"
+                          style={{
+                            height: userType === 'komitent' ? 'auto' : (isOstaloCollapsed ? "0px" : `${ostaloHeight}px`),
+                          }}
                         >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  <div className="flex items-center gap-2">
-                    <span>OSTALO</span>
-                    <ChevronDownIcon
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        !isOstaloCollapsed ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
-                ) : (
-                  <HorizontaLDots className="size-6 dark:text-[#d0d5dd]" />
-                )}
-              </button>
-                             <div
-                 ref={ostaloRef}
-                 className="overflow-hidden transition-all duration-300"
-                 style={{
-                   height: isOstaloCollapsed ? "0px" : `${ostaloHeight}px`,
-                 }}
-               >
-                 {renderMenuItems(othersItems)}
-               </div>
-             </div>
-           )}
+                          {renderMenuItems(userType === 'komitent' ? komitentOthersItems : othersItems)}
+                        </div>
+                      </div>
+                    )}
 
           </div>
         </nav>

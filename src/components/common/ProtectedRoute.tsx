@@ -7,8 +7,16 @@ interface ProtectedRouteProps {
   excludedRoles?: ('super-admin' | 'admin' | 'user' | 'komitent')[];
 }
 
+const getToken = () => localStorage.getItem("authToken");
+
 export default function ProtectedRoute({ children, allowedRoles, excludedRoles }: ProtectedRouteProps) {
   const { userType } = useUser();
+  const token = getToken();
+
+  // First check: Must be authenticated (have a valid token)
+  if (!token) {
+    return <Navigate to="/signin" replace />;
+  }
 
   // If excluded roles are specified and user type is in excluded roles, redirect to home
   if (excludedRoles && excludedRoles.includes(userType)) {

@@ -37,7 +37,7 @@ const mapFirmaFromApi = (firma: any, index: number) => {
 
 const columns = [
   { key: "redniBroj", label: "Redni broj", sortable: true },
-  { key: "naziv", label: "Naziv preduzeća/radnje", sortable: true },
+  { key: "naziv", label: "Naziv preduzeća", sortable: true },
   { key: "adresa", label: "Adresa", sortable: true },
   { key: "mesto", label: "Mesto", sortable: true },
   { key: "pib", label: "PIB", sortable: true },
@@ -188,7 +188,7 @@ const Firme: React.FC = () => {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Preduzeća/Radnje
+              Preduzeća
             </h1>
             <div className="hidden sm:flex items-center gap-4">
               <ExportPopoverButton

@@ -6,6 +6,7 @@ import { useUser } from "../context/UserContext";
 import {
   ChevronDownIcon,
   HorizontaLDots,
+  GroupIcon,
   ZaposleniIcon,
   RadnaMestaIcon,
   OsposobljavanjeIcon,
@@ -37,6 +38,11 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
+  {
+    icon: <GroupIcon />,
+    name: "Preduzeća/Radnje",
+    path: "/firme?context=moja-firma",
+  },
   {
     icon: <ZaposleniIcon />,
     name: "Zaposleni",
@@ -181,6 +187,11 @@ const komitentOthersItems: NavItem[] = [
 ];
 
 const supportItems: NavItem[] = [
+  {
+    icon: <GroupIcon />,
+    name: "Preduzeća/Radnje",
+    path: "/firme?context=komitenti",
+  },
   {
     icon: <ZaposleniIcon />,
     name: "Zaposleni",

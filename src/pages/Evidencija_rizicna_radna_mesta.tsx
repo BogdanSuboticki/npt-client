@@ -32,8 +32,8 @@ type TableRow = {
 };
 
 
-// Use TableRow type for initialRows
-const initialRows: TableRow[] = Array(10).fill({
+// Each row must be its own object — Array().fill() would share one reference across all rows
+const createEmptyRow = (): TableRow => ({
   nazivRadnogMesta: '',
   imePrezime: '',
   intervalPregleda: '',
@@ -45,6 +45,9 @@ const initialRows: TableRow[] = Array(10).fill({
   preduzeteMere: '',
 });
 
+// Use TableRow type for initialRows
+const initialRows: TableRow[] = Array.from({ length: 10 }, createEmptyRow);
+
 const EvidencijaRizicnaRadnaMesta: React.FC = () => {
   const [rows, setRows] = useState<TableRow[]>(initialRows);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -53,7 +56,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
   const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
   const { isOpen, openModal, closeModal } = useModal();
   const [nazivObrasca, setNazivObrasca] = useState('');
-  const [_saveError, setSaveError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   
   // Create refs for each input field
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -97,17 +100,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
     setItemsPerPage(newItemsPerPage);
     setRows(prev => {
       if (prev.length < newItemsPerPage) {
-        const newRows = Array(newItemsPerPage - prev.length).fill({
-          nazivRadnogMesta: '',
-          imePrezime: '',
-          intervalPregleda: '',
-          datumPregledaPrethodni: '',
-          datumPregledaPeriodični: ['', '', '', ''],
-          datumSledeci: '',
-          brojIzvestaja: '',
-          ocenaZdravstveneSposobnosti: '',
-          preduzeteMere: '',
-        });
+        const newRows = Array.from({ length: newItemsPerPage - prev.length }, createEmptyRow);
         return [...prev, ...newRows];
       } else if (prev.length > newItemsPerPage) {
         return prev.slice(0, newItemsPerPage);
@@ -123,20 +116,7 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
   };
 
   const addRow = () => {
-    setRows((prev) => [
-      ...prev,
-      {
-        nazivRadnogMesta: '',
-        imePrezime: '',
-        intervalPregleda: '',
-        datumPregledaPrethodni: '',
-        datumPregledaPeriodični: ['', '', '', ''],
-        datumSledeci: '',
-        brojIzvestaja: '',
-        ocenaZdravstveneSposobnosti: '',
-        preduzeteMere: '',
-      },
-    ]);
+    setRows((prev) => [...prev, createEmptyRow()]);
     setItemsPerPage(prev => prev + 1);
   };
 
@@ -190,8 +170,10 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
 
   const handleSave = async () => {
     if (!nazivObrasca.trim()) {
+      setSaveError('Unesite naziv obrasca.');
       return;
     }
+    setSaveError(null);
     try {
       await api.post('obrasci', {
         naziv_obrasca: nazivObrasca,
@@ -441,14 +423,20 @@ const EvidencijaRizicnaRadnaMesta: React.FC = () => {
             Sačuvaj obrazac
           </h4>
 
+          {saveError && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 text-sm text-red-600 dark:text-red-400">
+              {saveError}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-x-6 gap-y-5">
             <div className="col-span-1">
               <Label>
                 Naziv obrasca
               </Label>
-              <Input 
-                type="text" 
-                placeholder="Unesite naziv obrasca" 
+              <Input
+                type="text"
+                placeholder="Unesite naziv obrasca"
                 value={nazivObrasca}
                 onChange={handleNazivChange}
               />

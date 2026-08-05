@@ -205,7 +205,7 @@ export default function InspekcijskiNadzorForm({ isOpen, onClose, onSave, initia
                 <Label>Napomena</Label>
                 <TextArea
                   value={formData.napomena}
-                  onChange={(e: any) => setFormData({ ...formData, napomena: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, napomena: value })}
                   placeholder="Unesite napomenu"
                   className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                   rows={3}

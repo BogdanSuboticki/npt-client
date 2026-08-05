@@ -3,6 +3,7 @@ import OsposobljavanjeDataTable from './OsposobljavanjeDataTable';
 import OsposobljavanjeForm from './OsposobljavanjeForm';
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import { usePreduzeceScope } from "../../hooks/usePreduzeceScope";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { api } from "../../api/client";
 import { usePageContext } from "../../hooks/usePageContext";
@@ -70,6 +71,8 @@ const Osposobljavanje: React.FC = () => {
   const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
   const [data, setData] = useState<any[]>([]);
+  const { data: tableData, withPreduzeceColumn } = usePreduzeceScope(context, data);
+  const tableColumns = withPreduzeceColumn(columns);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -239,9 +242,9 @@ const Osposobljavanje: React.FC = () => {
           ) : errorMessage ? (
             <div className="p-4 text-sm text-error-500">{errorMessage}</div>
           ) : (
-            <OsposobljavanjeDataTable 
-              data={data}
-              columns={columns}
+            <OsposobljavanjeDataTable
+              data={tableData}
+              columns={tableColumns}
               onEditClick={handleEditClick}
               onDeleteClick={handleDeleteClick}
             />
@@ -256,8 +259,8 @@ const Osposobljavanje: React.FC = () => {
           angazovanja={angazovanja.map((a: any) => ({
             id: a.id,
             zaposleniName: a.zaposleni?.ime_prezime ?? "",
-            radnoMesto: a.radno_mesto?.naziv ?? "",
-            povecanRizik: a.radno_mesto?.povecan_rizik ?? false,
+            radnoMesto: a.radnoMesto?.naziv ?? "",
+            povecanRizik: a.radnoMesto?.povecan_rizik ?? false,
             lokacija: a.lokacija?.naziv ?? "",
             firmaPib: a.firma_pib ?? "",
           }))}

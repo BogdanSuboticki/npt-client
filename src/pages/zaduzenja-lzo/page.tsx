@@ -5,6 +5,7 @@ import ZaduzenjaLzoDataTable from "./ZaduzenjaLzoDataTable";
 import ZaduzenjaLzoForm from "./ZaduzenjaLzoForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import { usePreduzeceScope } from "../../hooks/usePreduzeceScope";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { api } from "../../api/client";
 import { usePageContext } from "../../hooks/usePageContext";
@@ -70,6 +71,9 @@ const ZaduzenjaLzoPage: React.FC = () => {
   const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
   const [data, setData] = useState<any[]>([]);
+  const { data: tableData, withPreduzeceColumn } = usePreduzeceScope(context, data);
+  const tableColumns = withPreduzeceColumn(columns);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -243,9 +247,9 @@ const ZaduzenjaLzoPage: React.FC = () => {
           ) : errorMessage ? (
             <div className="p-4 text-sm text-error-500">{errorMessage}</div>
           ) : (
-            <ZaduzenjaLzoDataTable 
-              data={data}
-              columns={columns}
+            <ZaduzenjaLzoDataTable
+              data={tableData}
+              columns={tableColumns}
               onDeleteClick={handleDeleteClick}
               onEditClick={handleEditClick}
               onUpdateData={setData}
@@ -260,10 +264,10 @@ const ZaduzenjaLzoPage: React.FC = () => {
           angazovanja={angazovanja.map((a: any) => ({
             id: a.id,
             zaposleniName: a.zaposleni?.ime_prezime ?? "",
-            radnoMesto: a.radno_mesto?.naziv ?? "",
-            povecanRizik: a.radno_mesto?.povecan_rizik ?? false,
+            radnoMesto: a.radnoMesto?.naziv ?? "",
+            povecanRizik: a.radnoMesto?.povecan_rizik ?? false,
             firmaPib: a.firma_pib ?? "",
-            lzsItems: (a.radno_mesto?.lzs ?? []).map((l: any) => ({
+            lzsItems: (a.radnoMesto?.lzs ?? []).map((l: any) => ({
               id: l.id,
               naziv: l.naziv,
               standard: l.standard ?? "",

@@ -70,6 +70,8 @@ const AppHeader: React.FC = () => {
   const isAdmin = userType === 'admin' || userType === 'super-admin';
   const isKomitent = userType === 'komitent';
   const searchPlaceholder = isAdmin ? "Unesite naziv preduzeća..." : "Unesite naziv firme...";
+  // "Moje preduzeće" is a single company, so there is nothing to choose between.
+  const showCompanySearch = !isKomitent && currentContext !== 'moja-firma';
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -312,7 +314,7 @@ const AppHeader: React.FC = () => {
            )}
 
           {/* Mobile Search Results */}
-          {!isKomitent && showMobileSearch && showFullList && (
+          {showCompanySearch && showMobileSearch && showFullList && (
             <div className="absolute top-full left-0 right-0 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-b-lg shadow-theme-lg max-h-[400px] overflow-hidden lg:hidden" data-mobile-search>
               {/* Company List */}
               <div className="overflow-y-auto" style={{ height: '400px' }}>
@@ -364,7 +366,7 @@ const AppHeader: React.FC = () => {
             </div>
           )}
 
-          {!isKomitent && (
+          {showCompanySearch && (
             <div className="flex items-center gap-2 lg:hidden" data-mobile-search>
               <button
                 onClick={handleMobileSearchToggle}
@@ -450,7 +452,7 @@ const AppHeader: React.FC = () => {
             </div>
           )}
 
-          {!isKomitent && (
+          {showCompanySearch && (
             <div className="hidden lg:block relative">
               <form>
                  <SearchInput

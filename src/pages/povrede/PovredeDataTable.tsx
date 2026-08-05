@@ -74,7 +74,7 @@ export default function PovredeDataTable({ data: initialData, columns, onDeleteC
     return Array.from(new Set(initialData.map(item => item.zaposleni)));
   }, [initialData]);
 
-  const tezinaPovredeOptions = ["Laka", "Srednja", "Teška", "Smrtna", "Kolektivna"];
+  const tezinaPovredeOptions = ["Laka", "Teška", "Smrtna", "Kolektivna"];
 
   // Update editBrojPovredneListe when number changes
   useEffect(() => {

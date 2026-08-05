@@ -3,6 +3,7 @@ import IspitivanjeRadneSredineDataTable from './IspitivanjeRadneSredineDataTable
 import IspitivanjeRadneSredineForm from './IspitivanjeRadneSredineForm';
 import Button from '../../components/ui/button/Button';
 import ExportPopoverButton from '../../components/ui/table/ExportPopoverButton';
+import { usePreduzeceScope } from "../../hooks/usePreduzeceScope";
 import ConfirmModal from '../../components/ui/modal/ConfirmModal';
 import { api } from '../../api/client';
 import { usePageContext } from '../../hooks/usePageContext';
@@ -108,6 +109,9 @@ const IspitivanjeRadneSredine: React.FC = () => {
   const context = usePageContext();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [data, setData] = useState<any[]>([]);
+  const { data: tableData, withPreduzeceColumn } = usePreduzeceScope(context, data);
+  const tableColumns = withPreduzeceColumn(columns);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -303,8 +307,8 @@ const IspitivanjeRadneSredine: React.FC = () => {
             <div className="p-4 text-sm text-error-500">{errorMessage}</div>
           ) : (
             <IspitivanjeRadneSredineDataTable
-              data={data}
-              columns={columns}
+              data={tableData}
+              columns={tableColumns}
               onDeleteClick={handleDeleteClick}
               onEditClick={handleEditClick}
               onIzvrsiIspitivanje={handleIzvrsiIspitivanje}

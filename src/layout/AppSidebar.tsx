@@ -40,8 +40,15 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     icon: <GroupIcon />,
-    name: "Preduzeća/Radnje",
+    name: "Preduzeće radnja",
     path: "/firme?context=moja-firma",
+  },
+  // Redosled prati zavisnost podataka: Lokacije ispod Preduzeća,
+  // Radna Mesta ispod Zaposlenih, LZS ispod Radnih Mesta.
+  {
+    icon: <LokacijeIcon />,
+    name: "Lokacije",
+    path: "/lokacije?context=moja-firma",
   },
   {
     icon: <ZaposleniIcon />,
@@ -49,14 +56,19 @@ const navItems: NavItem[] = [
     path: "/zaposleni?context=moja-firma",
   },
   {
-    icon: <ZaposleniIcon />,
-    name: "Angažovanja",
-    path: "/angazovanja?context=moja-firma",
-  },
-  {
     icon: <RadnaMestaIcon />,
     name: "Radna Mesta",
     path: "/radna-mesta?context=moja-firma",
+  },
+  {
+    icon: <OpremaIcon />,
+    name: "LZS",
+    path: "/lzs?context=moja-firma",
+  },
+  {
+    icon: <ZaposleniIcon />,
+    name: "Angažovanja",
+    path: "/angazovanja?context=moja-firma",
   },
   {
     icon: <OsposobljavanjeIcon />,
@@ -64,19 +76,9 @@ const navItems: NavItem[] = [
     path: "/osposobljavanje?context=moja-firma",
   },
   {
-    icon: <LokacijeIcon />,
-    name: "Lokacije",
-    path: "/lokacije?context=moja-firma",
-  },
-  {
     icon: <OpremaIcon />,
     name: "Oprema",
     path: "/oprema?context=moja-firma",
-  },
-  {
-    icon: <OpremaIcon />,
-    name: "LZS",
-    path: "/lzs?context=moja-firma",
   },
   {
     icon: <LekarskiPreglediIcon />,
@@ -189,28 +191,8 @@ const komitentOthersItems: NavItem[] = [
 const supportItems: NavItem[] = [
   {
     icon: <GroupIcon />,
-    name: "Preduzeća/Radnje",
+    name: "Preduzeća",
     path: "/firme?context=komitenti",
-  },
-  {
-    icon: <ZaposleniIcon />,
-    name: "Zaposleni",
-    path: "/zaposleni?context=komitenti",
-  },
-  {
-    icon: <ZaposleniIcon />,
-    name: "Angažovanja",
-    path: "/angazovanja?context=komitenti",
-  },
-  {
-    icon: <RadnaMestaIcon />,
-    name: "Radna mesta",
-    path: "/radna-mesta?context=komitenti",
-  },
-  {
-    icon: <OsposobljavanjeIcon />,
-    name: "Osposobljavanje",
-    path: "/osposobljavanje?context=komitenti",
   },
   {
     icon: <LokacijeIcon />,
@@ -218,14 +200,34 @@ const supportItems: NavItem[] = [
     path: "/lokacije?context=komitenti",
   },
   {
-    icon: <OpremaIcon />,
-    name: "Oprema",
-    path: "/oprema?context=komitenti",
+    icon: <ZaposleniIcon />,
+    name: "Zaposleni",
+    path: "/zaposleni?context=komitenti",
+  },
+  {
+    icon: <RadnaMestaIcon />,
+    name: "Radna mesta",
+    path: "/radna-mesta?context=komitenti",
   },
   {
     icon: <OpremaIcon />,
     name: "LZS",
     path: "/lzs?context=komitenti",
+  },
+  {
+    icon: <ZaposleniIcon />,
+    name: "Angažovanja",
+    path: "/angazovanja?context=komitenti",
+  },
+  {
+    icon: <OsposobljavanjeIcon />,
+    name: "Osposobljavanje",
+    path: "/osposobljavanje?context=komitenti",
+  },
+  {
+    icon: <OpremaIcon />,
+    name: "Oprema",
+    path: "/oprema?context=komitenti",
   },
   {
     icon: <LekarskiPreglediIcon />,

@@ -7,6 +7,7 @@ import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import { api } from "../../api/client";
 import { usePageContext } from "../../hooks/usePageContext";
+import FirmaSelect, { useFirme } from "../../components/form/FirmaSelect";
 
 interface PovredeFormProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface PovredeFormProps {
 
 export default function PovredeForm({ isOpen, onClose, onSave, initialData }: PovredeFormProps) {
   const context = usePageContext();
+  const firme = useFirme(context);
   const [formData, setFormData] = React.useState({
     zaposleni: "",
     datumPovrede: new Date(),
@@ -66,6 +68,13 @@ export default function PovredeForm({ isOpen, onClose, onSave, initialData }: Po
     }
   }, [isOpen]);
 
+  // A single company (always the case in "Moje preduzeće") needs no choosing.
+  useEffect(() => {
+    if (firme.length === 1 && !formData.firmaPib) {
+      setFormData(prev => ({ ...prev, firmaPib: firme[0].pib }));
+    }
+  }, [firme, formData.firmaPib]);
+
   useEffect(() => {
     if (isOpen && initialData) {
       setFormData({
@@ -86,7 +95,7 @@ export default function PovredeForm({ isOpen, onClose, onSave, initialData }: Po
     }
   }, [isOpen, initialData]);
 
-  const tezinaPovredeOptions = ["Laka", "Srednja", "Teška", "Smrtna", "Kolektivna"];
+  const tezinaPovredeOptions = ["Laka", "Teška", "Smrtna", "Kolektivna"];
 
   // Add click outside handler for dropdowns
   useEffect(() => {
@@ -157,6 +166,18 @@ export default function PovredeForm({ isOpen, onClose, onSave, initialData }: Po
               </div>
             )}
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 pb-4">
+          <div className="w-full lg:col-span-2">
+            <FirmaSelect
+              firme={firme}
+              value={formData.firmaPib}
+              onChange={(pib) => setFormData({
+                ...formData,
+                firmaPib: pib,
+                zaposleni: "",
+                angazovanjeId: "",
+              })}
+            />
+          </div>
           <div className="w-full">
             <Label>Zaposleni *</Label>
             <div className="relative w-full" ref={zaposleniRef}>
@@ -178,7 +199,9 @@ export default function PovredeForm({ isOpen, onClose, onSave, initialData }: Po
               {isZaposleniOpen && (
                 <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                   <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {angazovanjaList.map((item: any, index: number) => (
+                    {angazovanjaList
+                      .filter((item: any) => !formData.firmaPib || item.firma_pib === formData.firmaPib)
+                      .map((item: any, index: number) => (
                       <div
                         key={item.id}
                         className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${

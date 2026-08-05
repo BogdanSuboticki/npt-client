@@ -5,6 +5,7 @@ import PreglediOpremeDataTable from "./PreglediOpremeDataTable";
 import PreglediOpremeForm from "./PreglediOpremeForm";
 import Button from "../../components/ui/button/Button";
 import ExportPopoverButton from "../../components/ui/table/ExportPopoverButton";
+import { usePreduzeceScope } from "../../hooks/usePreduzeceScope";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { api } from "../../api/client";
 import { usePageContext } from "../../hooks/usePageContext";
@@ -75,6 +76,9 @@ const PreglediOpremePage: React.FC = () => {
   const context = usePageContext();
   const [showForm, setShowForm] = useState(false);
   const [data, setData] = useState<any[]>([]);
+  const { data: tableData, withPreduzeceColumn } = usePreduzeceScope(context, data);
+  const tableColumns = withPreduzeceColumn(columns);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -232,9 +236,9 @@ const PreglediOpremePage: React.FC = () => {
           ) : errorMessage ? (
             <div className="p-4 text-sm text-error-500">{errorMessage}</div>
           ) : (
-            <PreglediOpremeDataTable 
-              data={data}
-              columns={columns}
+            <PreglediOpremeDataTable
+              data={tableData}
+              columns={tableColumns}
               onDeleteClick={handleDeleteClick}
               onEditClick={handleEditClick}
             />

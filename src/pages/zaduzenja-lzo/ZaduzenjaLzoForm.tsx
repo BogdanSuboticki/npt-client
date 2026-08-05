@@ -5,6 +5,8 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import DatePicker from "../../components/form/input/DatePicker";
+import FirmaSelect, { useFirme } from "../../components/form/FirmaSelect";
+import { usePageContext } from "../../hooks/usePageContext";
 
 interface AngazovanjeWithLzs {
   id: number;
@@ -28,7 +30,10 @@ interface ZaduzenjaLzoFormProps {
 }
 
 export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja = [] }: ZaduzenjaLzoFormProps) {
+  const context = usePageContext();
+  const firme = useFirme(context);
   const [formData, setFormData] = React.useState<any>({
+    firmaPib: "",
     zaposleni: "",
     radnoMesto: "",
     povecanRizik: false,
@@ -53,6 +58,13 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja 
     if (isOpen) setFormError(null);
   }, [isOpen]);
 
+  // A single company (always the case in "Moje preduzeće") needs no choosing.
+  useEffect(() => {
+    if (firme.length === 1 && !formData.firmaPib) {
+      setFormData((prev: any) => ({ ...prev, firmaPib: firme[0].pib }));
+    }
+  }, [firme, formData.firmaPib]);
+
   const zaposleniData: Record<string, {
     id: number;
     radnoMesto: string;
@@ -69,6 +81,8 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja 
     }>;
   }> = {};
   for (const a of angazovanja) {
+    // Only employees of the chosen company may be picked.
+    if (formData.firmaPib && a.firmaPib !== formData.firmaPib) continue;
     zaposleniData[a.zaposleniName] = {
       id: a.id,
       radnoMesto: a.radnoMesto,
@@ -164,6 +178,21 @@ export default function ZaduzenjaLzoForm({ isOpen, onClose, onSave, angazovanja 
           </div>
         )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="col-span-1 lg:col-span-2">
+            <FirmaSelect
+              firme={firme}
+              value={formData.firmaPib}
+              onChange={(pib) => setFormData({
+                ...formData,
+                firmaPib: pib,
+                zaposleni: "",
+                radnoMesto: "",
+                povecanRizik: false,
+                angazovanjeId: null,
+                oprema: [],
+              })}
+            />
+          </div>
           <div className="col-span-1">
             <Label>Zaposleni *</Label>
             <div className="relative w-full" ref={zaposleniRef}>

@@ -3,6 +3,8 @@ import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import CustomDatePicker from "../../components/form/input/DatePicker";
+import FirmaSelect, { useFirme } from "../../components/form/FirmaSelect";
+import { usePageContext } from "../../hooks/usePageContext";
 
 interface AngazovanjeOption {
   id: number;
@@ -22,7 +24,10 @@ interface OsposobljavanjeFormProps {
 }
 
 export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialData, angazovanja = [] }: OsposobljavanjeFormProps) {
+  const context = usePageContext();
+  const firme = useFirme(context);
   const [formData, setFormData] = React.useState<any>({
+    firmaPib: "",
     angazovani: "",
     radnoMesto: "",
     povecanRizik: false,
@@ -45,6 +50,14 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
     if (isOpen) setFormError(null);
   }, [isOpen]);
 
+  // A single company (always the case in "Moje preduzeće") needs no choosing.
+  useEffect(() => {
+    if (firme.length === 1 && !formData.firmaPib) {
+      setFormData((prev: any) => ({ ...prev, firmaPib: firme[0].pib }));
+    }
+  }, [firme, formData.firmaPib]);
+
+  // Only employees of the chosen company may be picked.
   const angazovaniData: Record<string, {
     id: number;
     radnoMesto: string;
@@ -53,6 +66,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
     firmaPib: string;
   }> = {};
   for (const a of angazovanja) {
+    if (formData.firmaPib && a.firmaPib !== formData.firmaPib) continue;
     angazovaniData[a.zaposleniName] = {
       id: a.id,
       radnoMesto: a.radnoMesto,
@@ -103,6 +117,7 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
   useEffect(() => {
     if (initialData) {
       setFormData({
+        firmaPib: initialData.firmaPib || "",
         angazovani: initialData.zaposleni || "",
         radnoMesto: initialData.radnoMesto || "",
         povecanRizik: initialData.povecanRizik || false,
@@ -120,6 +135,10 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.firmaPib) {
+      setFormError('Molimo izaberite preduzeće');
+      return;
+    }
     if (!formData.angazovani || !formData.radnoMesto || !formData.lokacija || !formData.osposobljavanjeBZR) {
       setFormError('Molimo popunite sva obavezna polja');
       return;
@@ -167,6 +186,21 @@ export default function OsposobljavanjeForm({ isOpen, onClose, onSave, initialDa
           </div>
         )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="w-full lg:col-span-2">
+                <FirmaSelect
+                  firme={firme}
+                  value={formData.firmaPib}
+                  onChange={(pib) => setFormData({
+                    ...formData,
+                    firmaPib: pib,
+                    angazovani: "",
+                    radnoMesto: "",
+                    povecanRizik: false,
+                    lokacija: "",
+                    angazovanjeId: null,
+                  })}
+                />
+              </div>
               <div className="w-full">
                 <Label>Zaposleni *</Label>
                 {initialData ? (

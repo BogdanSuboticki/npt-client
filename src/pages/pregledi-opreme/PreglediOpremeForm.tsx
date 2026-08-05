@@ -7,6 +7,7 @@ import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
 import { api } from "../../api/client";
 import { usePageContext } from "../../hooks/usePageContext";
+import FirmaSelect, { useFirme } from "../../components/form/FirmaSelect";
 
 interface PreglediOpremeFormProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface PreglediOpremeFormProps {
 
 export default function PreglediOpremeForm({ isOpen, onClose, onSave, initialData: _initialData }: PreglediOpremeFormProps) {
   const context = usePageContext();
+  const firme = useFirme(context);
   const [formData, setFormData] = React.useState({
     nazivOpreme: "",
     vrstaOpreme: "",
@@ -51,6 +53,13 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave, initialDat
         .catch(() => {});
     }
   }, [isOpen]);
+
+  // A single company (always the case in "Moje preduzeće") needs no choosing.
+  useEffect(() => {
+    if (firme.length === 1 && !formData.firmaPib) {
+      setFormData(prev => ({ ...prev, firmaPib: firme[0].pib }));
+    }
+  }, [firme, formData.firmaPib]);
 
   // Interval options must match backend enum: ['1', '3', '6', '12', '24', '36']
   const intervalOptions = ["1", "3", "6", "12", "24", "36"];
@@ -135,6 +144,23 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave, initialDat
               </div>
             )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+              <div className="w-full lg:col-span-2">
+                <FirmaSelect
+                  firme={firme}
+                  value={formData.firmaPib}
+                  onChange={(pib) => setFormData({
+                    ...formData,
+                    firmaPib: pib,
+                    // Equipment belongs to the previous company — clear it.
+                    nazivOpreme: "",
+                    vrstaOpreme: "",
+                    lokacija: "",
+                    standard: "",
+                    opremaId: "",
+                    lokacijaId: "",
+                  })}
+                />
+              </div>
               <div className="w-full">
                 <Label>Naziv opreme *</Label>
                 <div className="relative w-full" ref={nazivOpremeRef}>
@@ -156,7 +182,9 @@ export default function PreglediOpremeForm({ isOpen, onClose, onSave, initialDat
                   {isNazivOpremeOpen && (
                     <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                       <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                        {opremaList.map((item, index) => (
+                        {opremaList
+                          .filter((item) => !formData.firmaPib || item.firma_pib === formData.firmaPib)
+                          .map((item, index) => (
                           <div
                             key={item.id}
                             className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${

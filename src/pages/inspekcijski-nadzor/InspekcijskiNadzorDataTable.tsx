@@ -570,7 +570,7 @@ export default function InspekcijskiNadzorDataTable({ data: initialData, columns
                     <Label>Napomena</Label>
                     <TextArea
                       value={editNapomena}
-                      onChange={(e: any) => setEditNapomena(e.target.value)}
+                      onChange={(value) => setEditNapomena(value)}
                       placeholder="Unesite napomenu"
                       className="bg-[#F9FAFB] dark:bg-[#101828] w-full"
                       rows={3}

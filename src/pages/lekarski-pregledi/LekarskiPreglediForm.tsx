@@ -5,6 +5,8 @@ import CustomDatePicker from "../../components/form/input/DatePicker";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
+import FirmaSelect, { useFirme } from "../../components/form/FirmaSelect";
+import { usePageContext } from "../../hooks/usePageContext";
 
 interface AngazovanjeOption {
   id: number;
@@ -23,7 +25,10 @@ interface LekarskiPreglediFormProps {
 }
 
 export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialData, angazovanja = [] }: LekarskiPreglediFormProps) {
+  const context = usePageContext();
+  const firme = useFirme(context);
   const [formData, setFormData] = React.useState<any>({
+    firmaPib: "",
     zaposleni: "",
     radnoMesto: "",
     povecanRizik: false,
@@ -44,6 +49,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
   const vrstaLekarskogRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<HTMLDivElement>(null);
 
+  // Only employees of the chosen company may be picked.
   const zaposleniData: Record<string, {
     id: number;
     radnoMesto: string;
@@ -51,6 +57,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
     firmaPib: string;
   }> = {};
   for (const a of angazovanja) {
+    if (formData.firmaPib && a.firmaPib !== formData.firmaPib) continue;
     zaposleniData[a.zaposleniName] = {
       id: a.id,
       radnoMesto: a.radnoMesto,
@@ -98,6 +105,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
   useEffect(() => {
     if (initialData) {
       setFormData({
+        firmaPib: initialData.firmaPib || "",
         zaposleni: initialData.zaposleni || "",
         radnoMesto: initialData.radnoMesto || "",
         povecanRizik: initialData.povecanRizik || false,
@@ -109,6 +117,7 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
       });
     } else {
       setFormData({
+        firmaPib: "",
         zaposleni: "",
         radnoMesto: "",
         povecanRizik: false,
@@ -125,8 +134,19 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
     if (isOpen) setFormError("");
   }, [isOpen]);
 
+  // A single company (always the case in "Moje preduzeće") needs no choosing.
+  useEffect(() => {
+    if (firme.length === 1 && !formData.firmaPib) {
+      setFormData((prev: any) => ({ ...prev, firmaPib: firme[0].pib }));
+    }
+  }, [firme, formData.firmaPib]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.firmaPib) {
+      setFormError('Molimo izaberite preduzeće');
+      return;
+    }
     if (!formData.zaposleni || !formData.radnoMesto || !formData.vrstaLekarskog || !formData.datumLekarskog || !formData.intervalLekarskog || !formData.datumNarednogLekarskog) {
       setFormError('Molimo popunite sva obavezna polja');
       return;
@@ -152,6 +172,21 @@ export default function LekarskiPreglediForm({ isOpen, onClose, onSave, initialD
           </div>
         )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="w-full lg:col-span-2">
+                <FirmaSelect
+                  firme={firme}
+                  value={formData.firmaPib}
+                  onChange={(pib) => setFormData({
+                    ...formData,
+                    firmaPib: pib,
+                    // Employee belongs to the previous company — clear it.
+                    zaposleni: "",
+                    radnoMesto: "",
+                    povecanRizik: false,
+                    angazovanjeId: null,
+                  })}
+                />
+              </div>
               <div className="w-full">
                 <Label>Zaposleni *</Label>
                 <div className="relative w-full" ref={zaposleniRef}>

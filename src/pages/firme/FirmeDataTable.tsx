@@ -11,6 +11,7 @@ import {
 import { EditButtonIcon, DeleteButtonIcon } from "../../icons";
 import PaginationWithTextAndIcon from "../../components/ui/pagination/PaginationWithTextAndIcon";
 import ItemsPerPageDropdown from "../../components/ui/dropdown/ItemsPerPageDropdown";
+import { Modal } from "../../components/ui/modal";
 
 
 
@@ -46,6 +47,7 @@ export default function FirmeDataTable({ data: initialData, columns, onDeleteCli
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortKey, setSortKey] = useState<string>(columns.find(col => col.sortable)?.key || columns[0].key);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [kontaktFirma, setKontaktFirma] = useState<FirmeData | null>(null);
   
 
 
@@ -213,7 +215,10 @@ export default function FirmeDataTable({ data: initialData, columns, onDeleteCli
                       <TableCell className="px-4 py-4 font-normal text-gray-800 border border-gray-100 dark:border-white/[0.05] text-theme-sm dark:text-white/90 whitespace-nowrap border-r-0">
                         <div className="flex items-center w-full gap-2">
                           <div className="relative inline-block group">
-                            <button className="text-gray-500 hover:text-[#10B981] dark:text-gray-400 dark:hover:text-[#10B981]">
+                            <button
+                              onClick={() => setKontaktFirma(item)}
+                              className="text-gray-500 hover:text-[#10B981] dark:text-gray-400 dark:hover:text-[#10B981]"
+                            >
                               <svg
                                 className="size-4"
                                 width="18"
@@ -289,7 +294,66 @@ export default function FirmeDataTable({ data: initialData, columns, onDeleteCli
               </div>
             </div>
           </div>
+
+          <Modal
+            isOpen={kontaktFirma !== null}
+            onClose={() => setKontaktFirma(null)}
+            className="max-w-[600px] dark:bg-[#11181E]"
+          >
+            <div className="p-5 pt-10">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                Kontakt podaci
+              </h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {kontaktFirma?.naziv}
+              </p>
+
+              <div className="mt-6 space-y-6">
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Preduzeće
+                  </h3>
+                  <dl className="space-y-1 text-sm">
+                    <KontaktRed label="Email" value={kontaktFirma?.emailFirme} />
+                    <KontaktRed label="Adresa" value={kontaktFirma?.adresa} />
+                    <KontaktRed label="Mesto" value={kontaktFirma?.mesto} />
+                  </dl>
+                </div>
+
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Direktor
+                  </h3>
+                  <dl className="space-y-1 text-sm">
+                    <KontaktRed label="Ime i prezime" value={kontaktFirma?.imePrezimeDirektora} />
+                    <KontaktRed label="Telefon" value={kontaktFirma?.telefonDirektora} />
+                    <KontaktRed label="Email" value={kontaktFirma?.emailDirektora} />
+                  </dl>
+                </div>
+
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Osoba za saradnju
+                  </h3>
+                  <dl className="space-y-1 text-sm">
+                    <KontaktRed label="Ime i prezime" value={kontaktFirma?.imePrezimeOsobeZaSaradnju} />
+                    <KontaktRed label="Telefon" value={kontaktFirma?.telefonOsobeZaSaradnju} />
+                    <KontaktRed label="Email" value={kontaktFirma?.emailOsobeZaSaradnju} />
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </Modal>
         </div>
 
+  );
+}
+
+function KontaktRed({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="flex gap-2">
+      <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">{label}</dt>
+      <dd className="text-gray-800 dark:text-white/90 break-all">{value || "—"}</dd>
+    </div>
   );
 } 

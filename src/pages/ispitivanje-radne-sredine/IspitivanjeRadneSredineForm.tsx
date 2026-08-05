@@ -8,6 +8,7 @@ import Slider from "../../components/ui/Slider";
 import Checkbox from "../../components/form/input/Checkbox";
 import { api } from "../../api/client";
 import { usePageContext } from "../../hooks/usePageContext";
+import FirmaSelect, { useFirme } from "../../components/form/FirmaSelect";
 
 interface IspitivanjeRadneSredineFormProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ interface TipIspitivanjaData {
 
 export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave, initialData: _initialData }: IspitivanjeRadneSredineFormProps) {
   const context = usePageContext();
+  const firme = useFirme(context);
   const [formData, setFormData] = React.useState({
     nazivLokacije: "",
     brojMernihMesta: "",
@@ -48,6 +50,13 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave, i
         .catch(() => {});
     }
   }, [isOpen]);
+
+  // A single company (always the case in "Moje preduzeće") needs no choosing.
+  React.useEffect(() => {
+    if (firme.length === 1 && !formData.firmaPib) {
+      setFormData(prev => ({ ...prev, firmaPib: firme[0].pib }));
+    }
+  }, [firme, formData.firmaPib]);
 
   // Environmental testing types with individual data
   const [tipoviIspitivanja, setTipoviIspitivanja] = React.useState<TipIspitivanjaData[]>([
@@ -189,6 +198,19 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave, i
               </div>
             )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="col-span-1 md:col-span-2">
+            <FirmaSelect
+              firme={firme}
+              value={formData.firmaPib}
+              onChange={(pib) => setFormData({
+                ...formData,
+                firmaPib: pib,
+                // Location belongs to the previous company — clear it.
+                nazivLokacije: "",
+                lokacijaId: "",
+              })}
+            />
+          </div>
           <div className="col-span-1">
             <Label>Lokacija *</Label>
             <div className="relative w-full" ref={lokacijaDropdownRef}>
@@ -210,7 +232,9 @@ export default function IspitivanjeRadneSredineForm({ isOpen, onClose, onSave, i
               {isLokacijaDropdownOpen && (
                 <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
                   <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-track]:my-1 pr-1">
-                    {lokacijeList.map((item, index) => (
+                    {lokacijeList
+                      .filter((item) => !formData.firmaPib || item.firma_pib === formData.firmaPib)
+                      .map((item, index) => (
                       <div
                         key={item.id}
                         className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${
